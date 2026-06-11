@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
@@ -7,14 +8,20 @@ import {
 beforeEach(() => clearRooms())
 
 describe('createRoom', () => {
-  it('6자리 영대문자+숫자 코드를 반환한다', () => {
+  it('6자리 16진수 대문자 코드를 반환한다', () => {
     const room = createRoom()
-    expect(room.code).toMatch(/^[A-Z0-9]{6}$/)
+    expect(room.code).toMatch(/^[A-F0-9]{6}$/)
     expect(room.players).toEqual([])
   })
 })
 
 describe('getRoom', () => {
+  it('생성된 방을 코드로 조회할 수 있다', () => {
+    const { code } = createRoom()
+    expect(getRoom(code)).not.toBeNull()
+    expect(getRoom(code).code).toBe(code)
+  })
+
   it('없는 코드는 null을 반환한다', () => {
     expect(getRoom('XXXXXX')).toBeNull()
   })
@@ -36,14 +43,44 @@ describe('addPlayer', () => {
       addPlayer(code, { socketId: 's5', name: 'p5', character: 'c5', isHost: false })
     ).toThrow('Room is full')
   })
+
+  it('socketId 없는 플레이어 추가 시 에러', () => {
+    const { code } = createRoom()
+    expect(() =>
+      addPlayer(code, { name: '철수', character: 'ptsc', isHost: true })
+    ).toThrow('player.socketId is required')
+  })
 })
 
 describe('removePlayer', () => {
-  it('socketId로 플레이어를 제거하고 마지막 플레이어면 방을 삭제한다', () => {
+  it('마지막 플레이어 제거 시 방을 삭제하고 null을 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    const result = removePlayer('s1')
+    expect(result).toBeNull()
+    expect(getRoom(code)).toBeNull()
+  })
+
+  it('플레이어가 남아있으면 방을 유지하고 방 객체를 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    addPlayer(code, { socketId: 's2', name: '영희', character: 'ptsh', isHost: false })
+    const result = removePlayer('s1')
+    expect(result).not.toBeNull()
+    expect(result.players).toHaveLength(1)
+    expect(getRoom(code)).not.toBeNull()
+  })
+
+  it('알 수 없는 socketId는 null을 반환한다', () => {
+    expect(removePlayer('unknown')).toBeNull()
+  })
+
+  it('같은 socketId로 두 번 호출해도 에러가 발생하지 않는다', () => {
     const { code } = createRoom()
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     removePlayer('s1')
-    expect(getRoom(code)).toBeNull()
+    expect(() => removePlayer('s1')).not.toThrow()
+    expect(removePlayer('s1')).toBeNull()
   })
 })
 
