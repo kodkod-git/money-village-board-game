@@ -13,6 +13,13 @@ export default function Lobby() {
   const [showQR, setShowQR] = useState(false)
 
   useEffect(() => {
+    fetch(`/api/rooms/${code}`)
+      .then(r => r.json())
+      .then(data => { if (data.players) setPlayers(data.players) })
+      .catch(() => {})
+  }, [code])
+
+  useEffect(() => {
     if (!socket) return
     const handler = ({ players }) => setPlayers(players)
     socket.on('room-updated', handler)

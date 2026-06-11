@@ -29,7 +29,7 @@ app.post('/api/rooms', (_req, res) => {
 app.get('/api/rooms/:code', (req, res) => {
   const room = getRoom(req.params.code.toUpperCase())
   if (!room) return res.status(404).json({ error: 'Room not found' })
-  res.json({ code: room.code, playerCount: room.players.length })
+  res.json({ code: room.code, playerCount: room.players.length, players: room.players })
 })
 
 app.get('/api/rooms/:code/qr', async (req, res) => {
