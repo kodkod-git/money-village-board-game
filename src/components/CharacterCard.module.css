@@ -1,0 +1,27 @@
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid #2a3a50;
+  border-radius: 12px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, opacity 0.15s;
+}
+.card.idle { opacity: 0.72; }
+.card.idle:hover { border-color: #42a5f5; opacity: 1; }
+.card.selected {
+  background: rgba(66,165,245,0.18);
+  border-color: #42a5f5;
+  opacity: 1;
+}
+.card.locked { opacity: 0.35; cursor: not-allowed; }
+.badge {
+  position: absolute; top: 5px; right: 5px;
+  background: #43a047; color: white;
+  border-radius: 50%; width: 18px; height: 18px;
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.card.locked .badge { background: transparent; }
+.img { width: 68px; height: 80px; object-fit: contain; display: block; margin: 0 auto; }
