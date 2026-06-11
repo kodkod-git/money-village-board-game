@@ -25,7 +25,7 @@ describe('NameInput', () => {
     render(<MemoryRouter initialEntries={['/name?code=ABC123']}><NameInput /></MemoryRouter>)
     fireEvent.change(screen.getByPlaceholderText('예) 홍길동'), { target: { value: '철수' } })
     fireEvent.click(screen.getByText('다음 →'))
-    expect(mockNavigate).toHaveBeenCalledWith('/select?code=ABC123&name=%EC%B2%A0%EC%88%98')
+    expect(mockNavigate).toHaveBeenCalledWith('/select?name=%EC%B2%A0%EC%88%98&code=ABC123')
   })
 
   it('이름이 비어있으면 이동하지 않는다', () => {

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import styles from './CodeModal.module.css'
 
-export default function CodeModal({ onSubmit, onClose }) {
-  const [code, setCode] = useState('')
+export default function CodeModal({ initialCode = '', onSubmit, onClose }) {
+  const [code, setCode] = useState(initialCode.toUpperCase())
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>

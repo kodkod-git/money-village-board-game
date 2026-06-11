@@ -4,10 +4,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 global.fetch = vi.fn()
 const mockNavigate = vi.fn()
+const mockEmit = vi.fn()
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return { ...actual, useNavigate: () => mockNavigate }
 })
+
+vi.mock('../hooks/useSocket', () => ({
+  default: () => ({ socket: { emit: mockEmit }, isConnected: true })
+}))
 
 import Home from './Home'
 
@@ -28,6 +34,7 @@ describe('Home', () => {
 
   it('팀 만들기 클릭 시 POST /api/rooms를 호출한다', async () => {
     fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ code: 'ABC123' }) })
+    mockEmit.mockImplementation((_event, _data, cb) => cb?.({ ok: true }))
     render(<MemoryRouter><Home /></MemoryRouter>)
     fireEvent.click(screen.getByText('팀 만들기'))
     await waitFor(() =>
@@ -35,12 +42,12 @@ describe('Home', () => {
     )
   })
 
-  it('QR URL(/join?code=)로 접근 시 /name으로 자동 이동한다', () => {
+  it('URL에 code가 있으면 CodeModal이 자동으로 열린다', () => {
     render(
-      <MemoryRouter initialEntries={['/join?code=ABC123']}>
+      <MemoryRouter initialEntries={['/team?name=철수&character=c1&code=ABC123']}>
         <Home />
       </MemoryRouter>
     )
-    expect(mockNavigate).toHaveBeenCalledWith('/name?code=ABC123')
+    expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toBeInTheDocument()
   })
 })

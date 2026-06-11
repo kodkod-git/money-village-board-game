@@ -8,12 +8,11 @@ export default function NameInput() {
   const [name, setName] = useState('')
 
   const code = searchParams.get('code') ?? ''
-  const isHost = searchParams.get('host') === 'true'
 
   function handleNext() {
     if (!name.trim()) return
-    const params = new URLSearchParams({ code, name: name.trim() })
-    if (isHost) params.set('host', 'true')
+    const params = new URLSearchParams({ name: name.trim() })
+    if (code) params.set('code', code)
     navigate(`/select?${params}`)
   }
 
