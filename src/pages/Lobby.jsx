@@ -1,1 +1,55 @@
-export default function Lobby() { return <div>로비</div> }
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import PlayerSlot from '../components/PlayerSlot'
+import QRModal from '../components/QRModal'
+import useSocket from '../hooks/useSocket'
+import styles from './Lobby.module.css'
+
+export default function Lobby() {
+  const { code } = useParams()
+  const navigate = useNavigate()
+  const { socket } = useSocket()
+  const [players, setPlayers] = useState([])
+  const [showQR, setShowQR] = useState(false)
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = ({ players }) => setPlayers(players)
+    socket.on('room-updated', handler)
+    return () => socket.off('room-updated', handler)
+  }, [socket])
+
+  function handleLeave() {
+    socket?.emit('leave-room')
+    navigate('/')
+  }
+
+  const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.topBar}>
+        <div className={styles.codeBox}>
+          팀 코드: <span className={styles.code}>{code}</span>
+          <button
+            className={styles.copyBtn}
+            onClick={() => navigator.clipboard.writeText(code)}
+            aria-label="코드 복사"
+          >📋</button>
+        </div>
+        <div className={styles.actions}>
+          <button className={styles.qrBtn} onClick={() => setShowQR(true)}>📱 QR</button>
+          <button className={styles.leaveBtn} onClick={handleLeave}>팀 나가기</button>
+        </div>
+      </div>
+
+      <div className={styles.counter}>{players.length} / 4 명 참가</div>
+
+      <div className={styles.characters}>
+        {slots.map((player, i) => <PlayerSlot key={i} player={player} />)}
+      </div>
+
+      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
+    </div>
+  )
+}

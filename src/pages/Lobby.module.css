@@ -1,0 +1,41 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg,
+    #0a1628 0%, #0f2a50 30%, #1a3f6e 55%,
+    #1e4e50 72%, #1a4a30 88%, #163d28 100%
+  );
+  display: flex; flex-direction: column;
+}
+.topBar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px;
+}
+.codeBox {
+  background: rgba(0,0,0,0.45); border-radius: 8px;
+  padding: 6px 14px; color: #aaa; font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.code { color: #ffd700; font-weight: bold; letter-spacing: 3px; font-size: 14px; }
+.copyBtn { background: transparent; color: #aaa; font-size: 13px; padding: 0; }
+.actions { display: flex; gap: 8px; }
+.qrBtn {
+  background: #1e88e5; color: white;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 11px; box-shadow: 0 2px 0 #1565c0;
+}
+.leaveBtn {
+  background: #e53935; color: white;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 11px; box-shadow: 0 2px 0 #b71c1c;
+}
+.counter {
+  background: rgba(255,255,255,0.1);
+  color: #90caf9; font-size: 12px;
+  padding: 4px 16px; border-radius: 12px;
+  width: fit-content; margin: 4px auto;
+}
+.characters {
+  display: flex; justify-content: center;
+  align-items: flex-end; gap: 20px;
+  padding: 24px 20px 40px; flex: 1;
+}
