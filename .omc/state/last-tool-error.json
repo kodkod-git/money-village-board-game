@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"mkdir -p \\\"C:\\\\Users\\\\USER\\\\OneDrive\\\\Desktop\\\\Project\\\\money-village-board-game\\\\public\\\\characters\\\" && cp \\\"C:\\\\Users\\\\USER\\\\OneDrive\\\\Desktop\\\\Project\\\\money-village-board-game\\\\efti\\\\...",
+  "error": "Exit code 1\ncp: missing destination file operand after 'C:\\Users\\USER\\OneDrive\\Desktop\\Project\\money-village-board-game\\efti\"*.png C:UsersUSEROneDriveDesktopProjectmoney-village-board-gamepubliccharacters\"'\nTry 'cp --help' for more information.",
+  "timestamp": "2026-06-11T07:09:41.521Z",
+  "retry_count": 1
+}

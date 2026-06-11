@@ -1,0 +1,117 @@
+{
+  "updatedAt": "2026-06-11T07:10:36.954Z",
+  "missions": [
+    {
+      "id": "session:85840ce1-0b86-4580-aa57-7a949bf71c41:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-06-11T06:52:48.191Z",
+      "updatedAt": "2026-06-11T07:10:36.954Z",
+      "status": "done",
+      "workerCount": 1,
+      "taskCounts": {
+        "total": 1,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 1,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "general-purpose:aba241c",
+          "role": "general-purpose",
+          "ownership": "aba241cc4b5e17130",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-06-11T07:10:36.954Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:aba241cc4b5e17130:2026-06-11T06:52:48.191Z",
+          "at": "2026-06-11T06:52:48.191Z",
+          "kind": "update",
+          "agent": "general-purpose:aba241c",
+          "detail": "started general-purpose:aba241c",
+          "sourceKey": "session-start:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:12.550Z",
+          "at": "2026-06-11T07:10:12.550Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:14.205Z",
+          "at": "2026-06-11T07:10:14.205Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:15.825Z",
+          "at": "2026-06-11T07:10:15.825Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:17.732Z",
+          "at": "2026-06-11T07:10:17.732Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:19.377Z",
+          "at": "2026-06-11T07:10:19.377Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:21.273Z",
+          "at": "2026-06-11T07:10:21.273Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:33.069Z",
+          "at": "2026-06-11T07:10:33.069Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:34.844Z",
+          "at": "2026-06-11T07:10:34.844Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        },
+        {
+          "id": "session-stop:aba241cc4b5e17130:2026-06-11T07:10:36.954Z",
+          "at": "2026-06-11T07:10:36.954Z",
+          "kind": "completion",
+          "agent": "general-purpose:aba241c",
+          "detail": "completed",
+          "sourceKey": "session-stop:aba241cc4b5e17130"
+        }
+      ]
+    }
+  ]
+}
