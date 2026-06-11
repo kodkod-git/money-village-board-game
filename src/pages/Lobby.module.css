@@ -1,5 +1,6 @@
 .page {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: linear-gradient(180deg,
     #0a1628 0%, #0f2a50 30%, #1a3f6e 55%,
     #1e4e50 72%, #1a4a30 88%, #163d28 100%
@@ -36,6 +37,8 @@
 }
 .characters {
   display: flex; justify-content: center;
-  align-items: flex-end; gap: 20px;
-  padding: 24px 20px 40px; flex: 1;
+  align-items: flex-end; gap: 8px;
+  padding: 0 8px 20px;
+  flex: 1;
+  min-height: 0;
 }
