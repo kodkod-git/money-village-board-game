@@ -39,11 +39,11 @@ describe('addPlayer', () => {
 })
 
 describe('removePlayer', () => {
-  it('socketId로 플레이어를 제거한다', () => {
+  it('socketId로 플레이어를 제거하고 마지막 플레이어면 방을 삭제한다', () => {
     const { code } = createRoom()
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     removePlayer('s1')
-    expect(getRoom(code).players).toHaveLength(0)
+    expect(getRoom(code)).toBeNull()
   })
 })
 

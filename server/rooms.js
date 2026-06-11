@@ -35,6 +35,7 @@ export function removePlayer(socketId) {
   if (!room) return null
   room.players = room.players.filter(p => p.socketId !== socketId)
   socketToRoom.delete(socketId)
+  if (room.players.length === 0) rooms.delete(code)
   return room
 }
 
