@@ -1,0 +1,28 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a1628 0%, #0f2a50 60%, #163d28 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 36px 32px;
+  width: 360px; text-align: center;
+}
+.title { color: #ffd700; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
+.subtitle { color: #90caf9; font-size: 13px; margin-bottom: 28px; }
+.label {
+  display: block; color: #90caf9; font-size: 12px;
+  font-weight: bold; text-align: left; margin-bottom: 6px;
+}
+.input {
+  width: 100%; padding: 11px 14px;
+  border-radius: 10px; border: 2px solid #42a5f5;
+  background: rgba(13,27,62,0.8); color: white;
+  font-size: 14px; margin-bottom: 24px;
+}
+.btn {
+  width: 100%; background: #1e88e5; color: white;
+  padding: 12px; border-radius: 10px;
+  font-size: 14px; font-weight: bold; box-shadow: 0 3px 0 #1565c0;
+}
