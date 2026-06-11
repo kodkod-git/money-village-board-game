@@ -37,8 +37,8 @@
 }
 .characters {
   display: flex; justify-content: center;
-  align-items: flex-end; gap: 8px;
-  padding: 0 8px 20px;
+  align-items: center; gap: 8px;
+  padding: 12px 20px;
   flex: 1;
   min-height: 0;
 }
