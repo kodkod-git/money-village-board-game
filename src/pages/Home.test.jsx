@@ -20,9 +20,9 @@ import Home from './Home'
 describe('Home', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('팀 만들기, 팀 참가 버튼을 렌더링한다', () => {
+  it('팀 생성, 팀 참가 버튼을 렌더링한다', () => {
     render(<MemoryRouter><Home /></MemoryRouter>)
-    expect(screen.getByText('팀 만들기')).toBeInTheDocument()
+    expect(screen.getByText('팀 생성')).toBeInTheDocument()
     expect(screen.getByText('팀 참가')).toBeInTheDocument()
   })
 
@@ -32,11 +32,11 @@ describe('Home', () => {
     expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toBeInTheDocument()
   })
 
-  it('팀 만들기 클릭 시 POST /api/rooms를 호출한다', async () => {
+  it('팀 생성 클릭 시 POST /api/rooms를 호출한다', async () => {
     fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ code: 'ABC123' }) })
     mockEmit.mockImplementation((_event, _data, cb) => cb?.({ ok: true }))
     render(<MemoryRouter><Home /></MemoryRouter>)
-    fireEvent.click(screen.getByText('팀 만들기'))
+    fireEvent.click(screen.getByText('팀 생성'))
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith('/api/rooms', expect.objectContaining({ method: 'POST' }))
     )

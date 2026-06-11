@@ -20,6 +20,28 @@
   margin-bottom: 24px;
 }
 
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.previewImg {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+.previewName {
+  color: #ffd700;
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: 0 2px 6px #000;
+}
+
 .buttons {
   display: flex;
   gap: 16px;

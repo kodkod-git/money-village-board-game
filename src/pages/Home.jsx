@@ -40,8 +40,14 @@ export default function Home() {
     <div className={styles.page}>
       <h1 className={styles.title}>💰 Money Village</h1>
       <p className={styles.subtitle}>보드게임 팀 구성 시스템</p>
+      {character && (
+        <div className={styles.preview}>
+          <img src={`/characters/${character}.png`} alt={character} className={styles.previewImg} />
+          <p className={styles.previewName}>{name}</p>
+        </div>
+      )}
       <div className={styles.buttons}>
-        <button className={styles.createBtn} onClick={handleCreate}>팀 만들기</button>
+        <button className={styles.createBtn} onClick={handleCreate}>팀 생성</button>
         <button className={styles.joinBtn} onClick={() => setShowCodeModal(true)}>팀 참가</button>
       </div>
       {showCodeModal && (
