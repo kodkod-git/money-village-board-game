@@ -32,7 +32,8 @@ export default function Lobby() {
   }
 
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
-  const allCompleted = players.length === 4 && players.every(p => p.gameState?.isCompleted)
+  const isHost = players.find(p => p.socketId === socket?.id)?.isHost ?? false
+  const allCompleted = isHost && players.length === 4 && players.every(p => p.gameState?.isCompleted)
 
   return (
     <div className={styles.page}>
