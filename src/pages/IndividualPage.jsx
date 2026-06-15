@@ -32,6 +32,15 @@ const JOB_LABELS = {
 
 const BADGE_NAMES = ['communication', 'global', 'idea', 'money', 'thinking', 'trust']
 
+const STOCK_COLORS = {
+  semiconductor: '#2196f3',
+  finance:       '#ff9800',
+  industrial:    '#78909c',
+  auto:          '#4caf50',
+  bio:           '#00bcd4',
+  content:       '#9c27b0',
+}
+
 function defaultGameState() {
   return {
     cash: null,
@@ -69,7 +78,7 @@ function useLongPress(callback, { delay = 400, interval = 80 } = {}) {
   return { onMouseDown: start, onMouseUp: stop, onMouseLeave: stop, onTouchStart: start, onTouchEnd: stop }
 }
 
-function CellBar({ count = 0, isEditing = false, small = false }) {
+function CellBar({ count = 0, isEditing = false, small = false, color = '#e91e63' }) {
   const filled = Math.min(count, 10)
   const overflow = !isEditing && count > 10
   return (
@@ -78,11 +87,12 @@ function CellBar({ count = 0, isEditing = false, small = false }) {
         {Array.from({ length: 10 }, (_, i) => (
           <div
             key={i}
-            className={`${styles.cell} ${small ? styles.cellSmall : ''} ${i < filled ? styles.cellFilled : styles.cellEmpty}`}
+            className={`${styles.cell} ${small ? styles.cellSmall : ''} ${i >= filled ? styles.cellEmpty : ''}`}
+            style={i < filled ? { background: color } : undefined}
           />
         ))}
       </div>
-      {overflow && <span className={styles.overflowLabel}>10+</span>}
+      {overflow && <span className={styles.overflowLabel} style={{ color }}>10+</span>}
       {isEditing && <span className={styles.editCount}>{count}</span>}
     </div>
   )
@@ -244,7 +254,7 @@ export default function IndividualPage() {
             <div className={styles.sectionLabel}>주식</div>
             <div className={styles.cellBars}>
               {Object.keys(STOCK_LABELS).map(key => (
-                <CellBar key={key} count={gameState.stocks[key]} />
+                <CellBar key={key} count={gameState.stocks[key]} color={STOCK_COLORS[key]} />
               ))}
             </div>
           </button>
@@ -277,6 +287,7 @@ export default function IndividualPage() {
           title="📈 주식 보유 수량"
           items={tempStocks}
           labels={STOCK_LABELS}
+          colors={STOCK_COLORS}
           onChange={setTempStocks}
           onConfirm={confirmStocks}
           onClose={() => setActivePopup(null)}
@@ -321,7 +332,7 @@ function CashPopup({ value, onChange, onConfirm, onClose }) {
   )
 }
 
-function QuantityPopup({ title, items, labels, onChange, onConfirm, onClose }) {
+function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onClose }) {
   function adjust(key, delta) {
     onChange(prev => ({ ...prev, [key]: Math.max(0, prev[key] + delta) }))
   }
@@ -335,7 +346,7 @@ function QuantityPopup({ title, items, labels, onChange, onConfirm, onClose }) {
               <span className={styles.quantityLabel}>{labels[key]}</span>
               <div className={styles.quantityControls}>
                 <button className={styles.qtyBtn} onClick={() => adjust(key, -1)}>−</button>
-                <CellBar count={items[key]} isEditing={true} small={true} />
+                <CellBar count={items[key]} isEditing={true} small={true} color={colors?.[key]} />
                 <button className={styles.qtyBtn} onClick={() => adjust(key, +1)}>+</button>
               </div>
             </div>
