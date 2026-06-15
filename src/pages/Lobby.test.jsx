@@ -15,13 +15,16 @@ vi.mock('socket.io-client', () => {
   return { io: vi.fn(() => socket) }
 })
 
+import { SocketProvider } from '../contexts/SocketContext'
 import Lobby from './Lobby'
 
 function renderLobby() {
   return render(
-    <MemoryRouter initialEntries={['/lobby/ABC123']}>
-      <Routes><Route path="/lobby/:code" element={<Lobby />} /></Routes>
-    </MemoryRouter>
+    <SocketProvider>
+      <MemoryRouter initialEntries={['/lobby/ABC123']}>
+        <Routes><Route path="/lobby/:code" element={<Lobby />} /></Routes>
+      </MemoryRouter>
+    </SocketProvider>
   )
 }
 

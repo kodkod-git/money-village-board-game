@@ -15,8 +15,14 @@ describe('PlayerSlot', () => {
     expect(screen.getByText('대기 중...')).toBeInTheDocument()
   })
 
-  it('isHost가 false이면 참가완료를 표시한다', () => {
+  it('isHost가 false이고 미완료면 상태 뱃지가 없다', () => {
     render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false }} />)
-    expect(screen.getByText('참가완료')).toBeInTheDocument()
+    expect(screen.getByText('영희')).toBeInTheDocument()
+    expect(screen.queryByText('참가완료')).toBeNull()
+  })
+
+  it('입력완료 시 입력완료 뱃지를 표시한다', () => {
+    render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false, gameState: { isCompleted: true } }} />)
+    expect(screen.getByText('입력완료')).toBeInTheDocument()
   })
 })

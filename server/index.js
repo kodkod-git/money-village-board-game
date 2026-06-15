@@ -4,7 +4,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState } from './rooms.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -61,6 +61,11 @@ io.on('connection', (socket) => {
 
   socket.on('character-preview', ({ code, character }) => {
     socket.to(code.toUpperCase()).emit('character-locked', { character, socketId: socket.id })
+  })
+
+  socket.on('update-player-state', ({ code, gameState }) => {
+    const room = updatePlayerState(socket.id, gameState)
+    if (room) io.to(room.code).emit('room-updated', { players: room.players })
   })
 
   socket.on('leave-room', () => {

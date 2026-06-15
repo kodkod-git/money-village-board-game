@@ -53,14 +53,22 @@
   font-weight: bold;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover .img {
+  opacity: 0.85;
+}
+
 .host {
   display: block;
   color: #ffd700;
   font-size: 13px;
 }
 
-.joined {
+.completed {
   display: block;
-  color: #aaa;
+  color: #69f0ae;
   font-size: 13px;
 }

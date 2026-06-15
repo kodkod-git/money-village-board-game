@@ -1,0 +1,359 @@
+.page {
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    #0a1628 0%, #0f2a50 30%, #1a3f6e 55%,
+    #1e4e50 72%, #1a4a30 88%, #163d28 100%
+  );
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+/* ── Top bar ── */
+.topBar {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  background: rgba(0,0,0,0.35);
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.playerName {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badges {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.badgeBtn {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: transparent;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.badgeImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.badgeLocked {
+  filter: grayscale(100%) brightness(30%);
+}
+
+.lockIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ── Main content ── */
+.content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 110px 1fr 110px;
+  gap: 8px;
+  padding: 6px 12px;
+  min-height: 0;
+}
+
+/* Left column */
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Center column */
+.centerCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.characterImg {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Right column */
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ── Cards ── */
+.card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  color: white;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.card:active {
+  background: rgba(255,255,255,0.13);
+}
+
+.cardTitle {
+  font-size: 10px;
+  color: #90caf9;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+}
+
+.cardValue {
+  font-size: 13px;
+  font-weight: bold;
+  word-break: keep-all;
+}
+
+.cardHint {
+  font-size: 10px;
+  color: #555;
+}
+
+/* ── Bottom bar ── */
+.bottomBar {
+  padding: 10px 14px 14px;
+  flex-shrink: 0;
+}
+
+.completeBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  background: rgba(255,255,255,0.08);
+  color: #444;
+  cursor: not-allowed;
+  transition: background 0.15s, color 0.15s;
+}
+
+.completeBtnActive {
+  background: #2e7d32;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #1b5e20;
+}
+
+.completeBtnActive:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.completeBtnDone {
+  background: #1b5e20;
+  color: #a5d6a7;
+  cursor: default;
+}
+
+/* ── Overlay & Popup ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.popup {
+  background: #162236;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 340px;
+  color: white;
+}
+
+.popupTitle {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #90caf9;
+}
+
+.popupActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: #aaa;
+  font-size: 14px;
+}
+
+.confirmBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  background: #1565c0;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 0 #0d47a1;
+}
+
+/* ── Cash popup ── */
+.cashDisplay {
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  margin: 8px 0 16px;
+  letter-spacing: -0.5px;
+}
+
+.cashControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.cashBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background: #1e88e5;
+  color: white;
+  font-size: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 0 #1565c0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cashBtn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.cashUnit {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+}
+
+/* ── Quantity popup ── */
+.quantityList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.quantityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quantityLabel {
+  font-size: 13px;
+  flex: 1;
+  color: #ccc;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qtyBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: #1e88e5;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.qtyValue {
+  font-size: 16px;
+  font-weight: bold;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* ── Job popup ── */
+.jobList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.jobOption {
+  padding: 13px 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  color: white;
+  font-size: 15px;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.jobOption:active {
+  background: rgba(255,255,255,0.15);
+}

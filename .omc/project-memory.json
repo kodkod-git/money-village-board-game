@@ -1,0 +1,460 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1781447216589,
+  "projectRoot": "C:\\Users\\USER\\OneDrive\\Desktop\\Project\\money-village-board-game",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": ">=20",
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "express",
+        "version": "5.2.1",
+        "category": "backend"
+      },
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "5.4.2",
+        "category": "build"
+      },
+      {
+        "name": "vitest",
+        "version": "4.1.8",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": "Node.js 20"
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "concurrently \"nodemon server/index.js\" \"vite\"",
+      "build": "vite build",
+      "start": "cross-env NODE_ENV=production node server/index.js",
+      "test": "vitest"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "public",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1781447216563,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1781447216563,
+      "keyFiles": []
+    },
+    "efti": {
+      "path": "efti",
+      "purpose": null,
+      "fileCount": 16,
+      "lastAccessed": 1781447216569,
+      "keyFiles": [
+        "faec.png",
+        "faen.png",
+        "fasc.png",
+        "fasn.png",
+        "ftec.png"
+      ]
+    },
+    "example": {
+      "path": "example",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1781447216569,
+      "keyFiles": [
+        "1. 로비.jpg",
+        "2-1. 코드로 팀 참가.jpg",
+        "2-2. QR 코드로 팀 참가.jpg",
+        "2. 팀 구성.jpg"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1781447216569,
+      "keyFiles": []
+    },
+    "server": {
+      "path": "server",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1781447216569,
+      "keyFiles": [
+        "index.js",
+        "rooms.js",
+        "rooms.test.js"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 5,
+      "lastAccessed": 1781447216570,
+      "keyFiles": [
+        "App.jsx",
+        "App.test.jsx",
+        "index.css",
+        "main.jsx",
+        "setupTests.js"
+      ]
+    },
+    "dist\\assets": {
+      "path": "dist\\assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1781447216570,
+      "keyFiles": [
+        "index-BA29cdtq.js",
+        "index-JsTRGwRM.css"
+      ]
+    },
+    "src\\components": {
+      "path": "src\\components",
+      "purpose": "UI components",
+      "fileCount": 11,
+      "lastAccessed": 1781447216571,
+      "keyFiles": [
+        "CharacterCard.jsx",
+        "CharacterCard.module.css",
+        "CharacterCard.test.jsx"
+      ]
+    },
+    "src\\pages": {
+      "path": "src\\pages",
+      "purpose": "Page components",
+      "fileCount": 12,
+      "lastAccessed": 1781447216572,
+      "keyFiles": [
+        "CharacterSelect.jsx",
+        "CharacterSelect.module.css",
+        "CharacterSelect.test.jsx"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "server\\rooms.js",
+      "accessCount": 11,
+      "lastAccessed": 1781502402658,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 9,
+      "lastAccessed": 1781174117410,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\PlayerSlot.module.css",
+      "accessCount": 9,
+      "lastAccessed": 1781502424551,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Home.jsx",
+      "accessCount": 8,
+      "lastAccessed": 1781501557609,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\CharacterSelect.jsx",
+      "accessCount": 7,
+      "lastAccessed": 1781501558003,
+      "type": "file"
+    },
+    {
+      "path": "server\\rooms.test.js",
+      "accessCount": 7,
+      "lastAccessed": 1781501943162,
+      "type": "file"
+    },
+    {
+      "path": "server\\index.js",
+      "accessCount": 7,
+      "lastAccessed": 1781502411857,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Lobby.jsx",
+      "accessCount": 7,
+      "lastAccessed": 1781502418760,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Lobby.module.css",
+      "accessCount": 6,
+      "lastAccessed": 1781501504949,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\NameInput.jsx",
+      "accessCount": 6,
+      "lastAccessed": 1781501558182,
+      "type": "file"
+    },
+    {
+      "path": "src\\App.jsx",
+      "accessCount": 6,
+      "lastAccessed": 1781502385399,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CodeModal.jsx",
+      "accessCount": 5,
+      "lastAccessed": 1781175509663,
+      "type": "file"
+    },
+    {
+      "path": "src\\constants\\characters.js",
+      "accessCount": 5,
+      "lastAccessed": 1781499813605,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useSocket.js",
+      "accessCount": 5,
+      "lastAccessed": 1781501504165,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\NameInput.test.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1781175554698,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CharacterCard.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1781185317658,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Home.test.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1781185350654,
+      "type": "file"
+    },
+    {
+      "path": "src\\App.test.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1781501942393,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\PlayerSlot.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1781502422401,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Home.module.css",
+      "accessCount": 3,
+      "lastAccessed": 1781185334989,
+      "type": "file"
+    },
+    {
+      "path": "src\\main.jsx",
+      "accessCount": 3,
+      "lastAccessed": 1781502382111,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\PlayerSlot.test.jsx",
+      "accessCount": 3,
+      "lastAccessed": 1781502388743,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Lobby.test.jsx",
+      "accessCount": 3,
+      "lastAccessed": 1781502390635,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1781162535795,
+      "type": "directory"
+    },
+    {
+      "path": "src\\index.css",
+      "accessCount": 2,
+      "lastAccessed": 1781162902401,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CharacterCard.module.css",
+      "accessCount": 2,
+      "lastAccessed": 1781164566014,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CharacterCard.test.jsx",
+      "accessCount": 2,
+      "lastAccessed": 1781164568026,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\QRModal.jsx",
+      "accessCount": 2,
+      "lastAccessed": 1781164883157,
+      "type": "file"
+    },
+    {
+      "path": "docs\\superpowers\\specs\\2026-06-15-individual-page-design.md",
+      "accessCount": 2,
+      "lastAccessed": 1781501454313,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useSocket.test.js",
+      "accessCount": 2,
+      "lastAccessed": 1781501582363,
+      "type": "file"
+    },
+    {
+      "path": "docs\\superpowers\\plans\\2026-06-11-money-village-lobby.md",
+      "accessCount": 1,
+      "lastAccessed": 1781162242332,
+      "type": "file"
+    },
+    {
+      "path": "server",
+      "accessCount": 1,
+      "lastAccessed": 1781162539062,
+      "type": "directory"
+    },
+    {
+      "path": "efti",
+      "accessCount": 1,
+      "lastAccessed": 1781162539448,
+      "type": "directory"
+    },
+    {
+      "path": "vite.config.js",
+      "accessCount": 1,
+      "lastAccessed": 1781162546892,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CodeModal.test.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1781163183539,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CodeModal.module.css",
+      "accessCount": 1,
+      "lastAccessed": 1781164111628,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\QRModal.module.css",
+      "accessCount": 1,
+      "lastAccessed": 1781164121672,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\NameInput.module.css",
+      "accessCount": 1,
+      "lastAccessed": 1781164354044,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\CharacterSelect.test.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1781164664188,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\CharacterSelect.module.css",
+      "accessCount": 1,
+      "lastAccessed": 1781164692820,
+      "type": "file"
+    },
+    {
+      "path": "railway.toml",
+      "accessCount": 1,
+      "lastAccessed": 1781165066762,
+      "type": "file"
+    },
+    {
+      "path": "nixpacks.toml",
+      "accessCount": 1,
+      "lastAccessed": 1781174398125,
+      "type": "file"
+    },
+    {
+      "path": "proposal\\20260615_individual_page.md",
+      "accessCount": 1,
+      "lastAccessed": 1781499787041,
+      "type": "file"
+    },
+    {
+      "path": "src\\contexts\\SocketContext.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1781502372910,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\IndividualPage.module.css",
+      "accessCount": 1,
+      "lastAccessed": 1781502453231,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\IndividualPage.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1781502496546,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

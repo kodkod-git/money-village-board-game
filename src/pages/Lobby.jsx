@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
-import useSocket from '../hooks/useSocket'
+import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Lobby.module.css'
 
 export default function Lobby() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { socket } = useSocket()
+  const { socket } = useSocketContext()
   const [players, setPlayers] = useState([])
   const [showQR, setShowQR] = useState(false)
 
@@ -53,7 +53,14 @@ export default function Lobby() {
       <div className={styles.counter}>{players.length} / 4 명 참가</div>
 
       <div className={styles.characters}>
-        {slots.map((player, i) => <PlayerSlot key={i} player={player} />)}
+        {slots.map((player, i) => (
+          <PlayerSlot
+            key={i}
+            player={player}
+            isOwnPlayer={player?.socketId === socket?.id}
+            onNavigate={() => navigate(`/lobby/${code}/individual`)}
+          />
+        ))}
       </div>
 
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}

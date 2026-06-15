@@ -9,6 +9,19 @@ function generateCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase()
 }
 
+function defaultGameState() {
+  return {
+    cash: null,
+    job: null,
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+    badges: [false, false, false, false, false, false],
+    stocksVisited: false,
+    realEstateVisited: false,
+    isCompleted: false,
+  }
+}
+
 export function createRoom() {
   let code
   do { code = generateCode() } while (rooms.has(code))
@@ -26,7 +39,7 @@ export function addPlayer(code, player) {
   const room = rooms.get(code)
   if (!room) throw new Error('Room not found')
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
-  room.players.push(player)
+  room.players.push({ ...player, gameState: defaultGameState() })
   socketToRoom.set(player.socketId, code)
   return room
 }
@@ -45,6 +58,17 @@ export function removePlayer(socketId) {
     rooms.delete(code)
     return null
   }
+  return room
+}
+
+export function updatePlayerState(socketId, gameState) {
+  const code = socketToRoom.get(socketId)
+  if (!code) return null
+  const room = rooms.get(code)
+  if (!room) return null
+  const player = room.players.find(p => p.socketId === socketId)
+  if (!player) return null
+  player.gameState = gameState
   return room
 }
 

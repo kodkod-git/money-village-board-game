@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import NameInput from './pages/NameInput'
 import CharacterSelect from './pages/CharacterSelect'
 import Lobby from './pages/Lobby'
+import IndividualPage from './pages/IndividualPage'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/select" element={<CharacterSelect />} />
       <Route path="/team" element={<Home />} />
       <Route path="/lobby/:code" element={<Lobby />} />
+      <Route path="/lobby/:code/individual" element={<IndividualPage />} />
     </Routes>
   )
 }

@@ -1,6 +1,6 @@
 import styles from './PlayerSlot.module.css'
 
-export default function PlayerSlot({ player }) {
+export default function PlayerSlot({ player, isOwnPlayer, onNavigate }) {
   if (!player) {
     return (
       <div className={styles.slot}>
@@ -10,7 +10,10 @@ export default function PlayerSlot({ player }) {
     )
   }
   return (
-    <div className={styles.slot}>
+    <div
+      className={`${styles.slot} ${isOwnPlayer ? styles.clickable : ''}`}
+      onClick={isOwnPlayer ? onNavigate : undefined}
+    >
       <img
         src={`/characters/${player.character}.png`}
         alt={player.character}
@@ -18,10 +21,8 @@ export default function PlayerSlot({ player }) {
       />
       <div className={styles.badge}>
         <span className={styles.name}>{player.name}</span>
-        {player.isHost
-          ? <span className={styles.host}>방장 ★</span>
-          : <span className={styles.joined}>참가완료</span>
-        }
+        {player.isHost && <span className={styles.host}>방장 ★</span>}
+        {player.gameState?.isCompleted && <span className={styles.completed}>입력완료</span>}
       </div>
     </div>
   )
