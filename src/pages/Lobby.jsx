@@ -32,6 +32,7 @@ export default function Lobby() {
   }
 
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
+  const allCompleted = players.length === 4 && players.every(p => p.gameState?.isCompleted)
 
   return (
     <div className={styles.page}>
@@ -61,6 +62,15 @@ export default function Lobby() {
             onNavigate={() => navigate(`/lobby/${code}/individual`)}
           />
         ))}
+      </div>
+
+      <div className={styles.bottomBar}>
+        <button
+          className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
+          disabled={!allCompleted}
+        >
+          결과 등록하기
+        </button>
       </div>
 
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}

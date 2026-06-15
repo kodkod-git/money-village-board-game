@@ -42,3 +42,35 @@
   flex: 1;
   min-height: 0;
 }
+
+.bottomBar {
+  padding: 8px 20px 14px;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.registerBtn {
+  width: 100%;
+  padding: clamp(7px, 1.2vw, 10px) clamp(16px, 2.5vw, 24px);
+  border-radius: 8px;
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: bold;
+  background: rgba(255,255,255,0.08);
+  color: #444;
+  cursor: not-allowed;
+  transition: background 0.15s, color 0.15s;
+}
+
+.registerBtnActive {
+  background: #1565c0;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #0d47a1;
+}
+
+.registerBtnActive:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}

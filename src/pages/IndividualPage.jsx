@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
@@ -19,6 +19,15 @@ const REAL_ESTATE_LABELS = {
   maru: '다세대 마루수리',
   chorong: '아파트 초롱부엉이',
   hani: '아파트 하늬여우',
+}
+
+const REAL_ESTATE_COLORS = {
+  gaon:   '#66bb6a',
+  nuri:   '#26a69a',
+  dami:   '#ffa726',
+  maru:   '#ff7043',
+  chorong:'#ab47bc',
+  hani:   '#7e57c2',
 }
 
 const JOB_LABELS = {
@@ -43,7 +52,7 @@ const STOCK_COLORS = {
 
 function defaultGameState() {
   return {
-    cash: null,
+    cash: 0,
     job: null,
     stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
@@ -54,29 +63,6 @@ function defaultGameState() {
   }
 }
 
-function useLongPress(callback, { delay = 400, interval = 80 } = {}) {
-  const timeoutRef = useRef(null)
-  const intervalRef = useRef(null)
-  const callbackRef = useRef(callback)
-  callbackRef.current = callback
-
-  const stop = useCallback(() => {
-    clearTimeout(timeoutRef.current)
-    clearInterval(intervalRef.current)
-  }, [])
-
-  const start = useCallback((e) => {
-    e.preventDefault()
-    callbackRef.current()
-    timeoutRef.current = setTimeout(() => {
-      intervalRef.current = setInterval(() => callbackRef.current(), interval)
-    }, delay)
-  }, [delay, interval])
-
-  useEffect(() => () => stop(), [stop])
-
-  return { onMouseDown: start, onMouseUp: stop, onMouseLeave: stop, onTouchStart: start, onTouchEnd: stop }
-}
 
 function CellBar({ count = 0, isEditing = false, small = false, color = '#e91e63' }) {
   const filled = Math.min(count, 10)
@@ -183,7 +169,6 @@ export default function IndividualPage() {
   }
 
   const canComplete =
-    gameState.cash !== null &&
     gameState.job !== null &&
     gameState.stocksVisited &&
     gameState.realEstateVisited &&
@@ -196,19 +181,13 @@ export default function IndividualPage() {
       <button className={styles.backBtn} onClick={() => navigate(`/lobby/${code}`)}>← 뒤로</button>
 
       <div className={styles.main}>
-        {/* LEFT: name, job, cash */}
+        {/* LEFT: name, job */}
         <div className={styles.leftCol}>
           <div className={styles.leftContent}>
             <div className={styles.nameText}>{player.name}</div>
             <button className={styles.jobBtn} onClick={() => setActivePopup('job')}>
-              <span className={gameState.job ? styles.jobValue : styles.placeholder}>
+              <span className={`${styles.jobValue}${!gameState.job ? ' ' + styles.placeholder : ''}`}>
                 {gameState.job ? JOB_LABELS[gameState.job] : '직업 선택'}
-              </span>
-            </button>
-            <button className={styles.cashInfoBtn} onClick={openCash}>
-              <span className={styles.cashLabel}>현금보유량</span>
-              <span className={gameState.cash !== null ? styles.cashValue : `${styles.cashValue} ${styles.placeholder}`}>
-                {gameState.cash !== null ? `${gameState.cash.toLocaleString()}원` : '—원'}
               </span>
             </button>
           </div>
@@ -225,39 +204,48 @@ export default function IndividualPage() {
 
         {/* RIGHT: badges, real estate, stocks */}
         <div className={styles.rightCol}>
-          <div className={styles.section}>
-            <div className={styles.sectionLabel}>성공카드</div>
-            <div className={styles.badgeGrid}>
-              {BADGE_NAMES.map((name, i) => (
-                <button key={name} className={styles.badgeBtn} onClick={() => toggleBadge(i)}>
-                  <img
-                    src={`/badges/${name}.png`}
-                    alt={name}
-                    className={`${styles.badgeImg} ${!gameState.badges[i] ? styles.badgeLocked : ''}`}
-                  />
-                  {!gameState.badges[i] && <span className={styles.lockIcon}>🔒</span>}
-                </button>
-              ))}
+          <div className={styles.rightGroup}>
+            <div className={styles.section}>
+              <div className={styles.sectionLabel}>성공카드</div>
+              <div className={styles.badgeGrid}>
+                {BADGE_NAMES.map((name, i) => (
+                  <button key={name} className={styles.badgeBtn} onClick={() => toggleBadge(i)}>
+                    <img
+                      src={`/badges/${name}.png`}
+                      alt={name}
+                      className={`${styles.badgeImg} ${!gameState.badges[i] ? styles.badgeLocked : ''}`}
+                    />
+                    {!gameState.badges[i] && <span className={styles.lockIcon}>🔒</span>}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            <button className={styles.assetSection} onClick={openRealEstate}>
+              <div className={styles.sectionLabel}>부동산</div>
+              <div className={styles.cellBars}>
+                {Object.keys(REAL_ESTATE_LABELS).map(key => (
+                  <CellBar key={key} count={gameState.realEstate[key]} color={REAL_ESTATE_COLORS[key]} />
+                ))}
+              </div>
+            </button>
+
+            <button className={styles.assetSection} onClick={openStocks}>
+              <div className={styles.sectionLabel}>주식</div>
+              <div className={styles.cellBars}>
+                {Object.keys(STOCK_LABELS).map(key => (
+                  <CellBar key={key} count={gameState.stocks[key]} color={STOCK_COLORS[key]} />
+                ))}
+              </div>
+            </button>
+
+            <button className={styles.cashSection} onClick={openCash}>
+              <div className={styles.sectionLabel}>현금</div>
+              <span className={styles.cashInlineValue}>
+                {(gameState.cash ?? 0).toLocaleString()}원
+              </span>
+            </button>
           </div>
-
-          <button className={styles.assetSection} onClick={openRealEstate}>
-            <div className={styles.sectionLabel}>부동산</div>
-            <div className={styles.cellBars}>
-              {Object.keys(REAL_ESTATE_LABELS).map(key => (
-                <CellBar key={key} count={gameState.realEstate[key]} />
-              ))}
-            </div>
-          </button>
-
-          <button className={styles.assetSection} onClick={openStocks}>
-            <div className={styles.sectionLabel}>주식</div>
-            <div className={styles.cellBars}>
-              {Object.keys(STOCK_LABELS).map(key => (
-                <CellBar key={key} count={gameState.stocks[key]} color={STOCK_COLORS[key]} />
-              ))}
-            </div>
-          </button>
         </div>
       </div>
 
@@ -298,6 +286,7 @@ export default function IndividualPage() {
           title="🏠 부동산 보유 수량"
           items={tempRealEstate}
           labels={REAL_ESTATE_LABELS}
+          colors={REAL_ESTATE_COLORS}
           onChange={setTempRealEstate}
           onConfirm={confirmRealEstate}
           onClose={() => setActivePopup(null)}
@@ -311,17 +300,16 @@ export default function IndividualPage() {
 }
 
 function CashPopup({ value, onChange, onConfirm, onClose }) {
-  const incHandlers = useLongPress(() => onChange(v => v + 1000))
-  const decHandlers = useLongPress(() => onChange(v => Math.max(0, v - 1000)))
   return (
     <div className={styles.overlay}>
       <div className={styles.popup}>
-        <div className={styles.popupTitle}>💵 현금 보유량</div>
-        <div className={styles.cashDisplay}>{value.toLocaleString()}원</div>
+        <div className={styles.popupTitle}>💵 현금</div>
         <div className={styles.cashControls}>
-          <button className={styles.cashAdjBtn} {...decHandlers}>−</button>
-          <span className={styles.cashUnit}>1,000원 단위<br />꾹 누르면 빨라져요</span>
-          <button className={styles.cashAdjBtn} {...incHandlers}>+</button>
+          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 10000))}>−만</button>
+          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 1000))}>−천</button>
+          <span className={styles.cashDisplay}>{value.toLocaleString()}원</span>
+          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 1000)}>+천</button>
+          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 10000)}>+만</button>
         </div>
         <div className={styles.popupActions}>
           <button className={styles.cancelBtn} onClick={onClose}>취소</button>
