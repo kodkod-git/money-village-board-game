@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices } from './rooms.js'
+import { saveGameResult } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -38,6 +39,26 @@ app.get('/api/rooms/:code/qr', async (req, res) => {
   const url = `${req.protocol}://${req.get('host')}/join?code=${code}`
   const png = await qrcode.toBuffer(url)
   res.set('Content-Type', 'image/png').send(png)
+})
+
+app.post('/api/rooms/:code/submit', async (req, res) => {
+  const room = getRoom(req.params.code.toUpperCase())
+  if (!room) return res.status(404).json({ error: 'Room not found' })
+
+  if (!room.players.every(p => p.gameState?.isCompleted)) {
+    return res.status(400).json({ error: 'Not all players have completed' })
+  }
+
+  try {
+    const sessionId = await saveGameResult(room)
+    res.json({ sessionId })
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Results already submitted for this room' })
+    }
+    console.error('submit error:', err)
+    res.status(500).json({ error: 'Failed to save results' })
+  }
 })
 
 if (process.env.NODE_ENV === 'production') {
