@@ -4,6 +4,7 @@ import NameInput from './pages/NameInput'
 import CharacterSelect from './pages/CharacterSelect'
 import Lobby from './pages/Lobby'
 import IndividualPage from './pages/IndividualPage'
+import ResultPage from './pages/ResultPage'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="/team" element={<Home />} />
       <Route path="/lobby/:code" element={<Lobby />} />
       <Route path="/lobby/:code/individual" element={<IndividualPage />} />
+      <Route path="/result/:sessionId" element={<ResultPage />} />
     </Routes>
   )
 }

@@ -36,6 +36,7 @@ export default function Lobby() {
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetch(`/api/rooms/${code}`)
@@ -70,6 +71,19 @@ export default function Lobby() {
     socket?.emit('update-room-prices', { code, prices: newPrices })
     setPrices(newPrices)
     setShowPriceModal(false)
+  }
+
+  async function handleSubmit() {
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/rooms/${code}/submit`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      navigate(`/result/${data.sessionId}`)
+    } catch (err) {
+      alert(err.message)
+      setIsSubmitting(false)
+    }
   }
 
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
@@ -114,9 +128,10 @@ export default function Lobby() {
         )}
         <button
           className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
-          disabled={!allCompleted}
+          disabled={!allCompleted || isSubmitting}
+          onClick={handleSubmit}
         >
-          결과 등록하기
+          {isSubmitting ? '저장 중...' : '결과 등록하기'}
         </button>
       </div>
 
