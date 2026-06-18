@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
-  isCharacterTaken, clearRooms
+  isCharacterTaken, clearRooms, updateRoomPrices
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -95,5 +95,37 @@ describe('isCharacterTaken', () => {
     const { code } = createRoom()
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     expect(isCharacterTaken(code, 'ptsc', 's1')).toBe(false)
+  })
+})
+
+describe('createRoom prices', () => {
+  it('주식/부동산 기본 가격을 초기화한다', () => {
+    const room = createRoom()
+    expect(room.prices.stocks).toEqual({
+      semiconductor: 2000, finance: 2000, industrial: 2000,
+      auto: 2000, bio: 2000, content: 2000,
+    })
+    expect(room.prices.realEstate).toEqual({
+      gaon: 10000, nuri: 10000, dami: 10000,
+      maru: 10000, chorong: 10000, hani: 10000,
+    })
+  })
+})
+
+describe('updateRoomPrices', () => {
+  it('방의 가격을 업데이트하고 방 객체를 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    const newPrices = {
+      stocks: { semiconductor: 4000, finance: 6000, industrial: 2000, auto: 8000, bio: 10000, content: 12000 },
+      realEstate: { gaon: 20000, nuri: 30000, dami: 10000, maru: 40000, chorong: 50000, hani: 60000 },
+    }
+    const room = updateRoomPrices('s1', newPrices)
+    expect(room).not.toBeNull()
+    expect(room.prices).toEqual(newPrices)
+  })
+
+  it('존재하지 않는 socketId는 null을 반환한다', () => {
+    expect(updateRoomPrices('unknown', {})).toBeNull()
   })
 })

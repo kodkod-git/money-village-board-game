@@ -22,10 +22,17 @@ function defaultGameState() {
   }
 }
 
+function defaultPrices() {
+  return {
+    stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+    realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
+  }
+}
+
 export function createRoom() {
   let code
   do { code = generateCode() } while (rooms.has(code))
-  const room = { code, createdAt: new Date(), players: [] }
+  const room = { code, createdAt: new Date(), players: [], prices: defaultPrices() }
   rooms.set(code, room)
   return room
 }
@@ -76,6 +83,15 @@ export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false
   return room.players.some(p => p.character === character && p.socketId !== requestingSocketId)
+}
+
+export function updateRoomPrices(socketId, prices) {
+  const code = socketToRoom.get(socketId)
+  if (!code) return null
+  const room = rooms.get(code)
+  if (!room) return null
+  room.prices = prices
+  return room
 }
 
 export function clearRooms() {
