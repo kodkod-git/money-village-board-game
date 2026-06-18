@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices } from './rooms.js'
-import { saveGameResult } from './db.js'
+import { saveGameResult, getGameResult } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -58,6 +58,32 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
     }
     console.error('submit error:', err)
     res.status(500).json({ error: 'Failed to save results' })
+  }
+})
+
+app.get('/api/results/:sessionId', async (req, res) => {
+  try {
+    const { session, results } = await getGameResult(req.params.sessionId)
+    res.json({
+      teamCode: session.team_code,
+      createdAt: session.created_at,
+      stockPrices: session.stock_prices,
+      realEstatePrices: session.real_estate_prices,
+      players: results.map((r, i) => ({
+        rank: i + 1,
+        name: r.name,
+        character: r.character,
+        job: r.job,
+        cash: r.cash,
+        stockHoldings: r.stock_holdings,
+        realEstateHoldings: r.real_estate_holdings,
+        badges: r.badges,
+        totalAssets: Number(r.total_assets),
+      })),
+    })
+  } catch (err) {
+    console.error('results error:', err)
+    res.status(404).json({ error: 'Result not found' })
   }
 })
 
