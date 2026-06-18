@@ -290,6 +290,7 @@
 
 .completeBtn {
   width: 100%;
+  min-height: 48px;
   padding: clamp(10px, 2.2vw, 15px);
   border-radius: 10px;
   font-size: clamp(13px, 3.5vw, 18px);
@@ -298,6 +299,7 @@
   color: #444;
   cursor: not-allowed;
   transition: background 0.15s, color 0.15s;
+  box-sizing: border-box;
 }
 
 .completeBtnActive {
@@ -316,6 +318,16 @@
   background: #1b5e20;
   color: #a5d6a7;
   cursor: default;
+}
+
+.cancelBtn {
+  background: #7f1d1d;
+  color: #fca5a5;
+  cursor: pointer;
+}
+
+.cancelBtn:active {
+  transform: translateY(2px);
 }
 
 /* ── Overlay & Popup ── */

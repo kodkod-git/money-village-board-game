@@ -37,6 +37,7 @@ export default function Lobby() {
   const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   useEffect(() => {
     fetch(`/api/rooms/${code}`)
@@ -62,6 +63,13 @@ export default function Lobby() {
     return () => socket.off('room-prices-updated', handler)
   }, [socket])
 
+  useEffect(() => {
+    if (!socket) return
+    const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
+    socket.on('game-submitted', handler)
+    return () => socket.off('game-submitted', handler)
+  }, [socket])
+
   function handleLeave() {
     socket?.emit('leave-room')
     navigate('/')
@@ -74,12 +82,12 @@ export default function Lobby() {
   }
 
   async function handleSubmit() {
+    setShowConfirmModal(false)
     setIsSubmitting(true)
     try {
       const res = await fetch(`/api/rooms/${code}/submit`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      navigate(`/result/${data.sessionId}`)
     } catch (err) {
       alert(err.message)
       setIsSubmitting(false)
@@ -88,7 +96,7 @@ export default function Lobby() {
 
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = players.find(p => p.socketId === socket?.id)?.isHost ?? false
-  const allCompleted = isHost && players.length === 4 && players.every(p => p.gameState?.isCompleted)
+  const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
 
   return (
     <div className={styles.page}>
@@ -126,15 +134,23 @@ export default function Lobby() {
             가격 설정
           </button>
         )}
-        <button
-          className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
-          disabled={!allCompleted || isSubmitting}
-          onClick={handleSubmit}
-        >
-          {isSubmitting ? '저장 중...' : '결과 등록하기'}
-        </button>
+        {isHost && (
+          <button
+            className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
+            disabled={!allCompleted || isSubmitting}
+            onClick={() => setShowConfirmModal(true)}
+          >
+            {isSubmitting ? '저장 중...' : '결과 등록하기'}
+          </button>
+        )}
       </div>
 
+      {showConfirmModal && (
+        <ConfirmModal
+          onConfirm={handleSubmit}
+          onClose={() => setShowConfirmModal(false)}
+        />
+      )}
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {showPriceModal && (
         <PriceSettingModal
@@ -143,6 +159,21 @@ export default function Lobby() {
           onClose={() => setShowPriceModal(false)}
         />
       )}
+    </div>
+  )
+}
+
+function ConfirmModal({ onConfirm, onClose }) {
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.popup}>
+        <div className={styles.popupTitle}>결과 등록</div>
+        <p className={styles.confirmText}>더 이상 수정할 수 없습니다.<br />결과를 등록하시겠습니까?</p>
+        <div className={styles.popupActions}>
+          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
+          <button className={styles.confirmBtn} onClick={onConfirm}>등록</button>
+        </div>
+      </div>
     </div>
   )
 }

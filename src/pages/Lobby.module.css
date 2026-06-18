@@ -190,6 +190,14 @@
   min-width: 80px;
   text-align: center;
 }
+.confirmText {
+  text-align: center;
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
 .popupActions {
   display: flex;
   gap: 10px;

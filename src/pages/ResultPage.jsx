@@ -37,7 +37,7 @@ export default function ResultPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div className={styles.teamCode}>팀 {data.teamCode}</div>
+        <div className={styles.teamCode}>등록 완료</div>
         <div className={styles.date}>{dateStr}</div>
       </div>
 
@@ -66,33 +66,43 @@ export default function ResultPage() {
               </span>
             </div>
 
-            {expanded === i && (
-              <div className={styles.detail}>
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>현금</span>
-                  <span className={styles.detailValue}>{player.cash.toLocaleString()}원</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>성공카드</span>
-                  <span className={styles.detailValue}>
-                    {player.badges.filter(Boolean).length}개
-                  </span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>획득 뱃지</span>
-                  <div className={styles.badgeRow}>
-                    {BADGE_NAMES.map((name, bi) => (
-                      <img
-                        key={name}
-                        src={`/badges/${name}.png`}
-                        alt={name}
-                        className={`${styles.badgeImg} ${!player.badges[bi] ? styles.badgeLocked : ''}`}
-                      />
-                    ))}
+            {expanded === i && (() => {
+              const stockValue = Object.keys(player.stockHoldings).reduce(
+                (sum, key) => sum + player.stockHoldings[key] * (data.stockPrices[key] ?? 0), 0
+              )
+              const realEstateValue = Object.keys(player.realEstateHoldings).reduce(
+                (sum, key) => sum + player.realEstateHoldings[key] * (data.realEstatePrices[key] ?? 0), 0
+              )
+              return (
+                <div className={styles.detail}>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>현금</span>
+                    <span className={styles.detailValue}>{player.cash.toLocaleString()}원</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>주식</span>
+                    <span className={styles.detailValue}>{stockValue.toLocaleString()}원</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>부동산</span>
+                    <span className={styles.detailValue}>{realEstateValue.toLocaleString()}원</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>성공카드</span>
+                    <div className={styles.badgeRow}>
+                      {BADGE_NAMES.map((name, bi) => (
+                        <img
+                          key={name}
+                          src={`/badges/${name}.png`}
+                          alt={name}
+                          className={`${styles.badgeImg} ${!player.badges[bi] ? styles.badgeLocked : ''}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
           </div>
         ))}
       </div>

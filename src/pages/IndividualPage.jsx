@@ -168,6 +168,12 @@ export default function IndividualPage() {
     navigate(`/lobby/${code}`)
   }
 
+  function handleCancel() {
+    const next = { ...gameState, isCompleted: false }
+    setGameState(next)
+    emitState(next)
+  }
+
   const canComplete =
     gameState.job !== null &&
     gameState.stocksVisited &&
@@ -250,16 +256,19 @@ export default function IndividualPage() {
       </div>
 
       <div className={styles.bottomBar}>
-        <button
-          className={[
-            styles.completeBtn,
-            gameState.isCompleted ? styles.completeBtnDone : canComplete ? styles.completeBtnActive : '',
-          ].join(' ')}
-          disabled={!canComplete || gameState.isCompleted}
-          onClick={handleComplete}
-        >
-          {gameState.isCompleted ? '입력완료 ✓' : '입력완료'}
-        </button>
+        {gameState.isCompleted ? (
+          <button className={`${styles.completeBtn} ${styles.cancelBtn}`} onClick={handleCancel}>
+            입력취소
+          </button>
+        ) : (
+          <button
+            className={`${styles.completeBtn} ${canComplete ? styles.completeBtnActive : ''}`}
+            disabled={!canComplete}
+            onClick={handleComplete}
+          >
+            입력완료
+          </button>
+        )}
       </div>
 
       {activePopup === 'cash' && (
