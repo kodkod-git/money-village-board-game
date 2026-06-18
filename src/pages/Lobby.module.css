@@ -47,12 +47,14 @@
   padding: 8px 20px 14px;
   flex-shrink: 0;
   width: 100%;
-  max-width: 280px;
+  max-width: 380px;
   margin: 0 auto;
+  display: flex;
+  gap: 8px;
 }
 
 .registerBtn {
-  width: 100%;
+  flex: 1;
   padding: clamp(7px, 1.2vw, 10px) clamp(16px, 2.5vw, 24px);
   border-radius: 8px;
   font-size: clamp(13px, 2vw, 16px);
@@ -73,4 +75,141 @@
 .registerBtnActive:active {
   transform: translateY(2px);
   box-shadow: none;
+}
+.priceBtn {
+  padding: clamp(7px, 1.2vw, 10px) clamp(12px, 2vw, 18px);
+  border-radius: 8px;
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: bold;
+  background: #4caf50;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #388e3c;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.priceBtn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.popup {
+  background: #162236;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 340px;
+  color: white;
+}
+.popupTitle {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #90caf9;
+}
+.categoryGrid {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.categoryCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.categoryCard:active {
+  background: rgba(255,255,255,0.15);
+}
+.categoryIcon {
+  font-size: 32px;
+  line-height: 1;
+}
+.categoryLabel {
+  font-size: 14px;
+  font-weight: bold;
+}
+.quantityList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.quantityItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.quantityLabel {
+  font-size: 13px;
+  color: #bbb;
+}
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qtyBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background: #1e88e5;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.priceDisplay {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  min-width: 80px;
+  text-align: center;
+}
+.popupActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.cancelBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: #aaa;
+  font-size: 14px;
+}
+.confirmBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  background: #1565c0;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 0 #0d47a1;
 }
