@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import CodeModal from '../components/CodeModal'
 import useSocket from '../hooks/useSocket'
+import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -19,7 +20,8 @@ export default function Home() {
   }, [initialCode])
 
   function joinRoom(code, isHost) {
-    socket.emit('join-room', { code, name, character, isHost }, ({ ok, error }) => {
+    const playerUuid = getPlayerUuid()
+    socket.emit('join-room', { code, name, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) navigate(`/lobby/${code}`)
       else alert(error)
     })

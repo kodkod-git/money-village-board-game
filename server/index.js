@@ -47,10 +47,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join-room', ({ code, name, character, isHost }, callback) => {
+  socket.on('join-room', ({ code, name, character, isHost, playerUuid }, callback) => {
     try {
       const room = addPlayer(code.toUpperCase(), {
-        socketId: socket.id, name, character, isHost: !!isHost,
+        socketId: socket.id, name, character, isHost: !!isHost, playerUuid,
       })
       socket.join(code.toUpperCase())
       io.to(code.toUpperCase()).emit('room-updated', { players: room.players })
