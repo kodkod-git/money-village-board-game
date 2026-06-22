@@ -51,7 +51,7 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
   try {
     const sessionId = await saveGameResult(room)
-    io.to(code).emit('game-submitted', { sessionId })
+    io.to(req.params.code.toUpperCase()).emit('game-submitted', { sessionId })
     res.json({ sessionId })
   } catch (err) {
     if (err.code === '23505') {
