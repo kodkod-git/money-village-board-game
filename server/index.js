@@ -58,7 +58,7 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
       return res.status(409).json({ error: 'Results already submitted for this room' })
     }
     console.error('submit error:', err)
-    res.status(500).json({ error: 'Failed to save results' })
+    res.status(500).json({ error: 'Failed to save results', detail: err?.message, code: err?.code })
   }
 })
 

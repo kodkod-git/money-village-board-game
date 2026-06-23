@@ -33,3 +33,10 @@ CREATE POLICY "Public read game_sessions"
 
 CREATE POLICY "Public read game_results"
   ON game_results FOR SELECT USING (true);
+
+-- 서버에서 결과 저장 허용
+CREATE POLICY "Service insert game_sessions"
+  ON game_sessions FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Service insert game_results"
+  ON game_results FOR INSERT WITH CHECK (true);

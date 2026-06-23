@@ -11,7 +11,7 @@ export function calculateTotalAssets(gameState, prices) {
     (sum, key) => sum + realEstate[key] * (prices.realEstate[key] ?? 0), 0
   )
   const baseAssets = (cash ?? 0) + stockValue + realEstateValue
-  return baseAssets * (badgeCount * 0.5)
+  return baseAssets * (1 + badgeCount * 0.5)
 }
 
 export async function saveGameResult(room) {
