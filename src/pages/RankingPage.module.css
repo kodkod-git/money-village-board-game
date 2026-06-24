@@ -3,6 +3,14 @@
   background: #0f0f1a;
   padding: 16px;
   color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inner {
+  width: 100%;
+  max-width: 480px;
 }
 
 .header {
