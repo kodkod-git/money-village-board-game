@@ -39,6 +39,8 @@ export default function RankingPage() {
     setLoading(true)
     setError(null)
 
+    if (isV2 && activeTab === 'affiliation' && myAffiliation === null) return
+
     let url = '/api/rankings'
 
     if (isV2) {
