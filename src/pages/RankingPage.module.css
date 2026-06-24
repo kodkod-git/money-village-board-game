@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #0f0f1a;
+  background: linear-gradient(180deg, #0a1628 0%, #0f2a50 60%, #163d28 100%);
   padding: 16px;
   color: #eee;
   display: flex;
