@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices } from './rooms.js'
-import { saveGameResult, getGameResult } from './db.js'
+import { saveGameResult, getGameResult, getAllRankings } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -62,6 +62,17 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
   }
 })
 
+app.get('/api/rankings', async (req, res) => {
+  try {
+    const affiliation = req.query.affiliation ?? null
+    const rankings = await getAllRankings(affiliation)
+    res.json(rankings)
+  } catch (err) {
+    console.error('rankings error:', err)
+    res.status(500).json({ error: 'Failed to fetch rankings' })
+  }
+})
+
 app.get('/api/results/:sessionId', async (req, res) => {
   try {
     const { session, results } = await getGameResult(req.params.sessionId)
@@ -73,6 +84,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
       players: results.map((r, i) => ({
         rank: i + 1,
         name: r.name,
+        affiliation: r.affiliation,
         character: r.character,
         job: r.job,
         cash: r.cash,
@@ -80,6 +92,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
         realEstateHoldings: r.real_estate_holdings,
         badges: r.badges,
         totalAssets: Number(r.total_assets),
+        playerUuid: r.player_uuid,
       })),
     })
   } catch (err) {
@@ -95,10 +108,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join-room', ({ code, name, character, isHost, playerUuid }, callback) => {
+  socket.on('join-room', ({ code, name, character, isHost, playerUuid, affiliation }, callback) => {
     try {
       const room = addPlayer(code.toUpperCase(), {
-        socketId: socket.id, name, character, isHost: !!isHost, playerUuid,
+        socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation,
       })
       socket.join(code.toUpperCase())
       io.to(code.toUpperCase()).emit('room-updated', { players: room.players })
