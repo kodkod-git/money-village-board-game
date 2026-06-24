@@ -6,6 +6,7 @@ import Lobby from './pages/Lobby'
 import Home from './pages/Home'
 import IndividualPage from './pages/IndividualPage'
 import RankingPage from './pages/RankingPage'
+import ResultPage from './pages/ResultPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/lobby/:code/individual" element={<IndividualPage />} />
       <Route path="/ranking" element={<RankingPage />} />
       <Route path="/result/:sessionId" element={<RankingPage />} />
+      <Route path="/result/:sessionId/player/:playerUuid" element={<ResultPage />} />
     </Routes>
   )
 }
