@@ -7,6 +7,11 @@
 .tableWrapper {
   overflow-y: auto;
   max-height: calc(100vh - 220px);
+  scrollbar-width: none;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .table {
