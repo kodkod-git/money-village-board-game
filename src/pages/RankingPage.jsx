@@ -92,6 +92,11 @@ export default function RankingPage() {
           <RankingTable
             rows={rows}
             highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
+            onRowClick={row => {
+              if (row.sessionId && row.playerUuid) {
+                navigate(`/result/${row.sessionId}/player/${row.playerUuid}`)
+              }
+            }}
           />
         )}
       </div>
