@@ -10,10 +10,12 @@ export default function LandingPage() {
       <p className={styles.subtitle}>보드게임 팀 구성 시스템</p>
       <div className={styles.buttons}>
         <button className={styles.rankingBtn} onClick={() => navigate('/ranking')}>
-          🏆 랭킹
+          <span style={{ fontSize: '32px' }}>🏆</span>
+          <span>랭킹</span>
         </button>
         <button className={styles.joinBtn} onClick={() => navigate('/join')}>
-          📋 참여
+          <span style={{ fontSize: '32px' }}>📋</span>
+          <span>참여</span>
         </button>
       </div>
     </div>

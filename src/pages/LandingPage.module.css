@@ -25,35 +25,29 @@
 
 .buttons {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: 240px;
-  margin-top: 16px;
+  flex-direction: row;
+  gap: 16px;
+  margin-top: 24px;
 }
 
-.rankingBtn {
-  padding: 16px;
+.rankingBtn,
+.joinBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 120px;
+  height: 120px;
   background: #ffd700;
   color: #1a1a2e;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 20px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
-.rankingBtn:hover { background: #ffe44d; }
-
-.joinBtn {
-  padding: 16px;
-  background: transparent;
-  color: #ffd700;
-  border: 2px solid #ffd700;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.joinBtn:hover { background: rgba(255, 215, 0, 0.1); }
+.rankingBtn:hover,
+.joinBtn:hover { background: #ffe44d; }
