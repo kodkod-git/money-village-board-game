@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import RankingTable from './RankingTable'
 
@@ -30,5 +31,16 @@ describe('RankingTable', () => {
   it('highlightPlayerUuid 없으면 pinned row를 렌더링하지 않는다', () => {
     render(<MemoryRouter><RankingTable rows={mockRows} /></MemoryRouter>)
     expect(screen.queryByTestId('pinned-row')).toBeNull()
+  })
+
+  it('onRowClick이 있을 때 행 클릭 시 해당 row 데이터로 콜백을 호출한다', async () => {
+    const handleClick = vi.fn()
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} onRowClick={handleClick} />
+      </MemoryRouter>
+    )
+    await userEvent.click(screen.getByText('홍길동'))
+    expect(handleClick).toHaveBeenCalledWith(mockRows[0])
   })
 })

@@ -1,6 +1,6 @@
 import styles from './RankingTable.module.css'
 
-export default function RankingTable({ rows, highlightPlayerUuid }) {
+export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) {
   const pinnedRow = highlightPlayerUuid
     ? rows.find(r => r.playerUuid === highlightPlayerUuid)
     : null
@@ -20,7 +20,12 @@ export default function RankingTable({ rows, highlightPlayerUuid }) {
           </thead>
           <tbody>
             {rows.map(row => (
-              <tr key={row.playerUuid ?? `${row.rank}-${row.name}`} className={styles.tr}>
+              <tr
+                key={row.playerUuid ?? `${row.rank}-${row.name}`}
+                className={styles.tr}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                style={onRowClick ? { cursor: 'pointer' } : undefined}
+              >
                 <td className={styles.td}>{row.rank}</td>
                 <td className={styles.td}>
                   <img
