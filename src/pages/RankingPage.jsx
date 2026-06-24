@@ -66,33 +66,35 @@ export default function RankingPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate('/')}>← 홈</button>
-        <h1 className={styles.title}>🏆 랭킹</h1>
-      </div>
-
-      {isV2 && (
-        <div className={styles.tabs}>
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className={styles.inner}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate('/')}>← 홈</button>
+          <h1 className={styles.title}>🏆 랭킹</h1>
         </div>
-      )}
 
-      {loading && <p className={styles.message}>불러오는 중...</p>}
-      {error && <p className={styles.message}>{error}</p>}
-      {!loading && !error && (
-        <RankingTable
-          rows={rows}
-          highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
-        />
-      )}
+        {isV2 && (
+          <div className={styles.tabs}>
+            {TABS.map(tab => (
+              <button
+                key={tab.key}
+                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loading && <p className={styles.message}>불러오는 중...</p>}
+        {error && <p className={styles.message}>{error}</p>}
+        {!loading && !error && (
+          <RankingTable
+            rows={rows}
+            highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
+          />
+        )}
+      </div>
     </div>
   )
 }
