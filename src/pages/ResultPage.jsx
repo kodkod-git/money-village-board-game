@@ -54,6 +54,7 @@ export default function ResultPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.wrapper}>
       <button className={styles.backBtn} onClick={() => navigate(-1)}>← 뒤로</button>
       <div className={styles.columns}>
         <div className={styles.leftCol}>
@@ -151,6 +152,7 @@ export default function ResultPage() {
             <div className={styles.cashValue}>{(player.cash ?? 0).toLocaleString()}원</div>
           </section>
         </div>
+      </div>
       </div>
     </div>
   )
