@@ -12,6 +12,7 @@ export default function Home() {
   const [showCodeModal, setShowCodeModal] = useState(false)
 
   const name = searchParams.get('name') ?? ''
+  const affiliation = searchParams.get('affiliation') ?? ''
   const character = searchParams.get('character') ?? ''
   const initialCode = searchParams.get('code') ?? ''
 
@@ -21,7 +22,7 @@ export default function Home() {
 
   function joinRoom(code, isHost) {
     const playerUuid = getPlayerUuid()
-    socket.emit('join-room', { code, name, character, isHost, playerUuid }, ({ ok, error }) => {
+    socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) navigate(`/lobby/${code}`)
       else alert(error)
     })
