@@ -50,6 +50,20 @@ describe('addPlayer', () => {
       addPlayer(code, { name: '철수', character: 'ptsc', isHost: true })
     ).toThrow('player.socketId is required')
   })
+
+  it('affiliation을 포함한 플레이어를 추가한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, affiliation: '경영학과' })
+    const player = getRoom(code).players[0]
+    expect(player.affiliation).toBe('경영학과')
+  })
+
+  it('affiliation 미전달 시 빈 문자열로 저장된다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    const player = getRoom(code).players[0]
+    expect(player.affiliation).toBe('')
+  })
 })
 
 describe('removePlayer', () => {

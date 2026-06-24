@@ -41,13 +41,13 @@ export function getRoom(code) {
   return rooms.get(code) ?? null
 }
 
-export function addPlayer(code, player) {
-  if (!player?.socketId) throw new Error('player.socketId is required')
+export function addPlayer(code, { socketId, name, character, isHost, playerUuid, affiliation = '' }) {
+  if (!socketId) throw new Error('player.socketId is required')
   const room = rooms.get(code)
   if (!room) throw new Error('Room not found')
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
-  room.players.push({ ...player, gameState: defaultGameState() })
-  socketToRoom.set(player.socketId, code)
+  room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, gameState: defaultGameState() })
+  socketToRoom.set(socketId, code)
   return room
 }
 
