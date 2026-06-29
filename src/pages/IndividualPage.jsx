@@ -311,18 +311,30 @@ export default function IndividualPage() {
 
             <button className={styles.assetSection} onClick={openRealEstate}>
               <div className={styles.sectionLabel}>부동산</div>
-              <div className={styles.cellBars}>
+              <div className={styles.imageBars}>
                 {Object.keys(REAL_ESTATE_LABELS).map(key => (
-                  <CellBar key={key} count={gameState.realEstate[key]} color={REAL_ESTATE_COLORS[key]} />
+                  <div key={key} className={styles.imageBarRow}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      i < gameState.realEstate[key]
+                        ? <img key={i} src={`/badges/estate/${ESTATE_IMAGES[key]}.png`} alt="" className={styles.imageBarCell} />
+                        : <div key={i} className={styles.imageBarCellEmpty} />
+                    ))}
+                  </div>
                 ))}
               </div>
             </button>
 
             <button className={styles.assetSection} onClick={openStocks}>
               <div className={styles.sectionLabel}>주식</div>
-              <div className={styles.cellBars}>
+              <div className={styles.imageBars}>
                 {Object.keys(STOCK_LABELS).map(key => (
-                  <CellBar key={key} count={gameState.stocks[key]} color={STOCK_COLORS[key]} />
+                  <div key={key} className={styles.imageBarRow}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      i < gameState.stocks[key]
+                        ? <img key={i} src={`/badges/stock/${STOCK_IMAGES[key]}.png`} alt="" className={styles.imageBarCell} />
+                        : <div key={i} className={styles.imageBarCellEmpty} />
+                    ))}
+                  </div>
                 ))}
               </div>
             </button>
@@ -367,8 +379,6 @@ export default function IndividualPage() {
           items={tempStocks}
           labels={STOCK_LABELS}
           colors={STOCK_COLORS}
-          images={STOCK_IMAGES}
-          imageDir="stock"
           onChange={setTempStocks}
           onConfirm={confirmStocks}
           onClose={() => setActivePopup(null)}
@@ -381,8 +391,6 @@ export default function IndividualPage() {
           items={tempRealEstate}
           labels={REAL_ESTATE_LABELS}
           colors={REAL_ESTATE_COLORS}
-          images={ESTATE_IMAGES}
-          imageDir="estate"
           onChange={setTempRealEstate}
           onConfirm={confirmRealEstate}
           onClose={() => setActivePopup(null)}
@@ -448,10 +456,10 @@ function CashPopup({ value, onConfirm, onClose, isSequential }) {
   )
 }
 
-function QuantityPopup({ title, items, labels, colors, images, imageDir, onChange, onConfirm, onClose, isSequential }) {
+function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onClose, isSequential }) {
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup}>
+      <div className={`${styles.popup} ${styles.popupWide}`}>
         <div className={styles.popupTitle}>{title}</div>
         <div className={styles.quantityList}>
           {Object.keys(labels).map(key => {
@@ -472,18 +480,6 @@ function QuantityPopup({ title, items, labels, colors, images, imageDir, onChang
                   style={{ accentColor: colors?.[key] }}
                   onChange={e => onChange(prev => ({ ...prev, [key]: Number(e.target.value) }))}
                 />
-                {images && imageDir && qty > 0 && (
-                  <div className={styles.qtyImages}>
-                    {Array.from({ length: qty }, (_, i) => (
-                      <img
-                        key={i}
-                        src={`/badges/${imageDir}/${images[key]}.png`}
-                        alt={images[key]}
-                        className={styles.qtyImg}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             )
           })}
@@ -530,9 +526,9 @@ function BadgePopup({ badges, onConfirm, onClose, isSequential }) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup}>
+      <div className={`${styles.popup} ${styles.popupNarrow}`}>
         <div className={styles.popupTitle}>🏅 성공카드</div>
-        <div className={styles.badgeGrid}>
+        <div className={`${styles.badgeGrid} ${styles.badgeGridCentered}`}>
           {BADGE_NAMES.map((name, i) => (
             <button key={name} className={styles.badgeBtn} onClick={() => toggle(i)}>
               <img

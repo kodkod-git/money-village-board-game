@@ -391,8 +391,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 320px;
-  overflow-y: auto;
 }
 
 .quantityItem {
@@ -480,6 +478,51 @@
   width: 28px;
   height: 28px;
   object-fit: contain;
+}
+
+/* ── Popup size variants ── */
+.popupNarrow {
+  max-width: 220px;
+}
+
+.popupWide {
+  max-width: min(92vw, 480px);
+  max-height: 90vh;
+}
+
+/* ── Badge grid centered (popup) ── */
+.badgeGridCentered {
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* ── Image-based asset bars (main view) ── */
+.imageBars {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5px, 0.6vw, 4px);
+}
+
+.imageBarRow {
+  display: flex;
+  gap: clamp(1.5px, 0.45vw, 3px);
+}
+
+.imageBarCell {
+  width: clamp(7px, 2.4vw, 14px);
+  height: clamp(7px, 2.4vw, 14px);
+  object-fit: contain;
+  border-radius: clamp(1.5px, 0.5vw, 3px);
+  flex-shrink: 0;
+}
+
+.imageBarCellEmpty {
+  width: clamp(7px, 2.4vw, 14px);
+  height: clamp(7px, 2.4vw, 14px);
+  border-radius: clamp(1.5px, 0.5vw, 3px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  flex-shrink: 0;
 }
 
 .numpad {
