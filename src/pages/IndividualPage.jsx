@@ -108,7 +108,14 @@ export default function IndividualPage() {
         setGameState(me.gameState ?? defaultGameState())
       })
       .catch(() => navigate(`/lobby/${code}`))
-  }, [code, socket])
+  }, [code, socket, navigate])
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = () => navigate('/team')
+    socket.on('you-were-kicked', handler)
+    return () => socket.off('you-were-kicked', handler)
+  }, [socket, navigate])
 
   function emitState(newState) {
     socket?.emit('update-player-state', { code, gameState: newState })

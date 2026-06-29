@@ -69,7 +69,14 @@ export default function Lobby() {
     const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
     socket.on('game-submitted', handler)
     return () => socket.off('game-submitted', handler)
-  }, [socket])
+  }, [socket, navigate])
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = () => navigate('/team')
+    socket.on('you-were-kicked', handler)
+    return () => socket.off('you-were-kicked', handler)
+  }, [socket, navigate])
 
   function handleLeave() {
     socket?.emit('leave-room')
@@ -126,6 +133,11 @@ export default function Lobby() {
             player={player}
             isOwnPlayer={player?.socketId === socket?.id}
             onNavigate={() => navigate(`/lobby/${code}/individual`)}
+            onKick={
+              isHost && player && player.socketId !== socket?.id
+                ? () => socket?.emit('kick-player', { playerUuid: player.playerUuid })
+                : undefined
+            }
           />
         ))}
       </div>

@@ -78,3 +78,21 @@
   color: #69f0ae;
   font-size: clamp(7px, 1.4vw, 17px);
 }
+
+.kickBtn {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border: none;
+  border-radius: 6px;
+  background: #e53935;
+  color: #fff;
+  font-size: clamp(7px, 1.4vw, 14px);
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.kickBtn:hover {
+  background: #c62828;
+}
