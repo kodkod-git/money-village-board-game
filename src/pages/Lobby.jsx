@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
@@ -34,6 +34,8 @@ export default function Lobby() {
   const navigate = useNavigate()
   const { socket } = useSocketContext()
   const [players, setPlayers] = useState([])
+  const [roomFetched, setRoomFetched] = useState(false)
+  const rejoinAttempted = useRef(false)
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
@@ -48,7 +50,29 @@ export default function Lobby() {
         if (data.prices) setPrices(data.prices)
       })
       .catch(() => {})
+      .finally(() => setRoomFetched(true))
   }, [code])
+
+  useEffect(() => {
+    if (!socket || !roomFetched || rejoinAttempted.current) return
+    if (players.find(p => p.socketId === socket.id)) return
+
+    const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
+    const playerUuid = localStorage.getItem('player_uuid')
+    if (!stored || stored.code !== code) return
+
+    rejoinAttempted.current = true
+    socket.emit('join-room', {
+      code,
+      name: stored.name,
+      affiliation: stored.affiliation,
+      character: stored.character,
+      isHost: stored.isHost ?? false,
+      playerUuid,
+    }, ({ ok }) => {
+      if (!ok) rejoinAttempted.current = false
+    })
+  }, [socket, roomFetched, players, code])
 
   useEffect(() => {
     if (!socket) return
@@ -135,7 +159,7 @@ export default function Lobby() {
             onNavigate={() => navigate(`/lobby/${code}/individual`)}
             onKick={
               isHost && player && player.socketId !== socket?.id
-                ? () => socket?.emit('kick-player', { playerUuid: player.playerUuid })
+                ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
                 : undefined
             }
           />

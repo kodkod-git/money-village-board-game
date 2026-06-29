@@ -135,8 +135,8 @@ io.on('connection', (socket) => {
     if (room) io.to(room.code).emit('room-prices-updated', { prices: room.prices })
   })
 
-  socket.on('kick-player', ({ playerUuid }) => {
-    const result = kickPlayer(socket.id, playerUuid)
+  socket.on('kick-player', ({ targetSocketId: tid }) => {
+    const result = kickPlayer(socket.id, tid)
     if (!result) return
     const { room, targetSocketId } = result
     io.to(targetSocketId).emit('you-were-kicked')
