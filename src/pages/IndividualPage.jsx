@@ -180,8 +180,8 @@ export default function IndividualPage() {
     setTempCash(gameState.cash ?? 0)
     setActivePopup('cash')
   }
-  function confirmCash() {
-    const next = { ...gameState, cash: tempCash }
+  function confirmCash(newCash) {
+    const next = { ...gameState, cash: newCash }
     setGameState(next)
     emitState(next)
     setActivePopup(null)
@@ -293,21 +293,21 @@ export default function IndividualPage() {
         {/* RIGHT: badges, real estate, stocks */}
         <div className={styles.rightCol}>
           <div className={styles.rightGroup}>
-            <div className={styles.section}>
+            <button className={styles.assetSection} onClick={() => setActivePopup('badges')}>
               <div className={styles.sectionLabel}>성공카드</div>
               <div className={styles.badgeGrid}>
                 {BADGE_NAMES.map((name, i) => (
-                  <button key={name} className={styles.badgeBtn} onClick={() => toggleBadge(i)}>
+                  <div key={name} className={styles.badgeBtn}>
                     <img
                       src={`/badges/${name}.png`}
                       alt={name}
                       className={`${styles.badgeImg} ${!gameState.badges[i] ? styles.badgeLocked : ''}`}
                     />
                     {!gameState.badges[i] && <span className={styles.lockIcon}>🔒</span>}
-                  </button>
+                  </div>
                 ))}
               </div>
-            </div>
+            </button>
 
             <button className={styles.assetSection} onClick={openRealEstate}>
               <div className={styles.sectionLabel}>부동산</div>
@@ -356,7 +356,6 @@ export default function IndividualPage() {
       {activePopup === 'cash' && (
         <CashPopup
           value={tempCash}
-          onChange={setTempCash}
           onConfirm={confirmCash}
           onClose={() => setActivePopup(null)}
           isSequential={isSequential}
@@ -405,7 +404,7 @@ export default function IndividualPage() {
   )
 }
 
-function CashPopup({ value, onChange, onConfirm, onClose, isSequential }) {
+function CashPopup({ value, onConfirm, onClose, isSequential }) {
   const [input, setInput] = useState(value > 0 ? String(value) : '')
 
   function press(key) {
@@ -419,8 +418,7 @@ function CashPopup({ value, onChange, onConfirm, onClose, isSequential }) {
   }
 
   function handleConfirm() {
-    onChange(input === '' ? 0 : Number(input))
-    onConfirm()
+    onConfirm(input === '' ? 0 : Number(input))
   }
 
   const display = input === '' ? '0' : Number(input).toLocaleString()
