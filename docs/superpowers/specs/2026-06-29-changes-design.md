@@ -39,6 +39,7 @@
   onKick={() => socket.emit('kick-player', { playerUuid: player.playerUuid })}
   ```
 - `you-were-kicked` 소켓 이벤트 수신 시 `/team`으로 navigate
+- 핸들러는 `Lobby`와 `IndividualPage` 양쪽에 추가 (플레이어가 어느 화면에 있든 추방 처리)
 
 ### 서버 변경
 - `rooms.js`에 `kickPlayer(hostSocketId, targetPlayerUuid)` 함수 추가
@@ -100,7 +101,8 @@
 
 **QuantityPopup (주식/부동산):**
 - 기존 `+`/`-` 버튼 → `<input type="range" min={0} max={10} step={1}>` 슬라이더로 교체
-- 슬라이더 아래 기존 `CellBar` 유지, 슬라이더 값과 실시간 연동
+- 슬라이더 아래 보유량 표시를 ResultPage 방식으로 변경: `/badges/estate/${ESTATE_IMAGES[key]}.png` 또는 `/badges/stock/${STOCK_IMAGES[key]}.png` 이미지를 보유량(qty)만큼 반복 렌더링
+- `ESTATE_IMAGES`, `STOCK_IMAGES` 매핑을 ResultPage에서 IndividualPage로 가져옴 (또는 공용 상수 파일로 분리)
 
 **CashPopup (현금):**
 - 기존 +천/-천/+만/-만 버튼 → 숫자 키패드 UI로 교체
@@ -136,7 +138,7 @@
 | `src/pages/CharacterSelect.jsx` | BackButton 추가, localStorage 프로필 저장 |
 | `src/pages/Home.jsx` | BackButton 추가 |
 | `src/pages/Lobby.jsx` | BackButton 추가, kick 소켓 이벤트, you-were-kicked 핸들러 |
-| `src/pages/IndividualPage.jsx` | BackButton 추가, 순차 팝업, 슬라이더, 키패드, 재연결 로직 |
+| `src/pages/IndividualPage.jsx` | BackButton 추가, 순차 팝업, 슬라이더, 이미지 보유량 표시, 키패드, 재연결 로직, you-were-kicked 핸들러 |
 | `src/pages/RankingPage.jsx` | BackButton 추가, 탭 명칭, myPlayerUuid 항상 전달 |
 | `src/pages/ResultPage.jsx` | BackButton 추가 |
 | `src/components/PlayerSlot.jsx` | onKick prop 추가 |
