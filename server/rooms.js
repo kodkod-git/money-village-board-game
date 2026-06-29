@@ -85,6 +85,20 @@ export function isCharacterTaken(code, character, requestingSocketId) {
   return room.players.some(p => p.character === character && p.socketId !== requestingSocketId)
 }
 
+export function kickPlayer(hostSocketId, targetPlayerUuid) {
+  const code = socketToRoom.get(hostSocketId)
+  if (!code) return null
+  const room = rooms.get(code)
+  if (!room) return null
+  const host = room.players.find(p => p.socketId === hostSocketId)
+  if (!host?.isHost) return null
+  const target = room.players.find(p => p.playerUuid === targetPlayerUuid)
+  if (!target) return null
+  room.players = room.players.filter(p => p.playerUuid !== targetPlayerUuid)
+  socketToRoom.delete(target.socketId)
+  return { room, targetSocketId: target.socketId }
+}
+
 export function updateRoomPrices(socketId, prices) {
   const code = socketToRoom.get(socketId)
   if (!code) return null

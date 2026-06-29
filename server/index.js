@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -133,6 +133,14 @@ io.on('connection', (socket) => {
   socket.on('update-room-prices', ({ code, prices }) => {
     const room = updateRoomPrices(socket.id, prices)
     if (room) io.to(room.code).emit('room-prices-updated', { prices: room.prices })
+  })
+
+  socket.on('kick-player', ({ playerUuid }) => {
+    const result = kickPlayer(socket.id, playerUuid)
+    if (!result) return
+    const { room, targetSocketId } = result
+    io.to(targetSocketId).emit('you-were-kicked')
+    io.to(room.code).emit('room-updated', { players: room.players })
   })
 
   socket.on('leave-room', () => {
