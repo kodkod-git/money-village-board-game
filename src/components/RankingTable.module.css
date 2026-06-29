@@ -62,3 +62,8 @@
 .pinnedName { flex: 1; }
 .pinnedAffiliation { color: #ccc; font-size: 13px; }
 .pinnedAssets { font-size: 15px; }
+
+.pinnedRowEmpty {
+  opacity: 0.75;
+  font-style: italic;
+}

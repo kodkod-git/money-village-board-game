@@ -54,4 +54,28 @@ describe('RankingTable', () => {
     const rows = screen.getAllByText('홍길동')
     expect(rows).toHaveLength(2)
   })
+
+  it('highlightPlayerUuid가 있지만 rows에서 찾을 수 없을 때 플레이스홀더 행을 렌더링한다', () => {
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} highlightPlayerUuid="uuid-unknown" />
+      </MemoryRouter>
+    )
+    const empty = screen.getByTestId('pinned-row-empty')
+    expect(empty).toBeInTheDocument()
+    expect(empty).toHaveTextContent('게임에 참여하러 가기')
+    expect(empty).toHaveTextContent('-위')
+    expect(empty).toHaveTextContent('-원')
+  })
+
+  it('플레이스홀더 행 클릭 시 onRowClick에 isPlaceholder: true 객체를 전달한다', async () => {
+    const handleClick = vi.fn()
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} highlightPlayerUuid="uuid-unknown" onRowClick={handleClick} />
+      </MemoryRouter>
+    )
+    await userEvent.click(screen.getByTestId('pinned-row-empty'))
+    expect(handleClick).toHaveBeenCalledWith({ isPlaceholder: true })
+  })
 })

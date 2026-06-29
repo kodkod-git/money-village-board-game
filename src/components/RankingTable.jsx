@@ -56,6 +56,21 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
           <span className={styles.pinnedAssets}>{pinnedRow.totalAssets.toLocaleString()}원</span>
         </div>
       )}
+
+      {highlightPlayerUuid && !pinnedRow && (
+        <div
+          className={`${styles.pinnedRow} ${styles.pinnedRowEmpty}`}
+          data-testid="pinned-row-empty"
+          onClick={onRowClick ? () => onRowClick({ isPlaceholder: true }) : undefined}
+          style={onRowClick ? { cursor: 'pointer' } : undefined}
+        >
+          <span className={styles.pinnedRank}>-위</span>
+          <span className={`${styles.pinnedName} ${styles.pinnedAffiliation}`}>
+            게임에 참여하러 가기
+          </span>
+          <span className={styles.pinnedAssets}>-원</span>
+        </div>
+      )}
     </div>
   )
 }
