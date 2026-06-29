@@ -448,3 +448,36 @@
 .jobOption:active {
   background: rgba(255,255,255,0.15);
 }
+
+.quantityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.quantityCount {
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 24px;
+  text-align: right;
+}
+
+.qtySlider {
+  width: 100%;
+  margin: 4px 0;
+}
+
+.qtyImages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  min-height: 32px;
+}
+
+.qtyImg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}

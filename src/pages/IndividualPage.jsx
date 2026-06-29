@@ -51,6 +51,16 @@ const STOCK_COLORS = {
   content:       '#9c27b0',
 }
 
+const ESTATE_IMAGES = {
+  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
+  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
+}
+
+const STOCK_IMAGES = {
+  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
+  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
+}
+
 function defaultGameState() {
   return {
     cash: 0,
@@ -327,6 +337,8 @@ export default function IndividualPage() {
           items={tempStocks}
           labels={STOCK_LABELS}
           colors={STOCK_COLORS}
+          images={STOCK_IMAGES}
+          imageDir="stock"
           onChange={setTempStocks}
           onConfirm={confirmStocks}
           onClose={() => setActivePopup(null)}
@@ -339,6 +351,8 @@ export default function IndividualPage() {
           items={tempRealEstate}
           labels={REAL_ESTATE_LABELS}
           colors={REAL_ESTATE_COLORS}
+          images={ESTATE_IMAGES}
+          imageDir="estate"
           onChange={setTempRealEstate}
           onConfirm={confirmRealEstate}
           onClose={() => setActivePopup(null)}
@@ -381,29 +395,51 @@ function CashPopup({ value, onChange, onConfirm, onClose }) {
   )
 }
 
-function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onClose }) {
-  function adjust(key, delta) {
-    onChange(prev => ({ ...prev, [key]: Math.max(0, prev[key] + delta) }))
-  }
+function QuantityPopup({ title, items, labels, colors, images, imageDir, onChange, onConfirm, onClose, isSequential }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.popupTitle}>{title}</div>
         <div className={styles.quantityList}>
-          {Object.keys(labels).map(key => (
-            <div key={key} className={styles.quantityItem}>
-              <span className={styles.quantityLabel}>{labels[key]}</span>
-              <div className={styles.quantityControls}>
-                <button className={styles.qtyBtn} onClick={() => adjust(key, -1)}>−</button>
-                <CellBar count={items[key]} isEditing={true} small={true} color={colors?.[key]} />
-                <button className={styles.qtyBtn} onClick={() => adjust(key, +1)}>+</button>
+          {Object.keys(labels).map(key => {
+            const qty = items[key]
+            return (
+              <div key={key} className={styles.quantityItem}>
+                <div className={styles.quantityRow}>
+                  <span className={styles.quantityLabel}>{labels[key]}</span>
+                  <span className={styles.quantityCount} style={{ color: colors?.[key] }}>{qty}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={qty}
+                  className={styles.qtySlider}
+                  style={{ accentColor: colors?.[key] }}
+                  onChange={e => onChange(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                />
+                {images && imageDir && qty > 0 && (
+                  <div className={styles.qtyImages}>
+                    {Array.from({ length: qty }, (_, i) => (
+                      <img
+                        key={i}
+                        src={`/badges/${imageDir}/${images[key]}.png`}
+                        alt={images[key]}
+                        className={styles.qtyImg}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
-          <button className={styles.confirmBtn} onClick={onConfirm}>확인</button>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={onConfirm}>
+            {isSequential ? '다음' : '확인'}
+          </button>
         </div>
       </div>
     </div>
