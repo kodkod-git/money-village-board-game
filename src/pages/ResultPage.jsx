@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import styles from './ResultPage.module.css'
 
 const JOB_LABELS = {
@@ -54,8 +55,8 @@ export default function ResultPage() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.wrapper}>
-      <button className={styles.backBtn} onClick={() => navigate(-1)}>← 뒤로</button>
       <div className={styles.columns}>
         <div className={styles.leftCol}>
           <img

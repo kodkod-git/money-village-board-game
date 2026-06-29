@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
 
@@ -26,8 +27,8 @@ const REAL_ESTATE_COLORS = {
   nuri:   '#26a69a',
   dami:   '#ffa726',
   maru:   '#ff7043',
-  chorong:'#ab47bc',
-  hani:   '#7e57c2',
+  chorong:'#e91e63',
+  hani:   '#ffca28',
 }
 
 const JOB_LABELS = {
@@ -47,7 +48,17 @@ const STOCK_COLORS = {
   industrial:    '#78909c',
   auto:          '#4caf50',
   bio:           '#00bcd4',
-  content:       '#9c27b0',
+  content:       '#ef5350',
+}
+
+const ESTATE_IMAGES = {
+  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
+  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
+}
+
+const STOCK_IMAGES = {
+  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
+  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
 }
 
 function defaultGameState() {
@@ -95,6 +106,7 @@ export default function IndividualPage() {
   const [tempCash, setTempCash] = useState(0)
   const [tempStocks, setTempStocks] = useState(null)
   const [tempRealEstate, setTempRealEstate] = useState(null)
+  const [isSequential, setIsSequential] = useState(false)
 
   useEffect(() => {
     if (!socket) return
@@ -102,12 +114,55 @@ export default function IndividualPage() {
       .then(r => r.json())
       .then(data => {
         const me = data.players?.find(p => p.socketId === socket.id)
-        if (!me) { navigate(`/lobby/${code}`); return }
-        setPlayer(me)
-        setGameState(me.gameState ?? defaultGameState())
+        if (me) {
+          setPlayer(me)
+          const gs = me.gameState ?? defaultGameState()
+          setGameState(gs)
+          if (gs.job === null) {
+            setIsSequential(true)
+            setActivePopup('job')
+          }
+          return
+        }
+
+        const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
+        const playerUuid = localStorage.getItem('player_uuid')
+        if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
+
+        socket.emit('join-room', {
+          code,
+          name: stored.name,
+          affiliation: stored.affiliation,
+          character: stored.character,
+          isHost: false,
+          playerUuid,
+        }, ({ ok }) => {
+          if (!ok) { navigate(`/lobby/${code}`); return }
+          fetch(`/api/rooms/${code}`)
+            .then(r => r.json())
+            .then(data2 => {
+              const me2 = data2.players?.find(p => p.socketId === socket.id)
+              if (!me2) { navigate(`/lobby/${code}`); return }
+              setPlayer(me2)
+              const gs = me2.gameState ?? defaultGameState()
+              setGameState(gs)
+              if (gs.job === null) {
+                setIsSequential(true)
+                setActivePopup('job')
+              }
+            })
+            .catch(() => navigate(`/lobby/${code}`))
+        })
       })
       .catch(() => navigate(`/lobby/${code}`))
-  }, [code, socket])
+  }, [code, socket, navigate])
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = () => navigate('/team')
+    socket.on('you-were-kicked', handler)
+    return () => socket.off('you-were-kicked', handler)
+  }, [socket, navigate])
 
   function emitState(newState) {
     socket?.emit('update-player-state', { code, gameState: newState })
@@ -125,11 +180,12 @@ export default function IndividualPage() {
     setTempCash(gameState.cash ?? 0)
     setActivePopup('cash')
   }
-  function confirmCash() {
-    const next = { ...gameState, cash: tempCash }
+  function confirmCash(newCash) {
+    const next = { ...gameState, cash: newCash }
     setGameState(next)
     emitState(next)
     setActivePopup(null)
+    if (isSequential) setIsSequential(false)
   }
 
   function openStocks() {
@@ -140,7 +196,12 @@ export default function IndividualPage() {
     const next = { ...gameState, stocks: tempStocks, stocksVisited: true }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setTempCash(next.cash ?? 0)
+      setActivePopup('cash')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function openRealEstate() {
@@ -151,14 +212,35 @@ export default function IndividualPage() {
     const next = { ...gameState, realEstate: tempRealEstate, realEstateVisited: true }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setTempStocks({ ...next.stocks })
+      setActivePopup('stocks')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function selectJob(key) {
     const next = { ...gameState, job: key }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setActivePopup('badges')
+    } else {
+      setActivePopup(null)
+    }
+  }
+
+  function confirmBadges(newBadges) {
+    const next = { ...gameState, badges: newBadges }
+    setGameState(next)
+    emitState(next)
+    if (isSequential) {
+      setTempRealEstate({ ...next.realEstate })
+      setActivePopup('realEstate')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function handleComplete() {
@@ -184,7 +266,7 @@ export default function IndividualPage() {
 
   return (
     <div className={styles.page}>
-      <button className={styles.backBtn} onClick={() => navigate(`/lobby/${code}`)}>← 뒤로</button>
+      <BackButton />
 
       <div className={styles.main}>
         {/* LEFT: name, job */}
@@ -211,36 +293,48 @@ export default function IndividualPage() {
         {/* RIGHT: badges, real estate, stocks */}
         <div className={styles.rightCol}>
           <div className={styles.rightGroup}>
-            <div className={styles.section}>
+            <button className={styles.assetSection} onClick={() => setActivePopup('badges')}>
               <div className={styles.sectionLabel}>성공카드</div>
               <div className={styles.badgeGrid}>
                 {BADGE_NAMES.map((name, i) => (
-                  <button key={name} className={styles.badgeBtn} onClick={() => toggleBadge(i)}>
+                  <div key={name} className={styles.badgeBtn}>
                     <img
                       src={`/badges/${name}.png`}
                       alt={name}
                       className={`${styles.badgeImg} ${!gameState.badges[i] ? styles.badgeLocked : ''}`}
                     />
                     {!gameState.badges[i] && <span className={styles.lockIcon}>🔒</span>}
-                  </button>
+                  </div>
                 ))}
               </div>
-            </div>
+            </button>
 
             <button className={styles.assetSection} onClick={openRealEstate}>
               <div className={styles.sectionLabel}>부동산</div>
-              <div className={styles.cellBars}>
+              <div className={styles.imageBars}>
                 {Object.keys(REAL_ESTATE_LABELS).map(key => (
-                  <CellBar key={key} count={gameState.realEstate[key]} color={REAL_ESTATE_COLORS[key]} />
+                  <div key={key} className={styles.imageBarRow}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      i < gameState.realEstate[key]
+                        ? <img key={i} src={`/badges/estate/${ESTATE_IMAGES[key]}.png`} alt="" className={styles.imageBarCell} />
+                        : <div key={i} className={styles.imageBarCellEmpty} />
+                    ))}
+                  </div>
                 ))}
               </div>
             </button>
 
             <button className={styles.assetSection} onClick={openStocks}>
               <div className={styles.sectionLabel}>주식</div>
-              <div className={styles.cellBars}>
+              <div className={styles.imageBars}>
                 {Object.keys(STOCK_LABELS).map(key => (
-                  <CellBar key={key} count={gameState.stocks[key]} color={STOCK_COLORS[key]} />
+                  <div key={key} className={styles.imageBarRow}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      i < gameState.stocks[key]
+                        ? <img key={i} src={`/badges/stock/${STOCK_IMAGES[key]}.png`} alt="" className={styles.imageBarCell} />
+                        : <div key={i} className={styles.imageBarCellEmpty} />
+                    ))}
+                  </div>
                 ))}
               </div>
             </button>
@@ -274,9 +368,9 @@ export default function IndividualPage() {
       {activePopup === 'cash' && (
         <CashPopup
           value={tempCash}
-          onChange={setTempCash}
           onConfirm={confirmCash}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'stocks' && tempStocks && (
@@ -288,6 +382,7 @@ export default function IndividualPage() {
           onChange={setTempStocks}
           onConfirm={confirmStocks}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'realEstate' && tempRealEstate && (
@@ -299,59 +394,101 @@ export default function IndividualPage() {
           onChange={setTempRealEstate}
           onConfirm={confirmRealEstate}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'job' && (
         <JobPopup onSelect={selectJob} onClose={() => setActivePopup(null)} />
       )}
+      {activePopup === 'badges' && (
+        <BadgePopup
+          badges={gameState.badges}
+          onConfirm={confirmBadges}
+          onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
+        />
+      )}
     </div>
   )
 }
 
-function CashPopup({ value, onChange, onConfirm, onClose }) {
+function CashPopup({ value, onConfirm, onClose, isSequential }) {
+  const [input, setInput] = useState(value > 0 ? String(value) : '')
+
+  function press(key) {
+    if (key === '←') {
+      setInput(prev => prev.slice(0, -1))
+    } else if (key === '00') {
+      setInput(prev => (prev === '' ? '' : prev + '00'))
+    } else {
+      setInput(prev => (prev === '0' ? key : prev + key))
+    }
+  }
+
+  function handleConfirm() {
+    onConfirm(input === '' ? 0 : Number(input))
+  }
+
+  const display = input === '' ? '0' : Number(input).toLocaleString()
+
+  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '←']
+
   return (
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.popupTitle}>💵 현금</div>
-        <div className={styles.cashControls}>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 10000))}>−만</button>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 1000))}>−천</button>
-          <span className={styles.cashDisplay}>{value.toLocaleString()}원</span>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 1000)}>+천</button>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 10000)}>+만</button>
+        <div className={styles.cashDisplay}>{display}원</div>
+        <div className={styles.numpad}>
+          {KEYS.map(k => (
+            <button key={k} className={styles.numpadKey} onClick={() => press(k)}>
+              {k}
+            </button>
+          ))}
         </div>
         <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
-          <button className={styles.confirmBtn} onClick={onConfirm}>확인</button>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={handleConfirm}>
+            {isSequential ? '완료' : '확인'}
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onClose }) {
-  function adjust(key, delta) {
-    onChange(prev => ({ ...prev, [key]: Math.max(0, prev[key] + delta) }))
-  }
+function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onClose, isSequential }) {
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup}>
+      <div className={`${styles.popup} ${styles.popupWide}`}>
         <div className={styles.popupTitle}>{title}</div>
         <div className={styles.quantityList}>
-          {Object.keys(labels).map(key => (
-            <div key={key} className={styles.quantityItem}>
-              <span className={styles.quantityLabel}>{labels[key]}</span>
-              <div className={styles.quantityControls}>
-                <button className={styles.qtyBtn} onClick={() => adjust(key, -1)}>−</button>
-                <CellBar count={items[key]} isEditing={true} small={true} color={colors?.[key]} />
-                <button className={styles.qtyBtn} onClick={() => adjust(key, +1)}>+</button>
+          {Object.keys(labels).map(key => {
+            const qty = items[key]
+            return (
+              <div key={key} className={styles.quantityItem}>
+                <div className={styles.quantityRow}>
+                  <span className={styles.quantityLabel}>{labels[key]}</span>
+                  <span className={styles.quantityCount} style={{ color: colors?.[key] }}>{qty}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={qty}
+                  className={styles.qtySlider}
+                  style={{ color: colors?.[key] ?? '#1e88e5', '--slider-pct': `${qty * 10}%` }}
+                  onChange={e => onChange(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                />
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
-          <button className={styles.confirmBtn} onClick={onConfirm}>확인</button>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={onConfirm}>
+            {isSequential ? '다음' : '확인'}
+          </button>
         </div>
       </div>
     </div>
@@ -371,6 +508,44 @@ function JobPopup({ onSelect, onClose }) {
           ))}
         </div>
         <button className={styles.cancelBtn} onClick={onClose}>취소</button>
+      </div>
+    </div>
+  )
+}
+
+function BadgePopup({ badges, onConfirm, onClose, isSequential }) {
+  const [tempBadges, setTempBadges] = useState([...badges])
+
+  function toggle(i) {
+    setTempBadges(prev => {
+      const next = [...prev]
+      next[i] = !next[i]
+      return next
+    })
+  }
+
+  return (
+    <div className={styles.overlay}>
+      <div className={`${styles.popup} ${styles.popupNarrow}`}>
+        <div className={styles.popupTitle}>🏅 성공카드</div>
+        <div className={`${styles.badgeGrid} ${styles.badgeGridCentered}`}>
+          {BADGE_NAMES.map((name, i) => (
+            <button key={name} className={styles.badgeBtn} onClick={() => toggle(i)}>
+              <img
+                src={`/badges/${name}.png`}
+                alt={name}
+                className={`${styles.badgeImg} ${!tempBadges[i] ? styles.badgeLocked : ''}`}
+              />
+              {!tempBadges[i] && <span className={styles.lockIcon}>🔒</span>}
+            </button>
+          ))}
+        </div>
+        <div className={styles.popupActions}>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={() => onConfirm(tempBadges)}>
+            {isSequential ? '다음' : '확인'}
+          </button>
+        </div>
       </div>
     </div>
   )

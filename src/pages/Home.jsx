@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import CodeModal from '../components/CodeModal'
 import useSocket from '../hooks/useSocket'
 import { getPlayerUuid } from '../utils/playerUuid'
@@ -23,8 +24,10 @@ export default function Home() {
   function joinRoom(code, isHost) {
     const playerUuid = getPlayerUuid()
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
-      if (ok) navigate(`/lobby/${code}`)
-      else alert(error)
+      if (ok) {
+        localStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost }))
+        navigate(`/lobby/${code}`)
+      } else alert(error)
     })
   }
 
@@ -41,6 +44,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <h1 className={styles.title}>💰 Money Village</h1>
       <p className={styles.subtitle}>보드게임 팀 구성 시스템</p>
       {character && (

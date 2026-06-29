@@ -4,6 +4,7 @@ const MAX_PLAYERS = 4
 
 const rooms = new Map()
 const socketToRoom = new Map()
+const roomDeletionTimers = new Map()
 
 function generateCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase()
@@ -45,6 +46,22 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
   if (!socketId) throw new Error('player.socketId is required')
   const room = rooms.get(code)
   if (!room) throw new Error('Room not found')
+
+  // Cancel any pending room deletion (reconnect within grace period)
+  if (roomDeletionTimers.has(code)) {
+    clearTimeout(roomDeletionTimers.get(code))
+    roomDeletionTimers.delete(code)
+  }
+
+  // Reconnect: same playerUuid already in room → just update socketId, preserve gameState
+  const existing = playerUuid ? room.players.find(p => p.playerUuid === playerUuid) : null
+  if (existing) {
+    socketToRoom.delete(existing.socketId)
+    existing.socketId = socketId
+    socketToRoom.set(socketId, code)
+    return room
+  }
+
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
   room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, gameState: defaultGameState() })
   socketToRoom.set(socketId, code)
@@ -62,7 +79,12 @@ export function removePlayer(socketId) {
   room.players = room.players.filter(p => p.socketId !== socketId)
   socketToRoom.delete(socketId)
   if (room.players.length === 0) {
-    rooms.delete(code)
+    // Keep room alive for 30 s so a refreshing player can reconnect
+    const timer = setTimeout(() => {
+      if (rooms.get(code)?.players.length === 0) rooms.delete(code)
+      roomDeletionTimers.delete(code)
+    }, 30000)
+    roomDeletionTimers.set(code, timer)
     return null
   }
   return room
@@ -85,6 +107,20 @@ export function isCharacterTaken(code, character, requestingSocketId) {
   return room.players.some(p => p.character === character && p.socketId !== requestingSocketId)
 }
 
+export function kickPlayer(hostSocketId, targetSocketId) {
+  const code = socketToRoom.get(hostSocketId)
+  if (!code) return null
+  const room = rooms.get(code)
+  if (!room) return null
+  const host = room.players.find(p => p.socketId === hostSocketId)
+  if (!host?.isHost) return null
+  const target = room.players.find(p => p.socketId === targetSocketId)
+  if (!target) return null
+  room.players = room.players.filter(p => p.socketId !== targetSocketId)
+  socketToRoom.delete(targetSocketId)
+  return { room, targetSocketId }
+}
+
 export function updateRoomPrices(socketId, prices) {
   const code = socketToRoom.get(socketId)
   if (!code) return null
@@ -95,6 +131,8 @@ export function updateRoomPrices(socketId, prices) {
 }
 
 export function clearRooms() {
+  for (const timer of roomDeletionTimers.values()) clearTimeout(timer)
+  roomDeletionTimers.clear()
   rooms.clear()
   socketToRoom.clear()
 }

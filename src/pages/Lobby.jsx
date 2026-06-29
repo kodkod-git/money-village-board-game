@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -33,6 +34,8 @@ export default function Lobby() {
   const navigate = useNavigate()
   const { socket } = useSocketContext()
   const [players, setPlayers] = useState([])
+  const [roomFetched, setRoomFetched] = useState(false)
+  const rejoinAttempted = useRef(false)
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
@@ -47,7 +50,29 @@ export default function Lobby() {
         if (data.prices) setPrices(data.prices)
       })
       .catch(() => {})
+      .finally(() => setRoomFetched(true))
   }, [code])
+
+  useEffect(() => {
+    if (!socket || !roomFetched || rejoinAttempted.current) return
+    if (players.find(p => p.socketId === socket.id)) return
+
+    const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
+    const playerUuid = localStorage.getItem('player_uuid')
+    if (!stored || stored.code !== code) return
+
+    rejoinAttempted.current = true
+    socket.emit('join-room', {
+      code,
+      name: stored.name,
+      affiliation: stored.affiliation,
+      character: stored.character,
+      isHost: stored.isHost ?? false,
+      playerUuid,
+    }, ({ ok }) => {
+      if (!ok) rejoinAttempted.current = false
+    })
+  }, [socket, roomFetched, players, code])
 
   useEffect(() => {
     if (!socket) return
@@ -68,7 +93,14 @@ export default function Lobby() {
     const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
     socket.on('game-submitted', handler)
     return () => socket.off('game-submitted', handler)
-  }, [socket])
+  }, [socket, navigate])
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = () => navigate('/team')
+    socket.on('you-were-kicked', handler)
+    return () => socket.off('you-were-kicked', handler)
+  }, [socket, navigate])
 
   function handleLeave() {
     socket?.emit('leave-room')
@@ -100,18 +132,18 @@ export default function Lobby() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.topBar}>
-        <div className={styles.codeBox}>
-          팀 코드: <span className={styles.code}>{code}</span>
-          <button
-            className={styles.copyBtn}
-            onClick={() => navigator.clipboard.writeText(code)}
-            aria-label="코드 복사"
-          >📋</button>
-        </div>
         <div className={styles.actions}>
+          <div className={styles.codeBox}>
+            팀 코드: <span className={styles.code}>{code}</span>
+            <button
+              className={styles.copyBtn}
+              onClick={() => navigator.clipboard.writeText(code)}
+              aria-label="코드 복사"
+            >📋</button>
+          </div>
           <button className={styles.qrBtn} onClick={() => setShowQR(true)}>📱 QR</button>
-          <button className={styles.leaveBtn} onClick={handleLeave}>팀 나가기</button>
         </div>
       </div>
 
@@ -124,6 +156,11 @@ export default function Lobby() {
             player={player}
             isOwnPlayer={player?.socketId === socket?.id}
             onNavigate={() => navigate(`/lobby/${code}/individual`)}
+            onKick={
+              isHost && player && player.socketId !== socket?.id
+                ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
+                : undefined
+            }
           />
         ))}
       </div>

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi } from 'vitest'
 import PlayerSlot from './PlayerSlot'
 
 describe('PlayerSlot', () => {
@@ -24,5 +25,23 @@ describe('PlayerSlot', () => {
   it('입력완료 시 입력완료 뱃지를 표시한다', () => {
     render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false, gameState: { isCompleted: true } }} />)
     expect(screen.getByText('입력완료')).toBeInTheDocument()
+  })
+
+  it('onKick이 전달되면 이름 옆에 X 버튼을 표시한다', () => {
+    const onKick = vi.fn()
+    render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} onKick={onKick} />)
+    expect(screen.getByRole('button', { name: '추방' })).toBeInTheDocument()
+  })
+
+  it('onKick이 없으면 X 버튼을 표시하지 않는다', () => {
+    render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} />)
+    expect(screen.queryByRole('button', { name: '추방' })).toBeNull()
+  })
+
+  it('X 버튼 클릭 시 onKick을 호출한다', async () => {
+    const onKick = vi.fn()
+    render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} onKick={onKick} />)
+    await userEvent.click(screen.getByRole('button', { name: '추방' }))
+    expect(onKick).toHaveBeenCalledOnce()
   })
 })

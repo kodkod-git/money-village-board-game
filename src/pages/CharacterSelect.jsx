@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import CharacterCard from '../components/CharacterCard'
 import { CHARACTERS } from '../constants/characters'
 import styles from './CharacterSelect.module.css'
@@ -26,6 +27,7 @@ export default function CharacterSelect() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.header}>
         <p className={styles.title}>캐릭터를 선택하세요</p>
         <p className={styles.subtitle}>{name} 님, 나를 대표할 캐릭터를 골라주세요</p>

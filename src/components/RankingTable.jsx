@@ -21,7 +21,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
           <tbody>
             {rows.map(row => (
               <tr
-                key={row.playerUuid ?? `${row.rank}-${row.name}`}
+                key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
                 className={styles.tr}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 style={onRowClick ? { cursor: 'pointer' } : undefined}
@@ -54,6 +54,17 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
           <span className={styles.pinnedName}>{pinnedRow.name}</span>
           <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation}</span>
           <span className={styles.pinnedAssets}>{pinnedRow.totalAssets.toLocaleString()}원</span>
+        </div>
+      )}
+
+      {highlightPlayerUuid && !pinnedRow && (
+        <div
+          className={`${styles.pinnedRow} ${styles.pinnedRowEmpty}`}
+          data-testid="pinned-row-empty"
+          onClick={onRowClick ? () => onRowClick({ isPlaceholder: true }) : undefined}
+          style={onRowClick ? { cursor: 'pointer' } : undefined}
+        >
+          <span className={styles.pinnedRowEmptyLabel}>게임에 참여하러 가기</span>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import styles from './PlayerSlot.module.css'
 
-export default function PlayerSlot({ player, isOwnPlayer, onNavigate }) {
+export default function PlayerSlot({ player, isOwnPlayer, onNavigate, onKick }) {
   if (!player) {
     return (
       <div className={styles.slot}>
@@ -23,6 +23,15 @@ export default function PlayerSlot({ player, isOwnPlayer, onNavigate }) {
         <span className={styles.name}>{player.name}</span>
         {player.isHost && <span className={styles.host}>방장 ★</span>}
         {player.gameState?.isCompleted && <span className={styles.completed}>입력완료</span>}
+        {onKick && (
+          <button
+            className={styles.kickBtn}
+            onClick={e => { e.stopPropagation(); onKick() }}
+            aria-label="추방"
+          >
+            ✕
+          </button>
+        )}
       </div>
     </div>
   )

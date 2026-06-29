@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import RankingTable from './RankingTable'
 
@@ -42,5 +43,39 @@ describe('RankingTable', () => {
     )
     await userEvent.click(screen.getByText('홍길동'))
     expect(handleClick).toHaveBeenCalledWith(mockRows[0])
+  })
+
+  it('같은 playerUuid가 여러 행에 있을 때 각 행을 독립적으로 렌더링한다', () => {
+    const duplicateRows = [
+      { rank: 1, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 200000, playerUuid: 'uuid-1', sessionId: 'session-A' },
+      { rank: 2, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1', sessionId: 'session-B' },
+    ]
+    render(<MemoryRouter><RankingTable rows={duplicateRows} /></MemoryRouter>)
+    const rows = screen.getAllByText('홍길동')
+    expect(rows).toHaveLength(2)
+  })
+
+  it('highlightPlayerUuid가 있지만 rows에서 찾을 수 없을 때 플레이스홀더 행을 렌더링한다', () => {
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} highlightPlayerUuid="uuid-unknown" />
+      </MemoryRouter>
+    )
+    const empty = screen.getByTestId('pinned-row-empty')
+    expect(empty).toBeInTheDocument()
+    expect(empty).toHaveTextContent('게임에 참여하러 가기')
+    expect(empty).toHaveTextContent('-위')
+    expect(empty).toHaveTextContent('-원')
+  })
+
+  it('플레이스홀더 행 클릭 시 onRowClick에 isPlaceholder: true 객체를 전달한다', async () => {
+    const handleClick = vi.fn()
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} highlightPlayerUuid="uuid-unknown" onRowClick={handleClick} />
+      </MemoryRouter>
+    )
+    await userEvent.click(screen.getByTestId('pinned-row-empty'))
+    expect(handleClick).toHaveBeenCalledWith({ isPlaceholder: true })
   })
 })

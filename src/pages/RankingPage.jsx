@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import RankingTable from '../components/RankingTable'
 import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
 
 const TABS = [
-  { key: 'global', label: '글로벌' },
+  { key: 'global', label: '전체' },
   { key: 'affiliation', label: '소속' },
-  { key: 'team', label: '팀 내' },
+  { key: 'team', label: '팀' },
 ]
 
 export default function RankingPage() {
@@ -66,9 +67,9 @@ export default function RankingPage() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.inner}>
         <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate('/')}>← 홈</button>
           <h1 className={styles.title}>🏆 랭킹</h1>
         </div>
 
@@ -91,8 +92,12 @@ export default function RankingPage() {
         {!loading && !error && (
           <RankingTable
             rows={rows}
-            highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
+            highlightPlayerUuid={myPlayerUuid}
             onRowClick={row => {
+              if (!row || row.isPlaceholder) {
+                navigate('/join')
+                return
+              }
               if (row.sessionId && row.playerUuid) {
                 navigate(`/result/${row.sessionId}/player/${row.playerUuid}`)
               }

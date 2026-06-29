@@ -175,11 +175,11 @@
 }
 
 .cashDisplay {
-  font-size: 18px;
-  font-weight: bold;
-  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
   text-align: center;
-  min-width: 90px;
+  padding: 8px 0;
+  letter-spacing: 0.02em;
 }
 
 /* ── Badges ── */
@@ -391,8 +391,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 320px;
-  overflow-y: auto;
 }
 
 .quantityItem {
@@ -447,4 +445,152 @@
 
 .jobOption:active {
   background: rgba(255,255,255,0.15);
+}
+
+.quantityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.quantityCount {
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 24px;
+  text-align: right;
+}
+
+.qtySlider {
+  width: 100%;
+  margin: 4px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+  outline: none;
+  cursor: pointer;
+}
+
+.qtySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+  margin-top: -6px;
+}
+
+.qtySlider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    currentColor var(--slider-pct, 0%),
+    rgba(255,255,255,0.15) var(--slider-pct, 0%)
+  );
+}
+
+.qtySlider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+}
+
+.qtySlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: currentColor;
+  cursor: pointer;
+}
+
+.qtySlider::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.qtyImages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  min-height: 32px;
+}
+
+.qtyImg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* ── Popup size variants ── */
+.popupNarrow {
+  max-width: 220px;
+}
+
+.popupWide {
+  max-width: min(92vw, 480px);
+  max-height: 90vh;
+}
+
+/* ── Badge grid centered (popup) ── */
+.badgeGridCentered {
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* ── Image-based asset bars (main view) ── */
+.imageBars {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5px, 0.6vw, 4px);
+}
+
+.imageBarRow {
+  display: flex;
+  gap: clamp(1.5px, 0.45vw, 3px);
+}
+
+.imageBarCell {
+  width: clamp(7px, 2.4vw, 14px);
+  height: clamp(7px, 2.4vw, 14px);
+  object-fit: contain;
+  border-radius: clamp(1.5px, 0.5vw, 3px);
+  flex-shrink: 0;
+}
+
+.imageBarCellEmpty {
+  width: clamp(7px, 2.4vw, 14px);
+  height: clamp(7px, 2.4vw, 14px);
+  border-radius: clamp(1.5px, 0.5vw, 3px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  flex-shrink: 0;
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.numpadKey {
+  padding: 14px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.numpadKey:active {
+  background: #e0e0e0;
 }
