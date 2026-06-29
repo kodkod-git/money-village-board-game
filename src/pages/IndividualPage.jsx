@@ -96,6 +96,7 @@ export default function IndividualPage() {
   const [tempCash, setTempCash] = useState(0)
   const [tempStocks, setTempStocks] = useState(null)
   const [tempRealEstate, setTempRealEstate] = useState(null)
+  const [isSequential, setIsSequential] = useState(false)
 
   useEffect(() => {
     if (!socket) return
@@ -105,7 +106,12 @@ export default function IndividualPage() {
         const me = data.players?.find(p => p.socketId === socket.id)
         if (!me) { navigate(`/lobby/${code}`); return }
         setPlayer(me)
-        setGameState(me.gameState ?? defaultGameState())
+        const gs = me.gameState ?? defaultGameState()
+        setGameState(gs)
+        if (gs.job === null) {
+          setIsSequential(true)
+          setActivePopup('job')
+        }
       })
       .catch(() => navigate(`/lobby/${code}`))
   }, [code, socket, navigate])
@@ -138,6 +144,7 @@ export default function IndividualPage() {
     setGameState(next)
     emitState(next)
     setActivePopup(null)
+    if (isSequential) setIsSequential(false)
   }
 
   function openStocks() {
@@ -148,7 +155,12 @@ export default function IndividualPage() {
     const next = { ...gameState, stocks: tempStocks, stocksVisited: true }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setTempCash(next.cash ?? 0)
+      setActivePopup('cash')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function openRealEstate() {
@@ -159,14 +171,35 @@ export default function IndividualPage() {
     const next = { ...gameState, realEstate: tempRealEstate, realEstateVisited: true }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setTempStocks({ ...next.stocks })
+      setActivePopup('stocks')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function selectJob(key) {
     const next = { ...gameState, job: key }
     setGameState(next)
     emitState(next)
-    setActivePopup(null)
+    if (isSequential) {
+      setActivePopup('badges')
+    } else {
+      setActivePopup(null)
+    }
+  }
+
+  function confirmBadges(newBadges) {
+    const next = { ...gameState, badges: newBadges }
+    setGameState(next)
+    emitState(next)
+    if (isSequential) {
+      setTempRealEstate({ ...next.realEstate })
+      setActivePopup('realEstate')
+    } else {
+      setActivePopup(null)
+    }
   }
 
   function handleComplete() {
@@ -285,6 +318,7 @@ export default function IndividualPage() {
           onChange={setTempCash}
           onConfirm={confirmCash}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'stocks' && tempStocks && (
@@ -296,6 +330,7 @@ export default function IndividualPage() {
           onChange={setTempStocks}
           onConfirm={confirmStocks}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'realEstate' && tempRealEstate && (
@@ -307,10 +342,19 @@ export default function IndividualPage() {
           onChange={setTempRealEstate}
           onConfirm={confirmRealEstate}
           onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
         />
       )}
       {activePopup === 'job' && (
         <JobPopup onSelect={selectJob} onClose={() => setActivePopup(null)} />
+      )}
+      {activePopup === 'badges' && (
+        <BadgePopup
+          badges={gameState.badges}
+          onConfirm={confirmBadges}
+          onClose={() => setActivePopup(null)}
+          isSequential={isSequential}
+        />
       )}
     </div>
   )
@@ -379,6 +423,44 @@ function JobPopup({ onSelect, onClose }) {
           ))}
         </div>
         <button className={styles.cancelBtn} onClick={onClose}>취소</button>
+      </div>
+    </div>
+  )
+}
+
+function BadgePopup({ badges, onConfirm, onClose, isSequential }) {
+  const [tempBadges, setTempBadges] = useState([...badges])
+
+  function toggle(i) {
+    setTempBadges(prev => {
+      const next = [...prev]
+      next[i] = !next[i]
+      return next
+    })
+  }
+
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.popup}>
+        <div className={styles.popupTitle}>🏅 성공카드</div>
+        <div className={styles.badgeGrid}>
+          {BADGE_NAMES.map((name, i) => (
+            <button key={name} className={styles.badgeBtn} onClick={() => toggle(i)}>
+              <img
+                src={`/badges/${name}.png`}
+                alt={name}
+                className={`${styles.badgeImg} ${!tempBadges[i] ? styles.badgeLocked : ''}`}
+              />
+              {!tempBadges[i] && <span className={styles.lockIcon}>🔒</span>}
+            </button>
+          ))}
+        </div>
+        <div className={styles.popupActions}>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={() => onConfirm(tempBadges)}>
+            {isSequential ? '다음' : '확인'}
+          </button>
+        </div>
       </div>
     </div>
   )
