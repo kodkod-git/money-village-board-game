@@ -6,9 +6,9 @@ import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
 
 const TABS = [
-  { key: 'global', label: '글로벌' },
+  { key: 'global', label: '전체' },
   { key: 'affiliation', label: '소속' },
-  { key: 'team', label: '팀 내' },
+  { key: 'team', label: '팀' },
 ]
 
 export default function RankingPage() {

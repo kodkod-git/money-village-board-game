@@ -21,7 +21,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
           <tbody>
             {rows.map(row => (
               <tr
-                key={row.playerUuid ?? `${row.rank}-${row.name}`}
+                key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
                 className={styles.tr}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 style={onRowClick ? { cursor: 'pointer' } : undefined}

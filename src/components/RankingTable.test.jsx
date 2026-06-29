@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import RankingTable from './RankingTable'
 
@@ -42,5 +43,15 @@ describe('RankingTable', () => {
     )
     await userEvent.click(screen.getByText('홍길동'))
     expect(handleClick).toHaveBeenCalledWith(mockRows[0])
+  })
+
+  it('같은 playerUuid가 여러 행에 있을 때 각 행을 독립적으로 렌더링한다', () => {
+    const duplicateRows = [
+      { rank: 1, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 200000, playerUuid: 'uuid-1', sessionId: 'session-A' },
+      { rank: 2, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1', sessionId: 'session-B' },
+    ]
+    render(<MemoryRouter><RankingTable rows={duplicateRows} /></MemoryRouter>)
+    const rows = screen.getAllByText('홍길동')
+    expect(rows).toHaveLength(2)
   })
 })
