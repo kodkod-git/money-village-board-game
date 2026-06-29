@@ -53,15 +53,6 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
     roomDeletionTimers.delete(code)
   }
 
-  // Reconnect: same playerUuid already in room → just update socketId, preserve gameState
-  const existing = playerUuid ? room.players.find(p => p.playerUuid === playerUuid) : null
-  if (existing) {
-    socketToRoom.delete(existing.socketId)
-    existing.socketId = socketId
-    socketToRoom.set(socketId, code)
-    return room
-  }
-
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
   room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, gameState: defaultGameState() })
   socketToRoom.set(socketId, code)
