@@ -374,21 +374,45 @@ export default function IndividualPage() {
   )
 }
 
-function CashPopup({ value, onChange, onConfirm, onClose }) {
+function CashPopup({ value, onChange, onConfirm, onClose, isSequential }) {
+  const [input, setInput] = useState(value > 0 ? String(value) : '')
+
+  function press(key) {
+    if (key === '←') {
+      setInput(prev => prev.slice(0, -1))
+    } else if (key === '00') {
+      setInput(prev => (prev === '' ? '' : prev + '00'))
+    } else {
+      setInput(prev => (prev === '0' ? key : prev + key))
+    }
+  }
+
+  function handleConfirm() {
+    onChange(input === '' ? 0 : Number(input))
+    onConfirm()
+  }
+
+  const display = input === '' ? '0' : Number(input).toLocaleString()
+
+  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '←']
+
   return (
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.popupTitle}>💵 현금</div>
-        <div className={styles.cashControls}>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 10000))}>−만</button>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => Math.max(0, v - 1000))}>−천</button>
-          <span className={styles.cashDisplay}>{value.toLocaleString()}원</span>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 1000)}>+천</button>
-          <button className={styles.cashAdjBtn} onClick={() => onChange(v => v + 10000)}>+만</button>
+        <div className={styles.cashDisplay}>{display}원</div>
+        <div className={styles.numpad}>
+          {KEYS.map(k => (
+            <button key={k} className={styles.numpadKey} onClick={() => press(k)}>
+              {k}
+            </button>
+          ))}
         </div>
         <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
-          <button className={styles.confirmBtn} onClick={onConfirm}>확인</button>
+          {!isSequential && <button className={styles.cancelBtn} onClick={onClose}>취소</button>}
+          <button className={styles.confirmBtn} onClick={handleConfirm}>
+            {isSequential ? '완료' : '확인'}
+          </button>
         </div>
       </div>
     </div>
