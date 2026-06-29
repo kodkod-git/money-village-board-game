@@ -27,8 +27,8 @@ const REAL_ESTATE_COLORS = {
   nuri:   '#26a69a',
   dami:   '#ffa726',
   maru:   '#ff7043',
-  chorong:'#ab47bc',
-  hani:   '#7e57c2',
+  chorong:'#e91e63',
+  hani:   '#ffca28',
 }
 
 const JOB_LABELS = {
@@ -48,7 +48,7 @@ const STOCK_COLORS = {
   industrial:    '#78909c',
   auto:          '#4caf50',
   bio:           '#00bcd4',
-  content:       '#9c27b0',
+  content:       '#ef5350',
 }
 
 const ESTATE_IMAGES = {
@@ -477,7 +477,7 @@ function QuantityPopup({ title, items, labels, colors, onChange, onConfirm, onCl
                   step={1}
                   value={qty}
                   className={styles.qtySlider}
-                  style={{ accentColor: colors?.[key] }}
+                  style={{ color: colors?.[key] ?? '#1e88e5', '--slider-pct': `${qty * 10}%` }}
                   onChange={e => onChange(prev => ({ ...prev, [key]: Number(e.target.value) }))}
                 />
               </div>

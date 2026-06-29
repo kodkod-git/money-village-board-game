@@ -134,17 +134,16 @@ export default function Lobby() {
     <div className={styles.page}>
       <BackButton />
       <div className={styles.topBar}>
-        <div className={styles.codeBox}>
-          팀 코드: <span className={styles.code}>{code}</span>
-          <button
-            className={styles.copyBtn}
-            onClick={() => navigator.clipboard.writeText(code)}
-            aria-label="코드 복사"
-          >📋</button>
-        </div>
         <div className={styles.actions}>
+          <div className={styles.codeBox}>
+            팀 코드: <span className={styles.code}>{code}</span>
+            <button
+              className={styles.copyBtn}
+              onClick={() => navigator.clipboard.writeText(code)}
+              aria-label="코드 복사"
+            >📋</button>
+          </div>
           <button className={styles.qrBtn} onClick={() => setShowQR(true)}>📱 QR</button>
-          <button className={styles.leaveBtn} onClick={handleLeave}>팀 나가기</button>
         </div>
       </div>
 

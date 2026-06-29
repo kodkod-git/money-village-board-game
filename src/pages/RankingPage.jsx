@@ -95,7 +95,7 @@ export default function RankingPage() {
             highlightPlayerUuid={myPlayerUuid}
             onRowClick={row => {
               if (!row || row.isPlaceholder) {
-                navigate('/team')
+                navigate('/join')
                 return
               }
               if (row.sessionId && row.playerUuid) {

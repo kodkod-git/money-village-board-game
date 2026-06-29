@@ -65,5 +65,13 @@
 
 .pinnedRowEmpty {
   opacity: 0.75;
-  font-style: italic;
+  justify-content: center;
+}
+
+.pinnedRowEmptyLabel {
+  font-size: 15px;
+  font-weight: bold;
+  font-style: normal;
+  text-align: center;
+  color: #ffd700;
 }
