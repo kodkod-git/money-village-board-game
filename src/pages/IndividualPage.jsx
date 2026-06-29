@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
 
@@ -184,7 +185,7 @@ export default function IndividualPage() {
 
   return (
     <div className={styles.page}>
-      <button className={styles.backBtn} onClick={() => navigate(`/lobby/${code}`)}>← 뒤로</button>
+      <BackButton />
 
       <div className={styles.main}>
         {/* LEFT: name, job */}

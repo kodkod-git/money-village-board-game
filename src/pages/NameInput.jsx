@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import styles from './NameInput.module.css'
 
 export default function NameInput() {
@@ -19,6 +20,7 @@ export default function NameInput() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.card}>
         <h1 className={styles.title}>💰 Money Village</h1>
         <p className={styles.subtitle}>팀에 참가하신 것을 환영합니다!</p>

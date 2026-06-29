@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import CodeModal from '../components/CodeModal'
 import useSocket from '../hooks/useSocket'
 import { getPlayerUuid } from '../utils/playerUuid'
@@ -41,6 +42,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <h1 className={styles.title}>💰 Money Village</h1>
       <p className={styles.subtitle}>보드게임 팀 구성 시스템</p>
       {character && (

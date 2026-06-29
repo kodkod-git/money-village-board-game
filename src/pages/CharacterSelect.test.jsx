@@ -24,7 +24,7 @@ describe('CharacterSelect', () => {
         <CharacterSelect />
       </MemoryRouter>
     )
-    expect(screen.getAllByRole('button')).toHaveLength(17) // 16 cards + 완료 button
+    expect(screen.getAllByRole('button')).toHaveLength(18) // BackButton + 16 cards + 완료 button
   })
 
   it('카드 클릭 시 selected 상태로 변경된다', () => {
@@ -33,7 +33,7 @@ describe('CharacterSelect', () => {
         <CharacterSelect />
       </MemoryRouter>
     )
-    fireEvent.click(screen.getAllByRole('button')[0])
+    fireEvent.click(screen.getAllByRole('button')[1])
     expect(screen.getByText('✓')).toBeInTheDocument()
   })
 })

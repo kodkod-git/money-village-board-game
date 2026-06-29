@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import RankingTable from '../components/RankingTable'
 import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
@@ -66,9 +67,9 @@ export default function RankingPage() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.inner}>
         <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate('/')}>← 홈</button>
           <h1 className={styles.title}>🏆 랭킹</h1>
         </div>
 

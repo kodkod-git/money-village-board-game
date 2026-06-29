@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -100,6 +101,7 @@ export default function Lobby() {
 
   return (
     <div className={styles.page}>
+      <BackButton />
       <div className={styles.topBar}>
         <div className={styles.codeBox}>
           팀 코드: <span className={styles.code}>{code}</span>
