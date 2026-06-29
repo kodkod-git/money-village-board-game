@@ -114,14 +114,45 @@ export default function IndividualPage() {
       .then(r => r.json())
       .then(data => {
         const me = data.players?.find(p => p.socketId === socket.id)
-        if (!me) { navigate(`/lobby/${code}`); return }
-        setPlayer(me)
-        const gs = me.gameState ?? defaultGameState()
-        setGameState(gs)
-        if (gs.job === null) {
-          setIsSequential(true)
-          setActivePopup('job')
+        if (me) {
+          setPlayer(me)
+          const gs = me.gameState ?? defaultGameState()
+          setGameState(gs)
+          if (gs.job === null) {
+            setIsSequential(true)
+            setActivePopup('job')
+          }
+          return
         }
+
+        const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
+        const playerUuid = localStorage.getItem('player_uuid')
+        if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
+
+        socket.emit('join-room', {
+          code,
+          name: stored.name,
+          affiliation: stored.affiliation,
+          character: stored.character,
+          isHost: false,
+          playerUuid,
+        }, ({ ok }) => {
+          if (!ok) { navigate(`/lobby/${code}`); return }
+          fetch(`/api/rooms/${code}`)
+            .then(r => r.json())
+            .then(data2 => {
+              const me2 = data2.players?.find(p => p.socketId === socket.id)
+              if (!me2) { navigate(`/lobby/${code}`); return }
+              setPlayer(me2)
+              const gs = me2.gameState ?? defaultGameState()
+              setGameState(gs)
+              if (gs.job === null) {
+                setIsSequential(true)
+                setActivePopup('job')
+              }
+            })
+            .catch(() => navigate(`/lobby/${code}`))
+        })
       })
       .catch(() => navigate(`/lobby/${code}`))
   }, [code, socket, navigate])

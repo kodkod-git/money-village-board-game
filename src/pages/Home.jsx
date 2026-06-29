@@ -24,8 +24,10 @@ export default function Home() {
   function joinRoom(code, isHost) {
     const playerUuid = getPlayerUuid()
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
-      if (ok) navigate(`/lobby/${code}`)
-      else alert(error)
+      if (ok) {
+        localStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code }))
+        navigate(`/lobby/${code}`)
+      } else alert(error)
     })
   }
 
