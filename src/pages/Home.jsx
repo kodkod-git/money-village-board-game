@@ -45,17 +45,29 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <BackButton />
-      <h1 className={styles.title}>💰 Money Village</h1>
-      <p className={styles.subtitle}>보드게임 팀 구성 시스템</p>
-      {character && (
-        <div className={styles.preview}>
-          <img src={`/characters/${character}.png`} alt={character} className={styles.previewImg} />
-          <p className={styles.previewName}>{name}</p>
-        </div>
-      )}
-      <div className={styles.buttons}>
-        <button className={styles.createBtn} onClick={handleCreate}>팀 생성</button>
-        <button className={styles.joinBtn} onClick={() => setShowCodeModal(true)}>팀 참가</button>
+      <div className={styles.center}>
+        {character && (
+          <div className={styles.preview}>
+            <img src={`/characters/${character}.png`} alt={character} className={styles.previewImg} />
+            <p className={styles.previewName}>{name}</p>
+          </div>
+        )}
+        <h1 className={styles.title}>팀 구성</h1>
+        <p className={styles.subtitle}>팀을 만들거나 참여하세요</p>
+      </div>
+      <div className={styles.cards}>
+        <button className={styles.card} onClick={handleCreate}>
+          <span className={styles.icon}>⊞</span>
+          <span className={styles.cardTitle}>팀 만들기</span>
+          <span className={styles.cardDesc}>새 팀 생성 후 코드 공유</span>
+          <span className={styles.chevron}>›</span>
+        </button>
+        <button className={styles.card} onClick={() => setShowCodeModal(true)}>
+          <span className={styles.icon}>🔑</span>
+          <span className={styles.cardTitle}>팀 참여</span>
+          <span className={styles.cardDesc}>초대 코드로 팀 입장</span>
+          <span className={styles.chevron}>›</span>
+        </button>
       </div>
       {showCodeModal && (
         <CodeModal

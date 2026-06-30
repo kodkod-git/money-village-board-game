@@ -1,68 +1,95 @@
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0a1628 0%, #0f2a50 60%, #163d28 100%);
+  background: var(--white);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  padding: 0 49px;
+  position: relative;
 }
 
-.title {
-  color: #ffd700;
-  font-size: 32px;
-  text-shadow: 0 2px 8px #000;
-}
-
-.subtitle {
-  color: #90caf9;
-  font-size: 14px;
-  margin-bottom: 24px;
+.center {
+  text-align: center;
+  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .preview {
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
 .previewImg {
-  width: 140px;
-  height: 140px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
 }
 
 .previewName {
-  color: #ffd700;
-  font-size: 20px;
-  font-weight: bold;
-  text-shadow: 0 2px 6px #000;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-.buttons {
+.title {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+
+.cards {
   display: flex;
   gap: 16px;
+  width: 100%;
+  max-width: 512px;
 }
 
-.createBtn {
-  background: #43a047;
-  color: white;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  box-shadow: 0 4px 0 #2e7d32;
+.card {
+  flex: 1;
+  background: var(--white);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--divider);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  cursor: pointer;
+  position: relative;
 }
 
-.joinBtn {
-  background: #1e88e5;
-  color: white;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  box-shadow: 0 4px 0 #1565c0;
+.icon { font-size: 28px; margin-bottom: 4px; }
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.cardDesc {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.chevron {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 20px;
+  color: var(--ink-2);
 }
