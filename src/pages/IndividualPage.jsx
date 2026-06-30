@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import StepBar from '../components/StepBar'
+import AssetRow from '../components/AssetRow'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
 
@@ -158,6 +159,109 @@ export default function IndividualPage() {
               >
                 <span className={styles.jobIcon}>{JOB_ICONS[key]}</span>
                 <span className={styles.tileLabel}>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 1 && (
+        <div className={styles.stepContent}>
+          <h1 className={styles.stepTitle}>성공카드</h1>
+          <p className={styles.stepSubtitle}>획득한 성공카드를 모두 선택해주세요</p>
+          <div className={styles.jobGrid}>
+            {BADGE_NAMES.map((name, i) => (
+              <button
+                key={name}
+                className={`${styles.jobTile} ${gameState.badges[i] ? styles.tileSelected : ''}`}
+                onClick={() => {
+                  const badges = [...gameState.badges]
+                  badges[i] = !badges[i]
+                  const next = { ...gameState, badges }
+                  setGameState(next)
+                  emitState(next)
+                }}
+              >
+                <img src={`/badges/${name}.png`} alt={name} className={styles.badgeImg} />
+                <span className={styles.tileLabel}>{BADGE_LABELS[name]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className={styles.stepContent}>
+          <h1 className={styles.stepTitle}>부동산</h1>
+          <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
+          <div className={styles.assetList}>
+            {Object.keys(REAL_ESTATE_LABELS).map(key => (
+              <AssetRow
+                key={key}
+                image={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
+                label={REAL_ESTATE_LABELS[key]}
+                price={ESTATE_PRICES[key]}
+                value={gameState.realEstate[key]}
+                onChange={val => {
+                  const realEstate = { ...gameState.realEstate, [key]: val }
+                  const next = { ...gameState, realEstate, realEstateVisited: true }
+                  setGameState(next)
+                  emitState(next)
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className={styles.stepContent}>
+          <h1 className={styles.stepTitle}>주식</h1>
+          <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
+          <div className={styles.assetList}>
+            {Object.keys(STOCK_LABELS).map(key => (
+              <AssetRow
+                key={key}
+                image={`/badges/stock/${STOCK_IMAGES[key]}.png`}
+                label={STOCK_LABELS[key]}
+                price="가격 설정"
+                value={gameState.stocks[key]}
+                onChange={val => {
+                  const stocks = { ...gameState.stocks, [key]: val }
+                  const next = { ...gameState, stocks, stocksVisited: true }
+                  setGameState(next)
+                  emitState(next)
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className={styles.stepContent}>
+          <h1 className={styles.stepTitle}>현금</h1>
+          <p className={styles.stepSubtitle}>보유 현금을 입력해주세요</p>
+          <div className={styles.numpadDisplay}>
+            {Number(cashDisplay || 0).toLocaleString()}원
+          </div>
+          <div className={styles.numpad}>
+            {['1','2','3','4','5','6','7','8','9','00','0','←'].map(key => (
+              <button
+                key={key}
+                className={styles.numpadKey}
+                onClick={() => {
+                  if (key === '←') {
+                    setCashDisplay(prev => prev.length <= 1 ? '0' : prev.slice(0, -1))
+                  } else {
+                    setCashDisplay(prev => {
+                      const next = prev === '0' ? key : prev + key
+                      return next.length > 10 ? prev : next
+                    })
+                  }
+                }}
+              >
+                {key}
               </button>
             ))}
           </div>

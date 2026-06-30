@@ -124,3 +124,35 @@
   font-weight: 700;
   color: var(--ink-2);
 }
+
+.numpadDisplay {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--ink);
+  text-align: center;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 24px;
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.numpadKey {
+  background: var(--white);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--divider);
+  height: 72px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+
+.numpadKey:active { background: var(--slot-empty); }
