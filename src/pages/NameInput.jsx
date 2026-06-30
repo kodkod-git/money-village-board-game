@@ -20,29 +20,41 @@ export default function NameInput() {
 
   return (
     <div className={styles.page}>
-      <BackButton />
-      <div className={styles.card}>
-        <h1 className={styles.title}>💰 Money Village</h1>
+      <BackButton variant="intro" />
+      <div className={styles.header}>
+        <h1 className={styles.title}>로그인</h1>
         <p className={styles.subtitle}>팀에 참가하신 것을 환영합니다!</p>
-        <label className={styles.label}>소속을 입력하세요</label>
-        <input
-          className={styles.input}
-          placeholder="예) 경영학과"
-          value={affiliation}
-          onChange={e => setAffiliation(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleNext()}
-          maxLength={30}
-        />
-        <label className={styles.label}>이름을 입력하세요</label>
-        <input
-          className={styles.input}
-          placeholder="예) 홍길동"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleNext()}
-          maxLength={20}
-        />
-        <button className={styles.btn} onClick={handleNext}>다음 →</button>
+      </div>
+      <div className={styles.card}>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>소속을 입력하세요</label>
+          <input
+            className={styles.input}
+            placeholder="예) 경영학과"
+            value={affiliation}
+            onChange={e => setAffiliation(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleNext()}
+            maxLength={30}
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>이름을 입력하세요</label>
+          <input
+            className={styles.input}
+            placeholder="예) 홍길동"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleNext()}
+            maxLength={20}
+          />
+        </div>
+        <button
+          className={styles.gradBtn}
+          onClick={handleNext}
+          disabled={!affiliation.trim() || !name.trim()}
+        >
+          다음 →
+        </button>
       </div>
     </div>
   )
