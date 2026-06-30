@@ -12,7 +12,7 @@ vi.mock('react-router-dom', async () => {
 import BackButton from './BackButton'
 
 describe('BackButton', () => {
-  it('<를 렌더링한다', () => {
+  it('뒤로 버튼을 렌더링한다', () => {
     render(<MemoryRouter><BackButton /></MemoryRouter>)
     expect(screen.getByRole('button', { name: '뒤로 가기' })).toBeInTheDocument()
   })
@@ -21,5 +21,15 @@ describe('BackButton', () => {
     render(<MemoryRouter><BackButton /></MemoryRouter>)
     await userEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
     expect(mockNavigate).toHaveBeenCalledWith(-1)
+  })
+
+  it('variant=intro는 intro 클래스를 적용한다', () => {
+    render(<MemoryRouter><BackButton variant="intro" /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: '뒤로 가기' }).className).toMatch(/intro/)
+  })
+
+  it('기본 variant는 body이다', () => {
+    render(<MemoryRouter><BackButton /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: '뒤로 가기' }).className).toMatch(/body/)
   })
 })
