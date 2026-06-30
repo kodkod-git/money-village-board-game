@@ -1,9 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&display=swap');
+
+:root {
+  --purple:      #6c7de5;
+  --purple-ink:  #5b7cf0;
+  --violet:      #9b5fd4;
+  --blue-accent: #70a6fe;
+  --blob:        #a3b3ff;
+  --grad-page:   linear-gradient(160deg, #6ea6fd 0%, #949dfe 50%, #9191fb 100%);
+  --grad-btn:    linear-gradient(90deg, #5b7cf0 0%, #9b5fd4 100%);
+  --ink:         #111111;
+  --ink-2:       #888888;
+  --muted:       #99a1af;
+  --disabled:    #bbbbbb;
+  --ghost:       #cccccc;
+  --white:       #ffffff;
+  --slot-empty:  #f9f9f9;
+  --line:        #e0e0e0;
+  --divider:     #ededed;
+  --r-sm:        16px;
+  --r-md:        20px;
+  --r-lg:        24px;
+  --r-pill:      999px;
+  --shadow-card: 0 4px 6px -4px rgba(0,0,0,.10), 0 10px 15px -3px rgba(0,0,0,.10);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #0a1628;
-  color: white;
+  font-family: 'Nunito', system-ui, sans-serif;
+  background: #ffffff;
+  color: #111111;
   min-height: 100vh;
 }
+
 input, button { font-family: inherit; }
 button { cursor: pointer; border: none; }
