@@ -129,66 +129,82 @@ export default function Lobby() {
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = players.find(p => p.socketId === socket?.id)?.isHost ?? false
   const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
+  const myPlayer = players.find(p => p.socketId === socket?.id)
 
   return (
     <div className={styles.page}>
       <BackButton />
-      <div className={styles.topBar}>
-        <div className={styles.actions}>
-          <div className={styles.codeBox}>
-            팀 코드: <span className={styles.code}>{code}</span>
-            <button
-              className={styles.copyBtn}
-              onClick={() => navigator.clipboard.writeText(code)}
-              aria-label="코드 복사"
-            >📋</button>
-          </div>
-          <button className={styles.qrBtn} onClick={() => setShowQR(true)}>📱 QR</button>
+      <button className={styles.leaveBtn} onClick={handleLeave}>🗑 팀 나가기</button>
+
+      <div className={styles.header}>
+        <h1 className={styles.title}>팀 만들기</h1>
+        <p className={styles.subtitle}>코드를 팀원에게 공유하세요</p>
+      </div>
+      <hr className={styles.divider} />
+
+      <div className={styles.codeCard}>
+        <span className={styles.codeLabel}>팀 초대 코드</span>
+        <div className={styles.codeRow}>
+          <span className={styles.code}>{code}</span>
+          <button
+            className={styles.copyBtn}
+            onClick={() => navigator.clipboard.writeText(code)}
+            aria-label="코드 복사"
+          >
+            📋
+          </button>
         </div>
       </div>
 
-      <div className={styles.counter}>{players.length} / 4 명 참가</div>
-
-      <div className={styles.characters}>
-        {slots.map((player, i) => (
-          <PlayerSlot
-            key={i}
-            player={player}
-            isOwnPlayer={player?.socketId === socket?.id}
-            onNavigate={() => navigate(`/lobby/${code}/individual`)}
-            onKick={
-              isHost && player && player.socketId !== socket?.id
-                ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
-                : undefined
-            }
-          />
-        ))}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>팀원 현황</span>
+        <div className={styles.slots}>
+          {slots.map((player, i) => (
+            <PlayerSlot
+              key={i}
+              player={player}
+              onKick={
+                isHost && player && player.socketId !== socket?.id
+                  ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
+                  : undefined
+              }
+            />
+          ))}
+        </div>
       </div>
 
       <div className={styles.bottomBar}>
         {isHost && (
-          <button className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>
+          <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
             가격 설정
           </button>
         )}
-        {isHost && (
+        {myPlayer && (
           <button
-            className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
-            disabled={!allCompleted || isSubmitting}
-            onClick={() => setShowConfirmModal(true)}
+            className={styles.actionBtn}
+            onClick={() => navigate(`/lobby/${code}/individual`)}
           >
-            {isSubmitting ? '저장 중...' : '결과 등록하기'}
+            프로필 설정
+          </button>
+        )}
+        {isHost && allCompleted && (
+          <button
+            className={`${styles.actionBtn} ${styles.submitBtn}`}
+            onClick={() => setShowConfirmModal(true)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '제출 중...' : '결과 등록'}
           </button>
         )}
       </div>
 
+      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmModal(false)}
         />
       )}
-      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {showPriceModal && (
         <PriceSettingModal
           prices={prices}

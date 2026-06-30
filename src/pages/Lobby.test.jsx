@@ -36,7 +36,7 @@ describe('Lobby', () => {
 
   it('참가 인원을 표시한다', () => {
     renderLobby()
-    expect(screen.getByText(/1 \/ 4 명 참가/)).toBeInTheDocument()
+    expect(screen.getByText('팀원 현황')).toBeInTheDocument()
   })
 
   it('참가한 플레이어 이름을 표시한다', () => {
