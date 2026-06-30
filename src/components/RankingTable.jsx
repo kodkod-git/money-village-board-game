@@ -64,7 +64,9 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
           onClick={onRowClick ? () => onRowClick({ isPlaceholder: true }) : undefined}
           style={onRowClick ? { cursor: 'pointer' } : undefined}
         >
+          <span className={styles.pinnedRank}>-위</span>
           <span className={styles.pinnedRowEmptyLabel}>게임에 참여하러 가기</span>
+          <span className={styles.pinnedAssets}>-원</span>
         </div>
       )}
     </div>

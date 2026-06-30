@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices
@@ -68,11 +68,17 @@ describe('addPlayer', () => {
 
 describe('removePlayer', () => {
   it('마지막 플레이어 제거 시 방을 삭제하고 null을 반환한다', () => {
+    vi.useFakeTimers()
     const { code } = createRoom()
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     const result = removePlayer('s1')
     expect(result).toBeNull()
+    // 그레이스 피리어드(30초) 동안 방 유지
+    expect(getRoom(code)).not.toBeNull()
+    // 30초 경과 후 방 삭제
+    vi.advanceTimersByTime(30001)
     expect(getRoom(code)).toBeNull()
+    vi.useRealTimers()
   })
 
   it('플레이어가 남아있으면 방을 유지하고 방 객체를 반환한다', () => {
