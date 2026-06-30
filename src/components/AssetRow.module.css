@@ -1,0 +1,49 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border-radius: var(--r-sm);
+  padding: 0 16px;
+  height: 74px;
+  box-shadow: var(--shadow-card);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+}
+
+.img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.price {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.total {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ink);
+  min-width: 28px;
+  text-align: right;
+  margin-left: auto;
+}
