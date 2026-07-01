@@ -29,17 +29,22 @@ export default function CharacterSelect() {
     <div className={styles.page}>
       <BackButton />
       <div className={styles.header}>
-        <p className={styles.title}>캐릭터를 선택하세요</p>
-        <p className={styles.subtitle}>{name} 님, 나를 대표할 캐릭터를 골라주세요</p>
+        <h2 className={styles.title}>캐릭터 선택</h2>
+        <p className={styles.subtitle}>나를 대표할 동물 캐릭터를 골라보세요</p>
       </div>
-      <div className={styles.grid}>
-        {CHARACTERS.map(id => (
-          <CharacterCard key={id} id={id} state={getState(id)} onSelect={setSelected} />
-        ))}
+      <hr className={styles.divider} />
+      <div className={styles.gridWrapper}>
+        <div className={styles.grid}>
+          {CHARACTERS.map(id => (
+            <CharacterCard key={id} id={id} state={getState(id)} onSelect={setSelected} />
+          ))}
+        </div>
       </div>
-      <button className={styles.submitBtn} onClick={handleSubmit} disabled={!selected}>
-        완료 → 로비 입장
-      </button>
+      <div className={styles.bottomBar}>
+        <button className={styles.ctaBtn} onClick={handleSubmit} disabled={!selected}>
+          이 캐릭터로 시작하기
+        </button>
+      </div>
     </div>
   )
 }

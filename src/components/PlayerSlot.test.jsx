@@ -11,9 +11,9 @@ describe('PlayerSlot', () => {
     expect(screen.getByAltText('ptsc')).toBeInTheDocument()
   })
 
-  it('player가 null이면 대기 중... 을 표시한다', () => {
+  it('player가 null이면 대기중을 표시한다', () => {
     render(<PlayerSlot player={null} />)
-    expect(screen.getByText('대기 중...')).toBeInTheDocument()
+    expect(screen.getByText('대기중')).toBeInTheDocument()
   })
 
   it('isHost가 false이고 미완료면 상태 뱃지가 없다', () => {
@@ -27,18 +27,18 @@ describe('PlayerSlot', () => {
     expect(screen.getByText('입력완료')).toBeInTheDocument()
   })
 
-  it('onKick이 전달되면 이름 옆에 X 버튼을 표시한다', () => {
+  it('onKick이 전달되면 추방 버튼을 표시한다', () => {
     const onKick = vi.fn()
     render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} onKick={onKick} />)
     expect(screen.getByRole('button', { name: '추방' })).toBeInTheDocument()
   })
 
-  it('onKick이 없으면 X 버튼을 표시하지 않는다', () => {
+  it('onKick이 없으면 추방 버튼을 표시하지 않는다', () => {
     render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} />)
     expect(screen.queryByRole('button', { name: '추방' })).toBeNull()
   })
 
-  it('X 버튼 클릭 시 onKick을 호출한다', async () => {
+  it('추방 버튼 클릭 시 onKick을 호출한다', async () => {
     const onKick = vi.fn()
     render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} onKick={onKick} />)
     await userEvent.click(screen.getByRole('button', { name: '추방' }))

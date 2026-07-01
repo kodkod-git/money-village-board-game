@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex: 1 1 100%;
+  justify-content: space-between;
+  gap: 3px;
+  min-width: 0;
+}
+
+.btn {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.selected {
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+}
+
+.empty {
+  background: var(--white);
+  color: var(--disabled);
+  border: 1px solid #eeeeee;
+}

@@ -7,21 +7,21 @@ import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Lobby.module.css'
 
 const STOCK_LABELS = {
-  semiconductor: '반도체·IT',
+  semiconductor: '반도체 IT',
   finance: '금융',
-  industrial: '산업재·기계',
-  auto: '자동차·쇼핑',
-  bio: '바이오·헬스케어',
-  content: '콘텐츠·플랫폼',
+  industrial: '산업재 기계',
+  auto: '소재 화학',
+  bio: '바이오 헬스케어',
+  content: '콘텐츠 소비재',
 }
 
 const REAL_ESTATE_LABELS = {
-  gaon: '단독 가온개미',
-  nuri: '단독 누리고양이',
+  gaon: '공동 가온개미',
+  nuri: '공동 누리고양이',
   dami: '다세대 다미원숭이',
   maru: '다세대 마루수리',
   chorong: '아파트 초롱부엉이',
-  hani: '아파트 하늬여우',
+  hani: '아파트 하니여우',
 }
 
 const DEFAULT_PRICES = {
@@ -129,66 +129,88 @@ export default function Lobby() {
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = players.find(p => p.socketId === socket?.id)?.isHost ?? false
   const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
+  const myPlayer = players.find(p => p.socketId === socket?.id)
 
   return (
     <div className={styles.page}>
       <BackButton />
-      <div className={styles.topBar}>
-        <div className={styles.actions}>
-          <div className={styles.codeBox}>
-            팀 코드: <span className={styles.code}>{code}</span>
+      <button className={styles.leaveBtn} onClick={handleLeave} aria-label="팀 나가기">
+        <img src="/icons/팀 나가기.png" alt="" className={styles.leaveIcon} />
+        <span>팀 나가기</span>
+      </button>
+
+      <div className={styles.header}>
+        <h1 className={styles.title}>팀 만들기</h1>
+        <p className={styles.subtitle}>코드를 팀원에게 공유하세요</p>
+      </div>
+      <hr className={styles.divider} />
+
+      <div className={styles.inviteGrid}>
+        <div className={styles.codeCard}>
+          <span className={styles.codeLabel}>팀 초대 코드</span>
+          <div className={styles.codeRow}>
+            <span className={styles.code}>{code}</span>
             <button
               className={styles.copyBtn}
               onClick={() => navigator.clipboard.writeText(code)}
               aria-label="코드 복사"
-            >📋</button>
+            >
+              <img src="/icons/복사하기.png" alt="" className={styles.copyIcon} />
+            </button>
           </div>
-          <button className={styles.qrBtn} onClick={() => setShowQR(true)}>📱 QR</button>
         </div>
+        <button
+          className={styles.qrCard}
+          onClick={() => setShowQR(true)}
+          type="button"
+        >
+          <span className={styles.codeLabel}>QR 코드</span>
+          <img src={`/api/rooms/${code}/qr`} alt="QR 코드" className={styles.qrImg} />
+        </button>
       </div>
 
-      <div className={styles.counter}>{players.length} / 4 명 참가</div>
-
-      <div className={styles.characters}>
-        {slots.map((player, i) => (
-          <PlayerSlot
-            key={i}
-            player={player}
-            isOwnPlayer={player?.socketId === socket?.id}
-            onNavigate={() => navigate(`/lobby/${code}/individual`)}
-            onKick={
-              isHost && player && player.socketId !== socket?.id
-                ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
-                : undefined
-            }
-          />
-        ))}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>팀원 현황</span>
+        <div className={styles.slots}>
+          {slots.map((player, i) => (
+            <PlayerSlot
+              key={i}
+              player={player}
+              onEdit={player && myPlayer ? () => navigate(`/lobby/${code}/individual`) : undefined}
+              onKick={
+                isHost && player && player.socketId !== socket?.id
+                  ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
+                  : undefined
+              }
+            />
+          ))}
+        </div>
       </div>
 
       <div className={styles.bottomBar}>
         {isHost && (
-          <button className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>
+          <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
             가격 설정
           </button>
         )}
         {isHost && (
           <button
-            className={`${styles.registerBtn} ${allCompleted ? styles.registerBtnActive : ''}`}
-            disabled={!allCompleted || isSubmitting}
+            className={`${styles.actionBtn} ${styles.submitBtn}`}
             onClick={() => setShowConfirmModal(true)}
+            disabled={!allCompleted || isSubmitting}
           >
-            {isSubmitting ? '저장 중...' : '결과 등록하기'}
+            {isSubmitting ? '제출 중...' : '결과 등록'}
           </button>
         )}
       </div>
 
+      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmModal(false)}
         />
       )}
-      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {showPriceModal && (
         <PriceSettingModal
           prices={prices}
@@ -236,14 +258,14 @@ function PriceSettingModal({ prices, onConfirm, onClose }) {
     return (
       <div className={styles.overlay}>
         <div className={styles.popup}>
-          <div className={styles.popupTitle}>💰 가격 설정</div>
+          <div className={styles.popupTitle}>가격 설정</div>
           <div className={styles.categoryGrid}>
             <button className={styles.categoryCard} onClick={() => setStep('stocks')}>
-              <span className={styles.categoryIcon}>📈</span>
+              <span className={styles.categoryIcon}>주</span>
               <span className={styles.categoryLabel}>주식</span>
             </button>
             <button className={styles.categoryCard} onClick={() => setStep('realEstate')}>
-              <span className={styles.categoryIcon}>🏠</span>
+              <span className={styles.categoryIcon}>부</span>
               <span className={styles.categoryLabel}>부동산</span>
             </button>
           </div>
@@ -261,14 +283,14 @@ function PriceSettingModal({ prices, onConfirm, onClose }) {
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.popupTitle}>
-          {isStocks ? '📈 주식 가격' : '🏠 부동산 가격'}
+          {isStocks ? '주식 가격' : '부동산 가격'}
         </div>
         <div className={styles.quantityList}>
           {Object.keys(labels).map(key => (
             <div key={key} className={styles.quantityItem}>
               <span className={styles.quantityLabel}>{labels[key]}</span>
               <div className={styles.quantityControls}>
-                <button className={styles.qtyBtn} onClick={() => adjust(category, key, -1)}>−</button>
+                <button className={styles.qtyBtn} onClick={() => adjust(category, key, -1)}>-</button>
                 <span className={styles.priceDisplay}>
                   {tempPrices[category][key].toLocaleString()}원
                 </span>
@@ -278,7 +300,7 @@ function PriceSettingModal({ prices, onConfirm, onClose }) {
           ))}
         </div>
         <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={() => setStep('select')}>← 뒤로</button>
+          <button className={styles.cancelBtn} onClick={() => setStep('select')}>뒤로</button>
           <button className={styles.confirmBtn} onClick={() => onConfirm(tempPrices)}>확인</button>
         </div>
       </div>

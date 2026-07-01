@@ -1,27 +1,39 @@
 .card {
-  background: rgba(255,255,255,0.05);
-  border: 2px solid #2a3a50;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
   border-radius: 12px;
-  padding: 10px 6px;
-  text-align: center;
   cursor: pointer;
   position: relative;
-  transition: border-color 0.15s, opacity 0.15s;
+  transition: border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
-.card.idle { opacity: 0.72; }
-.card.idle:hover { border-color: #42a5f5; opacity: 1; }
+.card.idle:hover { border-color: var(--purple); }
 .card.selected {
-  background: rgba(66,165,245,0.18);
-  border-color: #42a5f5;
-  opacity: 1;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(108, 125, 229, 0.2);
 }
 .card.locked { opacity: 0.35; cursor: not-allowed; }
 .badge {
-  position: absolute; top: 5px; right: 5px;
-  background: #43a047; color: white;
+  position: absolute; top: 4px; right: 4px;
+  background: var(--purple); color: white;
   border-radius: 50%; width: 18px; height: 18px;
   font-size: 10px;
   display: flex; align-items: center; justify-content: center;
 }
 .card.locked .badge { background: transparent; }
-.img { width: 68px; height: 80px; object-fit: contain; display: block; margin: 0 auto; }
+.img {
+  width: 96%;
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transform: scale(1.1);
+}

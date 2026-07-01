@@ -1,28 +1,83 @@
 .page {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #0a1628 0%, #0f2a50 60%, #163d28 100%);
-  display: flex; align-items: center; justify-content: center;
+  min-height: 100%;
+  height: 100%;
+  background: var(--grad-page);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 clamp(24px, 9vw, 49px);
+  overflow: hidden;
 }
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .card {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px; padding: 36px 32px;
-  width: 360px; text-align: center;
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff;
+  border: none;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-.title { color: #ffd700; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
-.subtitle { color: #90caf9; font-size: 13px; margin-bottom: 28px; }
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .label {
-  display: block; color: #90caf9; font-size: 12px;
-  font-weight: bold; text-align: left; margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6c7de5;
+  letter-spacing: 0;
+  text-transform: none;
 }
+
 .input {
-  width: 100%; padding: 11px 14px;
-  border-radius: 10px; border: 2px solid #42a5f5;
-  background: rgba(13,27,62,0.8); color: white;
-  font-size: 14px; margin-bottom: 24px;
+  height: 58px;
+  border-radius: var(--r-sm);
+  border: 1px solid #c8d8ff;
+  background: #e8f0fe;
+  padding: 0 22px;
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
 }
-.btn {
-  width: 100%; background: #1e88e5; color: white;
-  padding: 12px; border-radius: 10px;
-  font-size: 14px; font-weight: bold; box-shadow: 0 3px 0 #1565c0;
+
+.input::placeholder { color: var(--muted); }
+.input:focus { border-color: var(--blue-accent); }
+
+.gradBtn {
+  height: 56px;
+  background: var(--grad-btn);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
 }
+
+.gradBtn:disabled { opacity: 0.5; cursor: not-allowed; }
