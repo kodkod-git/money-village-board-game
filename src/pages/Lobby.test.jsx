@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 
 vi.mock('socket.io-client', () => {
   const socket = {
@@ -86,5 +86,20 @@ describe('Lobby readOnly mode', () => {
     renderReadOnlyLobby()
     expect(screen.queryByText('가격 설정')).toBeNull()
     expect(screen.queryByText('결과 등록')).toBeNull()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('fetch를 호출하지 않는다', () => {
+    vi.stubGlobal('fetch', vi.fn())
+    renderReadOnlyLobby()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('QR 코드 카드를 렌더링하지 않는다', () => {
+    renderReadOnlyLobby()
+    expect(screen.queryByText('QR 코드')).toBeNull()
   })
 })
