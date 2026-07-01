@@ -1,0 +1,73 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--divider);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.code {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: 2px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--purple);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.slot {
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  background: var(--slot-empty);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.slotImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.slotEmpty {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ghost);
+}
