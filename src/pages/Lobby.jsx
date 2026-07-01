@@ -29,20 +29,22 @@ const DEFAULT_PRICES = {
   realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
 }
 
-export default function Lobby() {
-  const { code } = useParams()
+export default function Lobby({ readOnly = false, mockRoom = null }) {
+  const { code: routeCode } = useParams()
+  const code = readOnly ? mockRoom.code : routeCode
   const navigate = useNavigate()
   const { socket } = useSocketContext()
-  const [players, setPlayers] = useState([])
-  const [roomFetched, setRoomFetched] = useState(false)
+  const [players, setPlayers] = useState(readOnly ? mockRoom.players : [])
+  const [roomFetched, setRoomFetched] = useState(readOnly)
   const rejoinAttempted = useRef(false)
   const [showQR, setShowQR] = useState(false)
-  const [prices, setPrices] = useState(DEFAULT_PRICES)
+  const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   useEffect(() => {
+    if (readOnly) return
     fetch(`/api/rooms/${code}`)
       .then(r => r.json())
       .then(data => {
@@ -51,9 +53,10 @@ export default function Lobby() {
       })
       .catch(() => {})
       .finally(() => setRoomFetched(true))
-  }, [code])
+  }, [code, readOnly])
 
   useEffect(() => {
+    if (readOnly) return
     if (!socket || !roomFetched || rejoinAttempted.current) return
     if (players.find(p => p.socketId === socket.id)) return
 
@@ -72,35 +75,35 @@ export default function Lobby() {
     }, ({ ok }) => {
       if (!ok) rejoinAttempted.current = false
     })
-  }, [socket, roomFetched, players, code])
+  }, [socket, roomFetched, players, code, readOnly])
 
   useEffect(() => {
-    if (!socket) return
+    if (readOnly || !socket) return
     const handler = ({ players }) => setPlayers(players)
     socket.on('room-updated', handler)
     return () => socket.off('room-updated', handler)
-  }, [socket])
+  }, [socket, readOnly])
 
   useEffect(() => {
-    if (!socket) return
+    if (readOnly || !socket) return
     const handler = ({ prices }) => setPrices(prices)
     socket.on('room-prices-updated', handler)
     return () => socket.off('room-prices-updated', handler)
-  }, [socket])
+  }, [socket, readOnly])
 
   useEffect(() => {
-    if (!socket) return
+    if (readOnly || !socket) return
     const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
     socket.on('game-submitted', handler)
     return () => socket.off('game-submitted', handler)
-  }, [socket, navigate])
+  }, [socket, navigate, readOnly])
 
   useEffect(() => {
-    if (!socket) return
+    if (readOnly || !socket) return
     const handler = () => navigate('/team')
     socket.on('you-were-kicked', handler)
     return () => socket.off('you-were-kicked', handler)
-  }, [socket, navigate])
+  }, [socket, navigate, readOnly])
 
   function handleLeave() {
     socket?.emit('leave-room')
@@ -127,21 +130,25 @@ export default function Lobby() {
   }
 
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
-  const isHost = players.find(p => p.socketId === socket?.id)?.isHost ?? false
+  const isHost = !readOnly && (players.find(p => p.socketId === socket?.id)?.isHost ?? false)
   const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
-  const myPlayer = players.find(p => p.socketId === socket?.id)
+  const myPlayer = readOnly ? null : players.find(p => p.socketId === socket?.id)
 
   return (
     <div className={styles.page}>
-      <BackButton />
-      <button className={styles.leaveBtn} onClick={handleLeave} aria-label="팀 나가기">
-        <img src="/icons/팀 나가기.png" alt="" className={styles.leaveIcon} />
-        <span>팀 나가기</span>
-      </button>
+      {!readOnly && <BackButton />}
+      {!readOnly && (
+        <button className={styles.leaveBtn} onClick={handleLeave} aria-label="팀 나가기">
+          <img src="/icons/팀 나가기.png" alt="" className={styles.leaveIcon} />
+          <span>팀 나가기</span>
+        </button>
+      )}
 
       <div className={styles.header}>
         <h1 className={styles.title}>팀 만들기</h1>
-        <p className={styles.subtitle}>코드를 팀원에게 공유하세요</p>
+        <p className={styles.subtitle}>
+          {readOnly ? '관전 모드입니다' : '코드를 팀원에게 공유하세요'}
+        </p>
       </div>
       <hr className={styles.divider} />
 
@@ -150,23 +157,27 @@ export default function Lobby() {
           <span className={styles.codeLabel}>팀 초대 코드</span>
           <div className={styles.codeRow}>
             <span className={styles.code}>{code}</span>
-            <button
-              className={styles.copyBtn}
-              onClick={() => navigator.clipboard.writeText(code)}
-              aria-label="코드 복사"
-            >
-              <img src="/icons/복사하기.png" alt="" className={styles.copyIcon} />
-            </button>
+            {!readOnly && (
+              <button
+                className={styles.copyBtn}
+                onClick={() => navigator.clipboard.writeText(code)}
+                aria-label="코드 복사"
+              >
+                <img src="/icons/복사하기.png" alt="" className={styles.copyIcon} />
+              </button>
+            )}
           </div>
         </div>
-        <button
-          className={styles.qrCard}
-          onClick={() => setShowQR(true)}
-          type="button"
-        >
-          <span className={styles.codeLabel}>QR 코드</span>
-          <img src={`/api/rooms/${code}/qr`} alt="QR 코드" className={styles.qrImg} />
-        </button>
+        {!readOnly && (
+          <button
+            className={styles.qrCard}
+            onClick={() => setShowQR(true)}
+            type="button"
+          >
+            <span className={styles.codeLabel}>QR 코드</span>
+            <img src={`/api/rooms/${code}/qr`} alt="QR 코드" className={styles.qrImg} />
+          </button>
+        )}
       </div>
 
       <div className={styles.section}>
@@ -176,9 +187,9 @@ export default function Lobby() {
             <PlayerSlot
               key={i}
               player={player}
-              onEdit={player && myPlayer ? () => navigate(`/lobby/${code}/individual`) : undefined}
+              onEdit={!readOnly && player && myPlayer ? () => navigate(`/lobby/${code}/individual`) : undefined}
               onKick={
-                isHost && player && player.socketId !== socket?.id
+                !readOnly && isHost && player && player.socketId !== socket?.id
                   ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
                   : undefined
               }
@@ -187,31 +198,33 @@ export default function Lobby() {
         </div>
       </div>
 
-      <div className={styles.bottomBar}>
-        {isHost && (
-          <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
-            가격 설정
-          </button>
-        )}
-        {isHost && (
-          <button
-            className={`${styles.actionBtn} ${styles.submitBtn}`}
-            onClick={() => setShowConfirmModal(true)}
-            disabled={!allCompleted || isSubmitting}
-          >
-            {isSubmitting ? '제출 중...' : '결과 등록'}
-          </button>
-        )}
-      </div>
+      {!readOnly && (
+        <div className={styles.bottomBar}>
+          {isHost && (
+            <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
+              가격 설정
+            </button>
+          )}
+          {isHost && (
+            <button
+              className={`${styles.actionBtn} ${styles.submitBtn}`}
+              onClick={() => setShowConfirmModal(true)}
+              disabled={!allCompleted || isSubmitting}
+            >
+              {isSubmitting ? '제출 중...' : '결과 등록'}
+            </button>
+          )}
+        </div>
+      )}
 
-      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
-      {showConfirmModal && (
+      {!readOnly && showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
+      {!readOnly && showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmModal(false)}
         />
       )}
-      {showPriceModal && (
+      {!readOnly && showPriceModal && (
         <PriceSettingModal
           prices={prices}
           onConfirm={handlePriceConfirm}
