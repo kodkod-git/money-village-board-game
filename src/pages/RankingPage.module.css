@@ -10,6 +10,12 @@
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.page::-webkit-scrollbar {
+  display: none;
 }
 
 .page::after {
