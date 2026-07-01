@@ -1,11 +1,12 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   background: var(--white);
   border-radius: var(--r-sm);
-  padding: 0 16px;
-  height: 74px;
+  padding: 12px;
+  min-height: 74px;
   box-shadow: var(--shadow-card);
 }
 
@@ -13,7 +14,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 140px;
+  min-width: 0;
+  flex: 1;
 }
 
 .img {
@@ -31,6 +33,7 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--ink);
+  word-break: keep-all;
 }
 
 .price {

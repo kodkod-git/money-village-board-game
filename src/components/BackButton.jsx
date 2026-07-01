@@ -9,7 +9,8 @@ export default function BackButton({ variant = 'body' }) {
       onClick={() => navigate(-1)}
       aria-label="뒤로 가기"
     >
-      ‹ 뒤로
+      <img src="/icons/뒤로가기.png" alt="" className={styles.icon} />
+      <span>뒤로</span>
     </button>
   )
 }

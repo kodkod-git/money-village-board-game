@@ -169,11 +169,11 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>성공카드</h1>
           <p className={styles.stepSubtitle}>획득한 성공카드를 모두 선택해주세요</p>
-          <div className={styles.jobGrid}>
+          <div className={`${styles.jobGrid} ${styles.badgeGrid}`}>
             {BADGE_NAMES.map((name, i) => (
               <button
                 key={name}
-                className={`${styles.jobTile} ${gameState.badges[i] ? styles.tileSelected : ''}`}
+                className={`${styles.jobTile} ${styles.badgeTile} ${gameState.badges[i] ? styles.tileSelected : ''}`}
                 onClick={() => {
                   const badges = [...gameState.badges]
                   badges[i] = !badges[i]

@@ -1,75 +1,89 @@
 .page {
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   background: var(--white);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 49px;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0 24px;
   position: relative;
 }
 
 .center {
-  text-align: center;
-  margin-bottom: 48px;
+  text-align: left;
+  padding-top: 96px;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.preview {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.previewImg {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-}
-
-.previewName {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
+  align-items: flex-start;
+  flex-shrink: 0;
 }
 
 .title {
-  font-size: 36px;
+  font-size: 26px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: 8px;
+  margin-top: 2px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 10px 0 46px;
+  flex-shrink: 0;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.previewImg {
+  width: 111px;
+  height: 111px;
+  object-fit: contain;
+}
+
+.previewName {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--ink);
 }
 
 .cards {
   display: flex;
-  gap: 16px;
+  flex-direction: row;
+  gap: 12px;
   width: 100%;
-  max-width: 512px;
+  max-width: 100%;
 }
 
 .card {
   flex: 1;
+  min-width: 0;
   background: var(--white);
   border-radius: var(--r-sm);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--divider);
-  padding: 28px 20px;
+  padding: 24px 10px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 6px;
   cursor: pointer;
   position: relative;
+  min-height: 136px;
 }
 
 .icon { font-size: 28px; margin-bottom: 4px; }
@@ -78,18 +92,19 @@
   font-size: 18px;
   font-weight: 900;
   color: var(--ink);
+  white-space: nowrap;
 }
 
 .cardDesc {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--ink-2);
+  white-space: nowrap;
 }
 
 .chevron {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
   font-size: 20px;
   color: var(--ink-2);
+  line-height: 1;
+  margin-top: 4px;
 }

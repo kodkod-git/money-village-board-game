@@ -1,54 +1,91 @@
 .page {
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   background: var(--white);
-  padding: 32px 49px 120px;
+  padding: 0 24px 120px;
   position: relative;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.page::-webkit-scrollbar {
+  display: none;
 }
 
 .leaveBtn {
   position: absolute;
   top: 32px;
-  right: 49px;
+  right: 24px;
   background: none;
   border: none;
+  height: 28px;
+  padding: 3px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--ink-2);
   font-size: 14px;
   font-weight: 700;
-  color: var(--ink-2);
-  cursor: pointer;
+  white-space: nowrap;
 }
 
-.header { margin-top: 44px; }
+.leaveIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.header {
+  padding-top: 96px;
+  flex-shrink: 0;
+}
 
 .title {
-  font-size: 36px;
+  font-size: 26px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--divider);
-  margin: 16px 0 24px;
+  margin: 10px 0 24px;
 }
 
-.codeCard {
+.inviteGrid {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.codeCard,
+.qrCard {
   background: var(--white);
   border-radius: var(--r-sm);
   box-shadow: var(--shadow-card);
-  padding: 20px 28px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  width: fit-content;
-  margin: 0 auto 32px;
+  min-height: 120px;
+  border: 1px solid var(--divider);
+}
+
+.qrCard {
+  cursor: pointer;
 }
 
 .codeLabel {
@@ -66,17 +103,37 @@
 }
 
 .code {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 900;
   color: var(--ink);
-  letter-spacing: 9px;
+  letter-spacing: 4px;
 }
 
 .copyBtn {
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.qrImg {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  background: var(--white);
+  object-fit: contain;
 }
 
 .section { margin-top: 8px; }
@@ -92,20 +149,22 @@
 }
 
 .slots {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  flex-wrap: wrap;
 }
 
 .bottomBar {
-  position: fixed;
+  position: absolute;
   bottom: 32px;
-  left: 49px;
+  left: 24px;
+  right: 24px;
   display: flex;
   gap: 12px;
 }
 
 .actionBtn {
+  flex: 1;
   background: var(--ink);
   color: #ffffff;
   font-size: 16px;
@@ -117,10 +176,16 @@
 }
 
 .submitBtn { background: var(--purple); }
-.actionBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.actionBtn:disabled {
+  background: var(--slot-empty);
+  color: var(--disabled);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  cursor: not-allowed;
+}
 
 .overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.4);
   display: flex;
@@ -133,7 +198,7 @@
   background: var(--white);
   border-radius: var(--r-lg);
   padding: 32px;
-  width: 320px;
+  width: min(320px, calc(100% - 28px));
   display: flex;
   flex-direction: column;
   gap: 20px;

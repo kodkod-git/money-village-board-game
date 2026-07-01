@@ -1,12 +1,13 @@
 .overlay {
-  position: fixed; inset: 0;
+  position: absolute; inset: 0;
   background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
   z-index: 100;
 }
 .modal {
   background: #1e88e5; border-radius: 14px;
-  padding: 28px 32px; width: 360px;
+  padding: 28px clamp(20px, 8vw, 32px);
+  width: min(330px, calc(100% - 28px));
   text-align: center; position: relative;
 }
 .close {
@@ -17,4 +18,10 @@
 .modal h2 { color: white; font-size: 16px; margin-bottom: 8px; }
 .divider { height: 2px; background: rgba(255,255,255,0.3); margin: 12px 0 16px; }
 .subtitle { color: white; font-size: 13px; margin-bottom: 16px; }
-.qr { width: 220px; height: 220px; background: white; border-radius: 8px; padding: 8px; }
+.qr {
+  width: min(220px, 70vw);
+  height: min(220px, 70vw);
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+}

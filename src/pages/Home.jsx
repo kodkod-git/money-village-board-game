@@ -46,15 +46,18 @@ export default function Home() {
     <div className={styles.page}>
       <BackButton />
       <div className={styles.center}>
-        {character && (
-          <div className={styles.preview}>
-            <img src={`/characters/${character}.png`} alt={character} className={styles.previewImg} />
-            <p className={styles.previewName}>{name}</p>
-          </div>
-        )}
         <h1 className={styles.title}>팀 구성</h1>
         <p className={styles.subtitle}>팀을 만들거나 참여하세요</p>
       </div>
+      <hr className={styles.divider} />
+      {(character || name) && (
+        <div className={styles.preview}>
+          {character && (
+            <img src={`/characters/${character}.png`} alt="" className={styles.previewImg} />
+          )}
+          {name && <span className={styles.previewName}>{name}</span>}
+        </div>
+      )}
       <div className={styles.cards}>
         <button className={styles.card} onClick={handleCreate}>
           <span className={styles.icon}>⊞</span>

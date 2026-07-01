@@ -33,10 +33,12 @@ export default function CharacterSelect() {
         <p className={styles.subtitle}>나를 대표할 동물 캐릭터를 골라보세요</p>
       </div>
       <hr className={styles.divider} />
-      <div className={styles.grid}>
-        {CHARACTERS.map(id => (
-          <CharacterCard key={id} id={id} state={getState(id)} onSelect={setSelected} />
-        ))}
+      <div className={styles.gridWrapper}>
+        <div className={styles.grid}>
+          {CHARACTERS.map(id => (
+            <CharacterCard key={id} id={id} state={getState(id)} onSelect={setSelected} />
+          ))}
+        </div>
       </div>
       <div className={styles.bottomBar}>
         <button className={styles.ctaBtn} onClick={handleSubmit} disabled={!selected}>
