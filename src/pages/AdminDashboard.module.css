@@ -78,6 +78,12 @@
   width: min(430px, 92vw);
   max-height: 90vh;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.popup::-webkit-scrollbar {
+  display: none;
 }
 
 .closeBtn {

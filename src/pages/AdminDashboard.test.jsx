@@ -26,38 +26,47 @@ afterEach(() => {
 })
 
 describe('AdminDashboard', () => {
-  it('마운트되면 body에 admin-mode 클래스를 추가한다', () => {
+  it('mounts with the admin-mode body class', () => {
     renderDashboard()
     expect(document.body.classList.contains('admin-mode')).toBe(true)
   })
 
-  it('언마운트되면 body에서 admin-mode 클래스를 제거한다', () => {
+  it('removes the admin-mode body class on unmount', () => {
     const { unmount } = renderDashboard()
     unmount()
     expect(document.body.classList.contains('admin-mode')).toBe(false)
   })
 
-  it('기본적으로 그리드 뷰를 표시한다', () => {
+  it('shows the grid view by default without team codes', () => {
     renderDashboard()
-    expect(screen.getByText('AB1234')).toBeInTheDocument()
+
+    expect(screen.getByText('홍길동')).toBeInTheDocument()
+    expect(screen.queryByText('CD5678')).not.toBeInTheDocument()
   })
 
-  it('테이블 뷰 탭을 클릭하면 테이블이 표시된다', async () => {
+  it('shows the table view when the table tab is clicked', async () => {
     renderDashboard()
+
     await userEvent.click(screen.getByText('테이블 뷰'))
-    expect(screen.getByText('팀코드')).toBeInTheDocument()
+
+    expect(screen.getByText('이름')).toBeInTheDocument()
+    expect(screen.queryByText('팀코드')).not.toBeInTheDocument()
   })
 
-  it('진행중 방 카드를 클릭하면 관전 팝업이 열린다', async () => {
+  it('opens the spectate popup when a room card is clicked', async () => {
     renderDashboard()
-    await userEvent.click(screen.getByText('AB1234'))
+
+    await userEvent.click(screen.getByRole('button', { name: /홍길동/ }))
+
     expect(screen.getByText('관전 모드입니다')).toBeInTheDocument()
   })
 
-  it('팝업 닫기 버튼을 클릭하면 팝업이 사라진다', async () => {
+  it('closes the popup when the close button is clicked', async () => {
     renderDashboard()
-    await userEvent.click(screen.getByText('AB1234'))
+
+    await userEvent.click(screen.getByRole('button', { name: /홍길동/ }))
     await userEvent.click(screen.getByLabelText('닫기'))
+
     expect(screen.queryByText('관전 모드입니다')).toBeNull()
   })
 })

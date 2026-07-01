@@ -7,49 +7,73 @@ const prices = {
   realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
 }
 
+const blankGameState = {
+  job: null,
+  cash: null,
+  stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+  realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+  badges: [false, false, false, false, false, false],
+  isCompleted: false,
+}
+
 const rooms = [
   {
     code: 'GH3456',
     prices,
     players: [
       {
-        playerUuid: 'p1', name: '오세훈', affiliation: '미래고',
+        playerUuid: 'p1',
+        name: '이서연',
+        affiliation: '미래고',
         gameState: {
-          job: 'a', cash: 32000,
-          stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
-          realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+          ...blankGameState,
+          job: 'a',
+          cash: 32000,
+          stocks: { ...blankGameState.stocks, semiconductor: 2 },
+          realEstate: { ...blankGameState.realEstate, gaon: 1 },
           badges: [true, true, false, false, false, false],
           isCompleted: true,
         },
       },
       {
-        playerUuid: 'p2', name: '한소희', affiliation: '미래고',
-        gameState: {
-          job: null, cash: null,
-          stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
-          realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
-          badges: [false, false, false, false, false, false],
-          isCompleted: false,
-        },
+        playerUuid: 'p2',
+        name: '박도윤',
+        affiliation: '미래고',
+        gameState: { ...blankGameState, cash: 12000 },
+      },
+      {
+        playerUuid: 'p3',
+        name: '최하은',
+        affiliation: '미래고',
+        gameState: blankGameState,
       },
     ],
   },
 ]
 
 describe('AdminTableView', () => {
-  it('완료된 플레이어의 자산을 계산해서 표시한다', () => {
+  it('does not render the team code column', () => {
     render(<AdminTableView rooms={rooms} />)
-    expect(screen.getByText('오세훈')).toBeInTheDocument()
+
+    expect(screen.queryByRole('columnheader', { name: '팀코드' })).not.toBeInTheDocument()
+    expect(screen.queryByText('GH3456')).not.toBeInTheDocument()
+  })
+
+  it('shows completed player assets and status', () => {
+    render(<AdminTableView rooms={rooms} />)
+
+    expect(screen.getByText('이서연')).toBeInTheDocument()
     expect(screen.getByText('32,000원')).toBeInTheDocument()
     expect(screen.getByText('10,000원')).toBeInTheDocument()
     expect(screen.getByText('4,000원')).toBeInTheDocument()
     expect(screen.getByText('46,000원')).toBeInTheDocument()
-    expect(screen.getByText('입력완료')).toBeInTheDocument()
+    expect(screen.getByText('✅ 입력완료')).toBeInTheDocument()
   })
 
-  it('미입력 플레이어는 자산 컬럼에 -를 표시한다', () => {
+  it('shows in-progress and not-started statuses', () => {
     render(<AdminTableView rooms={rooms} />)
-    expect(screen.getByText('한소희')).toBeInTheDocument()
-    expect(screen.getByText('미입력')).toBeInTheDocument()
+
+    expect(screen.getByText('🟡 입력중')).toBeInTheDocument()
+    expect(screen.getByText('❌ 미입력')).toBeInTheDocument()
   })
 })

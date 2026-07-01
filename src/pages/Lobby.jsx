@@ -3,16 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
+import QRCodeImage from '../components/QRCodeImage'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Lobby.module.css'
 
 const STOCK_LABELS = {
   semiconductor: '반도체 IT',
   finance: '금융',
-  industrial: '산업재 기계',
-  auto: '소재 화학',
-  bio: '바이오 헬스케어',
-  content: '콘텐츠 소비재',
+  industrial: '산업재·기계',
+  auto: '소재·화학',
+  bio: '바이오·헬스케어',
+  content: '콘텐츠·소비재',
 }
 
 const REAL_ESTATE_LABELS = {
@@ -111,13 +112,14 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
   }
 
   function handlePriceConfirm(newPrices) {
-    socket?.emit('update-room-prices', { code, prices: newPrices })
+    if (!readOnly) socket?.emit('update-room-prices', { code, prices: newPrices })
     setPrices(newPrices)
     setShowPriceModal(false)
   }
 
   async function handleSubmit() {
     setShowConfirmModal(false)
+    if (readOnly) return
     setIsSubmitting(true)
     try {
       const res = await fetch(`/api/rooms/${code}/submit`, { method: 'POST' })
@@ -132,6 +134,8 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = !readOnly && (players.find(p => p.socketId === socket?.id)?.isHost ?? false)
   const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
+  const canManageRoom = readOnly || isHost
+  const canSubmitResult = readOnly || allCompleted
   const myPlayer = readOnly ? null : players.find(p => p.socketId === socket?.id)
 
   return (
@@ -168,14 +172,14 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
             )}
           </div>
         </div>
-        {!readOnly && (
+        {canManageRoom && (
           <button
             className={styles.qrCard}
             onClick={() => setShowQR(true)}
             type="button"
           >
             <span className={styles.codeLabel}>QR 코드</span>
-            <img src={`/api/rooms/${code}/qr`} alt="QR 코드" className={styles.qrImg} />
+            <QRCodeImage code={code} className={styles.qrImg} />
           </button>
         )}
       </div>
@@ -198,33 +202,29 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
         </div>
       </div>
 
-      {!readOnly && (
+      {canManageRoom && (
         <div className={styles.bottomBar}>
-          {isHost && (
-            <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
-              가격 설정
-            </button>
-          )}
-          {isHost && (
-            <button
-              className={`${styles.actionBtn} ${styles.submitBtn}`}
-              onClick={() => setShowConfirmModal(true)}
-              disabled={!allCompleted || isSubmitting}
-            >
-              {isSubmitting ? '제출 중...' : '결과 등록'}
-            </button>
-          )}
+          <button className={styles.actionBtn} onClick={() => setShowPriceModal(true)}>
+            가격 설정
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.submitBtn}`}
+            onClick={() => setShowConfirmModal(true)}
+            disabled={!canSubmitResult || isSubmitting}
+          >
+            {isSubmitting ? '제출 중...' : '결과 등록'}
+          </button>
         </div>
       )}
 
-      {!readOnly && showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
-      {!readOnly && showConfirmModal && (
+      {canManageRoom && showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
+      {canManageRoom && showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmModal(false)}
         />
       )}
-      {!readOnly && showPriceModal && (
+      {canManageRoom && showPriceModal && (
         <PriceSettingModal
           prices={prices}
           onConfirm={handlePriceConfirm}

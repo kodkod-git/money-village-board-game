@@ -1,41 +1,34 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
 .card {
+  position: relative;
+  min-height: 276px;
   background: var(--white);
   border-radius: var(--r-sm);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--divider);
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   cursor: pointer;
   text-align: left;
 }
 
-.card:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+.card:hover {
+  border-color: var(--purple);
 }
 
-.cardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.code {
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--ink);
-  letter-spacing: 2px;
+.registered {
+  border-color: rgba(111, 66, 193, 0.32);
 }
 
 .badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
@@ -46,28 +39,57 @@
 
 .slots {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  height: 100%;
 }
 
 .slot {
-  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 112px;
   border-radius: var(--r-sm);
   background: var(--slot-empty);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   overflow: hidden;
+  padding: 8px;
 }
 
 .slotImg {
-  width: 100%;
-  height: 100%;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
 }
 
+.slotName,
+.emptyName {
+  width: 100%;
+  min-height: 18px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .slotEmpty {
-  font-size: 18px;
-  font-weight: 400;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ghost);
+  background: #ffffff;
+}
+
+.emptyName {
   color: var(--ghost);
 }

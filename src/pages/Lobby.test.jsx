@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
@@ -6,11 +6,13 @@ vi.mock('socket.io-client', () => {
   const socket = {
     on: vi.fn((ev, cb) => {
       if (ev === 'room-updated') {
-        cb({ players: [{ name: '철수', character: 'ptsc', isHost: true, socketId: 's1' }] })
+        cb({ players: [{ name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' }] })
       }
     }),
-    off: vi.fn(), emit: vi.fn(),
-    connected: true, id: 's1',
+    off: vi.fn(),
+    emit: vi.fn(),
+    connected: true,
+    id: 's1',
   }
   return { io: vi.fn(() => socket) }
 })
@@ -29,17 +31,12 @@ function renderLobby() {
 }
 
 describe('Lobby', () => {
-  it('팀 코드를 표시한다', () => {
+  it('shows the team code', () => {
     renderLobby()
     expect(screen.getByText(/ABC123/)).toBeInTheDocument()
   })
 
-  it('참가 인원을 표시한다', () => {
-    renderLobby()
-    expect(screen.getByText('팀원 현황')).toBeInTheDocument()
-  })
-
-  it('참가한 플레이어 이름을 표시한다', () => {
+  it('shows joined player names', () => {
     renderLobby()
     expect(screen.getByText('철수')).toBeInTheDocument()
   })
@@ -53,7 +50,7 @@ describe('Lobby readOnly mode', () => {
       realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
     },
     players: [
-      { playerUuid: 'p1', name: '민지', character: 'Guardian-판다', isHost: true, gameState: { isCompleted: true } },
+      { playerUuid: 'p1', name: '민서', character: 'Guardian-판다', isHost: true, gameState: { isCompleted: true } },
     ],
   }
 
@@ -67,39 +64,46 @@ describe('Lobby readOnly mode', () => {
     )
   }
 
-  it('mockRoom의 팀 코드를 표시한다', () => {
-    renderReadOnlyLobby()
-    expect(screen.getByText('ZZ9999')).toBeInTheDocument()
-  })
-
-  it('mockRoom의 플레이어 이름을 표시한다', () => {
-    renderReadOnlyLobby()
-    expect(screen.getByText('민지')).toBeInTheDocument()
-  })
-
-  it('나가기 버튼을 렌더링하지 않는다', () => {
-    renderReadOnlyLobby()
-    expect(screen.queryByLabelText('팀 나가기')).toBeNull()
-  })
-
-  it('가격 설정, 결과 등록 버튼을 렌더링하지 않는다', () => {
-    renderReadOnlyLobby()
-    expect(screen.queryByText('가격 설정')).toBeNull()
-    expect(screen.queryByText('결과 등록')).toBeNull()
-  })
-
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
-  it('fetch를 호출하지 않는다', () => {
+  it('shows mock room code and player names', () => {
+    renderReadOnlyLobby()
+
+    expect(screen.getByText('ZZ9999')).toBeInTheDocument()
+    expect(screen.getByText('민서')).toBeInTheDocument()
+  })
+
+  it('does not show the leave button', () => {
+    renderReadOnlyLobby()
+    expect(screen.queryByLabelText('팀 나가기')).toBeNull()
+  })
+
+  it('does not fetch live room data', () => {
     vi.stubGlobal('fetch', vi.fn())
     renderReadOnlyLobby()
     expect(fetch).not.toHaveBeenCalled()
   })
 
-  it('QR 코드 카드를 렌더링하지 않는다', () => {
+  it('shows the QR card in readOnly mode', () => {
     renderReadOnlyLobby()
-    expect(screen.queryByText('QR 코드')).toBeNull()
+    expect(screen.getByText('QR 코드')).toBeInTheDocument()
+  })
+
+  it('renders the QR preview as an in-browser data image', async () => {
+    renderReadOnlyLobby()
+
+    const qrImage = screen.getByAltText('QR 코드')
+
+    await waitFor(() => {
+      expect(qrImage).toHaveAttribute('src', expect.stringMatching(/^data:image\/png/))
+    })
+  })
+
+  it('shows price and result actions in readOnly mode', () => {
+    renderReadOnlyLobby()
+    expect(screen.getByText('가격 설정')).toBeInTheDocument()
+    expect(screen.getByText('결과 등록')).toBeInTheDocument()
   })
 })

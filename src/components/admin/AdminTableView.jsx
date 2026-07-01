@@ -2,8 +2,32 @@ import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import styles from './AdminTableView.module.css'
 
 const JOB_LABELS = {
-  a: '경영·금융', b: '연구·기술', c: '보건·교육',
-  d: '문화·콘텐츠', e: '서비스·판매', f: '생산·운송',
+  a: '경영·금융',
+  b: '연구·기술',
+  c: '보건·교육',
+  d: '문화·콘텐츠',
+  e: '서비스·판매',
+  f: '생산·운송',
+}
+
+function hasAnyInput(gameState) {
+  if (!gameState) return false
+  if (gameState.job) return true
+  if (gameState.cash != null) return true
+  if (Object.values(gameState.stocks ?? {}).some(count => count > 0)) return true
+  if (Object.values(gameState.realEstate ?? {}).some(count => count > 0)) return true
+  if ((gameState.badges ?? []).some(Boolean)) return true
+  return false
+}
+
+function getInputStatus(gameState) {
+  if (gameState?.isCompleted) return '✅ 입력완료'
+  if (hasAnyInput(gameState)) return '🟡 입력중'
+  return '❌ 미입력'
+}
+
+function formatWon(value) {
+  return value != null ? `${value.toLocaleString()}원` : '-'
 }
 
 function flattenRows(rooms) {
@@ -15,7 +39,6 @@ function flattenRows(rooms) {
         : null
       return {
         key: `${room.code}-${player.playerUuid}`,
-        teamCode: room.code,
         name: player.name,
         affiliation: player.affiliation,
         job: isCompleted ? JOB_LABELS[player.gameState.job] : null,
@@ -23,7 +46,7 @@ function flattenRows(rooms) {
         realEstateValue: breakdown?.realEstateValue ?? null,
         stockValue: breakdown?.stockValue ?? null,
         totalAssets: breakdown?.totalAssets ?? null,
-        isCompleted,
+        status: getInputStatus(player.gameState),
       }
     })
   )
@@ -36,7 +59,6 @@ export default function AdminTableView({ rooms }) {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.th}>팀코드</th>
             <th className={styles.th}>이름</th>
             <th className={styles.th}>소속</th>
             <th className={styles.th}>직업</th>
@@ -50,15 +72,14 @@ export default function AdminTableView({ rooms }) {
         <tbody>
           {rows.map(row => (
             <tr key={row.key} className={styles.tr}>
-              <td className={styles.td}>{row.teamCode}</td>
               <td className={styles.td}>{row.name}</td>
               <td className={styles.td}>{row.affiliation}</td>
               <td className={styles.td}>{row.job ?? '-'}</td>
-              <td className={styles.td}>{row.cash != null ? `${row.cash.toLocaleString()}원` : '-'}</td>
-              <td className={styles.td}>{row.realEstateValue != null ? `${row.realEstateValue.toLocaleString()}원` : '-'}</td>
-              <td className={styles.td}>{row.stockValue != null ? `${row.stockValue.toLocaleString()}원` : '-'}</td>
-              <td className={styles.td}>{row.totalAssets != null ? `${row.totalAssets.toLocaleString()}원` : '-'}</td>
-              <td className={styles.td}>{row.isCompleted ? '입력완료' : '미입력'}</td>
+              <td className={styles.td}>{formatWon(row.cash)}</td>
+              <td className={styles.td}>{formatWon(row.realEstateValue)}</td>
+              <td className={styles.td}>{formatWon(row.stockValue)}</td>
+              <td className={styles.td}>{formatWon(row.totalAssets)}</td>
+              <td className={`${styles.td} ${styles.status}`}>{row.status}</td>
             </tr>
           ))}
         </tbody>

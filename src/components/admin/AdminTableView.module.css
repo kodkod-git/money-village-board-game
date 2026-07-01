@@ -28,3 +28,7 @@
   border-bottom: 1px solid var(--divider);
   white-space: nowrap;
 }
+
+.status {
+  font-weight: 800;
+}
