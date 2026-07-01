@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import IndividualPage from './pages/IndividualPage'
 import RankingPage from './pages/RankingPage'
 import ResultPage from './pages/ResultPage'
+import AdminDashboard from './pages/AdminDashboard'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/ranking" element={<RankingPage />} />
       <Route path="/result/:sessionId" element={<RankingPage />} />
       <Route path="/result/:sessionId/player/:playerUuid" element={<ResultPage />} />
+      <Route path="/admin" element={<AdminDashboard />} />
     </Routes>
   )
 }
