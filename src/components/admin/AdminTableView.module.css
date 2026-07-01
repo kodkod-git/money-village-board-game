@@ -1,0 +1,30 @@
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--divider);
+  white-space: nowrap;
+}
+
+.tr:hover {
+  background: var(--slot-empty);
+}
+
+.td {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--divider);
+  white-space: nowrap;
+}
