@@ -114,3 +114,24 @@ body::after {
 
 input, button { font-family: inherit; }
 button { cursor: pointer; border: none; }
+
+body.admin-mode {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+body.admin-mode::before,
+body.admin-mode::after {
+  display: none;
+}
+
+body.admin-mode #root {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  aspect-ratio: unset;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: auto;
+}
