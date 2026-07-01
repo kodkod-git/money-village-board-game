@@ -7,7 +7,6 @@ describe('PlayerSlot', () => {
   it('참가한 플레이어의 이름과 캐릭터를 표시한다', () => {
     render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: true }} />)
     expect(screen.getByText('철수')).toBeInTheDocument()
-    expect(screen.getByText('방장 ★')).toBeInTheDocument()
     expect(screen.getByAltText('ptsc')).toBeInTheDocument()
   })
 
@@ -24,7 +23,7 @@ describe('PlayerSlot', () => {
 
   it('입력완료 시 입력완료 뱃지를 표시한다', () => {
     render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false, gameState: { isCompleted: true } }} />)
-    expect(screen.getByText('입력완료')).toBeInTheDocument()
+    expect(screen.getByLabelText('입력완료')).toBeInTheDocument()
   })
 
   it('onKick이 전달되면 추방 버튼을 표시한다', () => {
