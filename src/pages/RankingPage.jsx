@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
+import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
+import BoothCategoryTabs from '../components/BoothCategoryTabs'
 import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
+
+const TOP_TABS = [
+  { key: 'overall', label: '전체 랭킹' },
+  { key: 'booth', label: '부스 랭킹' },
+]
 
 const TABS = [
   { key: 'global', label: '전체' },
@@ -11,12 +18,16 @@ const TABS = [
   { key: 'team', label: '팀' },
 ]
 
+const BOOTH_VALUE_KEYS = { stock: 'stockValue', realEstate: 'realEstateValue' }
+
 export default function RankingPage() {
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const isV2 = Boolean(sessionId)
 
+  const [topTab, setTopTab] = useState('overall')
   const [activeTab, setActiveTab] = useState('global')
+  const [boothCategory, setBoothCategory] = useState('stock')
   const [rows, setRows] = useState([])
   const [myAffiliation, setMyAffiliation] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -39,6 +50,14 @@ export default function RankingPage() {
   useEffect(() => {
     setLoading(true)
     setError(null)
+
+    if (topTab === 'booth') {
+      fetch(`/api/rankings?category=${boothCategory}`)
+        .then(r => { if (!r.ok) throw new Error(); return r.json() })
+        .then(data => { setRows(data); setLoading(false) })
+        .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
+      return
+    }
 
     if (isV2 && activeTab === 'affiliation' && myAffiliation === null) return
 
@@ -63,23 +82,47 @@ export default function RankingPage() {
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(data => { setRows(data); setLoading(false) })
       .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-  }, [activeTab, sessionId, isV2, myAffiliation])
+  }, [activeTab, sessionId, isV2, myAffiliation, topTab, boothCategory])
+
+  const valueKey = topTab === 'booth' ? BOOTH_VALUE_KEYS[boothCategory] : 'totalAssets'
+  const podiumRows = rows.slice(0, 3)
 
   return (
     <div className={styles.page}>
       <BackButton />
       <div className={styles.inner}>
         <div className={styles.header}>
-          <h1 className={styles.title}>🏆 랭킹</h1>
+          <h1 className={styles.title}>랭킹</h1>
+          <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
         </div>
 
-        {isV2 && (
+        <div className={styles.topTabs}>
+          {TOP_TABS.map(tab => (
+            <button
+              key={tab.key}
+              className={`${styles.topTab} ${topTab === tab.key ? styles.topTabActive : ''}`}
+              onClick={() => {
+                // rows를 함께 비워야 이전 탭의 데이터(다른 valueKey 형태)가
+                // 새 탭의 렌더에 잘못 섞여 RankingPodium이 깨지는 것을 막는다.
+                setRows([])
+                setTopTab(tab.key)
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {topTab === 'overall' && isV2 && (
           <div className={styles.tabs}>
             {TABS.map(tab => (
               <button
                 key={tab.key}
                 className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setRows([])
+                  setActiveTab(tab.key)
+                }}
               >
                 {tab.label}
               </button>
@@ -87,22 +130,41 @@ export default function RankingPage() {
           </div>
         )}
 
+        {topTab === 'booth' && (
+          <BoothCategoryTabs
+            activeCategory={boothCategory}
+            onSelect={category => {
+              setRows([])
+              setBoothCategory(category)
+            }}
+          />
+        )}
+
         {loading && <p className={styles.message}>불러오는 중...</p>}
         {error && <p className={styles.message}>{error}</p>}
         {!loading && !error && (
-          <RankingTable
-            rows={rows}
-            highlightPlayerUuid={myPlayerUuid}
-            onRowClick={row => {
-              if (!row || row.isPlaceholder) {
-                navigate('/join')
-                return
-              }
-              if (row.sessionId && row.playerUuid) {
-                navigate(`/result/${row.sessionId}/player/${row.playerUuid}`)
-              }
-            }}
-          />
+          <>
+            {/* 순위 1~3위가 모두 있을 때만 시상대를 보여준다.
+                아래 목록에도 동일한 상위 랭커가 다시 나타나므로,
+                일부만 채워진 시상대는 오히려 어색하다. */}
+            {podiumRows.length === 3 && (
+              <RankingPodium rows={podiumRows} valueKey={valueKey} />
+            )}
+            <RankingTable
+              rows={rows}
+              valueKey={valueKey}
+              highlightPlayerUuid={myPlayerUuid}
+              onRowClick={row => {
+                if (!row || row.isPlaceholder) {
+                  navigate('/join')
+                  return
+                }
+                if (row.sessionId && row.playerUuid) {
+                  navigate(`/result/${row.sessionId}/player/${row.playerUuid}`)
+                }
+              }}
+            />
+          </>
         )}
       </div>
     </div>
