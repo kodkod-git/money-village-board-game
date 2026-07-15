@@ -1,0 +1,27 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  background: var(--slot-empty);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  height: 40px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.active {
+  background: var(--ink);
+  color: var(--white);
+  border-color: var(--ink);
+}
