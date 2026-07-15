@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js'
 
-export function calculateTotalAssets(gameState, prices) {
+export function calculateAssetBreakdown(gameState, prices) {
   const { cash, stocks, realEstate, badges } = gameState
   const badgeCount = badges.filter(Boolean).length
 
@@ -11,7 +11,9 @@ export function calculateTotalAssets(gameState, prices) {
     (sum, key) => sum + realEstate[key] * (prices.realEstate[key] ?? 0), 0
   )
   const baseAssets = (cash ?? 0) + stockValue + realEstateValue
-  return baseAssets * (badgeCount * 0.5)
+  const totalAssets = baseAssets * (badgeCount * 0.5)
+
+  return { cash: cash ?? 0, stockValue, realEstateValue, totalAssets }
 }
 
 export async function saveGameResult(room) {
@@ -40,7 +42,7 @@ export async function saveGameResult(room) {
     stock_holdings: player.gameState.stocks,
     real_estate_holdings: player.gameState.realEstate,
     badges: player.gameState.badges,
-    total_assets: calculateTotalAssets(player.gameState, prices),
+    total_assets: calculateAssetBreakdown(player.gameState, prices).totalAssets,
   }))
 
   const { error: resultsError } = await supabase.from('game_results').insert(rows)
