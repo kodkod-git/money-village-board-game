@@ -5,17 +5,25 @@ import { MemoryRouter } from 'react-router-dom'
 import RankingTable from './RankingTable'
 
 const mockRows = [
-  { rank: 1, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1' },
-  { rank: 2, name: '김철수', affiliation: '공학부', character: 'cat', totalAssets: 120000, playerUuid: 'uuid-2' },
+  { rank: 1, name: '홍길동', affiliation: '경영학과', teamCode: 'AB1234', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1' },
+  { rank: 2, name: '김철수', affiliation: '공학부', teamCode: 'CD5678', character: 'cat', totalAssets: 120000, playerUuid: 'uuid-2' },
 ]
 
 describe('RankingTable', () => {
-  it('등수, 이름, 소속, 총자산을 렌더링한다', () => {
+  it('등수, 이름, 소속, 팀, 총자산을 렌더링한다', () => {
     render(<MemoryRouter><RankingTable rows={mockRows} /></MemoryRouter>)
-    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('1위')).toBeInTheDocument()
     expect(screen.getByText('홍길동')).toBeInTheDocument()
-    expect(screen.getByText('경영학과')).toBeInTheDocument()
+    expect(screen.getByText('경영학과 · AB1234')).toBeInTheDocument()
     expect(screen.getByText('150,000원')).toBeInTheDocument()
+  })
+
+  it('valueKey를 지정하면 해당 필드 값을 표시한다', () => {
+    const boothRows = [
+      { rank: 1, name: '정우성', affiliation: '수도고', teamCode: 'EF9012', character: 'tiger', stockValue: 172000, playerUuid: 'uuid-3' },
+    ]
+    render(<MemoryRouter><RankingTable rows={boothRows} valueKey="stockValue" /></MemoryRouter>)
+    expect(screen.getByText('172,000원')).toBeInTheDocument()
   })
 
   it('highlightPlayerUuid에 해당하는 행을 하단에 pinned row로 렌더링한다', () => {
@@ -47,8 +55,8 @@ describe('RankingTable', () => {
 
   it('같은 playerUuid가 여러 행에 있을 때 각 행을 독립적으로 렌더링한다', () => {
     const duplicateRows = [
-      { rank: 1, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 200000, playerUuid: 'uuid-1', sessionId: 'session-A' },
-      { rank: 2, name: '홍길동', affiliation: '경영학과', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1', sessionId: 'session-B' },
+      { rank: 1, name: '홍길동', affiliation: '경영학과', teamCode: 'AB1234', character: 'fox', totalAssets: 200000, playerUuid: 'uuid-1', sessionId: 'session-A' },
+      { rank: 2, name: '홍길동', affiliation: '경영학과', teamCode: 'AB1234', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1', sessionId: 'session-B' },
     ]
     render(<MemoryRouter><RankingTable rows={duplicateRows} /></MemoryRouter>)
     const rows = screen.getAllByText('홍길동')

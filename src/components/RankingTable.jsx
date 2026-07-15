@@ -1,46 +1,38 @@
 import styles from './RankingTable.module.css'
 
-export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) {
+export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, valueKey = 'totalAssets' }) {
   const pinnedRow = highlightPlayerUuid
     ? rows.find(r => r.playerUuid === highlightPlayerUuid)
     : null
 
+  function formatValue(row) {
+    const value = row[valueKey]
+    return value == null ? '-원' : `${value.toLocaleString()}원`
+  }
+
   return (
     <div className={styles.container}>
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.th}>등수</th>
-              <th className={styles.th}>캐릭터</th>
-              <th className={styles.th}>이름</th>
-              <th className={styles.th}>소속</th>
-              <th className={styles.th}>총자산</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(row => (
-              <tr
-                key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
-                className={styles.tr}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-                style={onRowClick ? { cursor: 'pointer' } : undefined}
-              >
-                <td className={styles.td}>{row.rank}</td>
-                <td className={styles.td}>
-                  <img
-                    src={`/characters/${row.character}.png`}
-                    alt={row.character}
-                    className={styles.characterImg}
-                  />
-                </td>
-                <td className={styles.td}>{row.name}</td>
-                <td className={styles.td}>{row.affiliation}</td>
-                <td className={styles.td}>{row.totalAssets.toLocaleString()}원</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className={styles.list}>
+        {rows.map(row => (
+          <div
+            key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
+            className={styles.row}
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
+            style={onRowClick ? { cursor: 'pointer' } : undefined}
+          >
+            <span className={styles.rank}>{row.rank}위</span>
+            <img
+              src={`/characters/${row.character}.png`}
+              alt={row.character}
+              className={styles.characterImg}
+            />
+            <div className={styles.info}>
+              <span className={styles.name}>{row.name}</span>
+              <span className={styles.sub}>{row.affiliation} · {row.teamCode}</span>
+            </div>
+            <span className={styles.value}>{formatValue(row)}</span>
+          </div>
+        ))}
       </div>
 
       {pinnedRow && (
@@ -52,8 +44,8 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick }) 
             className={styles.characterImg}
           />
           <span className={styles.pinnedName}>{pinnedRow.name}</span>
-          <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation}</span>
-          <span className={styles.pinnedAssets}>{pinnedRow.totalAssets.toLocaleString()}원</span>
+          <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation} · {pinnedRow.teamCode}</span>
+          <span className={styles.pinnedAssets}>{formatValue(pinnedRow)}</span>
         </div>
       )}
 

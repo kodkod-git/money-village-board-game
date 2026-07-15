@@ -4,74 +4,92 @@
   flex-direction: column;
 }
 
-.tableWrapper {
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   overflow-y: auto;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 420px);
   scrollbar-width: none;
 }
 
-.tableWrapper::-webkit-scrollbar {
+.list::-webkit-scrollbar {
   display: none;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--slot-empty);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
 }
 
-.th {
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 12px;
-  color: #aaa;
-  border-bottom: 1px solid #333;
-}
-
-.tr:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.td {
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #eee;
-  border-bottom: 1px solid #222;
+.rank {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--ink-2);
+  min-width: 32px;
 }
 
 .characterImg {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .pinnedRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  margin-top: 8px;
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid #ffd700;
-  border-radius: 8px;
-  font-weight: bold;
-  color: #ffd700;
+  padding: 14px 16px;
+  margin-top: 12px;
+  background: var(--ink);
+  border-radius: var(--r-sm);
+  font-weight: 900;
+  color: var(--white);
 }
 
-.pinnedRank { font-size: 16px; min-width: 32px; }
+.pinnedRank { font-size: 15px; min-width: 32px; }
 .pinnedName { flex: 1; }
-.pinnedAffiliation { color: #ccc; font-size: 13px; }
-.pinnedAssets { font-size: 15px; }
+.pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: 12px; font-weight: 400; }
+.pinnedAssets { font-size: 14px; }
 
 .pinnedRowEmpty {
-  opacity: 0.75;
+  opacity: 0.85;
   justify-content: center;
 }
 
 .pinnedRowEmptyLabel {
-  font-size: 15px;
-  font-weight: bold;
-  font-style: normal;
+  font-size: 14px;
+  font-weight: 700;
   text-align: center;
-  color: #ffd700;
+  color: var(--white);
 }
