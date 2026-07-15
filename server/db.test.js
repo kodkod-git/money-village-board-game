@@ -145,3 +145,64 @@ describe('saveGameResult', () => {
     ])
   })
 })
+
+describe('getAllRankings', () => {
+  it('teamCode, stockValue, realEstateValue를 포함해 반환한다', async () => {
+    const rows = [{
+      player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
+      total_assets: 200000, stock_value: 4000, real_estate_value: 10000,
+      session_id: 's1', game_sessions: { team_code: 'AB1234' },
+    }]
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
+
+    const { getAllRankings } = await import('./db.js')
+    const result = await getAllRankings()
+
+    expect(result).toEqual([{
+      rank: 1, name: '김민준', affiliation: '서울중', character: 'lion',
+      totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
+      sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234',
+    }])
+  })
+
+  it('affiliation이 있으면 eq로 필터링을 건다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getAllRankings } = await import('./db.js')
+    await getAllRankings('서울중')
+
+    expect(builder.eq).toHaveBeenCalledWith('affiliation', '서울중')
+  })
+})
+
+describe('getBoothRankings', () => {
+  it('stock 카테고리는 stock_value 컬럼 기준 내림차순으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getBoothRankings } = await import('./db.js')
+    await getBoothRankings('stock')
+
+    expect(builder.order).toHaveBeenCalledWith('stock_value', { ascending: false })
+  })
+
+  it('realEstate 카테고리는 real_estate_value 컬럼 기준 내림차순으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getBoothRankings } = await import('./db.js')
+    await getBoothRankings('realEstate')
+
+    expect(builder.order).toHaveBeenCalledWith('real_estate_value', { ascending: false })
+  })
+
+  it('알 수 없는 카테고리는 에러를 던진다', async () => {
+    const { getBoothRankings } = await import('./db.js')
+    await expect(getBoothRankings('unknown')).rejects.toThrow('Unknown booth category: unknown')
+  })
+})
