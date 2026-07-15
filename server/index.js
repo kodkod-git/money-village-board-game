@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings } from './db.js'
+import { saveGameResult, getGameResult, getAllRankings, getBoothRankings } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -64,8 +64,10 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
 app.get('/api/rankings', async (req, res) => {
   try {
-    const affiliation = req.query.affiliation ?? null
-    const rankings = await getAllRankings(affiliation)
+    const { affiliation, category } = req.query
+    const rankings = category
+      ? await getBoothRankings(category)
+      : await getAllRankings(affiliation ?? null)
     res.json(rankings)
   } catch (err) {
     console.error('rankings error:', err)
@@ -93,6 +95,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
         badges: r.badges,
         totalAssets: Number(r.total_assets),
         playerUuid: r.player_uuid,
+        teamCode: session.team_code,
       })),
     })
   } catch (err) {
