@@ -100,3 +100,48 @@ describe('calculateAssetBreakdown', () => {
     expect(result.totalAssets).toBe(0)
   })
 })
+
+describe('saveGameResult', () => {
+  it('각 플레이어의 stock_value와 real_estate_value를 계산해 insert한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { saveGameResult } = await import('./db.js')
+
+    const room = {
+      code: 'AB1234',
+      prices: PRICES,
+      players: [
+        {
+          playerUuid: 'p1', name: '홍길동', affiliation: '서울중', character: 'fox',
+          gameState: {
+            job: 'a', cash: 10000,
+            stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+            realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+            badges: [true, true, false, false, false, false],
+          },
+        },
+      ],
+    }
+
+    await saveGameResult(room)
+
+    expect(mockResultsInsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        player_uuid: 'p1',
+        stock_value: 4000,
+        real_estate_value: 10000,
+        total_assets: 24000,
+      }),
+    ])
+  })
+})

@@ -20,6 +20,8 @@ CREATE TABLE game_results (
   real_estate_holdings JSONB NOT NULL,
   badges JSONB NOT NULL,
   total_assets NUMERIC NOT NULL,
+  stock_value NUMERIC,
+  real_estate_value NUMERIC,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

@@ -31,19 +31,24 @@ export async function saveGameResult(room) {
 
   if (sessionError) throw sessionError
 
-  const rows = players.map(player => ({
-    session_id: session.id,
-    player_uuid: player.playerUuid,
-    name: player.name,
-    affiliation: player.affiliation ?? '',
-    character: player.character,
-    job: player.gameState.job,
-    cash: player.gameState.cash ?? 0,
-    stock_holdings: player.gameState.stocks,
-    real_estate_holdings: player.gameState.realEstate,
-    badges: player.gameState.badges,
-    total_assets: calculateAssetBreakdown(player.gameState, prices).totalAssets,
-  }))
+  const rows = players.map(player => {
+    const breakdown = calculateAssetBreakdown(player.gameState, prices)
+    return {
+      session_id: session.id,
+      player_uuid: player.playerUuid,
+      name: player.name,
+      affiliation: player.affiliation ?? '',
+      character: player.character,
+      job: player.gameState.job,
+      cash: player.gameState.cash ?? 0,
+      stock_holdings: player.gameState.stocks,
+      real_estate_holdings: player.gameState.realEstate,
+      badges: player.gameState.badges,
+      total_assets: breakdown.totalAssets,
+      stock_value: breakdown.stockValue,
+      real_estate_value: breakdown.realEstateValue,
+    }
+  })
 
   const { error: resultsError } = await supabase.from('game_results').insert(rows)
   if (resultsError) throw resultsError
