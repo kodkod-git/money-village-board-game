@@ -82,7 +82,15 @@
 }
 
 .pinnedRank { font-size: 15px; min-width: 32px; }
-.pinnedName { flex: 1; }
+
+.pinnedInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.pinnedName { font-size: 15px; }
 .pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: 12px; font-weight: 400; }
 .pinnedAssets { font-size: 14px; }
 

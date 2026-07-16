@@ -43,8 +43,10 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
             alt={pinnedRow.character}
             className={styles.characterImg}
           />
-          <span className={styles.pinnedName}>{pinnedRow.name}</span>
-          <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation} · {pinnedRow.teamCode}</span>
+          <div className={styles.pinnedInfo}>
+            <span className={styles.pinnedName}>{pinnedRow.name}</span>
+            <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation} · {pinnedRow.teamCode}</span>
+          </div>
           <span className={styles.pinnedAssets}>{formatValue(pinnedRow)}</span>
         </div>
       )}
