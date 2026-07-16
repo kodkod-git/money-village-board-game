@@ -157,10 +157,6 @@ export default function RankingPage() {
               onRowClick={row => {
                 if (!row || row.isPlaceholder) {
                   navigate('/join')
-                  return
-                }
-                if (row.sessionId && row.playerUuid) {
-                  navigate(`/result/${row.sessionId}/player/${row.playerUuid}`)
                 }
               }}
             />
