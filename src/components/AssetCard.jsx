@@ -11,7 +11,7 @@ export default function AssetCard({ image, label, price, value, onChange }) {
           <span className={styles.price}>{price}</span>
         </div>
       </div>
-      <QuantitySelector value={value} onChange={onChange} />
+      <QuantitySelector value={value} onChange={onChange} label={label} />
     </div>
   )
 }
