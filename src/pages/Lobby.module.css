@@ -156,22 +156,22 @@
 
 .bottomBar {
   position: absolute;
-  bottom: 32px;
+  bottom: 24px;
   left: 24px;
   right: 24px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .actionBtn {
   flex: 1;
   background: var(--ink);
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   border-radius: var(--r-sm);
-  height: 56px;
-  padding: 0 24px;
+  height: 46px;
+  padding: 0 12px;
   box-shadow: var(--shadow-card);
 }
 
