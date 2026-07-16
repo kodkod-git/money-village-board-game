@@ -9,10 +9,9 @@ describe('QuantitySelector', () => {
     expect(screen.getByText('3')).toBeInTheDocument()
   })
 
-  it('값이 0이면 숫자 대신 대시(—)를 표시한다', () => {
+  it('값이 0이면 0을 표시한다', () => {
     render(<QuantitySelector value={0} onChange={vi.fn()} />)
-    expect(screen.getByText('—')).toBeInTheDocument()
-    expect(screen.queryByText('0')).toBeNull()
+    expect(screen.getByText('0')).toBeInTheDocument()
   })
 
   it('+ 버튼 클릭 시 onChange에 value+1을 전달한다', async () => {

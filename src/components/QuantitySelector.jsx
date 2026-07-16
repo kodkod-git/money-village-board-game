@@ -13,7 +13,7 @@ export default function QuantitySelector({ value, onChange }) {
       >
         −
       </button>
-      <span className={styles.count}>{value > 0 ? value : '—'}</span>
+      <span className={styles.count}>{value}</span>
       <button
         className={styles.plusBtn}
         onClick={() => onChange(Math.min(MAX, value + 1))}
