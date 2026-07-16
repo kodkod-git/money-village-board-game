@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import StepBar from '../components/StepBar'
 import AssetCard from '../components/AssetCard'
+import NumberInputModal from '../components/NumberInputModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
 
@@ -63,6 +64,7 @@ export default function IndividualPage() {
   const [step, setStep] = useState(0)
   const [completedUpTo, setCompletedUpTo] = useState(-1)
   const [cashDisplay, setCashDisplay] = useState('0')
+  const [showCashModal, setShowCashModal] = useState(false)
 
   useEffect(() => {
     if (!socket) return
@@ -242,29 +244,33 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>현금</h1>
           <p className={styles.stepSubtitle}>보유 현금을 입력해주세요</p>
-          <div className={styles.numpadDisplay}>
-            {Number(cashDisplay || 0).toLocaleString()}원
+          <div className={styles.cashCard}>
+            <span className={styles.cashLabel}>현금 (원)</span>
+            <button
+              type="button"
+              className={styles.cashInputBtn}
+              onClick={() => setShowCashModal(true)}
+            >
+              {cashDisplay === '0' ? (
+                <span className={styles.cashPlaceholder}>예: 5000</span>
+              ) : (
+                <span className={styles.cashValue}>{Number(cashDisplay).toLocaleString()}원</span>
+              )}
+            </button>
           </div>
-          <div className={styles.numpad}>
-            {['1','2','3','4','5','6','7','8','9','00','0','←'].map(key => (
-              <button
-                key={key}
-                className={styles.numpadKey}
-                onClick={() => {
-                  if (key === '←') {
-                    setCashDisplay(prev => prev.length <= 1 ? '0' : prev.slice(0, -1))
-                  } else {
-                    setCashDisplay(prev => {
-                      const next = prev === '0' ? key : prev + key
-                      return next.length > 10 ? prev : next
-                    })
-                  }
-                }}
-              >
-                {key}
-              </button>
-            ))}
-          </div>
+
+          {showCashModal && (
+            <NumberInputModal
+              title="현금 입력"
+              initialValue={Number(cashDisplay)}
+              unit="원"
+              onConfirm={val => {
+                setCashDisplay(String(val))
+                setShowCashModal(false)
+              }}
+              onClose={() => setShowCashModal(false)}
+            />
+          )}
         </div>
       )}
 

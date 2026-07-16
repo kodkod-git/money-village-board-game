@@ -125,66 +125,40 @@
   flex-shrink: 0;
 }
 
-.cashSection {
+.cashCard {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.cashInputWrapper {
-  display: flex;
-  align-items: center;
   gap: 12px;
 }
 
-.cashInput {
-  flex: 1;
-  height: 58px;
-  border-radius: var(--r-sm);
-  border: 1.5px solid var(--line);
-  padding: 0 22px;
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--ink);
-  outline: none;
-}
-
-.cashInput:focus { border-color: var(--purple); }
-
-.cashUnit {
-  font-size: 20px;
+.cashLabel {
+  font-size: 13px;
   font-weight: 700;
   color: var(--ink-2);
 }
 
-.numpadDisplay {
-  font-size: 36px;
+.cashInputBtn {
+  height: 58px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--line);
+  padding: 0 22px;
+  text-align: left;
+  background: var(--white);
+}
+
+.cashPlaceholder {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--disabled);
+}
+
+.cashValue {
+  font-size: 20px;
   font-weight: 900;
   color: var(--ink);
-  text-align: center;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--divider);
-  margin-bottom: 24px;
 }
-
-.numpad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.numpadKey {
-  background: var(--white);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--divider);
-  height: 72px;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--ink);
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-}
-
-.numpadKey:active { background: var(--slot-empty); }
