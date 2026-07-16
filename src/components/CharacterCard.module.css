@@ -23,6 +23,7 @@
 .card.locked { opacity: 0.35; cursor: not-allowed; }
 .badge {
   position: absolute; top: 4px; right: 4px;
+  z-index: 1;
   background: var(--ink); color: white;
   border-radius: 50%; width: 18px; height: 18px;
   font-size: 10px;
