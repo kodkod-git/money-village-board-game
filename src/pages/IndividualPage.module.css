@@ -71,8 +71,12 @@
 }
 
 .tileSelected {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(108, 125, 229, 0.2);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.tileSelected .tileLabel {
+  color: var(--white);
 }
 
 .jobIcon { font-size: 40px; }
@@ -108,9 +112,9 @@
 .nextBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .assetList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
   padding-bottom: 24px;
 }
 
