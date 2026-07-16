@@ -159,6 +159,7 @@ export default function IndividualPage() {
                   emitState(next)
                 }}
               >
+                {gameState.job === key && <span className={styles.tileBadge}>✓</span>}
                 <span className={styles.jobIcon}>{JOB_ICONS[key]}</span>
                 <span className={styles.tileLabel}>{label}</span>
               </button>
@@ -184,6 +185,7 @@ export default function IndividualPage() {
                   emitState(next)
                 }}
               >
+                {gameState.badges[i] && <span className={styles.tileBadge}>✓</span>}
                 <img src={`/badges/${name}.png`} alt={name} className={styles.badgeImg} />
                 <span className={styles.tileLabel}>{BADGE_LABELS[name]}</span>
               </button>
