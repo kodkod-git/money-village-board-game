@@ -2,7 +2,7 @@
   min-height: 100%;
   height: 100%;
   background: var(--white);
-  padding: 0 24px 32px;
+  padding: 0 24px 110px;
   color: var(--ink);
   display: flex;
   flex-direction: column;
@@ -20,8 +20,6 @@
 .inner {
   width: 100%;
   max-width: 100%;
-  position: relative;
-  z-index: 1;
 }
 
 .header {
@@ -45,7 +43,7 @@
 .topTabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   background: var(--slot-empty);
   border-radius: var(--r-pill);
   padding: 4px;
@@ -67,28 +65,26 @@
 }
 
 .tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--divider);
-  padding-bottom: 8px;
+  margin-bottom: 24px;
 }
 
 .tab {
-  padding: 8px 16px;
-  background: none;
-  border: none;
-  color: var(--ink-2);
-  font-size: 14px;
+  background: var(--slot-empty);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  height: 40px;
+  font-size: 13px;
   font-weight: 700;
-  border-radius: var(--r-sm);
+  color: var(--ink-2);
 }
-
-.tab:hover { background: var(--slot-empty); }
 
 .tabActive {
   color: var(--white);
   background: var(--ink);
+  border-color: var(--ink);
 }
 
 .message {

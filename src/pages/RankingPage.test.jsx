@@ -78,4 +78,11 @@ describe('RankingPage', () => {
     })
     expect(await screen.findByText('한소희')).toBeInTheDocument()
   })
+
+  it('홈 진입(sessionId 없음)에서는 나의 기록(pinned row)이 보이지 않는다', async () => {
+    renderAt('/ranking')
+    expect(await screen.findByText('김민준')).toBeInTheDocument()
+    expect(screen.queryByTestId('pinned-row')).toBeNull()
+    expect(screen.queryByTestId('pinned-row-empty')).toBeNull()
+  })
 })

@@ -15,6 +15,7 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets' }) {
           <span className={styles.name}>{row.name}</span>
           <div className={styles.box}>
             <span className={styles.rank}>{row.rank}위</span>
+            {row.rank !== 1 && <hr className={styles.divider} />}
             <span className={styles.value}>{row[valueKey].toLocaleString()}원</span>
           </div>
         </div>

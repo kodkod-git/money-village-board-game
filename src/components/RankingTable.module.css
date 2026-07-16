@@ -8,6 +8,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-bottom: 76px;
   overflow-y: auto;
   max-height: calc(100vh - 420px);
   scrollbar-width: none;
@@ -66,15 +67,19 @@
 }
 
 .pinnedRow {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  margin-top: 12px;
   background: var(--ink);
   border-radius: var(--r-sm);
   font-weight: 900;
   color: var(--white);
+  box-shadow: var(--shadow-card);
 }
 
 .pinnedRank { font-size: 15px; min-width: 32px; }

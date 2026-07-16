@@ -3,7 +3,7 @@
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .slot {
@@ -34,7 +34,7 @@
 .box {
   width: 100%;
   background: var(--slot-empty);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
   padding: 16px 8px;
   display: flex;
   flex-direction: column;
@@ -46,6 +46,13 @@
   font-size: 18px;
   font-weight: 900;
   color: var(--ink);
+}
+
+.divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 0;
 }
 
 .value {

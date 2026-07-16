@@ -42,4 +42,9 @@ describe('RankingPodium', () => {
     render(<RankingPodium rows={boothRows} valueKey="stockValue" />)
     expect(screen.getByText('172,000원')).toBeInTheDocument()
   })
+
+  it('2위/3위에는 구분선을 렌더링하고 1위에는 렌더링하지 않는다', () => {
+    const { container } = render(<RankingPodium rows={rows} />)
+    expect(container.querySelectorAll('hr')).toHaveLength(2)
+  })
 })

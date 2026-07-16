@@ -153,7 +153,7 @@ export default function RankingPage() {
             <RankingTable
               rows={rows}
               valueKey={valueKey}
-              highlightPlayerUuid={myPlayerUuid}
+              highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
               onRowClick={row => {
                 if (!row || row.isPlaceholder) {
                   navigate('/join')
