@@ -42,7 +42,7 @@
 .topTabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   background: var(--slot-empty);
   border-radius: var(--r-pill);
   padding: 4px;
@@ -51,10 +51,10 @@
 
 .topTab {
   flex: 1;
-  height: 44px;
+  height: 40px;
   border-radius: var(--r-pill);
   background: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--ink-2);
 }
@@ -76,8 +76,8 @@
   background: var(--slot-empty);
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  height: 40px;
-  font-size: 13px;
+  height: 36px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--ink-2);
 }
