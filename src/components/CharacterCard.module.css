@@ -2,7 +2,7 @@
   width: 100%;
   aspect-ratio: 1;
   background: #ffffff;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--ink);
   border-radius: 12px;
   cursor: pointer;
   position: relative;
