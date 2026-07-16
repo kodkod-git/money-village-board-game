@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import StepBar from '../components/StepBar'
-import AssetRow from '../components/AssetRow'
+import AssetCard from '../components/AssetCard'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './IndividualPage.module.css'
 
@@ -196,7 +196,7 @@ export default function IndividualPage() {
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
           <div className={styles.assetList}>
             {Object.keys(REAL_ESTATE_LABELS).map(key => (
-              <AssetRow
+              <AssetCard
                 key={key}
                 image={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
                 label={REAL_ESTATE_LABELS[key]}
@@ -220,7 +220,7 @@ export default function IndividualPage() {
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
           <div className={styles.assetList}>
             {Object.keys(STOCK_LABELS).map(key => (
-              <AssetRow
+              <AssetCard
                 key={key}
                 image={`/badges/stock/${STOCK_IMAGES[key]}.png`}
                 label={STOCK_LABELS[key]}

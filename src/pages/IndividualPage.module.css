@@ -112,9 +112,9 @@
 .nextBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .assetList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   padding-bottom: 24px;
 }
 
