@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
+import NumberInputModal from '../components/NumberInputModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Lobby.module.css'
 
@@ -28,6 +29,16 @@ const REAL_ESTATE_LABELS = {
 const DEFAULT_PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
   realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
+}
+
+const STOCK_IMAGES = {
+  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
+  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
+}
+
+const REAL_ESTATE_IMAGES = {
+  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
+  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
 }
 
 export default function Lobby({ readOnly = false, mockRoom = null }) {
@@ -261,72 +272,83 @@ function ConfirmModal({ onConfirm, onClose }) {
 }
 
 function PriceSettingModal({ prices, onConfirm, onClose }) {
-  const [step, setStep] = useState('select')
+  const [category, setCategory] = useState('stocks')
   const [tempPrices, setTempPrices] = useState(prices)
+  const [editingKey, setEditingKey] = useState(null)
 
-  function adjust(category, key, delta) {
-    const stepAmt = category === 'stocks' ? 2000 : 10000
-    const min = category === 'stocks' ? 2000 : 10000
-    const max = category === 'stocks' ? 20000 : 100000
-    setTempPrices(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [key]: Math.min(max, Math.max(min, prev[category][key] + delta * stepAmt)),
-      },
-    }))
+  function handleReset() {
+    setTempPrices(prev => ({ ...prev, [category]: DEFAULT_PRICES[category] }))
   }
 
-  if (step === 'select') {
-    return (
-      <div className={styles.overlay}>
-        <div className={styles.popup}>
-          <div className={styles.popupTitle}>가격 설정</div>
-          <div className={styles.categoryGrid}>
-            <button className={styles.categoryCard} onClick={() => setStep('stocks')}>
-              <span className={styles.categoryIcon}>주</span>
-              <span className={styles.categoryLabel}>주식</span>
-            </button>
-            <button className={styles.categoryCard} onClick={() => setStep('realEstate')}>
-              <span className={styles.categoryIcon}>부</span>
-              <span className={styles.categoryLabel}>부동산</span>
-            </button>
-          </div>
-          <button className={styles.cancelBtn} onClick={onClose}>닫기</button>
-        </div>
-      </div>
-    )
-  }
-
-  const isStocks = step === 'stocks'
-  const category = isStocks ? 'stocks' : 'realEstate'
-  const labels = isStocks ? STOCK_LABELS : REAL_ESTATE_LABELS
+  const labels = category === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
+  const images = category === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
+  const folder = category === 'stocks' ? 'stock' : 'estate'
+  const editingLabel = editingKey ? labels[editingKey] : null
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.popup}>
-        <div className={styles.popupTitle}>
-          {isStocks ? '주식 가격' : '부동산 가격'}
-        </div>
-        <div className={styles.quantityList}>
-          {Object.keys(labels).map(key => (
-            <div key={key} className={styles.quantityItem}>
-              <span className={styles.quantityLabel}>{labels[key]}</span>
-              <div className={styles.quantityControls}>
-                <button className={styles.qtyBtn} onClick={() => adjust(category, key, -1)}>-</button>
-                <span className={styles.priceDisplay}>
-                  {tempPrices[category][key].toLocaleString()}원
-                </span>
-                <button className={styles.qtyBtn} onClick={() => adjust(category, key, +1)}>+</button>
+    <>
+      <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.priceModal} onClick={e => e.stopPropagation()}>
+          <div className={styles.priceModalHeader}>
+            <button className={styles.priceBackBtn} onClick={onClose} type="button">‹ 뒤로</button>
+            <span className={styles.priceModalTitle}>가격 설정</span>
+            <button className={styles.priceResetBtn} onClick={handleReset} type="button">초기화</button>
+          </div>
+
+          <div className={styles.priceTabs}>
+            <button
+              className={`${styles.priceTab} ${category === 'stocks' ? styles.priceTabActive : ''}`}
+              onClick={() => setCategory('stocks')}
+              type="button"
+            >
+              주식
+            </button>
+            <button
+              className={`${styles.priceTab} ${category === 'realEstate' ? styles.priceTabActive : ''}`}
+              onClick={() => setCategory('realEstate')}
+              type="button"
+            >
+              부동산
+            </button>
+          </div>
+
+          <div className={styles.priceList}>
+            {Object.keys(labels).map(key => (
+              <div key={key} className={styles.priceRow}>
+                <img src={`/badges/${folder}/${images[key]}.png`} alt="" className={styles.priceIcon} />
+                <div className={styles.priceInfo}>
+                  <span className={styles.priceLabel}>{labels[key]}</span>
+                  <span className={styles.priceUnit}>단위: 원</span>
+                </div>
+                <button
+                  className={styles.pricePill}
+                  onClick={() => setEditingKey(key)}
+                  type="button"
+                >
+                  {tempPrices[category][key].toLocaleString()} 원 ›
+                </button>
               </div>
-            </div>
-          ))}
-        </div>
-        <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={() => setStep('select')}>뒤로</button>
-          <button className={styles.confirmBtn} onClick={() => onConfirm(tempPrices)}>확인</button>
+            ))}
+          </div>
+
+          <button className={styles.priceConfirmBtn} onClick={() => onConfirm(tempPrices)} type="button">
+            확인하기
+          </button>
         </div>
       </div>
-    </div>
+
+      {editingKey && (
+        <NumberInputModal
+          title={editingLabel}
+          initialValue={tempPrices[category][editingKey]}
+          unit="원"
+          onConfirm={val => {
+            setTempPrices(prev => ({ ...prev, [category]: { ...prev[category], [editingKey]: val } }))
+            setEditingKey(null)
+          }}
+          onClose={() => setEditingKey(null)}
+        />
+      )}
+    </>
   )
 }

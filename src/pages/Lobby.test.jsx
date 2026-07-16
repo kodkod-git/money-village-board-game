@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
@@ -105,5 +106,37 @@ describe('Lobby readOnly mode', () => {
     renderReadOnlyLobby()
     expect(screen.getByText('가격 설정')).toBeInTheDocument()
     expect(screen.getByText('결과 등록')).toBeInTheDocument()
+  })
+})
+
+describe('Lobby price setting modal', () => {
+  it('가격 설정 버튼을 누르면 팝업이 열리고 기본으로 주식 목록이 보인다', async () => {
+    renderLobby()
+    await userEvent.click(screen.getByText('가격 설정'))
+    expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+  })
+
+  it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
+    renderLobby()
+    await userEvent.click(screen.getByText('가격 설정'))
+    await userEvent.click(screen.getByText('부동산'))
+    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+  })
+
+  it('가격 pill을 누르면 숫자 입력 팝업이 열리고, 확인하면 가격이 갱신된다', async () => {
+    renderLobby()
+    await userEvent.click(screen.getByText('가격 설정'))
+    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
+    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
+
+    for (let i = 0; i < 4; i++) {
+      await userEvent.click(screen.getByRole('button', { name: '←' }))
+    }
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '0' }))
+    await userEvent.click(screen.getByRole('button', { name: '00' }))
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(screen.getByRole('button', { name: /9,000 원/ })).toBeInTheDocument()
   })
 })
