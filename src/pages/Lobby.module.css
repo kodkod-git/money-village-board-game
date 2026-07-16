@@ -12,30 +12,22 @@
   display: none;
 }
 
-.leaveBtn {
+.priceSettingBtn {
   position: absolute;
   top: 32px;
   right: 24px;
-  background: none;
-  border: none;
-  height: 28px;
-  padding: 3px 0;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: var(--ink-2);
+  gap: 6px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  height: 40px;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 700;
-  white-space: nowrap;
-}
-
-.leaveIcon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  display: block;
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
 }
 
 .header {
@@ -175,13 +167,31 @@
   box-shadow: var(--shadow-card);
 }
 
-.submitBtn { background: var(--purple); }
 .actionBtn:disabled {
   background: var(--slot-empty);
   color: var(--disabled);
   border: 1px solid var(--line);
   box-shadow: none;
   cursor: not-allowed;
+}
+
+.exitBtn {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  background: var(--white);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-card);
+}
+
+.exitIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .overlay {
