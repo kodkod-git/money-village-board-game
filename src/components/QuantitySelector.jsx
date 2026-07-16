@@ -1,8 +1,12 @@
+import { useState } from 'react'
+import NumberInputModal from './NumberInputModal'
 import styles from './QuantitySelector.module.css'
 
 const MAX = 10
 
-export default function QuantitySelector({ value, onChange }) {
+export default function QuantitySelector({ value, onChange, label }) {
+  const [showModal, setShowModal] = useState(false)
+
   return (
     <div className={styles.stepper}>
       <button
@@ -13,7 +17,9 @@ export default function QuantitySelector({ value, onChange }) {
       >
         −
       </button>
-      <span className={styles.count}>{value}</span>
+      <button type="button" className={styles.count} onClick={() => setShowModal(true)}>
+        {value}
+      </button>
       <button
         className={styles.plusBtn}
         onClick={() => onChange(Math.min(MAX, value + 1))}
@@ -22,6 +28,20 @@ export default function QuantitySelector({ value, onChange }) {
       >
         +
       </button>
+
+      {showModal && (
+        <NumberInputModal
+          title={`${label} 수량`}
+          initialValue={value}
+          unit="개"
+          maxValue={MAX}
+          onConfirm={next => {
+            onChange(next)
+            setShowModal(false)
+          }}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   )
 }
