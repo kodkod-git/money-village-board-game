@@ -1,0 +1,63 @@
+.page { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.header { display: flex; align-items: center; gap: 10px; }
+
+.backBtn { font-size: 14px; font-weight: 700; color: var(--ink-2); }
+
+.avatar { width: 36px; height: 36px; object-fit: contain; }
+
+.name { font-size: 18px; font-weight: 800; color: var(--ink); }
+
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.fieldHeader { display: flex; justify-content: space-between; align-items: center; }
+
+.fieldLabel { font-size: 12px; font-weight: 700; color: var(--ghost); }
+
+.fieldValue { font-size: 15px; font-weight: 800; color: var(--ink); }
+
+.editBtn {
+  background: var(--slot-empty);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+}
+
+.chipRow { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  background: var(--slot-empty);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 8px;
+  border-top: 1px solid var(--divider);
+  padding-top: 12px;
+}
+
+.footerLabel { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+
+.footerValue { font-size: 22px; font-weight: 900; color: var(--ink); }

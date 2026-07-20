@@ -1,0 +1,54 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi } from 'vitest'
+import AdminEditModal from './AdminEditModal'
+
+const PRICES = {
+  stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+  realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
+}
+
+const PLAYER = {
+  playerUuid: 'p1', name: '김민준', character: 'Innovator-사자', affiliation: '서울중',
+  gameState: {
+    cash: 125000, job: 'a',
+    stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+    badges: [true, false, false, false, false, false],
+    isCompleted: true,
+  },
+}
+
+describe('AdminEditModal', () => {
+  it('직업/현금/총자산 값을 보여준다', () => {
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('경영·금융')).toBeInTheDocument()
+    expect(screen.getByText('125,000원')).toBeInTheDocument()
+    // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → ×0.5 = 69,500원
+    expect(screen.getByText('69,500원')).toBeInTheDocument()
+  })
+
+  it('직업 수정 버튼 클릭 후 직업 선택 시 onSave("job", key)를 호출한다', async () => {
+    const onSave = vi.fn()
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByTestId('edit-job'))
+    await userEvent.click(screen.getByText('보건·교육'))
+    expect(onSave).toHaveBeenCalledWith('job', 'c')
+  })
+
+  it('현금 수정 시 onSave("cash", value)를 호출한다', async () => {
+    const onSave = vi.fn()
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByTestId('edit-cash'))
+    await userEvent.click(screen.getByText('5'))
+    await userEvent.click(screen.getByText('확인'))
+    expect(onSave).toHaveBeenCalledWith('cash', 5)
+  })
+
+  it('뒤로 버튼 클릭 시 onClose를 호출한다', async () => {
+    const onClose = vi.fn()
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={onClose} />)
+    await userEvent.click(screen.getByText('‹ 뒤로'))
+    expect(onClose).toHaveBeenCalled()
+  })
+})
