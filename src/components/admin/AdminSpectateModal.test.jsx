@@ -56,4 +56,39 @@ describe('AdminSpectateModal', () => {
     await userEvent.click(screen.getByText('‹ 뒤로'))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('필드 수정 시 PATCH 요청을 보내고 응답으로 onPlayerUpdate를 호출한다', async () => {
+    const onPlayerUpdate = vi.fn()
+    const updatedPlayer = {
+      playerUuid: 'AB1234-p1', name: '김민준', character: 'Innovator-사자', affiliation: '서울중',
+      gameState: {
+        cash: 10000, job: 'c',
+        stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+        realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+        badges: [false, false, false, false, false, false],
+        isCompleted: false,
+      },
+    }
+    global.fetch = vi.fn((_url, options) => {
+      if (options?.method === 'PATCH') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(updatedPlayer) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+    })
+
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={onPlayerUpdate} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByText('수정'))
+    await userEvent.click(screen.getByTestId('edit-job'))
+    await userEvent.click(screen.getByText('보건·교육'))
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/rooms/AB1234/players/AB1234-p1',
+      expect.objectContaining({
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job: 'c' }),
+      })
+    )
+    expect(onPlayerUpdate).toHaveBeenCalledWith('AB1234', updatedPlayer)
+  })
 })

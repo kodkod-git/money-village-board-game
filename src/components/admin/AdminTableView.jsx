@@ -1,14 +1,6 @@
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
+import { JOB_LABELS } from '../../constants/gameData'
 import styles from './AdminTableView.module.css'
-
-const JOB_LABELS = {
-  a: '경영·금융',
-  b: '연구·기술',
-  c: '보건·교육',
-  d: '문화·콘텐츠',
-  e: '서비스·판매',
-  f: '생산·운송',
-}
 
 function hasAnyInput(gameState) {
   if (!gameState) return false

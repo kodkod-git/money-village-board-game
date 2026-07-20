@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
-import { JOB_LABELS, BADGE_NAMES } from '../../constants/gameData'
+import { JOB_LABELS, BADGE_NAMES, BADGE_LABELS } from '../../constants/gameData'
 import NumberInputModal from '../NumberInputModal'
 import JobEditModal from './JobEditModal'
 import BadgeEditModal from './BadgeEditModal'
@@ -39,7 +39,7 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
             </div>
             <div className={styles.chipRow}>
               {earnedBadges.length === 0 && <span className={styles.fieldValue}>미입력</span>}
-              {earnedBadges.map(name => <span key={name} className={styles.chip}>{name}</span>)}
+              {earnedBadges.map(name => <span key={name} className={styles.chip}>{BADGE_LABELS[name]}</span>)}
             </div>
           </div>
 
