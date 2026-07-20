@@ -1,72 +1,88 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, vi, afterEach } from 'vitest'
-
-vi.mock('socket.io-client', () => {
-  const socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn(), connected: true, id: 's1' }
-  return { io: vi.fn(() => socket) }
-})
-
-import { SocketProvider } from '../contexts/SocketContext'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminDashboard from './AdminDashboard'
+
+const PRICES = {
+  stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+  realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
+}
+
+const ROOMS = [{
+  code: 'CD5678', status: 'live', registered: false, prices: PRICES,
+  players: [{
+    playerUuid: 'p1', name: '홍길동', character: 'Adventurer-강아지', affiliation: '서울중',
+    gameState: {
+      cash: 15000, job: 'a',
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+      isCompleted: false,
+    },
+  }],
+}]
 
 function renderDashboard() {
   return render(
-    <SocketProvider>
-      <MemoryRouter>
-        <AdminDashboard />
-      </MemoryRouter>
-    </SocketProvider>
+    <MemoryRouter>
+      <AdminDashboard />
+    </MemoryRouter>
   )
 }
+
+beforeEach(() => {
+  global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve(ROOMS) })
+})
 
 afterEach(() => {
   document.body.classList.remove('admin-mode')
 })
 
 describe('AdminDashboard', () => {
-  it('mounts with the admin-mode body class', () => {
+  it('마운트 시 admin-mode 바디 클래스를 추가한다', async () => {
     renderDashboard()
     expect(document.body.classList.contains('admin-mode')).toBe(true)
+    await screen.findByText('홍길동')
   })
 
-  it('removes the admin-mode body class on unmount', () => {
+  it('언마운트 시 admin-mode 바디 클래스를 제거한다', () => {
     const { unmount } = renderDashboard()
     unmount()
     expect(document.body.classList.contains('admin-mode')).toBe(false)
   })
 
-  it('shows the grid view by default without team codes', () => {
+  it('/api/admin/rooms에서 받은 팀을 그리드 뷰에 보여준다', async () => {
     renderDashboard()
-
-    expect(screen.getByText('홍길동')).toBeInTheDocument()
+    expect(await screen.findByText('홍길동')).toBeInTheDocument()
     expect(screen.queryByText('CD5678')).not.toBeInTheDocument()
   })
 
-  it('shows the table view when the table tab is clicked', async () => {
+  it('테이블 뷰 탭 클릭 시 테이블을 보여준다', async () => {
     renderDashboard()
-
+    await screen.findByText('홍길동')
     await userEvent.click(screen.getByText('테이블 뷰'))
-
     expect(screen.getByText('이름')).toBeInTheDocument()
-    expect(screen.queryByText('팀코드')).not.toBeInTheDocument()
   })
 
-  it('opens the spectate popup when a room card is clicked', async () => {
+  it('팀 카드 클릭 시 관전 팝업을 연다', async () => {
     renderDashboard()
-
-    await userEvent.click(screen.getByRole('button', { name: /홍길동/ }))
-
-    expect(screen.getByText('관전 모드입니다')).toBeInTheDocument()
+    await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
+    expect(screen.getByText('1팀')).toBeInTheDocument()
   })
 
-  it('closes the popup when the close button is clicked', async () => {
+  it('‹ 뒤로 클릭 시 팝업을 닫는다', async () => {
     renderDashboard()
+    await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
+    await userEvent.click(screen.getByText('‹ 뒤로'))
+    expect(screen.queryByText('1팀')).toBeNull()
+  })
 
-    await userEvent.click(screen.getByRole('button', { name: /홍길동/ }))
-    await userEvent.click(screen.getByLabelText('닫기'))
-
-    expect(screen.queryByText('관전 모드입니다')).toBeNull()
+  it('새로고침 버튼 클릭 시 /api/admin/rooms를 다시 호출한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    global.fetch.mockClear()
+    await userEvent.click(screen.getByText('↻ 새로고침'))
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms')
   })
 })
