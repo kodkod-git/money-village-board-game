@@ -5,8 +5,8 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings, getBoothRankings } from './db.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid } from './rooms.js'
+import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -72,6 +72,56 @@ app.get('/api/rankings', async (req, res) => {
   } catch (err) {
     console.error('rankings error:', err)
     res.status(500).json({ error: 'Failed to fetch rankings' })
+  }
+})
+
+app.get('/api/admin/rooms', async (_req, res) => {
+  try {
+    const liveRooms = listAllRooms().map(room => ({
+      code: room.code,
+      status: 'live',
+      registered: false,
+      prices: room.prices,
+      players: room.players.map(p => ({
+        playerUuid: p.playerUuid,
+        name: p.name,
+        character: p.character,
+        affiliation: p.affiliation,
+        gameState: p.gameState,
+      })),
+    }))
+    const completedRooms = await getAllCompletedTeams()
+    res.json([...liveRooms, ...completedRooms])
+  } catch (err) {
+    console.error('admin rooms error:', err)
+    res.status(500).json({ error: 'Failed to fetch rooms' })
+  }
+})
+
+app.patch('/api/admin/rooms/:code/players/:playerUuid', async (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const { playerUuid } = req.params
+  const partialGameState = req.body
+
+  const room = updatePlayerStateByUuid(code, playerUuid, partialGameState)
+  if (room) {
+    io.to(code).emit('room-updated', { players: room.players })
+    const player = room.players.find(p => p.playerUuid === playerUuid)
+    return res.json({
+      playerUuid: player.playerUuid,
+      name: player.name,
+      character: player.character,
+      affiliation: player.affiliation,
+      gameState: player.gameState,
+    })
+  }
+
+  try {
+    const updatedPlayer = await updateGameResult(code, playerUuid, partialGameState)
+    res.json(updatedPlayer)
+  } catch (err) {
+    console.error('admin patch error:', err)
+    res.status(404).json({ error: 'Player not found' })
   }
 })
 
