@@ -1,0 +1,55 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import IndividualPage from './IndividualPage'
+import { SocketProvider } from '../contexts/SocketContext'
+
+const PLAYER = {
+  socketId: 's1', playerUuid: 'p1', name: '김민준', character: 'Innovator-사자',
+  gameState: {
+    cash: 0, job: null,
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+    badges: [false, false, false, false, false, false],
+    stocksVisited: false, realEstateVisited: false, isCompleted: false,
+  },
+}
+
+vi.mock('socket.io-client', () => {
+  const socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn(), connected: true, id: 's1' }
+  return { io: vi.fn(() => socket) }
+})
+
+beforeEach(() => {
+  global.fetch = vi.fn().mockResolvedValue({
+    json: () => Promise.resolve({ players: [PLAYER], prices: {} }),
+  })
+})
+
+function renderPage() {
+  return render(
+    <SocketProvider>
+      <MemoryRouter initialEntries={['/lobby/AB1234/individual']}>
+        <Routes>
+          <Route path="/lobby/:code/individual" element={<IndividualPage />} />
+        </Routes>
+      </MemoryRouter>
+    </SocketProvider>
+  )
+}
+
+describe('IndividualPage', () => {
+  it('직업 선택 단계를 먼저 보여준다', async () => {
+    renderPage()
+    expect(await screen.findByText('직업 선택')).toBeInTheDocument()
+  })
+
+  it('직업을 선택하면 다음 단계로 진행할 수 있다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('경영·금융'))
+    await userEvent.click(screen.getByText('다음'))
+    expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
+  })
+})
