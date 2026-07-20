@@ -1934,7 +1934,8 @@ describe('AdminEditModal', () => {
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByText('경영·금융')).toBeInTheDocument()
     expect(screen.getByText('125,000원')).toBeInTheDocument()
-    expect(screen.getByText('135,000원')).toBeInTheDocument()
+    // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → ×0.5 = 69,500원
+    expect(screen.getByText('69,500원')).toBeInTheDocument()
   })
 
   it('직업 수정 버튼 클릭 후 직업 선택 시 onSave("job", key)를 호출한다', async () => {
