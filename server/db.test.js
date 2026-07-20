@@ -206,3 +206,46 @@ describe('getBoothRankings', () => {
     await expect(getBoothRankings('unknown')).rejects.toThrow('Unknown booth category: unknown')
   })
 })
+
+describe('getAllCompletedTeams', () => {
+  it('세션과 결과를 팀 단위로 묶어 room 형태로 반환한다', async () => {
+    const sessions = [{
+      id: 'session-1', team_code: 'AB1234',
+      stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+    }]
+    const results = [{
+      session_id: 'session-1', player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
+      job: 'a', cash: 10000,
+      stock_holdings: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      real_estate_holdings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
+    }]
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return makeQueryBuilder({ data: sessions, error: null })
+      if (table === 'game_results') return makeQueryBuilder({ data: results, error: null })
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { getAllCompletedTeams } = await import('./db.js')
+    const rooms = await getAllCompletedTeams()
+
+    expect(rooms).toEqual([{
+      code: 'AB1234',
+      status: 'completed',
+      registered: true,
+      prices: { stocks: PRICES.stocks, realEstate: PRICES.realEstate },
+      players: [{
+        playerUuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
+        gameState: {
+          cash: 10000, job: 'a',
+          stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+          realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+          badges: [true, true, false, false, false, false],
+          isCompleted: true,
+        },
+      }],
+    }])
+  })
+})

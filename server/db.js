@@ -76,6 +76,41 @@ export async function getGameResult(sessionId) {
   return { session, results }
 }
 
+export async function getAllCompletedTeams() {
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('game_sessions')
+    .select('*')
+  if (sessionsError) throw sessionsError
+
+  const { data: results, error: resultsError } = await supabase
+    .from('game_results')
+    .select('*')
+  if (resultsError) throw resultsError
+
+  return sessions.map(session => ({
+    code: session.team_code,
+    status: 'completed',
+    registered: true,
+    prices: { stocks: session.stock_prices, realEstate: session.real_estate_prices },
+    players: results
+      .filter(r => r.session_id === session.id)
+      .map(r => ({
+        playerUuid: r.player_uuid,
+        name: r.name,
+        character: r.character,
+        affiliation: r.affiliation,
+        gameState: {
+          cash: r.cash,
+          job: r.job,
+          stocks: r.stock_holdings,
+          realEstate: r.real_estate_holdings,
+          badges: r.badges,
+          isCompleted: true,
+        },
+      })),
+  }))
+}
+
 const RANKING_SELECT = 'player_uuid, name, affiliation, character, total_assets, stock_value, real_estate_value, session_id, game_sessions(team_code)'
 
 function mapRankingRow(r, i) {
