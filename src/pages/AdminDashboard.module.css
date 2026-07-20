@@ -14,6 +14,19 @@
   margin-bottom: 24px;
 }
 
+.headerActions { display: flex; gap: 8px; }
+
+.refreshBtn {
+  background: var(--slot-empty);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
 .title {
   font-size: 30px;
   font-weight: 900;
@@ -86,16 +99,3 @@
   display: none;
 }
 
-.closeBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--slot-empty);
-  color: var(--ink-2);
-  font-size: 18px;
-  line-height: 1;
-  z-index: 1;
-}

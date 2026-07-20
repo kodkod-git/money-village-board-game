@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+// src/pages/AdminDashboard.jsx
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminGridView from '../components/admin/AdminGridView'
 import AdminTableView from '../components/admin/AdminTableView'
-import Lobby from './Lobby'
-import { ADMIN_MOCK_ROOMS } from '../data/adminMockData'
+import AdminSpectateModal from '../components/admin/AdminSpectateModal'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
@@ -14,23 +14,43 @@ const TABS = [
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('grid')
-  const [spectatingRoom, setSpectatingRoom] = useState(null)
+  const [rooms, setRooms] = useState([])
+  const [spectateIndex, setSpectateIndex] = useState(null)
+
+  const loadRooms = useCallback(() => {
+    fetch('/api/admin/rooms')
+      .then(r => r.json())
+      .then(setRooms)
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     document.body.classList.add('admin-mode')
+    loadRooms()
     return () => document.body.classList.remove('admin-mode')
-  }, [])
+  }, [loadRooms])
+
+  function handlePlayerUpdate(code, updatedPlayer) {
+    setRooms(prev => prev.map(room => {
+      if (room.code !== code) return room
+      return {
+        ...room,
+        players: room.players.map(p => (p.playerUuid === updatedPlayer.playerUuid ? updatedPlayer : p)),
+      }
+    }))
+  }
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>관리자 모드</h1>
-          <p className={styles.subtitle}>데모 버전 — 목업 데이터로 동작합니다</p>
+          <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
         </div>
-        <button className={styles.exitBtn} onClick={() => navigate('/')} type="button">
-          ← 나가기
-        </button>
+        <div className={styles.headerActions}>
+          <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
+          <button className={styles.exitBtn} onClick={() => navigate('/')} type="button">← 나가기</button>
+        </div>
       </div>
 
       <div className={styles.tabs}>
@@ -47,22 +67,19 @@ export default function AdminDashboard() {
       </div>
 
       {activeTab === 'grid' && (
-        <AdminGridView rooms={ADMIN_MOCK_ROOMS} onSpectate={setSpectatingRoom} />
+        <AdminGridView rooms={rooms} onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))} />
       )}
-      {activeTab === 'table' && <AdminTableView rooms={ADMIN_MOCK_ROOMS} />}
+      {activeTab === 'table' && <AdminTableView rooms={rooms} />}
 
-      {spectatingRoom && (
-        <div className={styles.overlay} onClick={() => setSpectatingRoom(null)}>
+      {spectateIndex !== null && (
+        <div className={styles.overlay} onClick={() => setSpectateIndex(null)}>
           <div className={styles.popup} onClick={e => e.stopPropagation()}>
-            <button
-              className={styles.closeBtn}
-              onClick={() => setSpectatingRoom(null)}
-              aria-label="닫기"
-              type="button"
-            >
-              ×
-            </button>
-            <Lobby readOnly mockRoom={spectatingRoom} />
+            <AdminSpectateModal
+              rooms={rooms}
+              initialIndex={spectateIndex}
+              onPlayerUpdate={handlePlayerUpdate}
+              onClose={() => setSpectateIndex(null)}
+            />
           </div>
         </div>
       )}
