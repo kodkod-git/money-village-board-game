@@ -1,0 +1,59 @@
+.card {
+  background: var(--white);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header { display: flex; align-items: center; gap: 10px; }
+
+.avatar { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+
+.identity { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+.name { font-size: 16px; font-weight: 800; color: var(--ink); }
+
+.job { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+
+.editBtn {
+  background: var(--purple);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  flex-shrink: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid var(--divider);
+  padding-top: 10px;
+}
+
+.rowLabel { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+
+.totalAssets { font-size: 16px; font-weight: 900; color: var(--ink); }
+
+.section { display: flex; flex-direction: column; gap: 6px; }
+
+.sectionLabel { font-size: 11px; font-weight: 700; color: var(--ghost); }
+
+.iconRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px; }
+
+.badgeIcon, .assetIcon { width: 22px; height: 22px; object-fit: contain; }
+
+.iconCount {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
