@@ -42,6 +42,10 @@ export function getRoom(code) {
   return rooms.get(code) ?? null
 }
 
+export function listAllRooms() {
+  return Array.from(rooms.values())
+}
+
 export function addPlayer(code, { socketId, name, character, isHost, playerUuid, affiliation = '' }) {
   if (!socketId) throw new Error('player.socketId is required')
   const room = rooms.get(code)

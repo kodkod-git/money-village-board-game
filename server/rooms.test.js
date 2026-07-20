@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
-  isCharacterTaken, clearRooms, updateRoomPrices
+  isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -147,5 +147,19 @@ describe('updateRoomPrices', () => {
 
   it('존재하지 않는 socketId는 null을 반환한다', () => {
     expect(updateRoomPrices('unknown', {})).toBeNull()
+  })
+})
+
+describe('listAllRooms', () => {
+  it('생성된 모든 방을 배열로 반환한다', () => {
+    const room1 = createRoom()
+    const room2 = createRoom()
+    const codes = listAllRooms().map(r => r.code)
+    expect(codes).toEqual(expect.arrayContaining([room1.code, room2.code]))
+    expect(listAllRooms()).toHaveLength(2)
+  })
+
+  it('방이 없으면 빈 배열을 반환한다', () => {
+    expect(listAllRooms()).toEqual([])
   })
 })
