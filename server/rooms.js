@@ -96,6 +96,15 @@ export function updatePlayerState(socketId, gameState) {
   return room
 }
 
+export function updatePlayerStateByUuid(code, playerUuid, partialGameState) {
+  const room = rooms.get(code)
+  if (!room) return null
+  const player = room.players.find(p => p.playerUuid === playerUuid)
+  if (!player) return null
+  player.gameState = { ...player.gameState, ...partialGameState }
+  return room
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false

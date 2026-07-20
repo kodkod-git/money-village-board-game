@@ -2,7 +2,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
-  isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms
+  isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
+  updatePlayerStateByUuid
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -161,5 +162,25 @@ describe('listAllRooms', () => {
 
   it('방이 없으면 빈 배열을 반환한다', () => {
     expect(listAllRooms()).toEqual([])
+  })
+})
+
+describe('updatePlayerStateByUuid', () => {
+  it('playerUuid로 플레이어를 찾아 gameState를 병합한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = updatePlayerStateByUuid(code, 'p1', { cash: 15000 })
+    expect(room.players[0].gameState.cash).toBe(15000)
+    expect(room.players[0].gameState.job).toBeNull()
+  })
+
+  it('존재하지 않는 방 코드는 null을 반환한다', () => {
+    expect(updatePlayerStateByUuid('XXXXXX', 'p1', { cash: 1 })).toBeNull()
+  })
+
+  it('존재하지 않는 playerUuid는 null을 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    expect(updatePlayerStateByUuid(code, 'unknown', { cash: 1 })).toBeNull()
   })
 })
