@@ -249,3 +249,61 @@ describe('getAllCompletedTeams', () => {
     }])
   })
 })
+
+describe('updateGameResult', () => {
+  it('세션/현재 결과를 조회해 필드를 병합하고 재계산된 자산으로 UPDATE한다', async () => {
+    const mockSessionSingle = vi.fn().mockResolvedValue({
+      data: { id: 'session-1', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate },
+      error: null,
+    })
+    const mockSessionEq = vi.fn().mockReturnValue({ single: mockSessionSingle })
+    const mockSessionSelect = vi.fn().mockReturnValue({ eq: mockSessionEq })
+
+    const currentRow = {
+      cash: 10000, job: 'a',
+      stock_holdings: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      real_estate_holdings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
+    }
+    const mockCurrentSingle = vi.fn().mockResolvedValue({ data: currentRow, error: null })
+    const mockCurrentEqEq = vi.fn().mockReturnValue({ single: mockCurrentSingle })
+    const mockCurrentEq = vi.fn().mockReturnValue({ eq: mockCurrentEqEq })
+    const mockCurrentSelect = vi.fn().mockReturnValue({ eq: mockCurrentEq })
+
+    const updatedRow = {
+      player_uuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
+      cash: 20000, job: 'a',
+      stock_holdings: currentRow.stock_holdings,
+      real_estate_holdings: currentRow.real_estate_holdings,
+      badges: currentRow.badges,
+    }
+    const mockUpdateSingle = vi.fn().mockResolvedValue({ data: updatedRow, error: null })
+    const mockUpdateSelect = vi.fn().mockReturnValue({ single: mockUpdateSingle })
+    const mockUpdateEqEq = vi.fn().mockReturnValue({ select: mockUpdateSelect })
+    const mockUpdateEq = vi.fn().mockReturnValue({ eq: mockUpdateEqEq })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq })
+
+    let callCount = 0
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSessionSelect }
+      if (table === 'game_results') {
+        callCount += 1
+        return callCount === 1 ? { select: mockCurrentSelect } : { update: mockUpdate }
+      }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { updateGameResult } = await import('./db.js')
+    const updated = await updateGameResult('AB1234', 'p1', { cash: 20000 })
+
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      cash: 20000,
+      total_assets: 34000,
+      stock_value: 4000,
+      real_estate_value: 10000,
+    }))
+    expect(updated.gameState.cash).toBe(20000)
+    expect(updated.playerUuid).toBe('p1')
+  })
+})

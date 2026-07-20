@@ -111,6 +111,72 @@ export async function getAllCompletedTeams() {
   }))
 }
 
+const GAME_STATE_TO_COLUMN = {
+  job: 'job', cash: 'cash', stocks: 'stock_holdings',
+  realEstate: 'real_estate_holdings', badges: 'badges',
+}
+
+export async function updateGameResult(teamCode, playerUuid, partialGameState) {
+  const { data: session, error: sessionError } = await supabase
+    .from('game_sessions')
+    .select('id, stock_prices, real_estate_prices')
+    .eq('team_code', teamCode)
+    .single()
+  if (sessionError) throw sessionError
+
+  const { data: current, error: currentError } = await supabase
+    .from('game_results')
+    .select('*')
+    .eq('session_id', session.id)
+    .eq('player_uuid', playerUuid)
+    .single()
+  if (currentError) throw currentError
+
+  const mergedGameState = {
+    cash: current.cash,
+    job: current.job,
+    stocks: current.stock_holdings,
+    realEstate: current.real_estate_holdings,
+    badges: current.badges,
+    ...partialGameState,
+  }
+
+  const prices = { stocks: session.stock_prices, realEstate: session.real_estate_prices }
+  const breakdown = calculateAssetBreakdown(mergedGameState, prices)
+
+  const updateRow = {}
+  for (const [key, column] of Object.entries(GAME_STATE_TO_COLUMN)) {
+    if (key in partialGameState) updateRow[column] = partialGameState[key]
+  }
+  updateRow.total_assets = breakdown.totalAssets
+  updateRow.stock_value = breakdown.stockValue
+  updateRow.real_estate_value = breakdown.realEstateValue
+
+  const { data: updated, error: updateError } = await supabase
+    .from('game_results')
+    .update(updateRow)
+    .eq('session_id', session.id)
+    .eq('player_uuid', playerUuid)
+    .select('*')
+    .single()
+  if (updateError) throw updateError
+
+  return {
+    playerUuid: updated.player_uuid,
+    name: updated.name,
+    character: updated.character,
+    affiliation: updated.affiliation,
+    gameState: {
+      cash: updated.cash,
+      job: updated.job,
+      stocks: updated.stock_holdings,
+      realEstate: updated.real_estate_holdings,
+      badges: updated.badges,
+      isCompleted: true,
+    },
+  }
+}
+
 const RANKING_SELECT = 'player_uuid, name, affiliation, character, total_assets, stock_value, real_estate_value, session_id, game_sessions(team_code)'
 
 function mapRankingRow(r, i) {
