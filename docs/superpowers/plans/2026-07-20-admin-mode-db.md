@@ -2568,7 +2568,6 @@ git commit -m "feat: wire AdminDashboard to real data and AdminSpectateModal"
 - [ ] **Step 1: 테스트 전체 교체**
 
 ```jsx
-// src/pages/AdminDashboard.test.jsx
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
