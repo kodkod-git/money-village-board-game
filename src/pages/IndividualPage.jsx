@@ -1,48 +1,21 @@
+// src/pages/IndividualPage.jsx (전체 교체)
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import StepBar from '../components/StepBar'
-import AssetCard from '../components/AssetCard'
+import JobPicker from '../components/JobPicker'
+import BadgePicker from '../components/BadgePicker'
+import AssetListEditor from '../components/AssetListEditor'
 import NumberInputModal from '../components/NumberInputModal'
 import { useSocketContext } from '../contexts/SocketContext'
+import {
+  REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
+  STOCK_LABELS, STOCK_IMAGES,
+} from '../constants/gameData'
 import styles from './IndividualPage.module.css'
 
 const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
-
-const JOB_LABELS = {
-  a: '경영·금융', b: '연구·기술', c: '보건·교육',
-  d: '문화·콘텐츠', e: '서비스·판매', f: '생산·운송',
-}
-const JOB_ICONS = { a: '💼', b: '⚙️', c: '🏥', d: '🎨', e: '🛒', f: '🚚' }
-
-const BADGE_NAMES = ['communication', 'global', 'idea', 'money', 'thinking', 'trust']
-const BADGE_LABELS = {
-  communication: '의사소통 및 협상능력', global: '글로벌경제이해력',
-  idea: '문제해결능력', money: '재정관리능력',
-  thinking: '기업가정신', trust: '신용과 신뢰',
-}
-
-const REAL_ESTATE_LABELS = {
-  gaon: '단독 가온개미', nuri: '단독 누리고양이', dami: '다세대 다미원숭이',
-  maru: '다세대 마루수리', chorong: '아파트 초롱부엉이', hani: '아파트 하늬여우',
-}
-const ESTATE_IMAGES = {
-  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
-  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
-}
-const ESTATE_PRICES = {
-  gaon: '2만원', nuri: '2만원', dami: '7만원',
-  maru: '7만원', chorong: '10만원', hani: '10만원',
-}
-
-const STOCK_LABELS = {
-  semiconductor: '반도체·IT', finance: '금융', industrial: '산업재·기계',
-  auto: '자동차·쇼핑', bio: '바이오·헬스케어', content: '콘텐츠·플랫폼',
-}
-const STOCK_IMAGES = {
-  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
-  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
-}
+const STOCK_PRICE_LABELS = Object.fromEntries(Object.keys(STOCK_LABELS).map(key => [key, '가격 설정']))
 
 function defaultGameState() {
   return {
@@ -148,23 +121,14 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>직업 선택</h1>
           <p className={styles.stepSubtitle}>나의 직업을 선택해주세요</p>
-          <div className={styles.jobGrid}>
-            {Object.entries(JOB_LABELS).map(([key, label]) => (
-              <button
-                key={key}
-                className={`${styles.jobTile} ${gameState.job === key ? styles.tileSelected : ''}`}
-                onClick={() => {
-                  const next = { ...gameState, job: key }
-                  setGameState(next)
-                  emitState(next)
-                }}
-              >
-                {gameState.job === key && <span className={styles.tileBadge}>✓</span>}
-                <span className={styles.jobIcon}>{JOB_ICONS[key]}</span>
-                <span className={styles.tileLabel}>{label}</span>
-              </button>
-            ))}
-          </div>
+          <JobPicker
+            value={gameState.job}
+            onChange={job => {
+              const next = { ...gameState, job }
+              setGameState(next)
+              emitState(next)
+            }}
+          />
         </div>
       )}
 
@@ -172,25 +136,16 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>성공카드</h1>
           <p className={styles.stepSubtitle}>획득한 성공카드를 모두 선택해주세요</p>
-          <div className={`${styles.jobGrid} ${styles.badgeGrid}`}>
-            {BADGE_NAMES.map((name, i) => (
-              <button
-                key={name}
-                className={`${styles.jobTile} ${styles.badgeTile} ${gameState.badges[i] ? styles.tileSelected : ''}`}
-                onClick={() => {
-                  const badges = [...gameState.badges]
-                  badges[i] = !badges[i]
-                  const next = { ...gameState, badges }
-                  setGameState(next)
-                  emitState(next)
-                }}
-              >
-                {gameState.badges[i] && <span className={styles.tileBadge}>✓</span>}
-                <img src={`/badges/${name}.png`} alt={name} className={styles.badgeImg} />
-                <span className={styles.tileLabel}>{BADGE_LABELS[name]}</span>
-              </button>
-            ))}
-          </div>
+          <BadgePicker
+            badges={gameState.badges}
+            onToggle={i => {
+              const badges = [...gameState.badges]
+              badges[i] = !badges[i]
+              const next = { ...gameState, badges }
+              setGameState(next)
+              emitState(next)
+            }}
+          />
         </div>
       )}
 
@@ -198,23 +153,19 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>부동산</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <div className={styles.assetList}>
-            {Object.keys(REAL_ESTATE_LABELS).map(key => (
-              <AssetCard
-                key={key}
-                image={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
-                label={REAL_ESTATE_LABELS[key]}
-                price={ESTATE_PRICES[key]}
-                value={gameState.realEstate[key]}
-                onChange={val => {
-                  const realEstate = { ...gameState.realEstate, [key]: val }
-                  const next = { ...gameState, realEstate, realEstateVisited: true }
-                  setGameState(next)
-                  emitState(next)
-                }}
-              />
-            ))}
-          </div>
+          <AssetListEditor
+            labels={REAL_ESTATE_LABELS}
+            images={ESTATE_IMAGES}
+            priceLabels={ESTATE_PRICES}
+            imageFolder="estate"
+            values={gameState.realEstate}
+            onChange={(key, val) => {
+              const realEstate = { ...gameState.realEstate, [key]: val }
+              const next = { ...gameState, realEstate, realEstateVisited: true }
+              setGameState(next)
+              emitState(next)
+            }}
+          />
         </div>
       )}
 
@@ -222,23 +173,19 @@ export default function IndividualPage() {
         <div className={styles.stepContent}>
           <h1 className={styles.stepTitle}>주식</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <div className={styles.assetList}>
-            {Object.keys(STOCK_LABELS).map(key => (
-              <AssetCard
-                key={key}
-                image={`/badges/stock/${STOCK_IMAGES[key]}.png`}
-                label={STOCK_LABELS[key]}
-                price="가격 설정"
-                value={gameState.stocks[key]}
-                onChange={val => {
-                  const stocks = { ...gameState.stocks, [key]: val }
-                  const next = { ...gameState, stocks, stocksVisited: true }
-                  setGameState(next)
-                  emitState(next)
-                }}
-              />
-            ))}
-          </div>
+          <AssetListEditor
+            labels={STOCK_LABELS}
+            images={STOCK_IMAGES}
+            priceLabels={STOCK_PRICE_LABELS}
+            imageFolder="stock"
+            values={gameState.stocks}
+            onChange={(key, val) => {
+              const stocks = { ...gameState.stocks, [key]: val }
+              const next = { ...gameState, stocks, stocksVisited: true }
+              setGameState(next)
+              emitState(next)
+            }}
+          />
         </div>
       )}
 
