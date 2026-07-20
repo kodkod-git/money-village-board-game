@@ -40,6 +40,10 @@ describe('AdminEditModal', () => {
     const onSave = vi.fn()
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
     await userEvent.click(screen.getByTestId('edit-cash'))
+    // 기존 현금(125000, 6자리)이 미리 채워져 있으므로 백스페이스로 지운 뒤 입력한다.
+    for (let i = 0; i < 6; i++) {
+      await userEvent.click(screen.getByText('←'))
+    }
     await userEvent.click(screen.getByText('5'))
     await userEvent.click(screen.getByText('확인'))
     expect(onSave).toHaveBeenCalledWith('cash', 5)

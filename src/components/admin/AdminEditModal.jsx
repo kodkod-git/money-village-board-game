@@ -95,7 +95,7 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
       {editingField === 'cash' && (
         <NumberInputModal
           title="현금 수정"
-          initialValue={0}
+          initialValue={gameState.cash ?? 0}
           unit="원"
           onConfirm={val => { onSave('cash', val); setEditingField(null) }}
           onClose={() => setEditingField(null)}
