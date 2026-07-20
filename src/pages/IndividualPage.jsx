@@ -1,4 +1,3 @@
-// src/pages/IndividualPage.jsx (전체 교체)
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
