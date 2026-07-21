@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
-  updatePlayerStateByUuid
+  updatePlayerStateByUuid, updatePlayerState
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -189,5 +189,29 @@ describe('updatePlayerStateByUuid', () => {
     const { code } = createRoom()
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
     expect(updatePlayerStateByUuid(code, 'unknown', { cash: 1 })).toBeNull()
+  })
+})
+
+describe('updatedAt 갱신', () => {
+  it('updatePlayerState 호출 시 room.updatedAt이 갱신된다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    const before = getRoom(code).updatedAt
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(before.getTime() + 1000))
+    updatePlayerState('s1', { cash: 1000 })
+    vi.useRealTimers()
+    expect(getRoom(code).updatedAt.getTime()).toBeGreaterThan(before.getTime())
+  })
+
+  it('updatePlayerStateByUuid 호출 시 room.updatedAt이 갱신된다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const before = getRoom(code).updatedAt
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(before.getTime() + 1000))
+    updatePlayerStateByUuid(code, 'p1', { cash: 1000 })
+    vi.useRealTimers()
+    expect(getRoom(code).updatedAt.getTime()).toBeGreaterThan(before.getTime())
   })
 })

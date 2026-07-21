@@ -94,6 +94,7 @@ export function updatePlayerState(socketId, gameState) {
   const player = room.players.find(p => p.socketId === socketId)
   if (!player) return null
   player.gameState = gameState
+  room.updatedAt = new Date()
   return room
 }
 
@@ -103,6 +104,7 @@ export function updatePlayerStateByUuid(code, playerUuid, partialGameState) {
   const player = room.players.find(p => p.playerUuid === playerUuid)
   if (!player) return null
   player.gameState = { ...player.gameState, ...partialGameState }
+  room.updatedAt = new Date()
   return room
 }
 
