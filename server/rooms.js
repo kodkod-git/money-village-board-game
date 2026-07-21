@@ -128,6 +128,10 @@ export function setRoomHidden(code, hidden) {
   return room
 }
 
+export function deleteRoomByCode(code) {
+  return rooms.delete(code)
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false

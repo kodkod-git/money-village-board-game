@@ -3,7 +3,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
-  updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus, setRoomHidden
+  updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus, setRoomHidden,
+  deleteRoomByCode
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -278,5 +279,17 @@ describe('setRoomHidden', () => {
 
   it('존재하지 않는 방 코드는 null을 반환한다', () => {
     expect(setRoomHidden('XXXXXX', true)).toBeNull()
+  })
+})
+
+describe('deleteRoomByCode', () => {
+  it('방을 삭제하고 true를 반환한다', () => {
+    const { code } = createRoom()
+    expect(deleteRoomByCode(code)).toBe(true)
+    expect(getRoom(code)).toBeNull()
+  })
+
+  it('존재하지 않는 방 코드는 false를 반환한다', () => {
+    expect(deleteRoomByCode('XXXXXX')).toBe(false)
   })
 })
