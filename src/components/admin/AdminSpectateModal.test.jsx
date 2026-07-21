@@ -123,3 +123,70 @@ it('등록 완료된 방은 폴링하지 않는다', async () => {
   expect(fetchMock).not.toHaveBeenCalled()
   vi.useRealTimers()
 })
+
+it('라이브 룸(미등록)에는 숨김/삭제 버튼을 보여준다', () => {
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.getByText('숨김')).toBeInTheDocument()
+  expect(screen.getByText('삭제')).toBeInTheDocument()
+})
+
+it('등록 완료된 팀에는 숨김/삭제 버튼을 보여주지 않는다', () => {
+  const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+  render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.queryByText('숨김')).not.toBeInTheDocument()
+  expect(screen.queryByText('삭제')).not.toBeInTheDocument()
+})
+
+it('숨김 버튼 클릭 시 visibility PATCH 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
+  const onClose = vi.fn()
+  const onRoomChanged = vi.fn()
+  global.fetch = vi.fn((url, options) => {
+    if (options?.method === 'PATCH') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ code: 'AB1234', hidden: true }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={onClose} onRoomChanged={onRoomChanged} />)
+  await userEvent.click(screen.getByText('숨김'))
+
+  expect(global.fetch).toHaveBeenCalledWith(
+    '/api/admin/rooms/AB1234/visibility',
+    expect.objectContaining({
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hidden: true }),
+    })
+  )
+  expect(onRoomChanged).toHaveBeenCalled()
+  expect(onClose).toHaveBeenCalled()
+})
+
+it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
+  const onClose = vi.fn()
+  const onRoomChanged = vi.fn()
+  global.fetch = vi.fn((url, options) => {
+    if (options?.method === 'DELETE') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={onClose} onRoomChanged={onRoomChanged} />)
+  await userEvent.click(screen.getByText('삭제'))
+  expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
+
+  await userEvent.click(screen.getByText('정말 삭제'))
+
+  expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms/AB1234', expect.objectContaining({ method: 'DELETE' }))
+  expect(onRoomChanged).toHaveBeenCalled()
+  expect(onClose).toHaveBeenCalled()
+})
+
+it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다', async () => {
+  global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  await userEvent.click(screen.getByText('삭제'))
+  await userEvent.click(screen.getByText('취소'))
+  expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
+})

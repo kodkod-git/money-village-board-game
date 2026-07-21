@@ -5,9 +5,10 @@ import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
 
-export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose }) {
+export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose, onRoomChanged }) {
   const [index, setIndex] = useState(initialIndex)
   const [editingPlayerUuid, setEditingPlayerUuid] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const room = rooms[index]
   const pollTimer = useRef(null)
 
@@ -33,6 +34,25 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     if (!res.ok) return
     const updated = await res.json()
     onPlayerUpdate(room.code, updated)
+  }
+
+  async function handleToggleHidden() {
+    const res = await fetch(`/api/admin/rooms/${room.code}/visibility`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hidden: !room.hidden }),
+    })
+    if (!res.ok) return
+    onRoomChanged()
+    onClose()
+  }
+
+  async function handleDelete() {
+    const res = await fetch(`/api/admin/rooms/${room.code}`, { method: 'DELETE' })
+    setConfirmDelete(false)
+    if (!res.ok) return
+    onRoomChanged()
+    onClose()
   }
 
   if (editingPlayerUuid) {
@@ -80,6 +100,15 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         ))}
       </div>
 
+      {!room.registered && (
+        <div className={styles.dangerZone}>
+          <button type="button" className={styles.hideBtn} onClick={handleToggleHidden}>
+            {room.hidden ? '숨김 해제' : '숨김'}
+          </button>
+          <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
+        </div>
+      )}
+
       <div className={styles.grid}>
         {room.players.map((player, i) => (
           player ? (
@@ -94,6 +123,18 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           )
         ))}
       </div>
+
+      {confirmDelete && (
+        <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(false)}>
+          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
+            <p className={styles.confirmText}>이 방을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>취소</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={handleDelete}>정말 삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
