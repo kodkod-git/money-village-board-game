@@ -95,3 +95,31 @@ describe('AdminSpectateModal', () => {
     expect(onPlayerUpdate).toHaveBeenCalledWith('AB1234', updatedPlayer)
   })
 })
+
+it('stale 상태(미등록 라이브 룸)에서도 계속 폴링한다', async () => {
+  vi.useFakeTimers()
+  const staleRoom = { ...makeRoom('AB1234', '김민준'), status: 'stale' }
+  const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  global.fetch = fetchMock
+
+  render(<AdminSpectateModal rooms={[staleRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  fetchMock.mockClear()
+  await vi.advanceTimersByTimeAsync(3000)
+
+  expect(fetchMock).toHaveBeenCalledWith('/api/rooms/AB1234')
+  vi.useRealTimers()
+})
+
+it('등록 완료된 방은 폴링하지 않는다', async () => {
+  vi.useFakeTimers()
+  const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+  const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  global.fetch = fetchMock
+
+  render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  fetchMock.mockClear()
+  await vi.advanceTimersByTimeAsync(3000)
+
+  expect(fetchMock).not.toHaveBeenCalled()
+  vi.useRealTimers()
+})

@@ -12,7 +12,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const pollTimer = useRef(null)
 
   useEffect(() => {
-    if (room.status !== 'live') return undefined
+    if (room.registered) return undefined
     pollTimer.current = setInterval(() => {
       fetch(`/api/rooms/${room.code}`)
         .then(r => r.json())
@@ -22,7 +22,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         .catch(() => {})
     }, POLL_INTERVAL_MS)
     return () => clearInterval(pollTimer.current)
-  }, [room.code, room.status, onPlayerUpdate])
+  }, [room.code, room.registered, onPlayerUpdate])
 
   async function handleSave(playerUuid, field, value) {
     const res = await fetch(`/api/admin/rooms/${room.code}/players/${playerUuid}`, {
