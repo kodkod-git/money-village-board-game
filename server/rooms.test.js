@@ -14,6 +14,13 @@ describe('createRoom', () => {
     expect(room.code).toMatch(/^[A-F0-9]{6}$/)
     expect(room.players).toEqual([])
   })
+
+  it('updatedAt을 createdAt과 동일하게, hidden을 false로 초기화한다', () => {
+    const room = createRoom()
+    expect(room.hidden).toBe(false)
+    expect(room.updatedAt).toBeInstanceOf(Date)
+    expect(room.updatedAt.getTime()).toBe(room.createdAt.getTime())
+  })
 })
 
 describe('getRoom', () => {

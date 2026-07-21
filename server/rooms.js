@@ -33,7 +33,8 @@ function defaultPrices() {
 export function createRoom() {
   let code
   do { code = generateCode() } while (rooms.has(code))
-  const room = { code, createdAt: new Date(), players: [], prices: defaultPrices() }
+  const now = new Date()
+  const room = { code, createdAt: now, updatedAt: now, hidden: false, players: [], prices: defaultPrices() }
   rooms.set(code, room)
   return room
 }
