@@ -25,7 +25,7 @@ export default function Home() {
     const playerUuid = getPlayerUuid()
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) {
-        localStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost }))
+        sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost }))
         navigate(`/lobby/${code}`)
       } else alert(error)
     })

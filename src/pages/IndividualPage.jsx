@@ -52,8 +52,8 @@ export default function IndividualPage() {
           if (gs.job !== null) setCompletedUpTo(4)
           return
         }
-        const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
-        const playerUuid = localStorage.getItem('player_uuid')
+        const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+        const playerUuid = sessionStorage.getItem('player_uuid')
         if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
         socket.emit('join-room', {
           code, name: stored.name, affiliation: stored.affiliation,

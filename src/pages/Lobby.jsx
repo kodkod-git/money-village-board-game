@@ -72,8 +72,8 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
     if (!socket || !roomFetched || rejoinAttempted.current) return
     if (players.find(p => p.socketId === socket.id)) return
 
-    const stored = JSON.parse(localStorage.getItem('player_profile') || 'null')
-    const playerUuid = localStorage.getItem('player_uuid')
+    const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+    const playerUuid = sessionStorage.getItem('player_uuid')
     if (!stored || stored.code !== code) return
 
     rejoinAttempted.current = true
