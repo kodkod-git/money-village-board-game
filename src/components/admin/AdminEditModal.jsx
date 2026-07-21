@@ -1,12 +1,43 @@
 import { useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
-import { JOB_LABELS, BADGE_NAMES, BADGE_LABELS } from '../../constants/gameData'
+import {
+  JOB_LABELS, BADGE_NAMES, BADGE_LABELS,
+  REAL_ESTATE_LABELS, ESTATE_IMAGES,
+  STOCK_LABELS, STOCK_IMAGES,
+} from '../../constants/gameData'
 import NumberInputModal from '../NumberInputModal'
 import JobEditModal from './JobEditModal'
 import BadgeEditModal from './BadgeEditModal'
 import RealEstateEditModal from './RealEstateEditModal'
 import StockEditModal from './StockEditModal'
 import styles from './AdminEditModal.module.css'
+
+function AssetSummaryList({ labels, images, values, folder, unit, testIdPrefix }) {
+  const holdings = Object.keys(labels).filter(key => Number(values?.[key] ?? 0) > 0)
+
+  if (holdings.length === 0) {
+    return <span className={styles.emptyAsset}>미보유</span>
+  }
+
+  return (
+    <div className={styles.assetList}>
+      {holdings.map(key => {
+        const amount = Number(values[key] ?? 0)
+        return (
+          <div key={key} className={styles.assetRow} data-testid={`${testIdPrefix}-${key}`}>
+            <img
+              src={`/badges/${folder}/${images[key]}.png`}
+              alt={labels[key]}
+              className={styles.assetIcon}
+            />
+            <span className={styles.assetName}>{labels[key]}</span>
+            <span className={styles.assetAmount}>{amount}{unit}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function AdminEditModal({ player, prices, onSave, onClose }) {
   const [editingField, setEditingField] = useState(null)
@@ -18,8 +49,10 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
     <div className={styles.page}>
       <div className={styles.header}>
         <button type="button" className={styles.backBtn} onClick={onClose}>‹ 뒤로</button>
-        <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
-        <span className={styles.name}>{player.name}</span>
+        <div className={styles.profileHeader}>
+          <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
+          <span className={styles.name}>{player.name}</span>
+        </div>
       </div>
 
       <div className={styles.columns}>
@@ -58,6 +91,14 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
               <span className={styles.fieldLabel}>부동산</span>
               <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
             </div>
+            <AssetSummaryList
+              labels={REAL_ESTATE_LABELS}
+              images={ESTATE_IMAGES}
+              values={gameState.realEstate}
+              folder="estate"
+              unit="개"
+              testIdPrefix="admin-real-estate-holding"
+            />
           </div>
 
           <div className={styles.field}>
@@ -65,6 +106,14 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
               <span className={styles.fieldLabel}>주식</span>
               <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
             </div>
+            <AssetSummaryList
+              labels={STOCK_LABELS}
+              images={STOCK_IMAGES}
+              values={gameState.stocks}
+              folder="stock"
+              unit="주"
+              testIdPrefix="admin-stock-holding"
+            />
           </div>
         </div>
       </div>

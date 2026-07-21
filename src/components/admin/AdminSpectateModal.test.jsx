@@ -31,6 +31,11 @@ beforeEach(() => {
 })
 
 describe('AdminSpectateModal', () => {
+  it('does not render waiting cards for empty player slots', () => {
+    const { container } = render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(container.querySelector('[class*="emptySlot"]')).not.toBeInTheDocument()
+  })
+
   it('1팀 관전 화면을 보여주고 팀원 카드를 렌더링한다', () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByText('1팀')).toBeInTheDocument()
@@ -50,11 +55,9 @@ describe('AdminSpectateModal', () => {
     expect(screen.getByTestId('edit-job')).toBeInTheDocument()
   })
 
-  it('‹ 뒤로 버튼 클릭 시 onClose를 호출한다', async () => {
-    const onClose = vi.fn()
-    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={onClose} />)
-    await userEvent.click(screen.getByText('‹ 뒤로'))
-    expect(onClose).toHaveBeenCalled()
+  it('닫기 버튼을 렌더링하지 않는다', () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: '닫기' })).not.toBeInTheDocument()
   })
 
   it('필드 수정 시 PATCH 요청을 보내고 응답으로 onPlayerUpdate를 호출한다', async () => {

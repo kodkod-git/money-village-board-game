@@ -71,10 +71,10 @@ describe('AdminDashboard', () => {
     expect(screen.getByText('1팀')).toBeInTheDocument()
   })
 
-  it('‹ 뒤로 클릭 시 팝업을 닫는다', async () => {
-    renderDashboard()
+  it('배경 클릭 시 팝업을 닫는다', async () => {
+    const { container } = renderDashboard()
     await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
-    await userEvent.click(screen.getByText('‹ 뒤로'))
+    await userEvent.click(container.querySelector('[class*="overlay"]'))
     expect(screen.queryByText('1팀')).toBeNull()
   })
 

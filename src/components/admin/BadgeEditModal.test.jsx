@@ -13,10 +13,11 @@ describe('BadgeEditModal', () => {
     expect(onToggle).toHaveBeenCalledWith(2)
   })
 
-  it('뒤로 버튼 클릭 시 onClose를 호출한다', async () => {
+  it('닫기 버튼 없이 배경 클릭 시 onClose를 호출한다', async () => {
     const onClose = vi.fn()
-    render(<BadgeEditModal badges={NONE} onToggle={vi.fn()} onClose={onClose} />)
-    await userEvent.click(screen.getByText('‹ 뒤로'))
+    const { container } = render(<BadgeEditModal badges={NONE} onToggle={vi.fn()} onClose={onClose} />)
+    expect(screen.queryByRole('button', { name: '닫기' })).not.toBeInTheDocument()
+    await userEvent.click(container.firstChild)
     expect(onClose).toHaveBeenCalled()
   })
 })

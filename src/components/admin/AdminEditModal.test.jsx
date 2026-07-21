@@ -20,6 +20,17 @@ const PLAYER = {
 }
 
 describe('AdminEditModal', () => {
+  it('places the player name below the back button area', () => {
+    const { container } = render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
+    expect(container.querySelector('[class*="profileHeader"]')).toHaveTextContent('김민준')
+  })
+
+  it('shows owned real estate and stock quantities in the edit summary', () => {
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByTestId('admin-real-estate-holding-gaon')).toHaveTextContent('1개')
+    expect(screen.getByTestId('admin-stock-holding-semiconductor')).toHaveTextContent('2주')
+  })
+
   it('직업/현금/총자산 값을 보여준다', () => {
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByText('경영·금융')).toBeInTheDocument()

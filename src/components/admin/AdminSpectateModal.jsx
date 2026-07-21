@@ -47,12 +47,8 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     )
   }
 
-  const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
-
   return (
     <div className={styles.page}>
-      <button type="button" className={styles.backBtn} onClick={onClose}>‹ 뒤로</button>
-
       <div className={styles.nav}>
         <button
           type="button"
@@ -85,7 +81,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       </div>
 
       <div className={styles.grid}>
-        {slots.map((player, i) => (
+        {room.players.map((player, i) => (
           player ? (
             <AdminPlayerCard
               key={player.playerUuid}

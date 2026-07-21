@@ -1,12 +1,14 @@
 .page { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
-.header { display: flex; align-items: center; gap: 10px; }
+.header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 
 .backBtn { font-size: 14px; font-weight: 700; color: var(--ink-2); }
 
-.avatar { width: 36px; height: 36px; object-fit: contain; }
+.profileHeader { display: flex; align-items: center; gap: 14px; }
 
-.name { font-size: 18px; font-weight: 800; color: var(--ink); }
+.avatar { width: 52px; height: 52px; object-fit: contain; }
+
+.name { font-size: 28px; font-weight: 900; color: var(--ink); }
 
 .columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 
@@ -48,6 +50,33 @@
   font-weight: 700;
   color: var(--ink);
 }
+
+.assetList { display: flex; flex-direction: column; gap: 10px; }
+
+.assetRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.assetIcon { width: 24px; height: 24px; object-fit: contain; }
+
+.assetName {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.assetAmount {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.emptyAsset { font-size: 14px; font-weight: 800; color: var(--ghost); }
 
 .footer {
   display: flex;
