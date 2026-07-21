@@ -76,4 +76,21 @@ describe('AdminTableView', () => {
     expect(screen.getByText('🟡 입력중')).toBeInTheDocument()
     expect(screen.getByText('❌ 미입력')).toBeInTheDocument()
   })
+
+  it('방 상태 컬럼에 정체/등록 완료를 표시한다', () => {
+    const mixedRooms = [
+      {
+        code: 'A1', registered: false, status: 'stale', prices,
+        players: [{ playerUuid: 'x1', name: '가나다', affiliation: '', gameState: blankGameState }],
+      },
+      {
+        code: 'A2', registered: true, prices,
+        players: [{ playerUuid: 'x2', name: '라마바', affiliation: '', gameState: blankGameState }],
+      },
+    ]
+    render(<AdminTableView rooms={mixedRooms} />)
+    expect(screen.getByText('방 상태')).toBeInTheDocument()
+    expect(screen.getByText('정체')).toBeInTheDocument()
+    expect(screen.getByText('등록 완료')).toBeInTheDocument()
+  })
 })

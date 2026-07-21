@@ -1,5 +1,5 @@
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
-import { JOB_LABELS } from '../../constants/gameData'
+import { JOB_LABELS, ROOM_STATUS_LABELS } from '../../constants/gameData'
 import styles from './AdminTableView.module.css'
 
 function hasAnyInput(gameState) {
@@ -16,6 +16,11 @@ function getInputStatus(gameState) {
   if (gameState?.isCompleted) return '✅ 입력완료'
   if (hasAnyInput(gameState)) return '🟡 입력중'
   return '❌ 미입력'
+}
+
+function roomStatusLabel(room) {
+  if (room.registered) return '등록 완료'
+  return ROOM_STATUS_LABELS[room.status] ?? '-'
 }
 
 function formatWon(value) {
@@ -39,6 +44,7 @@ function flattenRows(rooms) {
         stockValue: breakdown?.stockValue ?? null,
         totalAssets: breakdown?.totalAssets ?? null,
         status: getInputStatus(player.gameState),
+        roomStatus: roomStatusLabel(room),
       }
     })
   )
@@ -59,6 +65,7 @@ export default function AdminTableView({ rooms }) {
             <th className={styles.th}>주식총액</th>
             <th className={styles.th}>총자산</th>
             <th className={styles.th}>상태</th>
+            <th className={styles.th}>방 상태</th>
           </tr>
         </thead>
         <tbody>
@@ -72,6 +79,7 @@ export default function AdminTableView({ rooms }) {
               <td className={styles.td}>{formatWon(row.stockValue)}</td>
               <td className={styles.td}>{formatWon(row.totalAssets)}</td>
               <td className={`${styles.td} ${styles.status}`}>{row.status}</td>
+              <td className={styles.td}>{row.roomStatus}</td>
             </tr>
           ))}
         </tbody>
