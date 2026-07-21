@@ -85,12 +85,4 @@ describe('AdminDashboard', () => {
     await userEvent.click(screen.getByText('↻ 새로고침'))
     expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms')
   })
-
-  it('숨김 항목 보기 토글 클릭 시 includeHidden=true로 다시 조회한다', async () => {
-    renderDashboard()
-    await screen.findByText('홍길동')
-    global.fetch.mockClear()
-    await userEvent.click(screen.getByLabelText('숨김 항목 보기'))
-    expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms?includeHidden=true')
-  })
 })

@@ -15,15 +15,13 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('grid')
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
-  const [showHidden, setShowHidden] = useState(false)
 
   const loadRooms = useCallback(() => {
-    const query = showHidden ? '?includeHidden=true' : ''
-    fetch(`/api/admin/rooms${query}`)
+    fetch('/api/admin/rooms')
       .then(r => r.json())
       .then(setRooms)
       .catch(() => {})
-  }, [showHidden])
+  }, [])
 
   useEffect(() => {
     document.body.classList.add('admin-mode')
@@ -49,14 +47,6 @@ export default function AdminDashboard() {
           <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>
-          <label className={styles.hiddenToggle}>
-            <input
-              type="checkbox"
-              checked={showHidden}
-              onChange={e => setShowHidden(e.target.checked)}
-            />
-            숨김 항목 보기
-          </label>
           <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
           <button className={styles.exitBtn} onClick={() => navigate('/')} type="button">← 나가기</button>
         </div>

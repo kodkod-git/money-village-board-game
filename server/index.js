@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, setRoomHidden, deleteRoomByCode } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -77,38 +77,27 @@ app.get('/api/rankings', async (req, res) => {
 
 app.get('/api/admin/rooms', async (req, res) => {
   try {
-    const includeHidden = req.query.includeHidden === 'true'
     const now = new Date()
-    const liveRooms = listAllRooms()
-      .filter(room => includeHidden || !room.hidden)
-      .map(room => ({
-        code: room.code,
-        status: computeLiveRoomStatus(room, now),
-        registered: false,
-        hidden: room.hidden,
-        updatedAt: room.updatedAt,
-        prices: room.prices,
-        players: room.players.map(p => ({
-          playerUuid: p.playerUuid,
-          name: p.name,
-          character: p.character,
-          affiliation: p.affiliation,
-          gameState: p.gameState,
-        })),
-      }))
+    const liveRooms = listAllRooms().map(room => ({
+      code: room.code,
+      status: computeLiveRoomStatus(room, now),
+      registered: false,
+      updatedAt: room.updatedAt,
+      prices: room.prices,
+      players: room.players.map(p => ({
+        playerUuid: p.playerUuid,
+        name: p.name,
+        character: p.character,
+        affiliation: p.affiliation,
+        gameState: p.gameState,
+      })),
+    }))
     const completedRooms = await getAllCompletedTeams()
     res.json([...liveRooms, ...completedRooms])
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })
   }
-})
-
-app.patch('/api/admin/rooms/:code/visibility', (req, res) => {
-  const code = req.params.code.toUpperCase()
-  const room = setRoomHidden(code, !!req.body.hidden)
-  if (!room) return res.status(404).json({ error: 'Room not found' })
-  res.json({ code: room.code, hidden: room.hidden })
 })
 
 app.delete('/api/admin/rooms/:code', (req, res) => {

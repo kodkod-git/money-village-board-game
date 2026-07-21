@@ -36,17 +36,6 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     onPlayerUpdate(room.code, updated)
   }
 
-  async function handleToggleHidden() {
-    const res = await fetch(`/api/admin/rooms/${room.code}/visibility`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hidden: !room.hidden }),
-    })
-    if (!res.ok) return
-    onRoomChanged()
-    onClose()
-  }
-
   async function handleDelete() {
     const res = await fetch(`/api/admin/rooms/${room.code}`, { method: 'DELETE' })
     setConfirmDelete(false)
@@ -102,9 +91,6 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
 
       {!room.registered && (
         <div className={styles.dangerZone}>
-          <button type="button" className={styles.hideBtn} onClick={handleToggleHidden}>
-            {room.hidden ? '숨김 해제' : '숨김'}
-          </button>
           <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
         </div>
       )}

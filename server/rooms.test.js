@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
-  updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus, setRoomHidden,
+  updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode
 } from './rooms.js'
 
@@ -16,9 +16,8 @@ describe('createRoom', () => {
     expect(room.players).toEqual([])
   })
 
-  it('updatedAt을 createdAt과 동일하게, hidden을 false로 초기화한다', () => {
+  it('updatedAt을 createdAt과 동일하게 초기화한다', () => {
     const room = createRoom()
-    expect(room.hidden).toBe(false)
     expect(room.updatedAt).toBeInstanceOf(Date)
     expect(room.updatedAt.getTime()).toBe(room.createdAt.getTime())
   })
@@ -259,26 +258,6 @@ describe('computeLiveRoomStatus', () => {
   it('플레이어가 없으면 completed-but-unregistered로 판정하지 않는다', () => {
     const room = makeRoom({ noPlayers: true, updatedAt: NOW })
     expect(computeLiveRoomStatus(room, NOW)).toBe('live')
-  })
-})
-
-describe('setRoomHidden', () => {
-  it('방을 숨김 처리하고 방 객체를 반환한다', () => {
-    const { code } = createRoom()
-    const room = setRoomHidden(code, true)
-    expect(room.hidden).toBe(true)
-    expect(getRoom(code).hidden).toBe(true)
-  })
-
-  it('숨김을 해제할 수 있다', () => {
-    const { code } = createRoom()
-    setRoomHidden(code, true)
-    const room = setRoomHidden(code, false)
-    expect(room.hidden).toBe(false)
-  })
-
-  it('존재하지 않는 방 코드는 null을 반환한다', () => {
-    expect(setRoomHidden('XXXXXX', true)).toBeNull()
   })
 })
 

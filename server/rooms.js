@@ -34,7 +34,7 @@ export function createRoom() {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, hidden: false, players: [], prices: defaultPrices() }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices() }
   rooms.set(code, room)
   return room
 }
@@ -119,13 +119,6 @@ export function computeLiveRoomStatus(room, now = new Date()) {
   if (elapsedMs < STALE_THRESHOLD_MS) return 'live'
   if (elapsedMs < ABANDONED_THRESHOLD_MS) return 'stale'
   return 'abandoned'
-}
-
-export function setRoomHidden(code, hidden) {
-  const room = rooms.get(code)
-  if (!room) return null
-  room.hidden = hidden
-  return room
 }
 
 export function deleteRoomByCode(code) {

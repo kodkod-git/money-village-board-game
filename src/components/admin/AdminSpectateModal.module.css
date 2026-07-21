@@ -50,17 +50,14 @@
 
 .dangerZone { display: flex; justify-content: center; gap: 8px; }
 
-.hideBtn,
 .deleteBtn {
   font-size: 12px;
   font-weight: 700;
   border-radius: var(--r-pill);
   padding: 6px 14px;
   background: var(--slot-empty);
-  color: var(--ink-2);
+  color: var(--red);
 }
-
-.deleteBtn { color: var(--red); }
 
 .confirmOverlay {
   position: fixed;

@@ -16,15 +16,6 @@
 
 .headerActions { display: flex; gap: 8px; }
 
-.hiddenToggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-2);
-}
-
 .refreshBtn {
   background: var(--slot-empty);
   border: 1px solid var(--line);
