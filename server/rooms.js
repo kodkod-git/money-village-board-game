@@ -121,6 +121,13 @@ export function computeLiveRoomStatus(room, now = new Date()) {
   return 'abandoned'
 }
 
+export function setRoomHidden(code, hidden) {
+  const room = rooms.get(code)
+  if (!room) return null
+  room.hidden = hidden
+  return room
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false
