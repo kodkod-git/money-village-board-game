@@ -104,6 +104,20 @@ app.get('/api/admin/rooms', async (req, res) => {
   }
 })
 
+app.patch('/api/admin/rooms/:code/visibility', (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const room = setRoomHidden(code, !!req.body.hidden)
+  if (!room) return res.status(404).json({ error: 'Room not found' })
+  res.json({ code: room.code, hidden: room.hidden })
+})
+
+app.delete('/api/admin/rooms/:code', (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const deleted = deleteRoomByCode(code)
+  if (!deleted) return res.status(404).json({ error: 'Room not found' })
+  res.json({ ok: true })
+})
+
 app.patch('/api/admin/rooms/:code/players/:playerUuid', async (req, res) => {
   const code = req.params.code.toUpperCase()
   const { playerUuid } = req.params
