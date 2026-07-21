@@ -32,3 +32,9 @@ export const STOCK_IMAGES = {
   semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
   auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
 }
+
+export const ROOM_STATUS_LABELS = {
+  stale: '정체',
+  abandoned: '방치',
+  'completed-but-unregistered': '등록 대기',
+}

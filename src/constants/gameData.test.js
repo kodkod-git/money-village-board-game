@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
-  STOCK_LABELS, STOCK_IMAGES,
+  STOCK_LABELS, STOCK_IMAGES, ROOM_STATUS_LABELS,
 } from './gameData'
 
 describe('gameData constants', () => {
@@ -28,5 +28,9 @@ describe('gameData constants', () => {
     const keys = Object.keys(STOCK_LABELS)
     expect(keys).toHaveLength(6)
     expect(Object.keys(STOCK_IMAGES)).toEqual(keys)
+  })
+
+  it('방 상태 라벨은 stale/abandoned/completed-but-unregistered 키를 갖는다', () => {
+    expect(Object.keys(ROOM_STATUS_LABELS)).toEqual(['stale', 'abandoned', 'completed-but-unregistered'])
   })
 })
