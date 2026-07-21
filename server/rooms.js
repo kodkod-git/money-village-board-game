@@ -108,6 +108,19 @@ export function updatePlayerStateByUuid(code, playerUuid, partialGameState) {
   return room
 }
 
+const STALE_THRESHOLD_MS = 30 * 60 * 1000
+const ABANDONED_THRESHOLD_MS = 2 * 60 * 60 * 1000
+
+export function computeLiveRoomStatus(room, now = new Date()) {
+  const allCompleted = room.players.length > 0 && room.players.every(p => p.gameState?.isCompleted)
+  if (allCompleted) return 'completed-but-unregistered'
+
+  const elapsedMs = now - new Date(room.updatedAt)
+  if (elapsedMs < STALE_THRESHOLD_MS) return 'live'
+  if (elapsedMs < ABANDONED_THRESHOLD_MS) return 'stale'
+  return 'abandoned'
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false

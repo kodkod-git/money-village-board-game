@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
-  updatePlayerStateByUuid, updatePlayerState
+  updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -213,5 +213,50 @@ describe('updatedAt 갱신', () => {
     updatePlayerStateByUuid(code, 'p1', { cash: 1000 })
     vi.useRealTimers()
     expect(getRoom(code).updatedAt.getTime()).toBeGreaterThan(before.getTime())
+  })
+})
+
+describe('computeLiveRoomStatus', () => {
+  function makeRoom({ updatedAt, isCompleted = false, noPlayers = false } = {}) {
+    const { code } = createRoom()
+    if (!noPlayers) {
+      addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    }
+    const room = getRoom(code)
+    if (updatedAt) room.updatedAt = updatedAt
+    if (isCompleted) room.players[0].gameState.isCompleted = true
+    return room
+  }
+
+  const NOW = new Date('2026-01-01T00:00:00Z')
+
+  it('29분 경과 시 live', () => {
+    const room = makeRoom({ updatedAt: new Date(NOW.getTime() - 29 * 60 * 1000) })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('live')
+  })
+
+  it('정확히 30분 경과 시 stale', () => {
+    const room = makeRoom({ updatedAt: new Date(NOW.getTime() - 30 * 60 * 1000) })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('stale')
+  })
+
+  it('1시간 59분 경과 시 stale', () => {
+    const room = makeRoom({ updatedAt: new Date(NOW.getTime() - (119 * 60 * 1000)) })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('stale')
+  })
+
+  it('정확히 2시간 경과 시 abandoned', () => {
+    const room = makeRoom({ updatedAt: new Date(NOW.getTime() - 2 * 60 * 60 * 1000) })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('abandoned')
+  })
+
+  it('전원 완료 시 방치 시간과 무관하게 completed-but-unregistered', () => {
+    const room = makeRoom({ updatedAt: new Date(NOW.getTime() - 3 * 60 * 60 * 1000), isCompleted: true })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('completed-but-unregistered')
+  })
+
+  it('플레이어가 없으면 completed-but-unregistered로 판정하지 않는다', () => {
+    const room = makeRoom({ noPlayers: true, updatedAt: NOW })
+    expect(computeLiveRoomStatus(room, NOW)).toBe('live')
   })
 })
