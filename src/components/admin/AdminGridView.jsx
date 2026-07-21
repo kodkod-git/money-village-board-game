@@ -1,10 +1,18 @@
+import { ROOM_STATUS_LABELS } from '../../constants/gameData'
 import styles from './AdminGridView.module.css'
+
+const STATUS_BADGE_CLASS = {
+  stale: 'badgeStale',
+  abandoned: 'badgeAbandoned',
+  'completed-but-unregistered': 'badgeUnregistered',
+}
 
 export default function AdminGridView({ rooms, onSpectate }) {
   return (
     <div className={styles.grid}>
       {rooms.map(room => {
         const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
+        const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
         return (
           <button
             key={room.code}
@@ -13,6 +21,11 @@ export default function AdminGridView({ rooms, onSpectate }) {
             type="button"
           >
             {room.registered && <span className={styles.badge}>등록 완료</span>}
+            {badgeClassKey && (
+              <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
+                {ROOM_STATUS_LABELS[room.status]}
+              </span>
+            )}
             <div className={styles.slots}>
               {slots.map((player, i) => (
                 <div key={i} className={styles.slot} data-testid="admin-player-slot">
