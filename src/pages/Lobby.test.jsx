@@ -3,11 +3,14 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
+const DEFAULT_PLAYERS = [{ name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' }]
+let mockRoomUpdatePlayers = DEFAULT_PLAYERS
+
 vi.mock('socket.io-client', () => {
   const socket = {
     on: vi.fn((ev, cb) => {
       if (ev === 'room-updated') {
-        cb({ players: [{ name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' }] })
+        cb({ players: mockRoomUpdatePlayers })
       }
     }),
     off: vi.fn(),
@@ -32,6 +35,10 @@ function renderLobby() {
 }
 
 describe('Lobby', () => {
+  afterEach(() => {
+    mockRoomUpdatePlayers = DEFAULT_PLAYERS
+  })
+
   it('shows the team code', () => {
     renderLobby()
     expect(screen.getByText(/ABC123/)).toBeInTheDocument()
@@ -40,6 +47,27 @@ describe('Lobby', () => {
   it('shows joined player names', () => {
     renderLobby()
     expect(screen.getByText('철수')).toBeInTheDocument()
+  })
+
+  it('방장이 아니어도 QR 코드가 보인다', () => {
+    mockRoomUpdatePlayers = [
+      { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
+      { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
+    ]
+    renderLobby()
+    expect(screen.getByText('QR 코드')).toBeInTheDocument()
+  })
+
+  it('내 카드만 클릭 가능하고, 다른 팀원 카드는 클릭할 수 없다', () => {
+    mockRoomUpdatePlayers = [
+      { name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' },
+      { name: '영희', character: 'Guardian-판다', isHost: false, socketId: 's2' },
+    ]
+    renderLobby()
+    const myCard = screen.getByText('철수').closest('[role]')
+    const otherCard = screen.getByText('영희').closest('[role]')
+    expect(myCard).toHaveAttribute('role', 'button')
+    expect(otherCard).toBeNull()
   })
 })
 

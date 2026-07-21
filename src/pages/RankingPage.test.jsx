@@ -85,4 +85,16 @@ describe('RankingPage', () => {
     expect(screen.queryByTestId('pinned-row')).toBeNull()
     expect(screen.queryByTestId('pinned-row-empty')).toBeNull()
   })
+
+  it('홈 진입(sessionId 없음)에서는 뒤로가기 버튼이 보인다', async () => {
+    renderAt('/ranking')
+    await screen.findByText('김민준')
+    expect(screen.getByLabelText('뒤로 가기')).toBeInTheDocument()
+  })
+
+  it('결과등록 후 진입(sessionId 있음)에서는 뒤로가기 버튼이 보이지 않는다', async () => {
+    renderAt('/result/session-1')
+    await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
+    expect(screen.queryByLabelText('뒤로 가기')).not.toBeInTheDocument()
+  })
 })

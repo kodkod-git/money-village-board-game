@@ -89,7 +89,7 @@ export default function RankingPage() {
 
   return (
     <div className={styles.page}>
-      <BackButton />
+      {!isV2 && <BackButton />}
       <div className={styles.inner}>
         <div className={styles.header}>
           <h1 className={styles.title}>랭킹</h1>

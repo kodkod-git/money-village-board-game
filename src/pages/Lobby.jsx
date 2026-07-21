@@ -186,16 +186,14 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
             )}
           </div>
         </div>
-        {canManageRoom && (
-          <button
-            className={styles.qrCard}
-            onClick={() => setShowQR(true)}
-            type="button"
-          >
-            <span className={styles.codeLabel}>QR 코드</span>
-            <QRCodeImage code={code} className={styles.qrImg} />
-          </button>
-        )}
+        <button
+          className={styles.qrCard}
+          onClick={() => setShowQR(true)}
+          type="button"
+        >
+          <span className={styles.codeLabel}>QR 코드</span>
+          <QRCodeImage code={code} className={styles.qrImg} />
+        </button>
       </div>
 
       <div className={styles.section}>
@@ -205,7 +203,7 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
             <PlayerSlot
               key={i}
               player={player}
-              onEdit={!readOnly && player && myPlayer ? () => navigate(`/lobby/${code}/individual`) : undefined}
+              onEdit={!readOnly && player && myPlayer && player.socketId === myPlayer.socketId ? () => navigate(`/lobby/${code}/individual`) : undefined}
               onKick={
                 !readOnly && isHost && player && player.socketId !== socket?.id
                   ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })
@@ -238,7 +236,7 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
         )}
       </div>
 
-      {canManageRoom && showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
+      {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {canManageRoom && showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
