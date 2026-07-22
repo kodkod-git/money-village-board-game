@@ -1,28 +1,31 @@
 .overlay {
   position: absolute; inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center;
   z-index: 100;
 }
 .modal {
-  background: #1e88e5; border-radius: 14px;
+  background: var(--white); border-radius: 14px;
   padding: 28px clamp(20px, 8vw, 32px);
   width: min(320px, calc(100% - 28px));
   text-align: center; position: relative;
+  box-shadow: var(--shadow-card);
 }
 .close {
   position: absolute; top: 12px; right: 12px;
-  background: #e53935; color: white;
+  background: var(--slot-empty); color: var(--ink);
   border-radius: 50%; width: 28px; height: 28px; font-size: 14px;
 }
-.modal h2 { color: white; font-size: 16px; margin-bottom: 8px; }
-.divider { height: 2px; background: rgba(255,255,255,0.3); margin: 12px 0 20px; }
+.modal h2 { color: var(--ink); font-size: 16px; margin-bottom: 8px; }
+.divider { height: 1px; background: var(--divider); margin: 12px 0 20px; }
 .input {
-  width: 100%; padding: 11px; border-radius: 8px; border: none;
+  width: 100%; padding: 11px; border-radius: 8px;
+  background: var(--slot-empty); border: 1px solid var(--line); color: var(--ink);
   font-size: 16px; letter-spacing: 4px; text-align: center; margin-bottom: 16px;
 }
+.input::placeholder { color: var(--ghost); }
 .btn {
-  background: #1565c0; color: white;
+  background: var(--ink); color: var(--white);
   padding: 10px 40px; border-radius: 8px;
-  font-size: 14px; font-weight: bold; box-shadow: 0 3px 0 #0d47a1;
+  font-size: 14px; font-weight: bold;
 }
