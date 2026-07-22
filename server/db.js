@@ -91,6 +91,7 @@ export async function getAllCompletedTeams() {
     code: session.team_code,
     status: 'completed',
     registered: true,
+    createdAt: session.created_at,
     prices: { stocks: session.stock_prices, realEstate: session.real_estate_prices },
     players: results
       .filter(r => r.session_id === session.id)

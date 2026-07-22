@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, sortRoomsByRecency } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -94,7 +94,7 @@ app.get('/api/admin/rooms', async (req, res) => {
       })),
     }))
     const completedRooms = await getAllCompletedTeams()
-    res.json([...liveRooms, ...completedRooms])
+    res.json(sortRoomsByRecency([...liveRooms, ...completedRooms]))
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })

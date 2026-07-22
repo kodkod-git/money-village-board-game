@@ -4,7 +4,7 @@ import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
-  deleteRoomByCode
+  deleteRoomByCode, sortRoomsByRecency
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -258,6 +258,43 @@ describe('computeLiveRoomStatus', () => {
   it('플레이어가 없으면 completed-but-unregistered로 판정하지 않는다', () => {
     const room = makeRoom({ noPlayers: true, updatedAt: NOW })
     expect(computeLiveRoomStatus(room, NOW)).toBe('live')
+  })
+})
+
+describe('sortRoomsByRecency', () => {
+  it('updatedAt 기준 내림차순(최신순)으로 정렬한다', () => {
+    const rooms = [
+      { code: 'A', updatedAt: new Date('2026-01-01T00:00:00Z') },
+      { code: 'B', updatedAt: new Date('2026-01-03T00:00:00Z') },
+      { code: 'C', updatedAt: new Date('2026-01-02T00:00:00Z') },
+    ]
+    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['B', 'C', 'A'])
+  })
+
+  it('updatedAt이 없으면 createdAt을 기준으로 정렬한다 (완료된 팀)', () => {
+    const rooms = [
+      { code: 'A', createdAt: '2026-01-01T00:00:00Z' },
+      { code: 'B', createdAt: '2026-01-03T00:00:00Z' },
+    ]
+    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['B', 'A'])
+  })
+
+  it('진행중인 방과 완료된 팀이 섞여 있어도 하나의 시간 기준으로 정렬한다', () => {
+    const rooms = [
+      { code: 'completed-old', createdAt: '2026-01-01T00:00:00Z' },
+      { code: 'live-new', updatedAt: new Date('2026-01-05T00:00:00Z') },
+      { code: 'completed-new', createdAt: '2026-01-04T00:00:00Z' },
+    ]
+    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['live-new', 'completed-new', 'completed-old'])
+  })
+
+  it('원본 배열을 변형하지 않는다', () => {
+    const rooms = [
+      { code: 'A', updatedAt: new Date('2026-01-01T00:00:00Z') },
+      { code: 'B', updatedAt: new Date('2026-01-02T00:00:00Z') },
+    ]
+    sortRoomsByRecency(rooms)
+    expect(rooms.map(r => r.code)).toEqual(['A', 'B'])
   })
 })
 

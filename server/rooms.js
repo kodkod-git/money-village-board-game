@@ -125,6 +125,10 @@ export function deleteRoomByCode(code) {
   return rooms.delete(code)
 }
 
+export function sortRoomsByRecency(rooms) {
+  return [...rooms].sort((a, b) => new Date(b.updatedAt ?? b.createdAt) - new Date(a.updatedAt ?? a.createdAt))
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false

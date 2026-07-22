@@ -210,7 +210,7 @@ describe('getBoothRankings', () => {
 describe('getAllCompletedTeams', () => {
   it('세션과 결과를 팀 단위로 묶어 room 형태로 반환한다', async () => {
     const sessions = [{
-      id: 'session-1', team_code: 'AB1234',
+      id: 'session-1', team_code: 'AB1234', created_at: '2026-01-01T00:00:00Z',
       stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
     }]
     const results = [{
@@ -235,6 +235,7 @@ describe('getAllCompletedTeams', () => {
       code: 'AB1234',
       status: 'completed',
       registered: true,
+      createdAt: '2026-01-01T00:00:00Z',
       prices: { stocks: PRICES.stocks, realEstate: PRICES.realEstate },
       players: [{
         playerUuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
