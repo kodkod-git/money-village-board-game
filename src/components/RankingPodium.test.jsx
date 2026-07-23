@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi } from 'vitest'
 import RankingPodium from './RankingPodium'
 
 const rows = [
@@ -52,5 +53,12 @@ describe('RankingPodium', () => {
     render(<RankingPodium rows={boothRows} valueKey="stockValue" />)
     expect(screen.getAllByText('-원')).toHaveLength(2)
     expect(screen.getByText('90,000원')).toBeInTheDocument()
+  })
+
+  it('onRowClick이 있으면 순위판 항목 클릭 시 해당 row로 호출한다', async () => {
+    const handleClick = vi.fn()
+    render(<RankingPodium rows={rows} onRowClick={handleClick} />)
+    await userEvent.click(screen.getByText('김민준'))
+    expect(handleClick).toHaveBeenCalledWith(rows[0])
   })
 })

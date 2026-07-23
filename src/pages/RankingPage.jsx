@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import BoothCategoryTabs from '../components/BoothCategoryTabs'
+import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
 
@@ -20,6 +21,30 @@ const TABS = [
 
 const BOOTH_VALUE_KEYS = { stock: 'stockValue', realEstate: 'realEstateValue' }
 
+function toAdminPlayer(row) {
+  return {
+    playerUuid: row.playerUuid,
+    name: row.name,
+    character: row.character,
+    affiliation: row.affiliation,
+    gameState: {
+      job: row.job ?? null,
+      cash: row.cash ?? 0,
+      stocks: row.stockHoldings ?? {},
+      realEstate: row.realEstateHoldings ?? {},
+      badges: row.badges ?? [false, false, false, false, false, false],
+      isCompleted: true,
+    },
+  }
+}
+
+function toAdminPrices(row) {
+  return {
+    stocks: row.stockPrices ?? {},
+    realEstate: row.realEstatePrices ?? {},
+  }
+}
+
 export default function RankingPage() {
   const { sessionId } = useParams()
   const navigate = useNavigate()
@@ -32,6 +57,7 @@ export default function RankingPage() {
   const [myAffiliation, setMyAffiliation] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [viewingPlayer, setViewingPlayer] = useState(null)
 
   const myPlayerUuid = getPlayerUuid()
 
@@ -70,7 +96,12 @@ export default function RankingPage() {
         fetch(`/api/results/${sessionId}`)
           .then(r => { if (!r.ok) throw new Error(); return r.json() })
           .then(data => {
-            setRows(data.players ?? [])
+            const players = (data.players ?? []).map(p => ({
+              ...p,
+              stockPrices: data.stockPrices,
+              realEstatePrices: data.realEstatePrices,
+            }))
+            setRows(players)
             setLoading(false)
           })
           .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
@@ -86,6 +117,14 @@ export default function RankingPage() {
 
   const valueKey = topTab === 'booth' ? BOOTH_VALUE_KEYS[boothCategory] : 'totalAssets'
   const podiumRows = rows.slice(0, 3)
+
+  function handleRowClick(row) {
+    if (!row || row.isPlaceholder) {
+      navigate('/join')
+      return
+    }
+    setViewingPlayer(row)
+  }
 
   return (
     <div className={styles.page}>
@@ -148,21 +187,30 @@ export default function RankingPage() {
                 아래 목록에도 동일한 상위 랭커가 다시 나타나므로,
                 일부만 채워진 시상대는 오히려 어색하다. */}
             {podiumRows.length === 3 && (
-              <RankingPodium rows={podiumRows} valueKey={valueKey} />
+              <RankingPodium rows={podiumRows} valueKey={valueKey} onRowClick={handleRowClick} />
             )}
             <RankingTable
               rows={rows}
               valueKey={valueKey}
               highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
-              onRowClick={row => {
-                if (!row || row.isPlaceholder) {
-                  navigate('/join')
-                }
-              }}
+              onRowClick={handleRowClick}
             />
           </>
         )}
       </div>
+
+      {viewingPlayer && (
+        <div className={styles.overlay} onClick={() => setViewingPlayer(null)}>
+          <div className={styles.popup} onClick={e => e.stopPropagation()}>
+            <AdminEditModal
+              player={toAdminPlayer(viewingPlayer)}
+              prices={toAdminPrices(viewingPlayer)}
+              onClose={() => setViewingPlayer(null)}
+              readOnly
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

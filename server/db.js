@@ -178,7 +178,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'player_uuid, name, affiliation, character, total_assets, stock_value, real_estate_value, session_id, game_sessions(team_code)'
+const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, game_sessions(team_code, stock_prices, real_estate_prices)'
 
 function mapRankingRow(r, i) {
   return {
@@ -186,12 +186,19 @@ function mapRankingRow(r, i) {
     name: r.name,
     affiliation: r.affiliation,
     character: r.character,
+    job: r.job,
+    cash: r.cash,
+    stockHoldings: r.stock_holdings,
+    realEstateHoldings: r.real_estate_holdings,
+    badges: r.badges,
     totalAssets: Number(r.total_assets),
     stockValue: r.stock_value != null ? Number(r.stock_value) : null,
     realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
     sessionId: r.session_id,
     playerUuid: r.player_uuid,
     teamCode: r.game_sessions?.team_code ?? '',
+    stockPrices: r.game_sessions?.stock_prices ?? null,
+    realEstatePrices: r.game_sessions?.real_estate_prices ?? null,
   }
 }
 

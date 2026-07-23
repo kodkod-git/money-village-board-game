@@ -39,7 +39,7 @@ function AssetSummaryList({ labels, images, values, folder, unit, testIdPrefix }
   )
 }
 
-export default function AdminEditModal({ player, prices, onSave, onClose }) {
+export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false }) {
   const [editingField, setEditingField] = useState(null)
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
@@ -60,7 +60,9 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <span className={styles.fieldLabel}>직업</span>
-              <button type="button" data-testid="edit-job" className={styles.editBtn} onClick={() => setEditingField('job')}>수정</button>
+              {!readOnly && (
+                <button type="button" data-testid="edit-job" className={styles.editBtn} onClick={() => setEditingField('job')}>수정</button>
+              )}
             </div>
             <span className={styles.fieldValue}>{gameState.job ? JOB_LABELS[gameState.job] : '미입력'}</span>
           </div>
@@ -68,7 +70,9 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <span className={styles.fieldLabel}>성공카드</span>
-              <button type="button" data-testid="edit-badges" className={styles.editBtn} onClick={() => setEditingField('badges')}>수정</button>
+              {!readOnly && (
+                <button type="button" data-testid="edit-badges" className={styles.editBtn} onClick={() => setEditingField('badges')}>수정</button>
+              )}
             </div>
             <div className={styles.chipRow}>
               {earnedBadges.length === 0 && <span className={styles.fieldValue}>미입력</span>}
@@ -79,7 +83,9 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <span className={styles.fieldLabel}>현금</span>
-              <button type="button" data-testid="edit-cash" className={styles.editBtn} onClick={() => setEditingField('cash')}>수정</button>
+              {!readOnly && (
+                <button type="button" data-testid="edit-cash" className={styles.editBtn} onClick={() => setEditingField('cash')}>수정</button>
+              )}
             </div>
             <span className={styles.fieldValue}>{(gameState.cash ?? 0).toLocaleString()}원</span>
           </div>
@@ -89,7 +95,9 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <span className={styles.fieldLabel}>부동산</span>
-              <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
+              {!readOnly && (
+                <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
+              )}
             </div>
             <AssetSummaryList
               labels={REAL_ESTATE_LABELS}
@@ -104,7 +112,9 @@ export default function AdminEditModal({ player, prices, onSave, onClose }) {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <span className={styles.fieldLabel}>주식</span>
-              <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
+              {!readOnly && (
+                <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
+              )}
             </div>
             <AssetSummaryList
               labels={STOCK_LABELS}

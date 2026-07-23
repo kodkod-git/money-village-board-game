@@ -66,4 +66,21 @@ describe('AdminEditModal', () => {
     await userEvent.click(screen.getByText('‹ 뒤로'))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('readOnly일 때는 모든 수정 버튼을 숨기지만 값과 뒤로가기는 그대로 보여준다', async () => {
+    const onClose = vi.fn()
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onClose={onClose} readOnly />)
+
+    expect(screen.queryByTestId('edit-job')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('edit-badges')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('edit-cash')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('edit-realEstate')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('edit-stocks')).not.toBeInTheDocument()
+
+    expect(screen.getByText('경영·금융')).toBeInTheDocument()
+    expect(screen.getByText('125,000원')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText('‹ 뒤로'))
+    expect(onClose).toHaveBeenCalled()
+  })
 })

@@ -6,7 +6,7 @@ function formatValue(value) {
   return value == null ? '-원' : `${value.toLocaleString()}원`
 }
 
-export default function RankingPodium({ rows, valueKey = 'totalAssets' }) {
+export default function RankingPodium({ rows, valueKey = 'totalAssets', onRowClick }) {
   if (rows.length === 0) return null
 
   const podiumRows = PODIUM_ORDER.map(i => rows[i]).filter(Boolean)
@@ -14,7 +14,12 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets' }) {
   return (
     <div className={styles.podium}>
       {podiumRows.map(row => (
-        <div key={row.playerUuid} className={`${styles.slot} ${row.rank === 1 ? styles.first : ''}`}>
+        <div
+          key={row.playerUuid}
+          className={`${styles.slot} ${row.rank === 1 ? styles.first : ''}`}
+          onClick={onRowClick ? () => onRowClick(row) : undefined}
+          style={onRowClick ? { cursor: 'pointer' } : undefined}
+        >
           <img src={`/characters/${row.character}.png`} alt={row.character} className={styles.avatar} />
           <span className={styles.name}>{row.name}</span>
           <div className={styles.box}>

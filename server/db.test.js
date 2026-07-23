@@ -150,8 +150,13 @@ describe('getAllRankings', () => {
   it('teamCode, stockValue, realEstateValue를 포함해 반환한다', async () => {
     const rows = [{
       player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
+      job: 'a', cash: 10000,
+      stock_holdings: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      real_estate_holdings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
       total_assets: 200000, stock_value: 4000, real_estate_value: 10000,
-      session_id: 's1', game_sessions: { team_code: 'AB1234' },
+      session_id: 's1',
+      game_sessions: { team_code: 'AB1234', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate },
     }]
     mockFrom.mockReset()
     mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
@@ -161,8 +166,13 @@ describe('getAllRankings', () => {
 
     expect(result).toEqual([{
       rank: 1, name: '김민준', affiliation: '서울중', character: 'lion',
+      job: 'a', cash: 10000,
+      stockHoldings: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstateHoldings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
       totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
       sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234',
+      stockPrices: PRICES.stocks, realEstatePrices: PRICES.realEstate,
     }])
   })
 

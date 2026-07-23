@@ -36,7 +36,12 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
       </div>
 
       {pinnedRow && (
-        <div className={styles.pinnedRow} data-testid="pinned-row">
+        <div
+          className={styles.pinnedRow}
+          data-testid="pinned-row"
+          onClick={onRowClick ? () => onRowClick(pinnedRow) : undefined}
+          style={onRowClick ? { cursor: 'pointer' } : undefined}
+        >
           <span className={styles.pinnedRank}>{pinnedRow.rank}위</span>
           <img
             src={`/characters/${pinnedRow.character}.png`}

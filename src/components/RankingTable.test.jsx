@@ -76,6 +76,17 @@ describe('RankingTable', () => {
     expect(empty).toHaveTextContent('-원')
   })
 
+  it('pinned row 클릭 시 onRowClick을 해당 데이터로 호출한다', async () => {
+    const handleClick = vi.fn()
+    render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} highlightPlayerUuid="uuid-2" onRowClick={handleClick} />
+      </MemoryRouter>
+    )
+    await userEvent.click(screen.getByTestId('pinned-row'))
+    expect(handleClick).toHaveBeenCalledWith(mockRows[1])
+  })
+
   it('플레이스홀더 행 클릭 시 onRowClick에 isPlaceholder: true 객체를 전달한다', async () => {
     const handleClick = vi.fn()
     render(

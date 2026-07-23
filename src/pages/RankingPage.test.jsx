@@ -97,4 +97,19 @@ describe('RankingPage', () => {
     await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
     expect(screen.queryByLabelText('뒤로 가기')).not.toBeInTheDocument()
   })
+
+  it('플레이어 행 클릭 시 관리자 수정화면과 동일한 읽기전용 상세보기를 연다', async () => {
+    renderAt('/ranking')
+    await userEvent.click(await screen.findByText('김민준'))
+    expect(screen.getByText('‹ 뒤로')).toBeInTheDocument()
+    expect(screen.queryByTestId('edit-job')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('edit-cash')).not.toBeInTheDocument()
+  })
+
+  it('상세보기에서 뒤로 버튼 클릭 시 닫힌다', async () => {
+    renderAt('/ranking')
+    await userEvent.click(await screen.findByText('김민준'))
+    await userEvent.click(screen.getByText('‹ 뒤로'))
+    expect(screen.queryByText('‹ 뒤로')).not.toBeInTheDocument()
+  })
 })
