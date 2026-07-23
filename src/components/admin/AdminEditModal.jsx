@@ -55,7 +55,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
         </div>
       </div>
 
-      <div className={styles.columns}>
+      <div className={`${styles.columns} ${readOnly ? styles.columnsSingle : ''}`}>
         <div className={styles.card}>
           <div className={styles.field}>
             <div className={styles.fieldHeader}>

@@ -83,4 +83,16 @@ describe('AdminEditModal', () => {
     await userEvent.click(screen.getByText('‹ 뒤로'))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('readOnly일 때는 단일 컬럼 레이아웃을, 아니면 2컬럼 레이아웃을 쓴다', () => {
+    const { container: readOnlyContainer } = render(
+      <AdminEditModal player={PLAYER} prices={PRICES} onClose={vi.fn()} readOnly />
+    )
+    expect(readOnlyContainer.querySelector('[class*="columnsSingle"]')).toBeInTheDocument()
+
+    const { container: editableContainer } = render(
+      <AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />
+    )
+    expect(editableContainer.querySelector('[class*="columnsSingle"]')).not.toBeInTheDocument()
+  })
 })
