@@ -30,7 +30,7 @@ describe('gameData constants', () => {
     expect(Object.keys(STOCK_IMAGES)).toEqual(keys)
   })
 
-  it('방 상태 라벨은 stale/abandoned/completed-but-unregistered 키를 갖는다', () => {
-    expect(Object.keys(ROOM_STATUS_LABELS)).toEqual(['stale', 'abandoned', 'completed-but-unregistered'])
+  it('방 상태 라벨은 live/stale/abandoned/completed-but-unregistered 키를 갖는다', () => {
+    expect(Object.keys(ROOM_STATUS_LABELS)).toEqual(['live', 'stale', 'abandoned', 'completed-but-unregistered'])
   })
 })

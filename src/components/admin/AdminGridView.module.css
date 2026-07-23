@@ -37,6 +37,8 @@
   padding: 4px 10px;
 }
 
+.badgeLive { background: var(--muted); }
+
 .badgeStale { background: var(--amber); }
 
 .badgeAbandoned { background: var(--red); }

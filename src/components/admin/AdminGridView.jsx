@@ -2,6 +2,7 @@ import { ROOM_STATUS_LABELS } from '../../constants/gameData'
 import styles from './AdminGridView.module.css'
 
 const STATUS_BADGE_CLASS = {
+  live: 'badgeLive',
   stale: 'badgeStale',
   abandoned: 'badgeAbandoned',
   'completed-but-unregistered': 'badgeUnregistered',

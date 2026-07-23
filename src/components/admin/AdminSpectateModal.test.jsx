@@ -129,10 +129,44 @@ it('라이브 룸(미등록)에는 삭제 버튼을 보여준다', () => {
   expect(screen.getByText('삭제')).toBeInTheDocument()
 })
 
-it('등록 완료된 팀에는 삭제 버튼을 보여주지 않는다', () => {
+it('등록 완료된 팀에도 삭제 버튼을 보여준다', () => {
   const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
   render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
-  expect(screen.queryByText('삭제')).not.toBeInTheDocument()
+  expect(screen.getByText('삭제')).toBeInTheDocument()
+})
+
+it('등록 대기(전원 입력완료) 상태에는 결과 등록 버튼을 보여준다', () => {
+  const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
+  render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.getByText('결과 등록')).toBeInTheDocument()
+})
+
+it('live/등록완료 상태에는 결과 등록 버튼을 보여주지 않는다', () => {
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.queryByText('결과 등록')).not.toBeInTheDocument()
+
+  const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+  render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.queryByText('결과 등록')).not.toBeInTheDocument()
+})
+
+it('결과 등록 버튼 클릭 시 확인 팝업 없이 바로 등록 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
+  const onClose = vi.fn()
+  const onRoomChanged = vi.fn()
+  global.fetch = vi.fn((url, options) => {
+    if (options?.method === 'POST') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ sessionId: 'session-1' }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+
+  const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
+  render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={onClose} onRoomChanged={onRoomChanged} />)
+  await userEvent.click(screen.getByText('결과 등록'))
+
+  expect(global.fetch).toHaveBeenCalledWith('/api/rooms/AB1234/submit', expect.objectContaining({ method: 'POST' }))
+  expect(onRoomChanged).toHaveBeenCalled()
+  expect(onClose).toHaveBeenCalled()
 })
 
 it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onRoomChanged와 onClose를 호출한다', async () => {

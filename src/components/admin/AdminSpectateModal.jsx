@@ -44,6 +44,13 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     onClose()
   }
 
+  async function handleRegister() {
+    const res = await fetch(`/api/rooms/${room.code}/submit`, { method: 'POST' })
+    if (!res.ok) return
+    onRoomChanged()
+    onClose()
+  }
+
   if (editingPlayerUuid) {
     const player = room.players.find(p => p.playerUuid === editingPlayerUuid)
     return (
@@ -89,12 +96,6 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         ))}
       </div>
 
-      {!room.registered && (
-        <div className={styles.dangerZone}>
-          <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
-        </div>
-      )}
-
       <div className={styles.grid}>
         {room.players.map((player, i) => (
           player ? (
@@ -108,6 +109,13 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             <div key={i} className={styles.emptySlot}>대기중</div>
           )
         ))}
+      </div>
+
+      <div className={styles.actions}>
+        {room.status === 'completed-but-unregistered' && (
+          <button type="button" className={styles.registerBtn} onClick={handleRegister}>결과 등록</button>
+        )}
+        <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
       </div>
 
       {confirmDelete && (

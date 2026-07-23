@@ -34,6 +34,7 @@ export const STOCK_IMAGES = {
 }
 
 export const ROOM_STATUS_LABELS = {
+  live: '미입력',
   stale: '정체',
   abandoned: '방치',
   'completed-but-unregistered': '등록 대기',

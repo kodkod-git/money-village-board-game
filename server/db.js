@@ -112,6 +112,27 @@ export async function getAllCompletedTeams() {
   }))
 }
 
+export async function deleteCompletedTeam(teamCode) {
+  const { data: session, error: sessionError } = await supabase
+    .from('game_sessions')
+    .select('id')
+    .eq('team_code', teamCode)
+    .single()
+  if (sessionError) throw sessionError
+
+  const { error: resultsError } = await supabase
+    .from('game_results')
+    .delete()
+    .eq('session_id', session.id)
+  if (resultsError) throw resultsError
+
+  const { error: sessionDeleteError } = await supabase
+    .from('game_sessions')
+    .delete()
+    .eq('id', session.id)
+  if (sessionDeleteError) throw sessionDeleteError
+}
+
 const GAME_STATE_TO_COLUMN = {
   job: 'job', cash: 'cash', stocks: 'stock_holdings',
   realEstate: 'real_estate_holdings', badges: 'badges',

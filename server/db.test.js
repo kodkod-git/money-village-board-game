@@ -318,3 +318,50 @@ describe('updateGameResult', () => {
     expect(updated.playerUuid).toBe('p1')
   })
 })
+
+describe('deleteCompletedTeam', () => {
+  it('세션을 조회한 뒤 결과와 세션을 순서대로 삭제한다', async () => {
+    const mockSessionSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSessionEq = vi.fn().mockReturnValue({ single: mockSessionSingle })
+    const mockSessionSelect = vi.fn().mockReturnValue({ eq: mockSessionEq })
+
+    const mockResultsEq = vi.fn().mockResolvedValue({ error: null })
+    const mockResultsDelete = vi.fn().mockReturnValue({ eq: mockResultsEq })
+
+    const mockSessionDeleteEq = vi.fn().mockResolvedValue({ error: null })
+    const mockSessionDelete = vi.fn().mockReturnValue({ eq: mockSessionDeleteEq })
+
+    let resultsCall = 0
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') {
+        resultsCall += 1
+        return resultsCall === 1 ? { select: mockSessionSelect } : { delete: mockSessionDelete }
+      }
+      if (table === 'game_results') return { delete: mockResultsDelete }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeam } = await import('./db.js')
+    await deleteCompletedTeam('AB1234')
+
+    expect(mockSessionEq).toHaveBeenCalledWith('team_code', 'AB1234')
+    expect(mockResultsEq).toHaveBeenCalledWith('session_id', 'session-1')
+    expect(mockSessionDeleteEq).toHaveBeenCalledWith('id', 'session-1')
+  })
+
+  it('세션을 찾지 못하면 에러를 던진다', async () => {
+    const mockSessionSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'not found' } })
+    const mockSessionEq = vi.fn().mockReturnValue({ single: mockSessionSingle })
+    const mockSessionSelect = vi.fn().mockReturnValue({ eq: mockSessionEq })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSessionSelect }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeam } = await import('./db.js')
+    await expect(deleteCompletedTeam('XXXXXX')).rejects.toEqual({ message: 'not found' })
+  })
+})

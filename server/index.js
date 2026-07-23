@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, sortRoomsByRecency } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult } from './db.js'
+import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -101,11 +101,17 @@ app.get('/api/admin/rooms', async (req, res) => {
   }
 })
 
-app.delete('/api/admin/rooms/:code', (req, res) => {
+app.delete('/api/admin/rooms/:code', async (req, res) => {
   const code = req.params.code.toUpperCase()
-  const deleted = deleteRoomByCode(code)
-  if (!deleted) return res.status(404).json({ error: 'Room not found' })
-  res.json({ ok: true })
+  if (deleteRoomByCode(code)) return res.json({ ok: true })
+
+  try {
+    await deleteCompletedTeam(code)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('admin delete error:', err)
+    res.status(404).json({ error: 'Room not found' })
+  }
 })
 
 app.patch('/api/admin/rooms/:code/players/:playerUuid', async (req, res) => {

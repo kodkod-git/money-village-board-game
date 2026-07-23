@@ -82,14 +82,12 @@ describe('AdminGridView', () => {
     expect(screen.getByText('등록 대기')).toBeInTheDocument()
   })
 
-  it('live 상태 방에는 상태 배지를 보여주지 않는다', () => {
+  it('live 상태 방에는 미입력 배지를 보여준다', () => {
     const liveRooms = [{
       code: 'AB1234', registered: false, status: 'live',
       players: [{ character: 'Adventurer-강아지', name: '김민준' }],
     }]
     render(<AdminGridView rooms={liveRooms} onSpectate={vi.fn()} />)
-    expect(screen.queryByText('정체')).not.toBeInTheDocument()
-    expect(screen.queryByText('방치')).not.toBeInTheDocument()
-    expect(screen.queryByText('등록 대기')).not.toBeInTheDocument()
+    expect(screen.getByText('미입력')).toBeInTheDocument()
   })
 })
