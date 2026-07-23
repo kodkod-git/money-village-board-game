@@ -2,6 +2,10 @@ import styles from './RankingPodium.module.css'
 
 const PODIUM_ORDER = [1, 0, 2]
 
+function formatValue(value) {
+  return value == null ? '-원' : `${value.toLocaleString()}원`
+}
+
 export default function RankingPodium({ rows, valueKey = 'totalAssets' }) {
   if (rows.length === 0) return null
 
@@ -15,7 +19,7 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets' }) {
           <span className={styles.name}>{row.name}</span>
           <div className={styles.box}>
             <span className={styles.rank}>{row.rank}위</span>
-            <span className={styles.value}>{row[valueKey].toLocaleString()}원</span>
+            <span className={styles.value}>{formatValue(row[valueKey])}</span>
           </div>
         </div>
       ))}

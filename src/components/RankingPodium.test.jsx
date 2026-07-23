@@ -42,4 +42,15 @@ describe('RankingPodium', () => {
     render(<RankingPodium rows={boothRows} valueKey="stockValue" />)
     expect(screen.getByText('172,000원')).toBeInTheDocument()
   })
+
+  it('해당 필드 값이 null이면 에러 없이 -원으로 표시한다', () => {
+    const boothRows = [
+      { rank: 1, name: '정우성', character: 'tiger', playerUuid: 'p4', stockValue: null },
+      { rank: 2, name: '한소희', character: 'toucan', playerUuid: 'p5', stockValue: 90000 },
+      { rank: 3, name: '박지호', character: 'panda', playerUuid: 'p6', stockValue: null },
+    ]
+    render(<RankingPodium rows={boothRows} valueKey="stockValue" />)
+    expect(screen.getAllByText('-원')).toHaveLength(2)
+    expect(screen.getByText('90,000원')).toBeInTheDocument()
+  })
 })
