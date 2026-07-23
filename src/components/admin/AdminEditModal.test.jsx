@@ -33,6 +33,7 @@ describe('AdminEditModal', () => {
 
   it('직업/현금/총자산 값을 보여준다', () => {
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('💼')).toBeInTheDocument()
     expect(screen.getByText('경영·금융')).toBeInTheDocument()
     expect(screen.getByText('125,000원')).toBeInTheDocument()
     // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → ×0.5 = 69,500원

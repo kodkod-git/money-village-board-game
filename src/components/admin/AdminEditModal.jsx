@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import {
-  JOB_LABELS, BADGE_NAMES, BADGE_LABELS,
+  JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
   STOCK_LABELS, STOCK_IMAGES,
 } from '../../constants/gameData'
@@ -64,7 +64,14 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                 <button type="button" data-testid="edit-job" className={styles.editBtn} onClick={() => setEditingField('job')}>수정</button>
               )}
             </div>
-            <span className={styles.fieldValue}>{gameState.job ? JOB_LABELS[gameState.job] : '미입력'}</span>
+            <span className={styles.fieldValue}>
+              {gameState.job ? (
+                <>
+                  <span aria-hidden="true">{JOB_ICONS[gameState.job]}</span>{' '}
+                  <span>{JOB_LABELS[gameState.job]}</span>
+                </>
+              ) : '미입력'}
+            </span>
           </div>
 
           <div className={styles.field}>
