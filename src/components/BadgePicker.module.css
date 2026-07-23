@@ -42,7 +42,7 @@
 .tileSelected { background: var(--ink); border-color: var(--ink); }
 .tileSelected .label { color: var(--white); }
 
-.img { width: 64px; height: 64px; object-fit: contain; flex-shrink: 0; }
+.img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 
 .label {
   font-size: 13px;
