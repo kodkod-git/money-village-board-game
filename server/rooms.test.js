@@ -190,6 +190,13 @@ describe('updatePlayerStateByUuid', () => {
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
     expect(updatePlayerStateByUuid(code, 'unknown', { cash: 1 })).toBeNull()
   })
+
+  it('관리자가 필드를 수정하면 isCompleted를 true로 설정한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = updatePlayerStateByUuid(code, 'p1', { job: 'a' })
+    expect(room.players[0].gameState.isCompleted).toBe(true)
+  })
 })
 
 describe('updatedAt 갱신', () => {

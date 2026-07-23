@@ -103,7 +103,10 @@ export function updatePlayerStateByUuid(code, playerUuid, partialGameState) {
   if (!room) return null
   const player = room.players.find(p => p.playerUuid === playerUuid)
   if (!player) return null
-  player.gameState = { ...player.gameState, ...partialGameState }
+  // 이 함수는 관리자 수정 라우트에서만 호출된다 — 관리자가 필드를 손대면
+  // 그 플레이어는 입력 완료로 간주해, 전원 완료 시 "등록 대기" 상태로
+  // 넘어가고 관리자가 결과 등록도 할 수 있게 한다.
+  player.gameState = { ...player.gameState, ...partialGameState, isCompleted: true }
   room.updatedAt = new Date()
   return room
 }

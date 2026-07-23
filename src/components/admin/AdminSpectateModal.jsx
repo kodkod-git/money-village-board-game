@@ -6,9 +6,13 @@ import styles from './AdminSpectateModal.module.css'
 const POLL_INTERVAL_MS = 3000
 
 export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose, onRoomChanged }) {
-  const [index, setIndex] = useState(initialIndex)
+  // 코드로 현재 팀을 추적한다 — onRoomChanged로 목록을 다시 불러오면
+  // 최신순 재정렬 때문에 이 방의 배열 인덱스가 바뀔 수 있으므로,
+  // 숫자 인덱스만 들고 있으면 편집 중 다른 팀으로 화면이 튈 수 있다.
+  const [currentCode, setCurrentCode] = useState(rooms[initialIndex].code)
   const [editingPlayerUuid, setEditingPlayerUuid] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const pollTimer = useRef(null)
 
@@ -34,6 +38,9 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     if (!res.ok) return
     const updated = await res.json()
     onPlayerUpdate(room.code, updated)
+    // 관리자가 필드를 저장하면 서버에서 해당 플레이어를 완료 처리하므로,
+    // 방 목록도 다시 불러와 상태 배지(예: 등록 대기)가 최신 상태를 반영하게 한다.
+    onRoomChanged?.()
   }
 
   async function handleDelete() {
@@ -71,7 +78,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           className={styles.navArrow}
           aria-label="이전 팀"
           disabled={index === 0}
-          onClick={() => setIndex(i => Math.max(0, i - 1))}
+          onClick={() => setCurrentCode(rooms[Math.max(0, index - 1)].code)}
         >
           ‹
         </button>
@@ -84,7 +91,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           className={styles.navArrow}
           aria-label="다음 팀"
           disabled={index === rooms.length - 1}
-          onClick={() => setIndex(i => Math.min(rooms.length - 1, i + 1))}
+          onClick={() => setCurrentCode(rooms[Math.min(rooms.length - 1, index + 1)].code)}
         >
           ›
         </button>

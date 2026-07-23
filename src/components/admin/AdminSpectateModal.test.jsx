@@ -94,6 +94,40 @@ describe('AdminSpectateModal', () => {
     )
     expect(onPlayerUpdate).toHaveBeenCalledWith('AB1234', updatedPlayer)
   })
+
+  it('필드 수정 저장 시 onRoomChanged도 호출해 방 목록(상태 배지)을 새로고침한다', async () => {
+    const onRoomChanged = vi.fn()
+    global.fetch = vi.fn((_url, options) => {
+      if (options?.method === 'PATCH') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ playerUuid: 'AB1234-p1', gameState: {} }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+    })
+
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+    await userEvent.click(screen.getByText('수정'))
+    await userEvent.click(screen.getByTestId('edit-job'))
+    await userEvent.click(screen.getByText('보건·교육'))
+
+    expect(onRoomChanged).toHaveBeenCalled()
+  })
+})
+
+it('onRoomChanged로 방 목록 순서가 바뀌어도 보고 있던 팀을 코드로 계속 추적한다', () => {
+  const roomA = makeRoom('AB1234', '김민준')
+  const roomB = makeRoom('CD5678', '이서연')
+  const { rerender } = render(
+    <AdminSpectateModal rooms={[roomA, roomB]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />
+  )
+  expect(screen.getByText('1팀')).toBeInTheDocument()
+  expect(screen.getByText('김민준')).toBeInTheDocument()
+
+  // 목록이 다시 정렬돼 순서가 바뀌어도(AB1234가 이제 index 1) 같은 방을 계속 보여줘야 한다.
+  rerender(
+    <AdminSpectateModal rooms={[roomB, roomA]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />
+  )
+  expect(screen.getByText('2팀')).toBeInTheDocument()
+  expect(screen.getByText('김민준')).toBeInTheDocument()
 })
 
 it('stale 상태(미등록 라이브 룸)에서도 계속 폴링한다', async () => {
