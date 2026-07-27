@@ -13,8 +13,8 @@ beforeEach(() => {
         json: () => Promise.resolve({ token: 't1', username: 'admin', isSuper: true }),
       })
     }
-    if (url === '/api/admin/orgs') {
-      return Promise.resolve({ ok: true, json: () => Promise.resolve([{ id: 'org-1', name: '경영학과' }]) })
+    if (url === '/api/admin/classes') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve([{ id: 'class-1', name: '3학년 2반' }]) })
     }
     return Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
   })
@@ -31,20 +31,20 @@ describe('AdminDashboard', () => {
     expect(screen.getByRole('button', { name: '로그인하기' })).toBeInTheDocument()
   })
 
-  it('로그인에 성공하면 소속 목록 화면으로 전환한다', async () => {
+  it('로그인에 성공하면 수업 목록 화면으로 전환한다', async () => {
     render(<AdminDashboard />)
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
-    expect(await screen.findByText('경영학과')).toBeInTheDocument()
+    expect(await screen.findByText('3학년 2반')).toBeInTheDocument()
   })
 
-  it('소속을 선택하면 해당 소속의 대시보드로 전환한다', async () => {
+  it('수업을 선택하면 해당 수업의 대시보드로 전환한다', async () => {
     render(<AdminDashboard />)
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
-    await userEvent.click(await screen.findByText('경영학과'))
-    expect(await screen.findByText('← 소속 목록')).toBeInTheDocument()
+    await userEvent.click(await screen.findByText('3학년 2반'))
+    expect(await screen.findByText('← 수업 목록')).toBeInTheDocument()
   })
 })

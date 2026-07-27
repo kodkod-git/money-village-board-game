@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { getAdminToken, getAdminProfile, setAdminSession, clearAdminSession } from '../utils/adminAuth'
 import AdminLogin from './AdminLogin'
-import AdminOrgList from './AdminOrgList'
-import AdminOrgDashboard from './AdminOrgDashboard'
+import AdminClassList from './AdminClassList'
+import AdminClassDashboard from './AdminClassDashboard'
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(() => getAdminToken())
   const [profile, setProfile] = useState(() => getAdminProfile())
-  const [selectedOrg, setSelectedOrg] = useState(null)
+  const [selectedClass, setSelectedClass] = useState(null)
 
   function handleLogin(newToken, newProfile) {
     setAdminSession(newToken, newProfile)
@@ -19,12 +19,18 @@ export default function AdminDashboard() {
     clearAdminSession()
     setToken(null)
     setProfile(null)
-    setSelectedOrg(null)
+    setSelectedClass(null)
   }
 
   if (!token || !profile) return <AdminLogin onLogin={handleLogin} />
-  if (!selectedOrg) {
-    return <AdminOrgList profile={profile} onSelectOrg={setSelectedOrg} onLogout={handleLogout} />
+  if (!selectedClass) {
+    return <AdminClassList profile={profile} onSelectClass={setSelectedClass} onLogout={handleLogout} />
   }
-  return <AdminOrgDashboard org={selectedOrg} onBack={() => setSelectedOrg(null)} />
+  return (
+    <AdminClassDashboard
+      classId={selectedClass.id}
+      initialName={selectedClass.name}
+      onBack={() => setSelectedClass(null)}
+    />
+  )
 }
