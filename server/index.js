@@ -7,6 +7,9 @@ import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, sortRoomsByRecency } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam } from './db.js'
+import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
+import { signAdminToken, requireAdmin } from './adminAuth.js'
+import { createOrg, listOrgsForAdmin, hasOrgAccess, UNASSIGNED_ORG } from './orgs.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -23,8 +26,8 @@ if (process.env.NODE_ENV === 'production') {
 // Health check — must be before /:code route
 app.get('/api/rooms/health', (_req, res) => res.json({ ok: true }))
 
-app.post('/api/rooms', (_req, res) => {
-  const room = createRoom()
+app.post('/api/rooms', (req, res) => {
+  const room = createRoom({ affiliation: req.body?.affiliation ?? '' })
   res.json({ code: room.code })
 })
 
@@ -76,14 +79,79 @@ app.get('/api/rankings', async (req, res) => {
   }
 })
 
-app.get('/api/admin/rooms', async (req, res) => {
+app.post('/api/admin/signup', async (req, res) => {
+  const { username, password } = req.body
+  if (!username?.trim() || !password?.trim()) {
+    return res.status(400).json({ error: 'username과 password가 필요합니다' })
+  }
   try {
+    const admin = await createAdmin(username.trim(), password)
+    const token = signAdminToken(admin)
+    res.json({ token, username: admin.username, isSuper: admin.isSuper })
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 아이디입니다' })
+    console.error('admin signup error:', err)
+    res.status(500).json({ error: 'Failed to create admin' })
+  }
+})
+
+app.post('/api/admin/login', async (req, res) => {
+  const { username, password } = req.body
+  if (!username?.trim() || !password?.trim()) {
+    return res.status(400).json({ error: 'username과 password가 필요합니다' })
+  }
+  const admin = await verifyAdminPassword(username.trim(), password)
+  if (!admin) return res.status(401).json({ error: '아이디 또는 비밀번호가 올바르지 않습니다' })
+  const token = signAdminToken(admin)
+  res.json({ token, username: admin.username, isSuper: admin.isSuper })
+})
+
+app.get('/api/admin/orgs', requireAdmin, async (req, res) => {
+  try {
+    const orgs = await listOrgsForAdmin(req.admin)
+    res.json(orgs)
+  } catch (err) {
+    console.error('list orgs error:', err)
+    res.status(500).json({ error: 'Failed to list orgs' })
+  }
+})
+
+app.post('/api/admin/orgs', requireAdmin, async (req, res) => {
+  const { name } = req.body
+  if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
+  try {
+    const org = await createOrg(name, req.admin.adminId)
+    res.json(org)
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 소속입니다' })
+    console.error('create org error:', err)
+    res.status(500).json({ error: 'Failed to create org' })
+  }
+})
+
+async function findRoomAffiliation(code) {
+  const liveRoom = getRoom(code)
+  if (liveRoom) return liveRoom.affiliation
+  const completed = await getAllCompletedTeams()
+  const match = completed.find(r => r.code === code)
+  return match ? match.affiliation : null
+}
+
+app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
+  const { org } = req.query
+  if (!org) return res.status(400).json({ error: 'org 쿼리 파라미터가 필요합니다' })
+
+  try {
+    const allowed = await hasOrgAccess(req.admin, org)
+    if (!allowed) return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+
     const now = new Date()
     const liveRooms = listAllRooms().map(room => ({
       code: room.code,
       status: computeLiveRoomStatus(room, now),
       registered: false,
       updatedAt: room.updatedAt,
+      affiliation: room.affiliation,
       prices: room.prices,
       players: room.players.map(p => ({
         playerUuid: p.playerUuid,
@@ -94,15 +162,25 @@ app.get('/api/admin/rooms', async (req, res) => {
       })),
     }))
     const completedRooms = await getAllCompletedTeams()
-    res.json(sortRoomsByRecency([...liveRooms, ...completedRooms]))
+    const allRooms = [...liveRooms, ...completedRooms]
+
+    const matchesOrg = room => (org === UNASSIGNED_ORG ? !room.affiliation : room.affiliation === org)
+
+    res.json(sortRoomsByRecency(allRooms.filter(matchesOrg)))
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })
   }
 })
 
-app.delete('/api/admin/rooms/:code', async (req, res) => {
+app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
+  const affiliation = await findRoomAffiliation(code)
+  if (affiliation === null) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasOrgAccess(req.admin, affiliation || UNASSIGNED_ORG))) {
+    return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+  }
+
   if (deleteRoomByCode(code)) return res.json({ ok: true })
 
   try {
@@ -114,10 +192,16 @@ app.delete('/api/admin/rooms/:code', async (req, res) => {
   }
 })
 
-app.patch('/api/admin/rooms/:code/players/:playerUuid', async (req, res) => {
+app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
   const { playerUuid } = req.params
   const partialGameState = req.body
+
+  const affiliation = await findRoomAffiliation(code)
+  if (affiliation === null) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasOrgAccess(req.admin, affiliation || UNASSIGNED_ORG))) {
+    return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+  }
 
   const room = updatePlayerStateByUuid(code, playerUuid, partialGameState)
   if (room) {
@@ -223,4 +307,8 @@ io.on('connection', (socket) => {
   })
 })
 
-httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+seedMasterAdmin()
+  .catch(err => console.error('Failed to seed master admin:', err))
+  .finally(() => {
+    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  })
