@@ -140,4 +140,45 @@ describe('AdminClassDashboard', () => {
     await userEvent.click(screen.getByText('← 수업 목록'))
     expect(onBack).toHaveBeenCalled()
   })
+
+  it('수업 삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onBack을 호출한다', async () => {
+    const onBack = vi.fn()
+    renderDashboard(onBack)
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+
+    await userEvent.click(screen.getByText('수업 삭제'))
+    expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText('정말 삭제'))
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1', expect.objectContaining({
+      method: 'DELETE',
+    }))
+    expect(onBack).toHaveBeenCalled()
+  })
+
+  it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    global.fetch.mockClear()
+
+    await userEvent.click(screen.getByText('수업 삭제'))
+    await userEvent.click(screen.getByText('취소'))
+
+    expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('미배정 수업(unassigned)에는 삭제 버튼을 보여주지 않는다', async () => {
+    render(<AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />)
+    await screen.findByText('홍길동')
+    expect(screen.queryByText('수업 삭제')).not.toBeInTheDocument()
+  })
 })

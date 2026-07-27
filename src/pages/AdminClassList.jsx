@@ -12,6 +12,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [newClassName, setNewClassName] = useState('')
   const [error, setError] = useState('')
   const [qrClass, setQrClass] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const loadClasses = useCallback(() => {
     adminFetch('/api/admin/classes')
@@ -39,6 +40,13 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
       return
     }
     setNewClassName('')
+    loadClasses()
+  }
+
+  async function handleConfirmDelete() {
+    const res = await adminFetch(`/api/admin/classes/${deleteTarget.id}`, { method: 'DELETE' })
+    setDeleteTarget(null)
+    if (!res.ok) return
     loadClasses()
   }
 
@@ -71,13 +79,30 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
               {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
             </button>
             {cls.id !== 'unassigned' && (
-              <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
+              <>
+                <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
+                <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(cls)}>삭제</button>
+              </>
             )}
           </li>
         ))}
       </ul>
 
       {qrClass && <ClassQRModal classId={qrClass.id} name={qrClass.name} onClose={() => setQrClass(null)} />}
+
+      {deleteTarget && (
+        <div className={styles.confirmOverlay} onClick={() => setDeleteTarget(null)}>
+          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
+            <p className={styles.confirmText}>
+              '{deleteTarget.name}' 수업을 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?
+            </p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.confirmCancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>정말 삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
