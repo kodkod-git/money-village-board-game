@@ -22,14 +22,14 @@ describe('createRoom', () => {
     expect(room.updatedAt.getTime()).toBe(room.createdAt.getTime())
   })
 
-  it('affiliation을 지정하지 않으면 빈 문자열로 초기화한다', () => {
+  it('classId를 지정하지 않으면 null로 초기화한다', () => {
     const room = createRoom()
-    expect(room.affiliation).toBe('')
+    expect(room.classId).toBeNull()
   })
 
-  it('affiliation을 지정하면 방에 저장한다', () => {
-    const room = createRoom({ affiliation: '경영학과' })
-    expect(room.affiliation).toBe('경영학과')
+  it('classId를 지정하면 방에 저장한다', () => {
+    const room = createRoom({ classId: 'class-1' })
+    expect(room.classId).toBe('class-1')
   })
 })
 

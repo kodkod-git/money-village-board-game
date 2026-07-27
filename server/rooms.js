@@ -30,11 +30,11 @@ function defaultPrices() {
   }
 }
 
-export function createRoom({ affiliation = '' } = {}) {
+export function createRoom({ classId = null } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), affiliation }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId }
   rooms.set(code, room)
   return room
 }
