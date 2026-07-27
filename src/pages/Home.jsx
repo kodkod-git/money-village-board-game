@@ -14,6 +14,7 @@ export default function Home() {
 
   const name = searchParams.get('name') ?? ''
   const affiliation = searchParams.get('affiliation') ?? ''
+  const classId = searchParams.get('classId') ?? ''
   const character = searchParams.get('character') ?? ''
   const initialCode = searchParams.get('code') ?? ''
 
@@ -35,7 +36,7 @@ export default function Home() {
     const res = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ affiliation }),
+      body: JSON.stringify({ classId: classId || null }),
     })
     const { code } = await res.json()
     joinRoom(code, true)
