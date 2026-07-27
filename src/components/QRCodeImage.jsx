@@ -6,12 +6,13 @@ function buildJoinUrl(code) {
   return `${origin}/join?code=${encodeURIComponent(code)}`
 }
 
-export default function QRCodeImage({ code, className }) {
+export default function QRCodeImage({ code, url, className }) {
+  const target = url ?? buildJoinUrl(code)
   const [src, setSrc] = useState('')
 
   useEffect(() => {
     let cancelled = false
-    QRCode.toDataURL(buildJoinUrl(code), { margin: 1, width: 220 })
+    QRCode.toDataURL(target, { margin: 1, width: 220 })
       .then(dataUrl => {
         if (!cancelled) setSrc(dataUrl)
       })
@@ -21,7 +22,7 @@ export default function QRCodeImage({ code, className }) {
     return () => {
       cancelled = true
     }
-  }, [code])
+  }, [target])
 
   return <img src={src} alt="QR 코드" className={className} />
 }
