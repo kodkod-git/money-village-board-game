@@ -32,8 +32,11 @@
 }
 .itemBtn {
   flex: 1; text-align: left; background: none; border: none;
-  padding: 12px 14px; font-size: 15px; font-weight: 700; color: var(--ink);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
 }
+.itemName { font-size: 17px; font-weight: 700; color: var(--ink); }
+.itemDate { font-size: 12px; font-weight: 500; color: var(--ink-2); }
 .qrBtn {
   background: var(--slot-empty); border: 1px solid var(--line);
   border-radius: var(--r-sm); height: 36px; padding: 0 14px;

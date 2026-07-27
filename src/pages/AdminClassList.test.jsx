@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassList from './AdminClassList'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
 
-const CLASSES = [{ id: 'class-1', name: '3학년 2반' }, { id: 'unassigned', name: '미배정 수업' }]
+const CLASSES = [
+  { id: 'class-1', name: '3학년 2반', createdAt: '2026-07-27T00:00:00.000Z' },
+  { id: 'unassigned', name: '미배정 수업' },
+]
 
 beforeEach(() => {
   setAdminSession('test-token', { username: 'admin', isSuper: true })
@@ -14,10 +17,21 @@ beforeEach(() => {
 afterEach(() => clearAdminSession())
 
 describe('AdminClassList', () => {
+  it('제목은 수업 목록이다', () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    expect(screen.getByText('수업 목록')).toBeInTheDocument()
+  })
+
   it('마운트 시 /api/admin/classes를 호출해 수업 목록을 보여준다', async () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
     expect(await screen.findByText('3학년 2반')).toBeInTheDocument()
     expect(screen.getByText('미배정 수업')).toBeInTheDocument()
+  })
+
+  it('수업 항목에 생성일을 함께 보여준다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('3학년 2반')
+    expect(screen.getByText(new Date('2026-07-27T00:00:00.000Z').toLocaleDateString('ko-KR'))).toBeInTheDocument()
   })
 
   it('수업 클릭 시 onSelectClass를 {id,name}과 함께 호출한다', async () => {

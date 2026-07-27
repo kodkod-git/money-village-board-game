@@ -21,17 +21,20 @@ export async function createClass(name, adminId) {
 
 export async function listClassesForAdmin(admin) {
   if (admin.isSuper) {
-    const { data, error } = await supabase.from('classes').select('id, name').order('name')
+    const { data, error } = await supabase.from('classes').select('id, name, created_at').order('name')
     if (error) throw error
-    return [...data, { id: 'unassigned', name: UNASSIGNED_CLASS }]
+    return [
+      ...data.map(cls => ({ id: cls.id, name: cls.name, createdAt: cls.created_at })),
+      { id: 'unassigned', name: UNASSIGNED_CLASS },
+    ]
   }
 
   const { data, error } = await supabase
     .from('admin_class_access')
-    .select('classes(id, name)')
+    .select('classes(id, name, created_at)')
     .eq('admin_id', admin.adminId)
   if (error) throw error
-  return data.map(row => row.classes)
+  return data.map(row => ({ id: row.classes.id, name: row.classes.name, createdAt: row.classes.created_at }))
 }
 
 export async function hasClassAccess(admin, classId) {

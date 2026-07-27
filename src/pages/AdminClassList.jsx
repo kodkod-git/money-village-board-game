@@ -3,6 +3,10 @@ import { adminFetch } from '../utils/adminAuth'
 import ClassQRModal from '../components/admin/ClassQRModal'
 import styles from './AdminClassList.module.css'
 
+function formatDate(isoString) {
+  return new Date(isoString).toLocaleDateString('ko-KR')
+}
+
 export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [classes, setClasses] = useState([])
   const [newClassName, setNewClassName] = useState('')
@@ -41,7 +45,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>수업 선택</h1>
+        <h1 className={styles.title}>수업 목록</h1>
         <div className={styles.headerActions}>
           <span className={styles.username}>{profile.username}</span>
           <button type="button" className={styles.logoutBtn} onClick={onLogout}>로그아웃</button>
@@ -63,7 +67,8 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
         {classes.map(cls => (
           <li key={cls.id} className={styles.item}>
             <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name })}>
-              {cls.name}
+              <span className={styles.itemName}>{cls.name}</span>
+              {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
             </button>
             {cls.id !== 'unassigned' && (
               <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
