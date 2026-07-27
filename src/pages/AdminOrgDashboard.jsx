@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import AdminGridView from '../components/admin/AdminGridView'
 import AdminTableView from '../components/admin/AdminTableView'
 import AdminSpectateModal from '../components/admin/AdminSpectateModal'
+import { adminFetch } from '../utils/adminAuth'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
@@ -10,18 +10,17 @@ const TABS = [
   { key: 'table', label: '테이블 뷰' },
 ]
 
-export default function AdminDashboard() {
-  const navigate = useNavigate()
+export default function AdminOrgDashboard({ org, onBack }) {
   const [activeTab, setActiveTab] = useState('grid')
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
 
   const loadRooms = useCallback(() => {
-    fetch('/api/admin/rooms')
+    adminFetch(`/api/admin/rooms?org=${encodeURIComponent(org)}`)
       .then(r => r.json())
       .then(setRooms)
       .catch(() => {})
-  }, [])
+  }, [org])
 
   useEffect(() => {
     document.body.classList.add('admin-mode')
@@ -43,12 +42,12 @@ export default function AdminDashboard() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>관리자 모드</h1>
+          <h1 className={styles.title}>{org}</h1>
           <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>
           <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
-          <button className={styles.exitBtn} onClick={() => navigate('/')} type="button">← 나가기</button>
+          <button className={styles.exitBtn} onClick={onBack} type="button">← 소속 목록</button>
         </div>
       </div>
 
