@@ -33,6 +33,22 @@
   color: var(--ink);
 }
 
+.titleInput {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--ink);
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  width: 100%;
+  max-width: 480px;
+}
+
+.titleInput:focus {
+  border-bottom: 2px solid var(--purple);
+}
+
 .subtitle {
   font-size: 14px;
   font-weight: 700;

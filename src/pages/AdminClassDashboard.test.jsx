@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import AdminOrgDashboard from './AdminOrgDashboard'
+import AdminClassDashboard from './AdminClassDashboard'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
 
 const PRICES = {
@@ -10,7 +10,7 @@ const PRICES = {
 }
 
 const ROOMS = [{
-  code: 'CD5678', status: 'live', registered: false, prices: PRICES, affiliation: '경영학과',
+  code: 'CD5678', status: 'live', registered: false, prices: PRICES, classId: 'class-1',
   players: [{
     playerUuid: 'p1', name: '홍길동', character: 'Adventurer-강아지', affiliation: '서울중',
     gameState: {
@@ -25,7 +25,12 @@ const ROOMS = [{
 
 beforeEach(() => {
   setAdminSession('test-token', { username: 'admin', isSuper: true })
-  global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve(ROOMS) })
+  global.fetch = vi.fn((url, options) => {
+    if (options?.method === 'PATCH') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ id: 'class-1', name: '새이름' }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+  })
 })
 
 afterEach(() => {
@@ -34,10 +39,10 @@ afterEach(() => {
 })
 
 function renderDashboard(onBack = vi.fn()) {
-  return render(<AdminOrgDashboard org="경영학과" onBack={onBack} />)
+  return render(<AdminClassDashboard classId="class-1" initialName="3학년 2반" onBack={onBack} />)
 }
 
-describe('AdminOrgDashboard', () => {
+describe('AdminClassDashboard', () => {
   it('마운트 시 admin-mode 바디 클래스를 추가한다', async () => {
     renderDashboard()
     expect(document.body.classList.contains('admin-mode')).toBe(true)
@@ -50,12 +55,34 @@ describe('AdminOrgDashboard', () => {
     expect(document.body.classList.contains('admin-mode')).toBe(false)
   })
 
-  it('org 쿼리와 함께 /api/admin/rooms를 호출하고 받은 팀을 그리드 뷰에 보여준다', async () => {
+  it('classId 쿼리와 함께 /api/admin/rooms를 호출하고 받은 팀을 그리드 뷰에 보여준다', async () => {
     renderDashboard()
     expect(await screen.findByText('홍길동')).toBeInTheDocument()
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/admin/rooms?org=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC',
+      '/api/admin/rooms?classId=class-1',
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer test-token' }) })
+    )
+  })
+
+  it('제목이 처음엔 initialName을 보여주는 입력란이다', () => {
+    renderDashboard()
+    expect(screen.getByDisplayValue('3학년 2반')).toBeInTheDocument()
+  })
+
+  it('제목을 수정하고 포커스를 벗어나면 PATCH로 저장한다', async () => {
+    renderDashboard()
+    const titleInput = screen.getByDisplayValue('3학년 2반')
+    await userEvent.clear(titleInput)
+    await userEvent.type(titleInput, '새이름')
+    await userEvent.tab()
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/classes/class-1',
+      expect.objectContaining({
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
+        body: JSON.stringify({ name: '새이름' }),
+      })
     )
   })
 
@@ -85,16 +112,16 @@ describe('AdminOrgDashboard', () => {
     global.fetch.mockClear()
     await userEvent.click(screen.getByText('↻ 새로고침'))
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/admin/rooms?org=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC',
+      '/api/admin/rooms?classId=class-1',
       expect.anything()
     )
   })
 
-  it('← 소속 목록 버튼 클릭 시 onBack을 호출한다', async () => {
+  it('← 수업 목록 버튼 클릭 시 onBack을 호출한다', async () => {
     const onBack = vi.fn()
     renderDashboard(onBack)
     await screen.findByText('홍길동')
-    await userEvent.click(screen.getByText('← 소속 목록'))
+    await userEvent.click(screen.getByText('← 수업 목록'))
     expect(onBack).toHaveBeenCalled()
   })
 })
