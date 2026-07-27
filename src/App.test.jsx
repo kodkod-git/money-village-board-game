@@ -14,8 +14,8 @@ describe('App routing', () => {
     expect(screen.getByPlaceholderText('예) 홍길동')).toBeInTheDocument()
   })
 
-  it('/admin 에서 관리자 대시보드를 렌더링한다', () => {
+  it('/admin 에서 로그인하지 않은 상태면 로그인 화면을 렌더링한다', () => {
     render(<MemoryRouter initialEntries={['/admin']}><App /></MemoryRouter>)
-    expect(screen.getByText('관리자 모드')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '로그인하기' })).toBeInTheDocument()
   })
 })
