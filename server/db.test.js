@@ -120,6 +120,7 @@ describe('saveGameResult', () => {
     const room = {
       code: 'AB1234',
       prices: PRICES,
+      affiliation: '경영학과',
       players: [
         {
           playerUuid: 'p1', name: '홍길동', affiliation: '서울중', character: 'fox',
@@ -135,6 +136,10 @@ describe('saveGameResult', () => {
 
     await saveGameResult(room)
 
+    expect(mockSessionInsert).toHaveBeenCalledWith(expect.objectContaining({
+      team_code: 'AB1234',
+      affiliation: '경영학과',
+    }))
     expect(mockResultsInsert).toHaveBeenCalledWith([
       expect.objectContaining({
         player_uuid: 'p1',
@@ -222,6 +227,7 @@ describe('getAllCompletedTeams', () => {
     const sessions = [{
       id: 'session-1', team_code: 'AB1234', created_at: '2026-01-01T00:00:00Z',
       stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+      affiliation: '경영학과',
     }]
     const results = [{
       session_id: 'session-1', player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
@@ -246,6 +252,7 @@ describe('getAllCompletedTeams', () => {
       status: 'completed',
       registered: true,
       createdAt: '2026-01-01T00:00:00Z',
+      affiliation: '경영학과',
       prices: { stocks: PRICES.stocks, realEstate: PRICES.realEstate },
       players: [{
         playerUuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
