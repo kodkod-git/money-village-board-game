@@ -6,17 +6,16 @@ import styles from './NameInput.module.css'
 export default function NameInput() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const lockedAffiliation = searchParams.get('affiliation') ?? ''
-  const [affiliation, setAffiliation] = useState('')
   const [name, setName] = useState('')
 
   const code = searchParams.get('code') ?? ''
+  const classId = searchParams.get('classId') ?? ''
 
   function handleNext() {
-    const finalAffiliation = lockedAffiliation || affiliation.trim()
-    if (!finalAffiliation || !name.trim()) return
-    const params = new URLSearchParams({ affiliation: finalAffiliation, name: name.trim() })
+    if (!name.trim()) return
+    const params = new URLSearchParams({ name: name.trim() })
     if (code) params.set('code', code)
+    if (classId) params.set('classId', classId)
     navigate(`/select?${params}`)
   }
 
@@ -29,21 +28,6 @@ export default function NameInput() {
       </div>
       <div className={styles.card}>
         <div className={styles.inputGroup}>
-          <label className={styles.label}>소속을 입력하세요</label>
-          {lockedAffiliation ? (
-            <p className={styles.lockedValue}>소속: {lockedAffiliation}</p>
-          ) : (
-            <input
-              className={styles.input}
-              placeholder="예) 경영학과"
-              value={affiliation}
-              onChange={e => setAffiliation(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleNext()}
-              maxLength={30}
-            />
-          )}
-        </div>
-        <div className={styles.inputGroup}>
           <label className={styles.label}>이름을 입력하세요</label>
           <input
             className={styles.input}
@@ -54,11 +38,7 @@ export default function NameInput() {
             maxLength={20}
           />
         </div>
-        <button
-          className={styles.gradBtn}
-          onClick={handleNext}
-          disabled={!(lockedAffiliation || affiliation.trim()) || !name.trim()}
-        >
+        <button className={styles.gradBtn} onClick={handleNext} disabled={!name.trim()}>
           다음 →
         </button>
       </div>
