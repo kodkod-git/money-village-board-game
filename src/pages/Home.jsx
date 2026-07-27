@@ -32,7 +32,11 @@ export default function Home() {
   }
 
   async function handleCreate() {
-    const res = await fetch('/api/rooms', { method: 'POST' })
+    const res = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ affiliation }),
+    })
     const { code } = await res.json()
     joinRoom(code, true)
   }

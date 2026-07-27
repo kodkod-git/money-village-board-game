@@ -42,6 +42,23 @@ describe('Home', () => {
     )
   })
 
+  it('팀 생성 시 URL의 affiliation을 요청 바디에 포함한다', async () => {
+    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ code: 'ABC123' }) })
+    mockEmit.mockImplementation((_event, _data, cb) => cb?.({ ok: true }))
+    render(
+      <MemoryRouter initialEntries={['/team?affiliation=경영학과&name=철수&character=c1']}>
+        <Home />
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('팀 만들기'))
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith('/api/rooms', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ affiliation: '경영학과' }),
+      }))
+    )
+  })
+
   it('URL에 code가 있으면 CodeModal이 자동으로 열린다', () => {
     render(
       <MemoryRouter initialEntries={['/team?name=철수&character=c1&code=ABC123']}>
