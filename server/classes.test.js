@@ -7,7 +7,7 @@ vi.mock('./supabase.js', () => ({
   supabase: { from: (...args) => mockFrom(...args) },
 }))
 
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
 
 beforeEach(() => {
   mockFrom.mockReset()
@@ -113,5 +113,25 @@ describe('updateClassName', () => {
     expect(mockUpdate).toHaveBeenCalledWith({ name: '새이름' })
     expect(mockEq).toHaveBeenCalledWith('id', 'class-1')
     expect(cls).toEqual({ id: 'class-1', name: '새이름' })
+  })
+})
+
+describe('deleteClass', () => {
+  it('classes 테이블에서 해당 id를 삭제한다', async () => {
+    const mockEq = vi.fn().mockResolvedValue({ error: null })
+    const mockDelete = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReturnValue({ delete: mockDelete })
+
+    await deleteClass('class-1')
+
+    expect(mockEq).toHaveBeenCalledWith('id', 'class-1')
+  })
+
+  it('에러가 나면 던진다', async () => {
+    const mockEq = vi.fn().mockResolvedValue({ error: { message: 'boom' } })
+    const mockDelete = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReturnValue({ delete: mockDelete })
+
+    await expect(deleteClass('class-1')).rejects.toEqual({ message: 'boom' })
   })
 })

@@ -5,11 +5,11 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, sortRoomsByRecency } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam } from './db.js'
+import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency } from './rooms.js'
+import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -142,6 +142,24 @@ app.patch('/api/admin/classes/:id', requireAdmin, async (req, res) => {
     if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
     console.error('update class error:', err)
     res.status(500).json({ error: 'Failed to update class' })
+  }
+})
+
+app.delete('/api/admin/classes/:id', requireAdmin, async (req, res) => {
+  const { id } = req.params
+  if (id === 'unassigned') return res.status(400).json({ error: '미배정 수업은 삭제할 수 없습니다' })
+  try {
+    const allowed = await hasClassAccess(req.admin, id)
+    if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+
+    deleteRoomsByClassId(id)
+    await deleteCompletedTeamsByClassId(id)
+    await deleteClass(id)
+
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('delete class error:', err)
+    res.status(500).json({ error: 'Failed to delete class' })
   }
 })
 

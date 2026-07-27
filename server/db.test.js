@@ -372,3 +372,55 @@ describe('deleteCompletedTeam', () => {
     await expect(deleteCompletedTeam('XXXXXX')).rejects.toEqual({ message: 'not found' })
   })
 })
+
+describe('deleteCompletedTeamsByClassId', () => {
+  it('해당 class_id의 세션들을 찾아 결과와 세션을 순서대로 삭제한다', async () => {
+    const mockSessionsSelectEq = vi.fn().mockResolvedValue({
+      data: [{ id: 'session-1' }, { id: 'session-2' }],
+      error: null,
+    })
+    const mockSessionsSelect = vi.fn().mockReturnValue({ eq: mockSessionsSelectEq })
+
+    const mockResultsIn = vi.fn().mockResolvedValue({ error: null })
+    const mockResultsDelete = vi.fn().mockReturnValue({ in: mockResultsIn })
+
+    const mockSessionsDeleteEq = vi.fn().mockResolvedValue({ error: null })
+    const mockSessionsDelete = vi.fn().mockReturnValue({ eq: mockSessionsDeleteEq })
+
+    let sessionsCall = 0
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') {
+        sessionsCall += 1
+        return sessionsCall === 1 ? { select: mockSessionsSelect } : { delete: mockSessionsDelete }
+      }
+      if (table === 'game_results') return { delete: mockResultsDelete }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeamsByClassId } = await import('./db.js')
+    await deleteCompletedTeamsByClassId('class-1')
+
+    expect(mockSessionsSelectEq).toHaveBeenCalledWith('class_id', 'class-1')
+    expect(mockResultsIn).toHaveBeenCalledWith('session_id', ['session-1', 'session-2'])
+    expect(mockSessionsDeleteEq).toHaveBeenCalledWith('class_id', 'class-1')
+  })
+
+  it('해당 수업의 세션이 없으면 아무 것도 삭제하지 않는다', async () => {
+    const mockSessionsSelectEq = vi.fn().mockResolvedValue({ data: [], error: null })
+    const mockSessionsSelect = vi.fn().mockReturnValue({ eq: mockSessionsSelectEq })
+    const mockResultsDelete = vi.fn()
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSessionsSelect }
+      if (table === 'game_results') return { delete: mockResultsDelete }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeamsByClassId } = await import('./db.js')
+    await deleteCompletedTeamsByClassId('class-empty')
+
+    expect(mockResultsDelete).not.toHaveBeenCalled()
+  })
+})

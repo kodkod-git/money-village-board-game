@@ -135,6 +135,30 @@ export async function deleteCompletedTeam(teamCode) {
   if (sessionDeleteError) throw sessionDeleteError
 }
 
+export async function deleteCompletedTeamsByClassId(classId) {
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('game_sessions')
+    .select('id')
+    .eq('class_id', classId)
+  if (sessionsError) throw sessionsError
+
+  if (sessions.length === 0) return
+
+  const sessionIds = sessions.map(s => s.id)
+
+  const { error: resultsError } = await supabase
+    .from('game_results')
+    .delete()
+    .in('session_id', sessionIds)
+  if (resultsError) throw resultsError
+
+  const { error: sessionsDeleteError } = await supabase
+    .from('game_sessions')
+    .delete()
+    .eq('class_id', classId)
+  if (sessionsDeleteError) throw sessionsDeleteError
+}
+
 const GAME_STATE_TO_COLUMN = {
   job: 'job', cash: 'cash', stocks: 'stock_holdings',
   realEstate: 'real_estate_holdings', badges: 'badges',

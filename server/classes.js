@@ -60,3 +60,8 @@ export async function updateClassName(classId, name) {
   if (error) throw error
   return data
 }
+
+export async function deleteClass(classId) {
+  const { error } = await supabase.from('classes').delete().eq('id', classId)
+  if (error) throw error
+}

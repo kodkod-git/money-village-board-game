@@ -128,6 +128,17 @@ export function deleteRoomByCode(code) {
   return rooms.delete(code)
 }
 
+export function deleteRoomsByClassId(classId) {
+  for (const [code, room] of rooms.entries()) {
+    if (room.classId !== classId) continue
+    rooms.delete(code)
+    if (roomDeletionTimers.has(code)) {
+      clearTimeout(roomDeletionTimers.get(code))
+      roomDeletionTimers.delete(code)
+    }
+  }
+}
+
 export function sortRoomsByRecency(rooms) {
   return [...rooms].sort((a, b) => new Date(b.updatedAt ?? b.createdAt) - new Date(a.updatedAt ?? a.createdAt))
 }
