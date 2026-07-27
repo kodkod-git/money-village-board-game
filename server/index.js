@@ -9,7 +9,7 @@ import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, update
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createOrg, listOrgsForAdmin, hasOrgAccess, UNASSIGNED_ORG } from './orgs.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, UNASSIGNED_CLASS } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 app.get('/api/rooms/health', (_req, res) => res.json({ ok: true }))
 
 app.post('/api/rooms', (req, res) => {
-  const room = createRoom({ affiliation: req.body?.affiliation ?? '' })
+  const room = createRoom({ classId: req.body?.classId ?? null })
   res.json({ code: room.code })
 })
 
@@ -106,44 +106,60 @@ app.post('/api/admin/login', async (req, res) => {
   res.json({ token, username: admin.username, isSuper: admin.isSuper })
 })
 
-app.get('/api/admin/orgs', requireAdmin, async (req, res) => {
+app.get('/api/admin/classes', requireAdmin, async (req, res) => {
   try {
-    const orgs = await listOrgsForAdmin(req.admin)
-    res.json(orgs)
+    const classes = await listClassesForAdmin(req.admin)
+    res.json(classes)
   } catch (err) {
-    console.error('list orgs error:', err)
-    res.status(500).json({ error: 'Failed to list orgs' })
+    console.error('list classes error:', err)
+    res.status(500).json({ error: 'Failed to list classes' })
   }
 })
 
-app.post('/api/admin/orgs', requireAdmin, async (req, res) => {
+app.post('/api/admin/classes', requireAdmin, async (req, res) => {
   const { name } = req.body
   if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
   try {
-    const org = await createOrg(name, req.admin.adminId)
-    res.json(org)
+    const cls = await createClass(name, req.admin.adminId)
+    res.json(cls)
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 소속입니다' })
-    console.error('create org error:', err)
-    res.status(500).json({ error: 'Failed to create org' })
+    if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
+    console.error('create class error:', err)
+    res.status(500).json({ error: 'Failed to create class' })
   }
 })
 
-async function findRoomAffiliation(code) {
+app.patch('/api/admin/classes/:id', requireAdmin, async (req, res) => {
+  const { id } = req.params
+  const { name } = req.body
+  if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
+  try {
+    const allowed = await hasClassAccess(req.admin, id)
+    if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+    const cls = await updateClassName(id, name)
+    res.json(cls)
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
+    console.error('update class error:', err)
+    res.status(500).json({ error: 'Failed to update class' })
+  }
+})
+
+async function findRoomClassId(code) {
   const liveRoom = getRoom(code)
-  if (liveRoom) return liveRoom.affiliation
+  if (liveRoom) return liveRoom.classId
   const completed = await getAllCompletedTeams()
   const match = completed.find(r => r.code === code)
-  return match ? match.affiliation : null
+  return match ? match.classId : undefined
 }
 
 app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
-  const { org } = req.query
-  if (!org) return res.status(400).json({ error: 'org 쿼리 파라미터가 필요합니다' })
+  const { classId } = req.query
+  if (!classId) return res.status(400).json({ error: 'classId 쿼리 파라미터가 필요합니다' })
 
   try {
-    const allowed = await hasOrgAccess(req.admin, org)
-    if (!allowed) return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+    const allowed = await hasClassAccess(req.admin, classId)
+    if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
     const now = new Date()
     const liveRooms = listAllRooms().map(room => ({
@@ -151,7 +167,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
       status: computeLiveRoomStatus(room, now),
       registered: false,
       updatedAt: room.updatedAt,
-      affiliation: room.affiliation,
+      classId: room.classId,
       prices: room.prices,
       players: room.players.map(p => ({
         playerUuid: p.playerUuid,
@@ -164,9 +180,9 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
     const completedRooms = await getAllCompletedTeams()
     const allRooms = [...liveRooms, ...completedRooms]
 
-    const matchesOrg = room => (org === UNASSIGNED_ORG ? !room.affiliation : room.affiliation === org)
+    const matchesClass = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
 
-    res.json(sortRoomsByRecency(allRooms.filter(matchesOrg)))
+    res.json(sortRoomsByRecency(allRooms.filter(matchesClass)))
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })
@@ -175,10 +191,10 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
 
 app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
-  const affiliation = await findRoomAffiliation(code)
-  if (affiliation === null) return res.status(404).json({ error: 'Room not found' })
-  if (!(await hasOrgAccess(req.admin, affiliation || UNASSIGNED_ORG))) {
-    return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+  const classId = await findRoomClassId(code)
+  if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasClassAccess(req.admin, classId || 'unassigned'))) {
+    return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
   }
 
   if (deleteRoomByCode(code)) return res.json({ ok: true })
@@ -197,10 +213,10 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
   const { playerUuid } = req.params
   const partialGameState = req.body
 
-  const affiliation = await findRoomAffiliation(code)
-  if (affiliation === null) return res.status(404).json({ error: 'Room not found' })
-  if (!(await hasOrgAccess(req.admin, affiliation || UNASSIGNED_ORG))) {
-    return res.status(403).json({ error: '해당 소속에 접근 권한이 없습니다' })
+  const classId = await findRoomClassId(code)
+  if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasClassAccess(req.admin, classId || 'unassigned'))) {
+    return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
   }
 
   const room = updatePlayerStateByUuid(code, playerUuid, partialGameState)
