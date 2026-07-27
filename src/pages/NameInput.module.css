@@ -70,6 +70,13 @@
 .input::placeholder { color: var(--muted); }
 .input:focus { border-color: var(--blue-accent); }
 
+.lockedValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 12px 0;
+}
+
 .gradBtn {
   height: 56px;
   background: var(--grad-btn);

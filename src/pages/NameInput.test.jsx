@@ -43,4 +43,17 @@ describe('NameInput', () => {
     expect(affiliationInput.compareDocumentPosition(nameInput))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
+
+  it('URL에 affiliation이 있으면 소속 입력란 대신 읽기 전용 라벨을 보여준다', () => {
+    render(<MemoryRouter initialEntries={['/name?affiliation=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC']}><NameInput /></MemoryRouter>)
+    expect(screen.queryByPlaceholderText('예) 경영학과')).not.toBeInTheDocument()
+    expect(screen.getByText('소속: 경영학과')).toBeInTheDocument()
+  })
+
+  it('URL에 affiliation이 있으면 이름만 입력해도 다음으로 진행하고 affiliation을 유지한다', () => {
+    render(<MemoryRouter initialEntries={['/name?affiliation=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC']}><NameInput /></MemoryRouter>)
+    fireEvent.change(screen.getByPlaceholderText('예) 홍길동'), { target: { value: '철수' } })
+    fireEvent.click(screen.getByText('다음 →'))
+    expect(mockNavigate).toHaveBeenCalledWith('/select?affiliation=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC&name=%EC%B2%A0%EC%88%98')
+  })
 })

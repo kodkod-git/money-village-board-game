@@ -6,14 +6,16 @@ import styles from './NameInput.module.css'
 export default function NameInput() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const lockedAffiliation = searchParams.get('affiliation') ?? ''
   const [affiliation, setAffiliation] = useState('')
   const [name, setName] = useState('')
 
   const code = searchParams.get('code') ?? ''
 
   function handleNext() {
-    if (!affiliation.trim() || !name.trim()) return
-    const params = new URLSearchParams({ affiliation: affiliation.trim(), name: name.trim() })
+    const finalAffiliation = lockedAffiliation || affiliation.trim()
+    if (!finalAffiliation || !name.trim()) return
+    const params = new URLSearchParams({ affiliation: finalAffiliation, name: name.trim() })
     if (code) params.set('code', code)
     navigate(`/select?${params}`)
   }
@@ -28,14 +30,18 @@ export default function NameInput() {
       <div className={styles.card}>
         <div className={styles.inputGroup}>
           <label className={styles.label}>소속을 입력하세요</label>
-          <input
-            className={styles.input}
-            placeholder="예) 경영학과"
-            value={affiliation}
-            onChange={e => setAffiliation(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleNext()}
-            maxLength={30}
-          />
+          {lockedAffiliation ? (
+            <p className={styles.lockedValue}>소속: {lockedAffiliation}</p>
+          ) : (
+            <input
+              className={styles.input}
+              placeholder="예) 경영학과"
+              value={affiliation}
+              onChange={e => setAffiliation(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleNext()}
+              maxLength={30}
+            />
+          )}
         </div>
         <div className={styles.inputGroup}>
           <label className={styles.label}>이름을 입력하세요</label>
@@ -51,7 +57,7 @@ export default function NameInput() {
         <button
           className={styles.gradBtn}
           onClick={handleNext}
-          disabled={!affiliation.trim() || !name.trim()}
+          disabled={!(lockedAffiliation || affiliation.trim()) || !name.trim()}
         >
           다음 →
         </button>
