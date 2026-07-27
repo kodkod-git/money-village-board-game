@@ -4,6 +4,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassDashboard from './AdminClassDashboard'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
 
+vi.mock('qrcode', () => ({
+  default: { toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,fake') },
+}))
+
 const PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
   realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
@@ -67,6 +71,18 @@ describe('AdminClassDashboard', () => {
   it('제목이 처음엔 initialName을 보여주는 입력란이다', () => {
     renderDashboard()
     expect(screen.getByDisplayValue('3학년 2반')).toBeInTheDocument()
+  })
+
+  it('제목 옆에 편집 가능 표시 아이콘을 보여준다', () => {
+    renderDashboard()
+    expect(screen.getByText('✏️')).toBeInTheDocument()
+  })
+
+  it('QR 버튼 클릭 시 ClassQRModal을 보여준다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByText('QR'))
+    expect(screen.getByText('3학년 2반 수업 QR 코드')).toBeInTheDocument()
   })
 
   it('제목을 수정하고 포커스를 벗어나면 PATCH로 저장한다', async () => {

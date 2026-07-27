@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import AdminGridView from '../components/admin/AdminGridView'
 import AdminTableView from '../components/admin/AdminTableView'
 import AdminSpectateModal from '../components/admin/AdminSpectateModal'
+import ClassQRModal from '../components/admin/ClassQRModal'
 import { adminFetch } from '../utils/adminAuth'
 import styles from './AdminDashboard.module.css'
 
@@ -15,6 +16,7 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
   const [name, setName] = useState(initialName)
+  const [showQr, setShowQr] = useState(false)
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
@@ -53,20 +55,28 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div>
-          <input
-            className={styles.titleInput}
-            value={name}
-            onChange={e => setName(e.target.value)}
-            onBlur={handleTitleBlur}
-          />
-          <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
+        <div className={styles.titleGroup}>
+          <div>
+            <div className={styles.titleRow}>
+              <input
+                className={styles.titleInput}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                onBlur={handleTitleBlur}
+              />
+              <span className={styles.editIcon} aria-hidden="true">✏️</span>
+            </div>
+            <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
+          </div>
+          <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR</button>
         </div>
         <div className={styles.headerActions}>
           <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
           <button className={styles.exitBtn} onClick={onBack} type="button">← 수업 목록</button>
         </div>
       </div>
+
+      {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
 
       <div className={styles.tabs}>
         {TABS.map(tab => (
