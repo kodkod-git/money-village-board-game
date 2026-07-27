@@ -21,6 +21,16 @@ describe('createRoom', () => {
     expect(room.updatedAt).toBeInstanceOf(Date)
     expect(room.updatedAt.getTime()).toBe(room.createdAt.getTime())
   })
+
+  it('affiliation을 지정하지 않으면 빈 문자열로 초기화한다', () => {
+    const room = createRoom()
+    expect(room.affiliation).toBe('')
+  })
+
+  it('affiliation을 지정하면 방에 저장한다', () => {
+    const room = createRoom({ affiliation: '경영학과' })
+    expect(room.affiliation).toBe('경영학과')
+  })
 })
 
 describe('getRoom', () => {
