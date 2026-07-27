@@ -12,12 +12,14 @@ export default function CharacterSelect() {
 
   const name = searchParams.get('name') ?? ''
   const affiliation = searchParams.get('affiliation') ?? ''
+  const classId = searchParams.get('classId') ?? ''
   const code = searchParams.get('code') ?? ''
 
   function handleSubmit() {
     if (!selected) return
     const params = new URLSearchParams({ affiliation, name, character: selected })
     if (code) params.set('code', code)
+    if (classId) params.set('classId', classId)
     navigate(`/team?${params}`)
   }
 

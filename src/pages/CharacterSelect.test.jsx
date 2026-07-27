@@ -10,9 +10,10 @@ vi.mock('socket.io-client', () => {
   }
   return { io: vi.fn(() => socket) }
 })
+const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
-  return { ...actual, useNavigate: () => vi.fn() }
+  return { ...actual, useNavigate: () => mockNavigate }
 })
 
 import CharacterSelect from './CharacterSelect'
@@ -35,5 +36,16 @@ describe('CharacterSelect', () => {
     )
     fireEvent.click(screen.getAllByRole('button')[1])
     expect(screen.getByText('✓')).toBeInTheDocument()
+  })
+
+  it('URL에 classId가 있으면 다음 화면으로 그대로 전달한다', () => {
+    render(
+      <MemoryRouter initialEntries={['/select?name=철수&classId=class-1']}>
+        <CharacterSelect />
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getAllByRole('button')[1])
+    fireEvent.click(screen.getByText('이 캐릭터로 시작하기'))
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('classId=class-1'))
   })
 })
