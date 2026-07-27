@@ -9,7 +9,7 @@ import { createRoom, getRoom, addPlayer, removePlayer, updatePlayerState, update
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
