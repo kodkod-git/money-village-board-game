@@ -78,10 +78,10 @@ describe('AdminClassDashboard', () => {
     expect(screen.getByText('✏️')).toBeInTheDocument()
   })
 
-  it('QR 버튼 클릭 시 ClassQRModal을 보여준다', async () => {
+  it('QR 코드 버튼 클릭 시 ClassQRModal을 보여준다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
-    await userEvent.click(screen.getByText('QR'))
+    await userEvent.click(screen.getByText('QR 코드'))
     expect(screen.getByText('3학년 2반 수업 QR 코드')).toBeInTheDocument()
   })
 

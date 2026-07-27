@@ -16,8 +16,6 @@
 
 .headerActions { display: flex; gap: 8px; }
 
-.titleGroup { display: flex; align-items: center; gap: 12px; }
-
 .titleRow { display: flex; align-items: center; gap: 6px; }
 
 .editIcon { font-size: 16px; opacity: 0.6; }
@@ -26,12 +24,11 @@
   background: var(--slot-empty);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  height: 40px;
-  padding: 0 16px;
-  font-size: 13px;
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink-2);
-  flex-shrink: 0;
 }
 
 .refreshBtn {
