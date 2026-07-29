@@ -149,8 +149,8 @@
 
 @media (min-width: 768px) {
   .slots {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 190px));
-    justify-content: start;
+    grid-template-columns: repeat(4, minmax(140px, 190px));
+    justify-content: center;
   }
 }
 
