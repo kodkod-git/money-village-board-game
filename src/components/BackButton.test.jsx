@@ -32,4 +32,12 @@ describe('BackButton', () => {
     render(<MemoryRouter><BackButton /></MemoryRouter>)
     expect(screen.getByRole('button', { name: '뒤로 가기' }).className).toMatch(/body/)
   })
+
+  it('to와 label을 지정하면 해당 라벨을 보여주고 클릭 시 그 경로로 이동한다', async () => {
+    render(<MemoryRouter><BackButton to="/" label="처음으로" /></MemoryRouter>)
+    const btn = screen.getByRole('button', { name: '처음으로' })
+    expect(btn).toBeInTheDocument()
+    await userEvent.click(btn)
+    expect(mockNavigate).toHaveBeenCalledWith('/')
+  })
 })

@@ -98,6 +98,12 @@ describe('RankingPage', () => {
     expect(screen.queryByLabelText('뒤로 가기')).not.toBeInTheDocument()
   })
 
+  it('결과등록 후 진입(sessionId 있음)에서는 처음으로 버튼이 보인다', async () => {
+    renderAt('/result/session-1')
+    await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: '처음으로' })).toBeInTheDocument()
+  })
+
   it('플레이어 행 클릭 시 관리자 수정화면과 동일한 읽기전용 상세보기를 연다', async () => {
     renderAt('/ranking')
     await userEvent.click(await screen.findByText('김민준'))
