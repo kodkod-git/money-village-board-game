@@ -40,7 +40,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 44px 0 112px;
+  padding: 44px 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.gridWrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .grid {
@@ -53,11 +59,9 @@
 }
 
 .bottomBar {
-  position: absolute;
-  bottom: 44px;
-  left: 50%;
-  transform: translateX(-50%);
+  flex-shrink: 0;
   width: min(307px, calc(100% - 24px));
+  margin: 16px auto 24px;
 }
 
 .ctaBtn {
