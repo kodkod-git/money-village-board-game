@@ -129,12 +129,11 @@ export default function RankingPage() {
   return (
     <div className={styles.page}>
       {!isV2 && <BackButton />}
+      <div className={styles.header}>
+        <h1 className={styles.title}>랭킹</h1>
+        <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
+      </div>
       <div className={styles.inner}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>랭킹</h1>
-          <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
-        </div>
-
         <div className={styles.topTabs}>
           {TOP_TABS.map(tab => (
             <button

@@ -18,10 +18,6 @@
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  width: 100%;
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .title {
@@ -40,10 +36,8 @@
 .divider {
   border: none;
   border-top: 1px solid var(--divider);
-  margin: 10px auto 46px;
+  margin: 10px 0 46px;
   flex-shrink: 0;
-  width: 100%;
-  max-width: 420px;
 }
 
 .preview {

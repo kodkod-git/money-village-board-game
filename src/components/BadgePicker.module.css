@@ -5,6 +5,13 @@
   align-items: stretch;
 }
 
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 130px));
+    justify-content: center;
+  }
+}
+
 .tile {
   background: var(--white);
   border-radius: var(--r-sm);

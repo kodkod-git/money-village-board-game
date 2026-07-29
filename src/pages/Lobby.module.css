@@ -33,9 +33,6 @@
 .header {
   padding-top: 96px;
   flex-shrink: 0;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .title {
@@ -54,8 +51,7 @@
 .divider {
   border: none;
   border-top: 1px solid var(--divider);
-  margin: 10px auto 24px;
-  max-width: 480px;
+  margin: 10px 0 24px;
 }
 
 .inviteGrid {
