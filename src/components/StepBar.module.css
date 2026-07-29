@@ -10,7 +10,7 @@
   border: none;
   padding: 0;
   cursor: default;
-  text-align: left;
+  text-align: center;
 }
 
 .step:not(:disabled) { cursor: pointer; }

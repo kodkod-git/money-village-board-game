@@ -72,6 +72,8 @@
   .assetList {
     grid-template-columns: repeat(auto-fill, minmax(150px, 200px));
     justify-content: center;
+    max-width: 620px;
+    margin: 0 auto;
   }
 }
 

@@ -9,6 +9,8 @@
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 130px));
     justify-content: center;
+    max-width: 410px;
+    margin: 0 auto;
   }
 }
 
