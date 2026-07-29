@@ -2,8 +2,6 @@
   display: flex;
   gap: 12px;
   padding: 76px 24px 0;
-  max-width: 528px;
-  margin: 0 auto;
 }
 
 .step {
