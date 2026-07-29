@@ -75,7 +75,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  margin: 12px 0 16px;
+  margin: 12px 0 24px;
   background: var(--ink);
   border-radius: var(--r-sm);
   font-weight: 900;
