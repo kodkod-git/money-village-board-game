@@ -4,7 +4,7 @@ import {
   createRoom, getRoom, addPlayer, removePlayer,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
-  deleteRoomByCode, sortRoomsByRecency
+  deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -20,6 +20,16 @@ describe('createRoom', () => {
     const room = createRoom()
     expect(room.updatedAt).toBeInstanceOf(Date)
     expect(room.updatedAt.getTime()).toBe(room.createdAt.getTime())
+  })
+
+  it('classId를 지정하지 않으면 null로 초기화한다', () => {
+    const room = createRoom()
+    expect(room.classId).toBeNull()
+  })
+
+  it('classId를 지정하면 방에 저장한다', () => {
+    const room = createRoom({ classId: 'class-1' })
+    expect(room.classId).toBe('class-1')
   })
 })
 
@@ -314,5 +324,23 @@ describe('deleteRoomByCode', () => {
 
   it('존재하지 않는 방 코드는 false를 반환한다', () => {
     expect(deleteRoomByCode('XXXXXX')).toBe(false)
+  })
+})
+
+describe('deleteRoomsByClassId', () => {
+  it('해당 classId를 가진 방을 모두 삭제한다', () => {
+    const room1 = createRoom({ classId: 'class-1' })
+    const room2 = createRoom({ classId: 'class-1' })
+    const otherRoom = createRoom({ classId: 'class-2' })
+
+    deleteRoomsByClassId('class-1')
+
+    expect(getRoom(room1.code)).toBeNull()
+    expect(getRoom(room2.code)).toBeNull()
+    expect(getRoom(otherRoom.code)).not.toBeNull()
+  })
+
+  it('일치하는 방이 없어도 에러 없이 동작한다', () => {
+    expect(() => deleteRoomsByClassId('no-such-class')).not.toThrow()
   })
 })

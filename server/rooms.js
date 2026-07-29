@@ -30,11 +30,11 @@ function defaultPrices() {
   }
 }
 
-export function createRoom() {
+export function createRoom({ classId = null } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices() }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId }
   rooms.set(code, room)
   return room
 }
@@ -126,6 +126,17 @@ export function computeLiveRoomStatus(room, now = new Date()) {
 
 export function deleteRoomByCode(code) {
   return rooms.delete(code)
+}
+
+export function deleteRoomsByClassId(classId) {
+  for (const [code, room] of rooms.entries()) {
+    if (room.classId !== classId) continue
+    rooms.delete(code)
+    if (roomDeletionTimers.has(code)) {
+      clearTimeout(roomDeletionTimers.get(code))
+      roomDeletionTimers.delete(code)
+    }
+  }
 }
 
 export function sortRoomsByRecency(rooms) {

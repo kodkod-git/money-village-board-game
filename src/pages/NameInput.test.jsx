@@ -21,26 +21,28 @@ describe('NameInput', () => {
     expect(screen.getByText('다음 →')).toBeInTheDocument()
   })
 
-  it('이름 입력 후 /select로 이동한다', () => {
-    render(<MemoryRouter initialEntries={['/name?code=ABC123']}><NameInput /></MemoryRouter>)
-    fireEvent.change(screen.getByPlaceholderText('예) 경영학과'), { target: { value: '경영학과' } })
-    fireEvent.change(screen.getByPlaceholderText('예) 홍길동'), { target: { value: '철수' } })
-    fireEvent.click(screen.getByText('다음 →'))
-    expect(mockNavigate).toHaveBeenCalledWith('/select?affiliation=%EA%B2%BD%EC%98%81%ED%95%99%EA%B3%BC&name=%EC%B2%A0%EC%88%98&code=ABC123')
+  it('소속 입력란은 더 이상 렌더링하지 않는다', () => {
+    render(<MemoryRouter><NameInput /></MemoryRouter>)
+    expect(screen.queryByPlaceholderText('예) 경영학과')).not.toBeInTheDocument()
   })
 
-  it('이름이나 소속이 비어있으면 이동하지 않는다', () => {
+  it('이름 입력 후 /select로 이동한다', () => {
+    render(<MemoryRouter initialEntries={['/name?code=ABC123']}><NameInput /></MemoryRouter>)
+    fireEvent.change(screen.getByPlaceholderText('예) 홍길동'), { target: { value: '철수' } })
+    fireEvent.click(screen.getByText('다음 →'))
+    expect(mockNavigate).toHaveBeenCalledWith('/select?name=%EC%B2%A0%EC%88%98&code=ABC123')
+  })
+
+  it('이름이 비어있으면 이동하지 않는다', () => {
     render(<MemoryRouter initialEntries={['/name?code=ABC123']}><NameInput /></MemoryRouter>)
     fireEvent.click(screen.getByText('다음 →'))
     expect(mockNavigate).not.toHaveBeenCalled()
   })
 
-  it('소속 입력 필드가 이름 입력 필드 위에 렌더링된다', () => {
-    render(<MemoryRouter><NameInput /></MemoryRouter>)
-    const affiliationInput = screen.getByPlaceholderText('예) 경영학과')
-    const nameInput = screen.getByPlaceholderText('예) 홍길동')
-    expect(affiliationInput).toBeInTheDocument()
-    expect(affiliationInput.compareDocumentPosition(nameInput))
-      .toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  it('URL에 classId가 있으면 이름 입력 후 그대로 다음 화면에 전달한다', () => {
+    render(<MemoryRouter initialEntries={['/name?classId=class-1']}><NameInput /></MemoryRouter>)
+    fireEvent.change(screen.getByPlaceholderText('예) 홍길동'), { target: { value: '철수' } })
+    fireEvent.click(screen.getByText('다음 →'))
+    expect(mockNavigate).toHaveBeenCalledWith('/select?name=%EC%B2%A0%EC%88%98&classId=class-1')
   })
 })

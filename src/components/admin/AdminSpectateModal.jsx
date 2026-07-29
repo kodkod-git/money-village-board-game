@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminPlayerCard from './AdminPlayerCard'
 import AdminEditModal from './AdminEditModal'
+import { adminFetch } from '../../utils/adminAuth'
 import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
@@ -30,7 +31,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   }, [room.code, room.registered, onPlayerUpdate])
 
   async function handleSave(playerUuid, field, value) {
-    const res = await fetch(`/api/admin/rooms/${room.code}/players/${playerUuid}`, {
+    const res = await adminFetch(`/api/admin/rooms/${room.code}/players/${playerUuid}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [field]: value }),
@@ -44,7 +45,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   }
 
   async function handleDelete() {
-    const res = await fetch(`/api/admin/rooms/${room.code}`, { method: 'DELETE' })
+    const res = await adminFetch(`/api/admin/rooms/${room.code}`, { method: 'DELETE' })
     setConfirmDelete(false)
     if (!res.ok) return
     onRoomChanged()

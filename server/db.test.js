@@ -120,6 +120,7 @@ describe('saveGameResult', () => {
     const room = {
       code: 'AB1234',
       prices: PRICES,
+      classId: 'class-1',
       players: [
         {
           playerUuid: 'p1', name: '홍길동', affiliation: '서울중', character: 'fox',
@@ -135,6 +136,10 @@ describe('saveGameResult', () => {
 
     await saveGameResult(room)
 
+    expect(mockSessionInsert).toHaveBeenCalledWith(expect.objectContaining({
+      team_code: 'AB1234',
+      class_id: 'class-1',
+    }))
     expect(mockResultsInsert).toHaveBeenCalledWith([
       expect.objectContaining({
         player_uuid: 'p1',
@@ -222,6 +227,7 @@ describe('getAllCompletedTeams', () => {
     const sessions = [{
       id: 'session-1', team_code: 'AB1234', created_at: '2026-01-01T00:00:00Z',
       stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+      class_id: 'class-1',
     }]
     const results = [{
       session_id: 'session-1', player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
@@ -246,6 +252,7 @@ describe('getAllCompletedTeams', () => {
       status: 'completed',
       registered: true,
       createdAt: '2026-01-01T00:00:00Z',
+      classId: 'class-1',
       prices: { stocks: PRICES.stocks, realEstate: PRICES.realEstate },
       players: [{
         playerUuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
@@ -363,5 +370,57 @@ describe('deleteCompletedTeam', () => {
 
     const { deleteCompletedTeam } = await import('./db.js')
     await expect(deleteCompletedTeam('XXXXXX')).rejects.toEqual({ message: 'not found' })
+  })
+})
+
+describe('deleteCompletedTeamsByClassId', () => {
+  it('해당 class_id의 세션들을 찾아 결과와 세션을 순서대로 삭제한다', async () => {
+    const mockSessionsSelectEq = vi.fn().mockResolvedValue({
+      data: [{ id: 'session-1' }, { id: 'session-2' }],
+      error: null,
+    })
+    const mockSessionsSelect = vi.fn().mockReturnValue({ eq: mockSessionsSelectEq })
+
+    const mockResultsIn = vi.fn().mockResolvedValue({ error: null })
+    const mockResultsDelete = vi.fn().mockReturnValue({ in: mockResultsIn })
+
+    const mockSessionsDeleteEq = vi.fn().mockResolvedValue({ error: null })
+    const mockSessionsDelete = vi.fn().mockReturnValue({ eq: mockSessionsDeleteEq })
+
+    let sessionsCall = 0
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') {
+        sessionsCall += 1
+        return sessionsCall === 1 ? { select: mockSessionsSelect } : { delete: mockSessionsDelete }
+      }
+      if (table === 'game_results') return { delete: mockResultsDelete }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeamsByClassId } = await import('./db.js')
+    await deleteCompletedTeamsByClassId('class-1')
+
+    expect(mockSessionsSelectEq).toHaveBeenCalledWith('class_id', 'class-1')
+    expect(mockResultsIn).toHaveBeenCalledWith('session_id', ['session-1', 'session-2'])
+    expect(mockSessionsDeleteEq).toHaveBeenCalledWith('class_id', 'class-1')
+  })
+
+  it('해당 수업의 세션이 없으면 아무 것도 삭제하지 않는다', async () => {
+    const mockSessionsSelectEq = vi.fn().mockResolvedValue({ data: [], error: null })
+    const mockSessionsSelect = vi.fn().mockReturnValue({ eq: mockSessionsSelectEq })
+    const mockResultsDelete = vi.fn()
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSessionsSelect }
+      if (table === 'game_results') return { delete: mockResultsDelete }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { deleteCompletedTeamsByClassId } = await import('./db.js')
+    await deleteCompletedTeamsByClassId('class-empty')
+
+    expect(mockResultsDelete).not.toHaveBeenCalled()
   })
 })

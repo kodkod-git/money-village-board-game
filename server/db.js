@@ -17,7 +17,7 @@ export function calculateAssetBreakdown(gameState, prices) {
 }
 
 export async function saveGameResult(room) {
-  const { code, prices, players } = room
+  const { code, prices, players, classId = null } = room
 
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
@@ -25,6 +25,7 @@ export async function saveGameResult(room) {
       team_code: code,
       stock_prices: prices.stocks,
       real_estate_prices: prices.realEstate,
+      class_id: classId,
     })
     .select('id')
     .single()
@@ -92,6 +93,7 @@ export async function getAllCompletedTeams() {
     status: 'completed',
     registered: true,
     createdAt: session.created_at,
+    classId: session.class_id ?? null,
     prices: { stocks: session.stock_prices, realEstate: session.real_estate_prices },
     players: results
       .filter(r => r.session_id === session.id)
@@ -131,6 +133,30 @@ export async function deleteCompletedTeam(teamCode) {
     .delete()
     .eq('id', session.id)
   if (sessionDeleteError) throw sessionDeleteError
+}
+
+export async function deleteCompletedTeamsByClassId(classId) {
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('game_sessions')
+    .select('id')
+    .eq('class_id', classId)
+  if (sessionsError) throw sessionsError
+
+  if (sessions.length === 0) return
+
+  const sessionIds = sessions.map(s => s.id)
+
+  const { error: resultsError } = await supabase
+    .from('game_results')
+    .delete()
+    .in('session_id', sessionIds)
+  if (resultsError) throw resultsError
+
+  const { error: sessionsDeleteError } = await supabase
+    .from('game_sessions')
+    .delete()
+    .eq('class_id', classId)
+  if (sessionsDeleteError) throw sessionsDeleteError
 }
 
 const GAME_STATE_TO_COLUMN = {

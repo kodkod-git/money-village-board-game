@@ -16,6 +16,21 @@
 
 .headerActions { display: flex; gap: 8px; }
 
+.titleRow { display: flex; align-items: center; gap: 6px; }
+
+.editIcon { font-size: 16px; opacity: 0.6; }
+
+.qrBtn {
+  background: var(--slot-empty);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
 .refreshBtn {
   background: var(--slot-empty);
   border: 1px solid var(--line);
@@ -31,6 +46,22 @@
   font-size: 30px;
   font-weight: 900;
   color: var(--ink);
+}
+
+.titleInput {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--ink);
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  width: 100%;
+  max-width: 480px;
+}
+
+.titleInput:focus {
+  border-bottom: 2px solid var(--purple);
 }
 
 .subtitle {
@@ -98,4 +129,37 @@
 .popup::-webkit-scrollbar {
   display: none;
 }
+
+.deleteBtn {
+  background: var(--slot-empty);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e53935;
+}
+
+.confirmPopup {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  width: min(320px, 88vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirmText { font-size: 14px; font-weight: 700; color: var(--ink); text-align: center; line-height: 1.5; }
+
+.confirmActions { display: flex; gap: 8px; }
+
+.confirmCancelBtn,
+.confirmDeleteBtn { flex: 1; height: 44px; border-radius: var(--r-sm); font-size: 14px; font-weight: 700; }
+
+.confirmCancelBtn { background: var(--slot-empty); color: var(--ink-2); }
+
+.confirmDeleteBtn { background: #e53935; color: white; }
 

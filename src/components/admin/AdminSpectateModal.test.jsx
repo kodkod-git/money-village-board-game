@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminSpectateModal from './AdminSpectateModal'
+import { setAdminSession, clearAdminSession } from '../../utils/adminAuth'
 
 const PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
@@ -27,8 +28,11 @@ function makeRoom(code, name) {
 const ROOMS = [makeRoom('AB1234', '김민준'), makeRoom('CD5678', '이서연')]
 
 beforeEach(() => {
+  setAdminSession('test-token', { username: 'admin', isSuper: true })
   global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
 })
+
+afterEach(() => clearAdminSession())
 
 describe('AdminSpectateModal', () => {
   it('does not render waiting cards for empty player slots', () => {
@@ -88,7 +92,7 @@ describe('AdminSpectateModal', () => {
       '/api/admin/rooms/AB1234/players/AB1234-p1',
       expect.objectContaining({
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
         body: JSON.stringify({ job: 'c' }),
       })
     )
