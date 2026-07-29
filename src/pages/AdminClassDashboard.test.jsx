@@ -47,18 +47,6 @@ function renderDashboard(onBack = vi.fn()) {
 }
 
 describe('AdminClassDashboard', () => {
-  it('마운트 시 admin-mode 바디 클래스를 추가한다', async () => {
-    renderDashboard()
-    expect(document.body.classList.contains('admin-mode')).toBe(true)
-    await screen.findByText('홍길동')
-  })
-
-  it('언마운트 시 admin-mode 바디 클래스를 제거한다', () => {
-    const { unmount } = renderDashboard()
-    unmount()
-    expect(document.body.classList.contains('admin-mode')).toBe(false)
-  })
-
   it('classId 쿼리와 함께 /api/admin/rooms를 호출하고 받은 팀을 그리드 뷰에 보여준다', async () => {
     renderDashboard()
     expect(await screen.findByText('홍길동')).toBeInTheDocument()

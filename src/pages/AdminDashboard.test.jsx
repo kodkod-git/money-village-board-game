@@ -31,6 +31,13 @@ describe('AdminDashboard', () => {
     expect(screen.getByRole('button', { name: '로그인하기' })).toBeInTheDocument()
   })
 
+  it('마운트 시 admin-mode 바디 클래스를 추가하고, 언마운트 시 제거한다', () => {
+    const { unmount } = render(<AdminDashboard />)
+    expect(document.body.classList.contains('admin-mode')).toBe(true)
+    unmount()
+    expect(document.body.classList.contains('admin-mode')).toBe(false)
+  })
+
   it('로그인에 성공하면 수업 목록 화면으로 전환한다', async () => {
     render(<AdminDashboard />)
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')

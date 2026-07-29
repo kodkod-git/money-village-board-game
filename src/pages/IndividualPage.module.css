@@ -68,6 +68,18 @@
   padding-bottom: 24px;
 }
 
+@media (min-width: 768px) {
+  .assetList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .assetList {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .cashCard {
   background: var(--white);
   border: 1px solid var(--line);

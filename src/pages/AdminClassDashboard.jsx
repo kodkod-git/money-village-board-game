@@ -27,9 +27,7 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   }, [classId])
 
   useEffect(() => {
-    document.body.classList.add('admin-mode')
     loadRooms()
-    return () => document.body.classList.remove('admin-mode')
   }, [loadRooms])
 
   function handlePlayerUpdate(code, updatedPlayer) {
