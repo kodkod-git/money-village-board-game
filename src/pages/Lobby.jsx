@@ -225,15 +225,13 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
             <img src="/icons/exit_to_app.png" alt="" className={styles.exitIcon} />
           </button>
         )}
-        {canManageRoom && (
-          <button
-            className={styles.actionBtn}
-            onClick={() => setShowConfirmModal(true)}
-            disabled={!canSubmitResult || isSubmitting}
-          >
-            {isSubmitting ? '제출 중...' : '결과 등록'}
-          </button>
-        )}
+        <button
+          className={styles.actionBtn}
+          onClick={() => setShowConfirmModal(true)}
+          disabled={!canManageRoom || !canSubmitResult || isSubmitting}
+        >
+          {isSubmitting ? '제출 중...' : '결과 등록'}
+        </button>
       </div>
 
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}

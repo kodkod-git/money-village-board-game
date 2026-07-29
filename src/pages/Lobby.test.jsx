@@ -58,6 +58,15 @@ describe('Lobby', () => {
     expect(screen.getByText('QR 코드')).toBeInTheDocument()
   })
 
+  it('방장이 아니면 결과 등록 버튼이 보이지만 비활성화된다', () => {
+    mockRoomUpdatePlayers = [
+      { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
+      { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
+    ]
+    renderLobby()
+    expect(screen.getByText('결과 등록')).toBeDisabled()
+  })
+
   it('내 카드만 클릭 가능하고, 다른 팀원 카드는 클릭할 수 없다', () => {
     mockRoomUpdatePlayers = [
       { name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' },
