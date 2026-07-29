@@ -7,9 +7,9 @@
 
 @media (min-width: 768px) {
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 130px));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 200px));
     justify-content: center;
-    max-width: 410px;
+    max-width: 620px;
     margin: 0 auto;
   }
 }
@@ -26,7 +26,7 @@
   justify-content: center;
   gap: 12px;
   cursor: pointer;
-  height: 116px;
+  aspect-ratio: 1;
   min-width: 0;
   position: relative;
 }
