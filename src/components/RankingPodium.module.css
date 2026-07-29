@@ -3,7 +3,7 @@
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 32px;
+  margin: 32px 0 48px;
   flex-shrink: 0;
 }
 
