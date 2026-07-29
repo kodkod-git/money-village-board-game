@@ -13,7 +13,7 @@
 
 .inner {
   width: 100%;
-  max-width: 100%;
+  max-width: 720px;
   flex: 1;
   min-height: 0;
   display: flex;

@@ -52,12 +52,6 @@
   aspect-ratio: 1;
 }
 
-@media (min-width: 768px) {
-  .grid {
-    width: min(100%, 480px);
-  }
-}
-
 .bottomBar {
   position: absolute;
   bottom: 44px;
