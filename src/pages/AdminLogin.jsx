@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BackButton from '../components/BackButton'
 import styles from './AdminLogin.module.css'
 
 export default function AdminLogin({ onLogin }) {
@@ -26,6 +27,11 @@ export default function AdminLogin({ onLogin }) {
 
   return (
     <div className={styles.page}>
+      <BackButton variant="intro" />
+      <div className={styles.header}>
+        <h1 className={styles.title}>관리자</h1>
+        <p className={styles.subtitle}>선생님 계정으로 로그인해주세요</p>
+      </div>
       <div className={styles.card}>
         <div className={styles.tabs}>
           <button
@@ -43,7 +49,7 @@ export default function AdminLogin({ onLogin }) {
             회원가입
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <input
             className={styles.input}
             placeholder="아이디"

@@ -9,12 +9,12 @@ export default function AdminDashboard() {
   const [profile, setProfile] = useState(() => getAdminProfile())
   const [selectedClass, setSelectedClass] = useState(null)
 
-  // 로그인/수업 목록/수업 대시보드 전체가 관리자 화면이므로,
-  // 폰 프레임을 벗어나 화면 전체를 쓰도록 /admin 진입 내내 유지한다.
+  // 로그인 화면은 다른 페이지들과 동일하게 폰 프레임 카드 안에 보여주고,
+  // 로그인 이후(수업 목록/수업 대시보드)에만 화면 전체를 쓰는 관리자 모드로 전환한다.
   useEffect(() => {
-    document.body.classList.add('admin-mode')
+    document.body.classList.toggle('admin-mode', Boolean(token && profile))
     return () => document.body.classList.remove('admin-mode')
-  }, [])
+  }, [token, profile])
 
   function handleLogin(newToken, newProfile) {
     setAdminSession(newToken, newProfile)

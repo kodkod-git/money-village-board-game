@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import AdminLogin from './AdminLogin'
 
@@ -9,12 +10,12 @@ beforeEach(() => {
 
 describe('AdminLogin', () => {
   it('기본으로 로그인하기 버튼을 보여준다', () => {
-    render(<AdminLogin onLogin={vi.fn()} />)
+    render(<MemoryRouter><AdminLogin onLogin={vi.fn()} /></MemoryRouter>)
     expect(screen.getByRole('button', { name: '로그인하기' })).toBeInTheDocument()
   })
 
   it('회원가입 탭 클릭 시 회원가입하기 버튼으로 바뀐다', async () => {
-    render(<AdminLogin onLogin={vi.fn()} />)
+    render(<MemoryRouter><AdminLogin onLogin={vi.fn()} /></MemoryRouter>)
     await userEvent.click(screen.getByText('회원가입'))
     expect(screen.getByRole('button', { name: '회원가입하기' })).toBeInTheDocument()
   })
@@ -25,7 +26,7 @@ describe('AdminLogin', () => {
       json: () => Promise.resolve({ token: 't1', username: 'admin', isSuper: true }),
     })
     const onLogin = vi.fn()
-    render(<AdminLogin onLogin={onLogin} />)
+    render(<MemoryRouter><AdminLogin onLogin={onLogin} /></MemoryRouter>)
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
@@ -42,7 +43,7 @@ describe('AdminLogin', () => {
       ok: false,
       json: () => Promise.resolve({ error: '아이디 또는 비밀번호가 올바르지 않습니다' }),
     })
-    render(<AdminLogin onLogin={vi.fn()} />)
+    render(<MemoryRouter><AdminLogin onLogin={vi.fn()} /></MemoryRouter>)
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), 'wrong')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
