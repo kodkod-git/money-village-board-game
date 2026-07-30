@@ -5,6 +5,7 @@
   --design-height: 844;
   --app-ratio: calc(var(--design-width) / var(--design-height));
   --app-max-width: 430px;
+  --app-min-height: 600px;
   --app-side-padding: clamp(12px, 4vw, 32px);
   --app-block-padding: clamp(20px, 4vh, 40px);
   --purple:      #6c7de5;
@@ -51,7 +52,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: var(--app-block-padding) var(--app-side-padding);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   isolation: isolate;
 }
@@ -82,7 +84,7 @@ body::after {
   width: min(100%, calc(100dvh * var(--app-ratio)), var(--app-max-width));
   aspect-ratio: var(--design-width) / var(--design-height);
   max-height: 100%;
-  min-height: 0;
+  min-height: var(--app-min-height);
   position: relative;
   overflow: hidden;
   background: var(--white);
@@ -103,6 +105,7 @@ body::after {
   #root {
     width: 100vw;
     height: 100dvh;
+    min-height: var(--app-min-height);
     border: none;
     border-radius: 0;
     box-shadow: none;
@@ -121,6 +124,7 @@ body::after {
     aspect-ratio: unset;
     width: min(94vw, 820px);
     height: min(92dvh, 1040px);
+    min-height: var(--app-min-height);
   }
 }
 
@@ -128,6 +132,7 @@ body::after {
   #root {
     width: min(90vw, 1100px);
     height: min(90dvh, 1100px);
+    min-height: var(--app-min-height);
   }
 }
 
