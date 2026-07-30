@@ -1,9 +1,9 @@
 import { BADGE_NAMES, BADGE_LABELS } from '../constants/gameData'
 import styles from './BadgePicker.module.css'
 
-export default function BadgePicker({ badges, onToggle }) {
+export default function BadgePicker({ badges, onToggle, fill = false }) {
   return (
-    <div className={styles.grid}>
+    <div className={`${styles.grid} ${fill ? styles.gridFill : ''}`}>
       {BADGE_NAMES.map((name, i) => (
         <button
           key={name}

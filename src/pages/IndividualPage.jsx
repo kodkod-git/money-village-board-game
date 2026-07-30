@@ -105,8 +105,10 @@ export default function IndividualPage() {
 
   if (!player) return null
 
+  const isFillStep = step >= 0 && step <= 4
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${isFillStep ? styles.pageFill : ''}`}>
       <BackButton />
       <StepBar
         steps={STEPS}
@@ -117,94 +119,108 @@ export default function IndividualPage() {
       <hr className={styles.divider} />
 
       {step === 0 && (
-        <div className={styles.stepContent}>
+        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>직업 선택</h1>
           <p className={styles.stepSubtitle}>나의 직업을 선택해주세요</p>
-          <JobPicker
-            value={gameState.job}
-            onChange={job => {
-              const next = { ...gameState, job }
-              setGameState(next)
-              emitState(next)
-            }}
-          />
+          <div className={styles.fillWrapper}>
+            <JobPicker
+              fill
+              value={gameState.job}
+              onChange={job => {
+                const next = { ...gameState, job }
+                setGameState(next)
+                emitState(next)
+              }}
+            />
+          </div>
         </div>
       )}
 
       {step === 1 && (
-        <div className={styles.stepContent}>
+        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>성공카드</h1>
           <p className={styles.stepSubtitle}>획득한 성공카드를 모두 선택해주세요</p>
-          <BadgePicker
-            badges={gameState.badges}
-            onToggle={i => {
-              const badges = [...gameState.badges]
-              badges[i] = !badges[i]
-              const next = { ...gameState, badges }
-              setGameState(next)
-              emitState(next)
-            }}
-          />
+          <div className={styles.fillWrapper}>
+            <BadgePicker
+              fill
+              badges={gameState.badges}
+              onToggle={i => {
+                const badges = [...gameState.badges]
+                badges[i] = !badges[i]
+                const next = { ...gameState, badges }
+                setGameState(next)
+                emitState(next)
+              }}
+            />
+          </div>
         </div>
       )}
 
       {step === 2 && (
-        <div className={styles.stepContent}>
+        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>부동산</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <AssetListEditor
-            labels={REAL_ESTATE_LABELS}
-            images={ESTATE_IMAGES}
-            priceLabels={ESTATE_PRICES}
-            imageFolder="estate"
-            values={gameState.realEstate}
-            onChange={(key, val) => {
-              const realEstate = { ...gameState.realEstate, [key]: val }
-              const next = { ...gameState, realEstate, realEstateVisited: true }
-              setGameState(next)
-              emitState(next)
-            }}
-          />
+          <div className={styles.fillWrapper}>
+            <AssetListEditor
+              fill
+              labels={REAL_ESTATE_LABELS}
+              images={ESTATE_IMAGES}
+              priceLabels={ESTATE_PRICES}
+              imageFolder="estate"
+              values={gameState.realEstate}
+              onChange={(key, val) => {
+                const realEstate = { ...gameState.realEstate, [key]: val }
+                const next = { ...gameState, realEstate, realEstateVisited: true }
+                setGameState(next)
+                emitState(next)
+              }}
+            />
+          </div>
         </div>
       )}
 
       {step === 3 && (
-        <div className={styles.stepContent}>
+        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>주식</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <AssetListEditor
-            labels={STOCK_LABELS}
-            images={STOCK_IMAGES}
-            priceLabels={STOCK_PRICE_LABELS}
-            imageFolder="stock"
-            values={gameState.stocks}
-            onChange={(key, val) => {
-              const stocks = { ...gameState.stocks, [key]: val }
-              const next = { ...gameState, stocks, stocksVisited: true }
-              setGameState(next)
-              emitState(next)
-            }}
-          />
+          <div className={styles.fillWrapper}>
+            <AssetListEditor
+              fill
+              labels={STOCK_LABELS}
+              images={STOCK_IMAGES}
+              priceLabels={STOCK_PRICE_LABELS}
+              imageFolder="stock"
+              values={gameState.stocks}
+              onChange={(key, val) => {
+                const stocks = { ...gameState.stocks, [key]: val }
+                const next = { ...gameState, stocks, stocksVisited: true }
+                setGameState(next)
+                emitState(next)
+              }}
+            />
+          </div>
         </div>
       )}
 
       {step === 4 && (
-        <div className={styles.stepContent}>
+        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>현금</h1>
           <p className={styles.stepSubtitle}>보유 현금을 입력해주세요</p>
-          <div className={styles.cashCard}>
-            <span className={styles.cashLabel}>현금 (원)</span>
-            <button
-              type="button"
-              className={styles.cashInputBtn}
-              onClick={() => setShowCashModal(true)}
-            >
-              {cashDisplay === '0' ? (
-                <span className={styles.cashPlaceholder}>예: 5000</span>
-              ) : (
-                <span className={styles.cashValue}>{Number(cashDisplay).toLocaleString()}원</span>
-              )}
-            </button>
+          <div className={styles.fillWrapper}>
+            <div className={styles.cashCard}>
+              <span className={styles.cashLabel}>현금 (원)</span>
+              <button
+                type="button"
+                className={styles.cashInputBtn}
+                onClick={() => setShowCashModal(true)}
+              >
+                {cashDisplay === '0' ? (
+                  <span className={styles.cashPlaceholder}>예: 5000</span>
+                ) : (
+                  <span className={styles.cashValue}>{Number(cashDisplay).toLocaleString()}원</span>
+                )}
+              </button>
+            </div>
           </div>
 
           {showCashModal && (

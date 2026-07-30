@@ -37,8 +37,9 @@
 .gridWrapper {
   flex: 1;
   min-height: 0;
+  container-type: size;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 44px 0;
   overflow-y: auto;
@@ -54,7 +55,7 @@
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 4px;
-  width: min(100%, 360px);
+  width: min(100cqw, 100cqh);
   aspect-ratio: 1;
 }
 

@@ -1,9 +1,9 @@
 import AssetCard from './AssetCard'
 import styles from '../pages/IndividualPage.module.css'
 
-export default function AssetListEditor({ labels, images, priceLabels, imageFolder, values, onChange }) {
+export default function AssetListEditor({ labels, images, priceLabels, imageFolder, values, onChange, fill = false }) {
   return (
-    <div className={styles.assetList}>
+    <div className={`${styles.assetList} ${fill ? styles.assetListFill : ''}`}>
       {Object.keys(labels).map(key => (
         <AssetCard
           key={key}

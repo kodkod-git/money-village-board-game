@@ -14,6 +14,14 @@
   }
 }
 
+.gridFill {
+  --cell: min((100cqw - 20px) / 3, (100cqh - 10px) / 2);
+  grid-template-columns: repeat(3, var(--cell));
+  grid-template-rows: repeat(2, minmax(var(--cell), auto));
+  width: calc(var(--cell) * 3 + 20px);
+  margin: 0 auto;
+}
+
 .tile {
   background: var(--white);
   border-radius: var(--r-sm);

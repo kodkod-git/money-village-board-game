@@ -1,9 +1,9 @@
 import { JOB_LABELS, JOB_ICONS } from '../constants/gameData'
 import styles from './JobPicker.module.css'
 
-export default function JobPicker({ value, onChange }) {
+export default function JobPicker({ value, onChange, fill = false }) {
   return (
-    <div className={styles.grid}>
+    <div className={`${styles.grid} ${fill ? styles.gridFill : ''}`}>
       {Object.entries(JOB_LABELS).map(([key, label]) => (
         <button
           key={key}
