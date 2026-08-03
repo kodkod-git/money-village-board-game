@@ -57,3 +57,13 @@
   font-weight: 700;
   color: var(--ink);
 }
+
+.reconnectingBadge {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 10px;
+  font-weight: 700;
+}

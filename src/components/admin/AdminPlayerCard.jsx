@@ -19,6 +19,9 @@ export default function AdminPlayerCard({ player, prices, onEdit }) {
         <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
         <div className={styles.identity}>
           <span className={styles.name}>{player.name}</span>
+          {player.connected === false && (
+            <span className={styles.reconnectingBadge}>재접속 중</span>
+          )}
           <span className={styles.job}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
         </div>
         <button type="button" className={styles.editBtn} onClick={onEdit}>수정</button>

@@ -41,4 +41,15 @@ describe('AdminPlayerCard', () => {
     await userEvent.click(screen.getByText('수정'))
     expect(onEdit).toHaveBeenCalled()
   })
+
+  it('connected가 false면 재접속 중 뱃지를 표시한다', () => {
+    const player = { ...PLAYER, connected: false }
+    render(<AdminPlayerCard player={player} prices={PRICES} onEdit={vi.fn()} />)
+    expect(screen.getByText('재접속 중')).toBeInTheDocument()
+  })
+
+  it('connected가 명시되지 않으면 재접속 중 뱃지를 표시하지 않는다', () => {
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} />)
+    expect(screen.queryByText('재접속 중')).toBeNull()
+  })
 })
