@@ -5,6 +5,7 @@ const MAX_PLAYERS = 4
 const rooms = new Map()
 const socketToRoom = new Map()
 const roomDeletionTimers = new Map()
+function cancelPlayerDisconnectTimer() {}
 
 function generateCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase()
@@ -58,8 +59,18 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
     roomDeletionTimers.delete(code)
   }
 
+  const existing = playerUuid ? room.players.find(p => p.playerUuid === playerUuid) : null
+  if (existing) {
+    // 재접속: 기존 자리와 gameState를 재사용하고 socketId만 갱신한다
+    existing.socketId = socketId
+    existing.connected = true
+    socketToRoom.set(socketId, code)
+    cancelPlayerDisconnectTimer(code, playerUuid)
+    return room
+  }
+
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
-  room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, gameState: defaultGameState() })
+  room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, connected: true, gameState: defaultGameState() })
   socketToRoom.set(socketId, code)
   return room
 }

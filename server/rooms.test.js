@@ -84,6 +84,50 @@ describe('addPlayer', () => {
   })
 })
 
+describe('addPlayer 재접속 (playerUuid upsert)', () => {
+  it('같은 playerUuid로 다시 addPlayer를 호출하면 새 항목을 추가하지 않고 socketId만 갱신한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = addPlayer(code, { socketId: 's1-new', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    expect(room.players).toHaveLength(1)
+    expect(room.players[0].socketId).toBe('s1-new')
+  })
+
+  it('재접속 시 기존 gameState를 보존한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    updatePlayerStateByUuid(code, 'p1', { cash: 5000 })
+    const room = addPlayer(code, { socketId: 's1-new', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    expect(room.players[0].gameState.cash).toBe(5000)
+  })
+
+  it('playerUuid가 없으면 매번 새 항목으로 추가한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    const room = addPlayer(code, { socketId: 's2', name: '영희', character: 'pasc', isHost: false })
+    expect(room.players).toHaveLength(2)
+  })
+
+  it('신규 참가자에게는 MAX_PLAYERS 제한이 그대로 적용된다', () => {
+    const { code } = createRoom()
+    for (let i = 0; i < 4; i++) {
+      addPlayer(code, { socketId: `s${i}`, name: `p${i}`, character: `c${i}`, isHost: i === 0, playerUuid: `uuid${i}` })
+    }
+    expect(() =>
+      addPlayer(code, { socketId: 's5', name: 'p5', character: 'c5', isHost: false, playerUuid: 'uuid5' })
+    ).toThrow('Room is full')
+  })
+
+  it('재접속(같은 playerUuid)은 MAX_PLAYERS 제한을 우회한다', () => {
+    const { code } = createRoom()
+    for (let i = 0; i < 4; i++) {
+      addPlayer(code, { socketId: `s${i}`, name: `p${i}`, character: `c${i}`, isHost: i === 0, playerUuid: `uuid${i}` })
+    }
+    const room = addPlayer(code, { socketId: 's0-new', name: 'p0', character: 'c0', isHost: true, playerUuid: 'uuid0' })
+    expect(room.players).toHaveLength(4)
+  })
+})
+
 describe('removePlayer', () => {
   it('마지막 플레이어 제거 시 방을 삭제하고 null을 반환한다', () => {
     vi.useFakeTimers()
