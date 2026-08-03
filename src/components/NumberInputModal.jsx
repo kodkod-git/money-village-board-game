@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './NumberInputModal.module.css'
 
 const MAX_LENGTH = 10
@@ -6,6 +7,7 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '←']
 
 export default function NumberInputModal({ title, initialValue, unit, maxValue, onConfirm, onClose }) {
   const [display, setDisplay] = useState(String(initialValue ?? 0))
+  const portalRoot = document.getElementById('root') ?? document.body
 
   function handleKey(key) {
     if (key === '←') {
@@ -24,8 +26,8 @@ export default function NumberInputModal({ title, initialValue, unit, maxValue, 
     onConfirm(clamped)
   }
 
-  return (
-    <div className={styles.overlay} onClick={onClose}>
+  return createPortal(
+    <div className={styles.overlay} data-testid="number-input-overlay" onClick={onClose}>
       <div className={styles.sheet} onClick={e => e.stopPropagation()}>
         <div className={styles.handle} />
         <h2 className={styles.title}>{title}</h2>
@@ -46,6 +48,7 @@ export default function NumberInputModal({ title, initialValue, unit, maxValue, 
           확인
         </button>
       </div>
-    </div>
+    </div>,
+    portalRoot,
   )
 }

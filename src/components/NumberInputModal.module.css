@@ -1,5 +1,5 @@
 .overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
@@ -16,6 +16,8 @@
   border-radius: 24px;
   padding: 12px 24px 24px;
   box-shadow: var(--shadow-card);
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
 }
 
 .handle {

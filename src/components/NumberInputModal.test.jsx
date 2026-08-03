@@ -44,7 +44,7 @@ describe('NumberInputModal', () => {
     const onClose = vi.fn()
     const onConfirm = vi.fn()
     const { container } = render(<NumberInputModal title="현금 입력" initialValue={0} unit="원" onConfirm={onConfirm} onClose={onClose} />)
-    await userEvent.click(container.firstChild)
+    await userEvent.click(screen.getByTestId('number-input-overlay'))
     expect(onClose).toHaveBeenCalled()
     expect(onConfirm).not.toHaveBeenCalled()
   })
