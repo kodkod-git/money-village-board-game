@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
-  createRoom, getRoom, addPlayer, removePlayer,
+  createRoom, getRoom, addPlayer, removePlayer, markDisconnected,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency
@@ -135,10 +135,10 @@ describe('removePlayer', () => {
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     const result = removePlayer('s1')
     expect(result).toBeNull()
-    // 그레이스 피리어드(30초) 동안 방 유지
+    // 그레이스 피리어드(10분) 동안 방 유지
     expect(getRoom(code)).not.toBeNull()
-    // 30초 경과 후 방 삭제
-    vi.advanceTimersByTime(30001)
+    // 10분 경과 후 방 삭제
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
     expect(getRoom(code)).toBeNull()
     vi.useRealTimers()
   })
@@ -163,6 +163,55 @@ describe('removePlayer', () => {
     removePlayer('s1')
     expect(() => removePlayer('s1')).not.toThrow()
     expect(removePlayer('s1')).toBeNull()
+  })
+})
+
+describe('markDisconnected', () => {
+  it('플레이어를 connected: false로 표시하고 방을 유지한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = markDisconnected('s1')
+    expect(room.players).toHaveLength(1)
+    expect(room.players[0].connected).toBe(false)
+  })
+
+  it('유예 시간(10분) 내 재접속하지 않으면 플레이어를 제거한다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    markDisconnected('s1')
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
+    expect(getRoom(code).players).toHaveLength(0)
+    vi.useRealTimers()
+  })
+
+  it('유예 시간 내 재접속(addPlayer)하면 제거 타이머가 취소된다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    markDisconnected('s1')
+    vi.advanceTimersByTime(5 * 60 * 1000)
+    addPlayer(code, { socketId: 's1-new', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    vi.advanceTimersByTime(10 * 60 * 1000)
+    expect(getRoom(code).players).toHaveLength(1)
+    expect(getRoom(code).players[0].connected).toBe(true)
+    vi.useRealTimers()
+  })
+
+  it('알 수 없는 socketId는 null을 반환한다', () => {
+    expect(markDisconnected('unknown')).toBeNull()
+  })
+
+  it('마지막 플레이어가 유예 만료로 제거되면 방도 10분 후 삭제된다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    markDisconnected('s1')
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1) // 플레이어 제거, 방은 비지만 아직 삭제 전
+    expect(getRoom(code)).not.toBeNull()
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1) // 방 삭제
+    expect(getRoom(code)).toBeNull()
+    vi.useRealTimers()
   })
 })
 

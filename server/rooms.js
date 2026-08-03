@@ -5,7 +5,22 @@ const MAX_PLAYERS = 4
 const rooms = new Map()
 const socketToRoom = new Map()
 const roomDeletionTimers = new Map()
-function cancelPlayerDisconnectTimer() {}
+const playerDisconnectTimers = new Map()
+
+const PLAYER_DISCONNECT_GRACE_MS = 10 * 60 * 1000
+const ROOM_EMPTY_GRACE_MS = 10 * 60 * 1000
+
+function playerTimerKey(code, playerUuid) {
+  return `${code}:${playerUuid}`
+}
+
+function cancelPlayerDisconnectTimer(code, playerUuid) {
+  const key = playerTimerKey(code, playerUuid)
+  if (playerDisconnectTimers.has(key)) {
+    clearTimeout(playerDisconnectTimers.get(key))
+    playerDisconnectTimers.delete(key)
+  }
+}
 
 function generateCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase()
@@ -86,14 +101,32 @@ export function removePlayer(socketId) {
   room.players = room.players.filter(p => p.socketId !== socketId)
   socketToRoom.delete(socketId)
   if (room.players.length === 0) {
-    // Keep room alive for 30 s so a refreshing player can reconnect
+    // Keep room alive for the grace period so a reconnecting player can rejoin
     const timer = setTimeout(() => {
       if (rooms.get(code)?.players.length === 0) rooms.delete(code)
       roomDeletionTimers.delete(code)
-    }, 30000)
+    }, ROOM_EMPTY_GRACE_MS)
     roomDeletionTimers.set(code, timer)
     return null
   }
+  return room
+}
+
+export function markDisconnected(socketId) {
+  const code = socketToRoom.get(socketId)
+  if (!code) return null
+  const room = rooms.get(code)
+  if (!room) return null
+  const player = room.players.find(p => p.socketId === socketId)
+  if (!player) return null
+
+  player.connected = false
+  const key = playerTimerKey(code, player.playerUuid)
+  const timer = setTimeout(() => {
+    playerDisconnectTimers.delete(key)
+    removePlayer(socketId)
+  }, PLAYER_DISCONNECT_GRACE_MS)
+  playerDisconnectTimers.set(key, timer)
   return room
 }
 
@@ -186,6 +219,8 @@ export function updateRoomPrices(socketId, prices) {
 export function clearRooms() {
   for (const timer of roomDeletionTimers.values()) clearTimeout(timer)
   roomDeletionTimers.clear()
+  for (const timer of playerDisconnectTimers.values()) clearTimeout(timer)
+  playerDisconnectTimers.clear()
   rooms.clear()
   socketToRoom.clear()
 }
