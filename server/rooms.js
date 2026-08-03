@@ -112,6 +112,8 @@ export function removePlayer(socketId) {
   return room
 }
 
+// 같은 플레이어에 대해 연속으로 호출돼도(중복 disconnect 이벤트 등) 이전
+// 타이머가 고아로 남지 않도록, 새 타이머를 등록하기 전에 기존 타이머를 취소한다.
 export function markDisconnected(socketId) {
   const code = socketToRoom.get(socketId)
   if (!code) return null
@@ -121,6 +123,7 @@ export function markDisconnected(socketId) {
   if (!player) return null
 
   player.connected = false
+  cancelPlayerDisconnectTimer(code, player.playerUuid)
   const key = playerTimerKey(code, player.playerUuid)
   const timer = setTimeout(() => {
     playerDisconnectTimers.delete(key)
@@ -169,12 +172,17 @@ export function computeLiveRoomStatus(room, now = new Date()) {
 }
 
 export function deleteRoomByCode(code) {
+  const room = rooms.get(code)
+  if (room) {
+    for (const p of room.players) cancelPlayerDisconnectTimer(code, p.playerUuid)
+  }
   return rooms.delete(code)
 }
 
 export function deleteRoomsByClassId(classId) {
   for (const [code, room] of rooms.entries()) {
     if (room.classId !== classId) continue
+    for (const p of room.players) cancelPlayerDisconnectTimer(code, p.playerUuid)
     rooms.delete(code)
     if (roomDeletionTimers.has(code)) {
       clearTimeout(roomDeletionTimers.get(code))

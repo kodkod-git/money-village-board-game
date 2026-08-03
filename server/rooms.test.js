@@ -202,6 +202,31 @@ describe('markDisconnected', () => {
     expect(markDisconnected('unknown')).toBeNull()
   })
 
+  it('같은 socketId로 두 번 호출해도 이전 타이머를 취소해 고아 타이머를 남기지 않는다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+
+    markDisconnected('s1') // 첫 번째 타이머 등록 (t=0, 만료 t=10분)
+    expect(vi.getTimerCount()).toBe(1)
+
+    vi.advanceTimersByTime(5 * 60 * 1000) // t=5분
+    markDisconnected('s1') // 중복 disconnect 이벤트: 새 타이머로 재등록되어야 하며, 개수는 여전히 1개여야 한다
+    expect(vi.getTimerCount()).toBe(1)
+
+    // 첫 번째 타이머의 원래 만료 시점(t=10분)을 지나도, 그 타이머는 취소되었으므로 플레이어가 제거되지 않아야 한다
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1) // t=10분 1ms
+    expect(getRoom(code).players).toHaveLength(1)
+
+    // 재접속 후에도 남아있는 고아 타이머로 인해 잘못 제거되지 않아야 한다
+    addPlayer(code, { socketId: 's1-new', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    vi.advanceTimersByTime(10 * 60 * 1000)
+    expect(getRoom(code).players).toHaveLength(1)
+    expect(getRoom(code).players[0].connected).toBe(true)
+
+    vi.useRealTimers()
+  })
+
   it('마지막 플레이어가 유예 만료로 제거되면 방도 10분 후 삭제된다', () => {
     vi.useFakeTimers()
     const { code } = createRoom()
@@ -418,6 +443,22 @@ describe('deleteRoomByCode', () => {
   it('존재하지 않는 방 코드는 false를 반환한다', () => {
     expect(deleteRoomByCode('XXXXXX')).toBe(false)
   })
+
+  it('연결 해제 유예 타이머가 걸린 플레이어가 있는 방을 삭제하면 해당 타이머도 함께 취소된다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    markDisconnected('s1')
+    expect(vi.getTimerCount()).toBe(1)
+
+    expect(deleteRoomByCode(code)).toBe(true)
+    expect(getRoom(code)).toBeNull()
+    expect(vi.getTimerCount()).toBe(0)
+
+    // 남은 타이머가 없으므로 시간이 흘러도 에러 없이 동작한다
+    expect(() => vi.advanceTimersByTime(10 * 60 * 1000 + 1)).not.toThrow()
+    vi.useRealTimers()
+  })
 })
 
 describe('deleteRoomsByClassId', () => {
@@ -435,5 +476,24 @@ describe('deleteRoomsByClassId', () => {
 
   it('일치하는 방이 없어도 에러 없이 동작한다', () => {
     expect(() => deleteRoomsByClassId('no-such-class')).not.toThrow()
+  })
+
+  it('연결 해제 유예 타이머가 걸린 플레이어가 있는 방들을 삭제하면 해당 타이머도 모두 취소된다', () => {
+    vi.useFakeTimers()
+    const room1 = createRoom({ classId: 'class-1' })
+    const room2 = createRoom({ classId: 'class-1' })
+    addPlayer(room1.code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    addPlayer(room2.code, { socketId: 's2', name: '영희', character: 'ptsh', isHost: true, playerUuid: 'p2' })
+    markDisconnected('s1')
+    markDisconnected('s2')
+    expect(vi.getTimerCount()).toBe(2)
+
+    deleteRoomsByClassId('class-1')
+    expect(getRoom(room1.code)).toBeNull()
+    expect(getRoom(room2.code)).toBeNull()
+    expect(vi.getTimerCount()).toBe(0)
+
+    expect(() => vi.advanceTimersByTime(10 * 60 * 1000 + 1)).not.toThrow()
+    vi.useRealTimers()
   })
 })
