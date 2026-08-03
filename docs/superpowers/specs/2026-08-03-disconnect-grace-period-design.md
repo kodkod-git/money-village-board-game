@@ -30,7 +30,7 @@
   (관리자 대시보드의 stale/abandoned 판정은 이와 별개로 `updatedAt` 기준 30분/2시간
   기준을 그대로 유지하므로 영향 없음.)
 - 재접속 대기 중인 플레이어는 `connected: false`로 표시하고, 참가자 목록과 관리자
-  화면에 "재접속 중" 뱃지로 노출한다.
+  화면에 "연결 끊김" 뱃지로 노출한다.
 - 재접속 시 `name`/`character`/`affiliation`/`isHost`는 서버에 저장된 기존 값을
   그대로 유지한다 (클라이언트가 stale한 값을 보낼 가능성을 배제하기 위해 `playerUuid`는
   신원 확인 용도로만 사용).
@@ -68,7 +68,7 @@
 **`connected` 뱃지 표시**
 - `room-updated`로 내려오는 `players` 배열의 `connected` 필드를 참가자 목록
   (`Lobby.jsx`의 `PlayerSlot`)과 관리자 관전 화면(`AdminSpectateModal.jsx`의
-  `AdminPlayerCard`)에서 읽어, `player.connected === false`인 플레이어에 "재접속 중"
+  `AdminPlayerCard`)에서 읽어, `player.connected === false`인 플레이어에 "연결 끊김"
   뱃지를 표시한다. 관리자 방 목록(그리드/테이블 뷰)에는 표시하지 않는다 — 카드 단위
   상세 화면에서만 필요하다고 판단.
 

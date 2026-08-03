@@ -6,3 +6,9 @@ export function getPlayerUuid() {
   }
   return uuid
 }
+
+export function resetPlayerUuid() {
+  const uuid = crypto.randomUUID()
+  sessionStorage.setItem('player_uuid', uuid)
+  return uuid
+}

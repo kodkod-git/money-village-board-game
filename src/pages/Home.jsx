@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import CodeModal from '../components/CodeModal'
 import useSocket from '../hooks/useSocket'
-import { getPlayerUuid } from '../utils/playerUuid'
+import { resetPlayerUuid } from '../utils/playerUuid'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -23,7 +23,10 @@ export default function Home() {
   }, [initialCode])
 
   function joinRoom(code, isHost) {
-    const playerUuid = getPlayerUuid()
+    // 이 기기(탭)에서 이전에 다른 참가자가 게임을 마쳤을 수도 있으므로,
+    // 새로 팀을 만들거나 참여하는 시점에는 매번 새 playerUuid를 발급해
+    // 이전 참가자의 결과와 뒤섞이지 않게 한다.
+    const playerUuid = resetPlayerUuid()
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) {
         sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost }))

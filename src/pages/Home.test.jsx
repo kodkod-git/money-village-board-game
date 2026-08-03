@@ -18,7 +18,10 @@ vi.mock('../hooks/useSocket', () => ({
 import Home from './Home'
 
 describe('Home', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+  })
 
   it('팀 생성, 팀 참가 버튼을 렌더링한다', () => {
     render(<MemoryRouter><Home /></MemoryRouter>)
@@ -74,6 +77,19 @@ describe('Home', () => {
         body: JSON.stringify({ classId: null }),
       }))
     )
+  })
+
+  it('팀 생성 시 이전 참가자의 playerUuid가 남아있어도 새 playerUuid를 발급한다', async () => {
+    sessionStorage.setItem('player_uuid', 'stale-uuid-from-previous-player')
+    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ code: 'ABC123' }) })
+    mockEmit.mockImplementation((_event, _data, cb) => cb?.({ ok: true }))
+    render(<MemoryRouter><Home /></MemoryRouter>)
+    fireEvent.click(screen.getByText('팀 만들기'))
+    await waitFor(() => expect(mockEmit).toHaveBeenCalled())
+
+    const [, payload] = mockEmit.mock.calls[0]
+    expect(payload.playerUuid).not.toBe('stale-uuid-from-previous-player')
+    expect(sessionStorage.getItem('player_uuid')).toBe(payload.playerUuid)
   })
 
   it('URL에 code가 있으면 CodeModal이 자동으로 열린다', () => {

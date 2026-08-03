@@ -87,6 +87,12 @@ body::after {
   min-height: var(--app-min-height);
   position: relative;
   overflow: hidden;
+  /* Makes #root a containing block for `position: fixed` descendants
+     (modals, overlays) so they're scoped to the app's own phone-shaped
+     frame instead of the real browser viewport, which is usually larger
+     on desktop/tablet — without this, bottom-sheet modals anchor to the
+     viewport's edges and get clipped by #root's own overflow: hidden. */
+  contain: layout;
   background: var(--white);
   border: none;
   border-radius: 28px;

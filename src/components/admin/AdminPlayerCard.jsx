@@ -20,7 +20,7 @@ export default function AdminPlayerCard({ player, prices, onEdit }) {
         <div className={styles.identity}>
           <span className={styles.name}>{player.name}</span>
           {player.connected === false && (
-            <span className={styles.reconnectingBadge}>재접속 중</span>
+            <span className={styles.disconnectedBadge}>연결 끊김</span>
           )}
           <span className={styles.job}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
         </div>

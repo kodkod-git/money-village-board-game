@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { getPlayerUuid } from './playerUuid'
+import { getPlayerUuid, resetPlayerUuid } from './playerUuid'
 
 beforeEach(() => sessionStorage.clear())
 
@@ -19,5 +19,20 @@ describe('getPlayerUuid', () => {
   it('localStorage가 아닌 sessionStorage에 저장한다 (다른 탭 간 공유되지 않도록)', () => {
     getPlayerUuid()
     expect(localStorage.getItem('player_uuid')).toBeNull()
+  })
+})
+
+describe('resetPlayerUuid', () => {
+  it('기존 uuid가 있어도 새 uuid를 생성해 덮어쓴다', () => {
+    const first = getPlayerUuid()
+    const second = resetPlayerUuid()
+    expect(second).not.toBe(first)
+    expect(sessionStorage.getItem('player_uuid')).toBe(second)
+  })
+
+  it('이후 getPlayerUuid를 호출하면 새로 발급된 uuid를 반환한다', () => {
+    getPlayerUuid()
+    const reset = resetPlayerUuid()
+    expect(getPlayerUuid()).toBe(reset)
   })
 })

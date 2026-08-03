@@ -31,7 +31,7 @@ export default function PlayerSlot({ player, onKick, onEdit }) {
       )}
       {onEdit && <span className={styles.editIcon} aria-hidden="true">✎</span>}
       {player.connected === false && (
-        <span className={styles.reconnectingBadge}>재접속 중</span>
+        <span className={styles.disconnectedBadge}>연결 끊김</span>
       )}
       <img
         src={`/characters/${player.character}.png`}

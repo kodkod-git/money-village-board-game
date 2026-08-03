@@ -58,7 +58,7 @@
   color: var(--ink);
 }
 
-.reconnectingBadge {
+.disconnectedBadge {
   align-self: flex-start;
   padding: 2px 8px;
   border-radius: var(--r-pill);

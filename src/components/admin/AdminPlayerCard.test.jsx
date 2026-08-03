@@ -42,14 +42,14 @@ describe('AdminPlayerCard', () => {
     expect(onEdit).toHaveBeenCalled()
   })
 
-  it('connected가 false면 재접속 중 뱃지를 표시한다', () => {
+  it('connected가 false면 연결 끊김 뱃지를 표시한다', () => {
     const player = { ...PLAYER, connected: false }
     render(<AdminPlayerCard player={player} prices={PRICES} onEdit={vi.fn()} />)
-    expect(screen.getByText('재접속 중')).toBeInTheDocument()
+    expect(screen.getByText('연결 끊김')).toBeInTheDocument()
   })
 
-  it('connected가 명시되지 않으면 재접속 중 뱃지를 표시하지 않는다', () => {
+  it('connected가 명시되지 않으면 연결 끊김 뱃지를 표시하지 않는다', () => {
     render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} />)
-    expect(screen.queryByText('재접속 중')).toBeNull()
+    expect(screen.queryByText('연결 끊김')).toBeNull()
   })
 })
