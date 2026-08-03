@@ -67,8 +67,10 @@
 
 **`connected` 뱃지 표시**
 - `room-updated`로 내려오는 `players` 배열의 `connected` 필드를 참가자 목록
-  (`IndividualPage.jsx`)과 관리자 화면(`AdminSpectateModal.jsx`, 관리자 방 목록)에서
-  읽어, `!p.connected`인 플레이어에 "재접속 중" 뱃지를 표시한다.
+  (`Lobby.jsx`의 `PlayerSlot`)과 관리자 관전 화면(`AdminSpectateModal.jsx`의
+  `AdminPlayerCard`)에서 읽어, `player.connected === false`인 플레이어에 "재접속 중"
+  뱃지를 표시한다. 관리자 방 목록(그리드/테이블 뷰)에는 표시하지 않는다 — 카드 단위
+  상세 화면에서만 필요하다고 판단.
 
 ## 테스트 계획
 
