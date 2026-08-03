@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
@@ -48,7 +48,6 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
   const { socket } = useSocketContext()
   const [players, setPlayers] = useState(readOnly ? mockRoom.players : [])
   const [roomFetched, setRoomFetched] = useState(readOnly)
-  const rejoinAttempted = useRef(false)
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
@@ -69,14 +68,13 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
 
   useEffect(() => {
     if (readOnly) return
-    if (!socket || !roomFetched || rejoinAttempted.current) return
+    if (!socket || !roomFetched) return
     if (players.find(p => p.socketId === socket.id)) return
 
     const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
     const playerUuid = sessionStorage.getItem('player_uuid')
     if (!stored || stored.code !== code) return
 
-    rejoinAttempted.current = true
     socket.emit('join-room', {
       code,
       name: stored.name,
@@ -84,10 +82,30 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
       character: stored.character,
       isHost: stored.isHost ?? false,
       playerUuid,
-    }, ({ ok }) => {
-      if (!ok) rejoinAttempted.current = false
     })
   }, [socket, roomFetched, players, code, readOnly])
+
+  useEffect(() => {
+    if (readOnly || !socket) return
+
+    function rejoin() {
+      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+      const playerUuid = sessionStorage.getItem('player_uuid')
+      if (!stored || stored.code !== code) return
+
+      socket.emit('join-room', {
+        code,
+        name: stored.name,
+        affiliation: stored.affiliation,
+        character: stored.character,
+        isHost: stored.isHost ?? false,
+        playerUuid,
+      })
+    }
+
+    socket.on('connect', rejoin)
+    return () => socket.off('connect', rejoin)
+  }, [socket, code, readOnly])
 
   useEffect(() => {
     if (readOnly || !socket) return

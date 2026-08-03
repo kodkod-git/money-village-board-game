@@ -21,6 +21,7 @@ vi.mock('socket.io-client', () => {
   return { io: vi.fn(() => socket) }
 })
 
+import { io } from 'socket.io-client'
 import { SocketProvider } from '../contexts/SocketContext'
 import Lobby from './Lobby'
 
@@ -37,6 +38,7 @@ function renderLobby() {
 describe('Lobby', () => {
   afterEach(() => {
     mockRoomUpdatePlayers = DEFAULT_PLAYERS
+    sessionStorage.clear()
   })
 
   it('shows the team code', () => {
@@ -77,6 +79,40 @@ describe('Lobby', () => {
     const otherCard = screen.getByText('영희').closest('[role]')
     expect(myCard).toHaveAttribute('role', 'button')
     expect(otherCard).toBeNull()
+  })
+
+  it('소켓이 재연결되면 저장된 프로필로 join-room을 다시 보낸다', () => {
+    renderLobby()
+    const socket = io()
+    const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
+
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: true,
+    }))
+    sessionStorage.setItem('player_uuid', 'p1')
+    socket.emit.mockClear()
+
+    connectHandler()
+
+    expect(socket.emit).toHaveBeenCalledWith('join-room', {
+      code: 'ABC123', name: '철수', affiliation: '', character: 'Adventurer-강아지', isHost: true, playerUuid: 'p1',
+    })
+  })
+
+  it('저장된 프로필의 방 코드가 다르면 재연결 시 join-room을 보내지 않는다', () => {
+    renderLobby()
+    const socket = io()
+    const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
+
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'OTHER1', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: true,
+    }))
+    sessionStorage.setItem('player_uuid', 'p1')
+    socket.emit.mockClear()
+
+    connectHandler()
+
+    expect(socket.emit).not.toHaveBeenCalledWith('join-room', expect.anything())
   })
 })
 
