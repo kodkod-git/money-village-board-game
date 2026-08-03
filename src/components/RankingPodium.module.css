@@ -3,8 +3,14 @@
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  margin: 16px 0 20px;
+  margin-bottom: 12px;
   flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.podium::-webkit-scrollbar {
+  display: none;
 }
 
 .slot {
@@ -12,7 +18,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  flex: 0 0 120px;
   max-width: 120px;
 }
 
@@ -54,6 +60,7 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--ink-2);
+  white-space: nowrap;
 }
 
 .first .box {
@@ -65,4 +72,45 @@
 .first .rank,
 .first .value {
   color: var(--white);
+}
+
+/* 실제 사용 가능한 폭(스마트폰 비율의 앱 프레임)이 좁을 때, 세 자리 슬롯을 억지로
+   구겨 넣는 대신 시상대 자체와 글씨 크기를 함께 줄여 한 화면에 들어오게 한다. */
+@container (max-width: 400px) {
+  .podium {
+    gap: 10px;
+  }
+
+  .slot {
+    flex: 0 0 100px;
+    max-width: 100px;
+    gap: 6px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .name {
+    font-size: 13px;
+  }
+
+  .box {
+    padding: 12px 6px;
+    gap: 3px;
+  }
+
+  .rank {
+    font-size: 16px;
+  }
+
+  .value {
+    font-size: 10px;
+  }
+
+  .first .box {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
 }

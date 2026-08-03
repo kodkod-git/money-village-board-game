@@ -3,7 +3,7 @@ import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import {
   JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
-  STOCK_LABELS, STOCK_IMAGES,
+  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
 } from '../../constants/gameData'
 import NumberInputModal from '../NumberInputModal'
 import JobEditModal from './JobEditModal'
@@ -163,6 +163,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           title="현금 수정"
           initialValue={gameState.cash ?? 0}
           unit="원"
+          maxValue={MAX_CASH}
           onConfirm={val => { onSave('cash', val); setEditingField(null) }}
           onClose={() => setEditingField(null)}
         />

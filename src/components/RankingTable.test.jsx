@@ -87,6 +87,18 @@ describe('RankingTable', () => {
     expect(handleClick).toHaveBeenCalledWith(mockRows[1])
   })
 
+  it('podium prop이 전달되면 스크롤 목록 위에 함께 렌더링된다', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <RankingTable rows={mockRows} podium={<div data-testid="podium-stub">시상대</div>} />
+      </MemoryRouter>
+    )
+    expect(screen.getByTestId('podium-stub')).toBeInTheDocument()
+
+    const html = container.innerHTML
+    expect(html.indexOf('podium-stub')).toBeLessThan(html.indexOf('홍길동'))
+  })
+
   it('플레이스홀더 행 클릭 시 onRowClick에 isPlaceholder: true 객체를 전달한다', async () => {
     const handleClick = vi.fn()
     render(

@@ -9,7 +9,7 @@ import NumberInputModal from '../components/NumberInputModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import {
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
-  STOCK_LABELS, STOCK_IMAGES,
+  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
 } from '../constants/gameData'
 import styles from './IndividualPage.module.css'
 
@@ -235,6 +235,7 @@ export default function IndividualPage() {
               title="현금 입력"
               initialValue={Number(cashDisplay)}
               unit="원"
+              maxValue={MAX_CASH}
               onConfirm={val => {
                 setCashDisplay(String(val))
                 setShowCashModal(false)

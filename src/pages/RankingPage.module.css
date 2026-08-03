@@ -15,11 +15,35 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding-top: 96px;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.header {
+  padding-top: 96px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 10px 0 20px;
+  flex-shrink: 0;
 }
 
 .topTabs {

@@ -61,6 +61,20 @@ describe('AdminEditModal', () => {
     expect(onSave).toHaveBeenCalledWith('cash', 5)
   })
 
+  it('현금을 10억원 초과로 입력하면 10억원으로 클램프된다', async () => {
+    const onSave = vi.fn()
+    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByTestId('edit-cash'))
+    for (let i = 0; i < 6; i++) {
+      await userEvent.click(screen.getByText('←'))
+    }
+    for (let i = 0; i < 10; i++) {
+      await userEvent.click(screen.getByRole('button', { name: '9' }))
+    }
+    await userEvent.click(screen.getByText('확인'))
+    expect(onSave).toHaveBeenCalledWith('cash', 1000000000)
+  })
+
   it('뒤로 버튼 클릭 시 onClose를 호출한다', async () => {
     const onClose = vi.fn()
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={onClose} />)

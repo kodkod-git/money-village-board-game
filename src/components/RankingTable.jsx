@@ -1,6 +1,6 @@
 import styles from './RankingTable.module.css'
 
-export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, valueKey = 'totalAssets' }) {
+export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, valueKey = 'totalAssets', podium }) {
   const pinnedRow = highlightPlayerUuid
     ? rows.find(r => r.playerUuid === highlightPlayerUuid)
     : null
@@ -13,6 +13,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
   return (
     <div className={styles.container}>
       <div className={styles.list}>
+        {podium}
         {rows.map(row => (
           <div
             key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}

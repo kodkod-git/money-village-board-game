@@ -130,6 +130,11 @@ export default function RankingPage() {
     <div className={styles.page}>
       {isV2 ? <BackButton to="/" label="처음으로" /> : <BackButton />}
       <div className={styles.inner}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>랭킹</h1>
+          <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
+        </div>
+        <hr className={styles.divider} />
         <div className={styles.topTabs}>
           {TOP_TABS.map(tab => (
             <button
@@ -177,20 +182,21 @@ export default function RankingPage() {
         {loading && <p className={styles.message}>불러오는 중...</p>}
         {error && <p className={styles.message}>{error}</p>}
         {!loading && !error && (
-          <>
-            {/* 순위 1~3위가 모두 있을 때만 시상대를 보여준다.
-                아래 목록에도 동일한 상위 랭커가 다시 나타나므로,
-                일부만 채워진 시상대는 오히려 어색하다. */}
-            {podiumRows.length === 3 && (
-              <RankingPodium rows={podiumRows} valueKey={valueKey} onRowClick={handleRowClick} />
-            )}
-            <RankingTable
-              rows={rows}
-              valueKey={valueKey}
-              highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
-              onRowClick={handleRowClick}
-            />
-          </>
+          <RankingTable
+            rows={rows}
+            valueKey={valueKey}
+            highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
+            onRowClick={handleRowClick}
+            podium={
+              // 순위 1~3위가 모두 있을 때만 시상대를 보여준다. 아래 목록에도 동일한
+              // 상위 랭커가 다시 나타나므로, 일부만 채워진 시상대는 오히려 어색하다.
+              // 목록과 같은 스크롤 영역 안에 있어야 하므로 RankingTable에 넘겨 그
+              // 안에서 렌더링한다.
+              podiumRows.length === 3
+                ? <RankingPodium rows={podiumRows} valueKey={valueKey} onRowClick={handleRowClick} />
+                : null
+            }
+          />
         )}
       </div>
 

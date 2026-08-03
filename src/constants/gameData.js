@@ -33,6 +33,8 @@ export const STOCK_IMAGES = {
   auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
 }
 
+export const MAX_CASH = 1000000000
+
 export const ROOM_STATUS_LABELS = {
   live: '미입력',
   stale: '정체',
