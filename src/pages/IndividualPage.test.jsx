@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { io } from 'socket.io-client'
 import IndividualPage from './IndividualPage'
 import { SocketProvider } from '../contexts/SocketContext'
 
@@ -51,5 +52,18 @@ describe('IndividualPage', () => {
     await userEvent.click(screen.getByText('경영·금융'))
     await userEvent.click(screen.getByText('다음'))
     expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
+  })
+
+  it('소켓이 재연결되면 참가자 정보를 다시 불러온다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+
+    const socket = io()
+    const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
+
+    fetch.mockClear()
+    connectHandler()
+
+    expect(fetch).toHaveBeenCalledWith('/api/rooms/AB1234')
   })
 })

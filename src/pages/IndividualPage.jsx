@@ -40,41 +40,48 @@ export default function IndividualPage() {
 
   useEffect(() => {
     if (!socket) return
-    fetch(`/api/rooms/${code}`)
-      .then(r => r.json())
-      .then(data => {
-        const me = data.players?.find(p => p.socketId === socket.id)
-        if (me) {
-          setPlayer(me)
-          const gs = me.gameState ?? defaultGameState()
-          setGameState(gs)
-          setCashDisplay(String(gs.cash ?? 0))
-          if (gs.job !== null) setCompletedUpTo(4)
-          return
-        }
-        const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
-        const playerUuid = sessionStorage.getItem('player_uuid')
-        if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
-        socket.emit('join-room', {
-          code, name: stored.name, affiliation: stored.affiliation,
-          character: stored.character, isHost: false, playerUuid,
-        }, ({ ok }) => {
-          if (!ok) { navigate(`/lobby/${code}`); return }
-          fetch(`/api/rooms/${code}`)
-            .then(r => r.json())
-            .then(data2 => {
-              const me2 = data2.players?.find(p => p.socketId === socket.id)
-              if (!me2) { navigate(`/lobby/${code}`); return }
-              setPlayer(me2)
-              const gs = me2.gameState ?? defaultGameState()
-              setGameState(gs)
-              setCashDisplay(String(gs.cash ?? 0))
-              if (gs.job !== null) setCompletedUpTo(4)
-            })
-            .catch(() => navigate(`/lobby/${code}`))
+
+    function syncPlayer() {
+      fetch(`/api/rooms/${code}`)
+        .then(r => r.json())
+        .then(data => {
+          const me = data.players?.find(p => p.socketId === socket.id)
+          if (me) {
+            setPlayer(me)
+            const gs = me.gameState ?? defaultGameState()
+            setGameState(gs)
+            setCashDisplay(String(gs.cash ?? 0))
+            if (gs.job !== null) setCompletedUpTo(4)
+            return
+          }
+          const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+          const playerUuid = sessionStorage.getItem('player_uuid')
+          if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
+          socket.emit('join-room', {
+            code, name: stored.name, affiliation: stored.affiliation,
+            character: stored.character, isHost: false, playerUuid,
+          }, ({ ok }) => {
+            if (!ok) { navigate(`/lobby/${code}`); return }
+            fetch(`/api/rooms/${code}`)
+              .then(r => r.json())
+              .then(data2 => {
+                const me2 = data2.players?.find(p => p.socketId === socket.id)
+                if (!me2) { navigate(`/lobby/${code}`); return }
+                setPlayer(me2)
+                const gs = me2.gameState ?? defaultGameState()
+                setGameState(gs)
+                setCashDisplay(String(gs.cash ?? 0))
+                if (gs.job !== null) setCompletedUpTo(4)
+              })
+              .catch(() => navigate(`/lobby/${code}`))
+          })
         })
-      })
-      .catch(() => navigate(`/lobby/${code}`))
+        .catch(() => navigate(`/lobby/${code}`))
+    }
+
+    syncPlayer()
+    socket.on('connect', syncPlayer)
+    return () => socket.off('connect', syncPlayer)
   }, [code, socket, navigate])
 
   useEffect(() => {
