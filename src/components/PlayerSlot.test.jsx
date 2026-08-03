@@ -26,6 +26,16 @@ describe('PlayerSlot', () => {
     expect(screen.getByLabelText('입력완료')).toBeInTheDocument()
   })
 
+  it('connected가 false면 재접속 중 뱃지를 표시한다', () => {
+    render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false, connected: false }} />)
+    expect(screen.getByText('재접속 중')).toBeInTheDocument()
+  })
+
+  it('connected가 true(기본)면 재접속 중 뱃지를 표시하지 않는다', () => {
+    render(<PlayerSlot player={{ name: '영희', character: 'pasc', isHost: false, connected: true }} />)
+    expect(screen.queryByText('재접속 중')).toBeNull()
+  })
+
   it('onKick이 전달되면 추방 버튼을 표시한다', () => {
     const onKick = vi.fn()
     render(<PlayerSlot player={{ name: '철수', character: 'ptsc', isHost: false }} onKick={onKick} />)

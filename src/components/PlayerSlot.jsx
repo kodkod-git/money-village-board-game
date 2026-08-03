@@ -30,6 +30,9 @@ export default function PlayerSlot({ player, onKick, onEdit }) {
         <span className={styles.completedIcon} aria-label="입력완료">✓</span>
       )}
       {onEdit && <span className={styles.editIcon} aria-hidden="true">✎</span>}
+      {player.connected === false && (
+        <span className={styles.reconnectingBadge}>재접속 중</span>
+      )}
       <img
         src={`/characters/${player.character}.png`}
         alt={player.character}
