@@ -193,6 +193,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
         character: p.character,
         affiliation: p.affiliation,
         gameState: p.gameState,
+        connected: p.connected,
       })),
     }))
     const completedRooms = await getAllCompletedTeams()
@@ -247,6 +248,7 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
       character: player.character,
       affiliation: player.affiliation,
       gameState: player.gameState,
+      connected: player.connected,
     })
   }
 

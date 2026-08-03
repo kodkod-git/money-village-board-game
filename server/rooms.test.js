@@ -126,6 +126,20 @@ describe('addPlayer 재접속 (playerUuid upsert)', () => {
     const room = addPlayer(code, { socketId: 's0-new', name: 'p0', character: 'c0', isHost: true, playerUuid: 'uuid0' })
     expect(room.players).toHaveLength(4)
   })
+
+  it('재접속 후 이전 socketId는 socketToRoom 매핑에서 제거된다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1-old', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    addPlayer(code, { socketId: 's1-new', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+
+    // 이전 socketId는 더 이상 어떤 방에도 매핑되지 않아야 한다 (누수 방지)
+    expect(removePlayer('s1-old')).toBeNull()
+    // 재접속한 플레이어는 새 socketId로 여전히 방에 남아있어야 한다
+    // (removePlayer('s1-old') 호출이 실수로 재접속한 플레이어를 제거하지 않았음을 증명)
+    const room = getRoom(code)
+    expect(room.players).toHaveLength(1)
+    expect(room.players[0].socketId).toBe('s1-new')
+  })
 })
 
 describe('removePlayer', () => {

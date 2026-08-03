@@ -77,6 +77,7 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
   const existing = playerUuid ? room.players.find(p => p.playerUuid === playerUuid) : null
   if (existing) {
     // 재접속: 기존 자리와 gameState를 재사용하고 socketId만 갱신한다
+    if (existing.socketId !== socketId) socketToRoom.delete(existing.socketId)
     existing.socketId = socketId
     existing.connected = true
     socketToRoom.set(socketId, code)
