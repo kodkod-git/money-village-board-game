@@ -2,8 +2,6 @@ import { useState } from 'react'
 import NumberInputModal from './NumberInputModal'
 import styles from './QuantitySelector.module.css'
 
-const MAX = 10
-
 export default function QuantitySelector({ value, onChange, label }) {
   const [showModal, setShowModal] = useState(false)
 
@@ -22,8 +20,7 @@ export default function QuantitySelector({ value, onChange, label }) {
       </button>
       <button
         className={styles.plusBtn}
-        onClick={() => onChange(Math.min(MAX, value + 1))}
-        disabled={value >= MAX}
+        onClick={() => onChange(value + 1)}
         aria-label="수량 증가"
       >
         +
@@ -34,7 +31,6 @@ export default function QuantitySelector({ value, onChange, label }) {
           title={`${label} 수량`}
           initialValue={value}
           unit="개"
-          maxValue={MAX}
           onConfirm={next => {
             onChange(next)
             setShowModal(false)

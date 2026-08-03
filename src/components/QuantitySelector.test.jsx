@@ -33,9 +33,16 @@ describe('QuantitySelector', () => {
     expect(screen.getByLabelText('수량 감소')).toBeDisabled()
   })
 
-  it('값이 10이면 + 버튼이 비활성화된다', () => {
+  it('값이 10 이상이어도 + 버튼이 비활성화되지 않는다', () => {
     render(<QuantitySelector value={10} onChange={vi.fn()} label="단독 가온개미" />)
-    expect(screen.getByLabelText('수량 증가')).toBeDisabled()
+    expect(screen.getByLabelText('수량 증가')).not.toBeDisabled()
+  })
+
+  it('값이 10일 때 + 버튼을 클릭하면 11을 전달한다 (상한 없음)', async () => {
+    const onChange = vi.fn()
+    render(<QuantitySelector value={10} onChange={onChange} label="단독 가온개미" />)
+    await userEvent.click(screen.getByLabelText('수량 증가'))
+    expect(onChange).toHaveBeenCalledWith(11)
   })
 
   it('가운데 숫자를 클릭하면 라벨을 포함한 수량 입력 팝업이 열린다', async () => {
