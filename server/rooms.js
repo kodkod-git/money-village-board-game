@@ -209,6 +209,7 @@ export function listPublicRoomsByClassId(classId) {
     status: computeLiveRoomStatus(room, now),
     playerCount: room.players.length,
     characters: room.players.map(p => p.character),
+    hostName: room.players.find(p => p.isHost)?.name ?? null,
   }))
 }
 

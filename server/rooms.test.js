@@ -514,7 +514,7 @@ describe('deleteRoomsByClassId', () => {
 })
 
 describe('listPublicRoomsByClassId', () => {
-  it('해당 classId의 방만 반환하며 민감 정보는 제외한다', () => {
+  it('해당 classId의 방만 반환하며 방장 닉네임 외의 민감 정보는 제외한다', () => {
     const room = createRoom({ classId: 'class-1' })
     addPlayer(room.code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, affiliation: '경영학과' })
     createRoom({ classId: 'class-2' })
@@ -522,8 +522,23 @@ describe('listPublicRoomsByClassId', () => {
     const result = listPublicRoomsByClassId('class-1')
 
     expect(result).toEqual([
-      { code: room.code, status: 'live', playerCount: 1, characters: ['ptsc'] },
+      { code: room.code, status: 'live', playerCount: 1, characters: ['ptsc'], hostName: '철수' },
     ])
+  })
+
+  it('방장이 아직 없으면(참가자가 없는 방) hostName은 null이다', () => {
+    const room = createRoom({ classId: 'class-1' })
+    const result = listPublicRoomsByClassId('class-1')
+    expect(result).toEqual([
+      { code: room.code, status: 'live', playerCount: 0, characters: [], hostName: null },
+    ])
+  })
+
+  it('방장이 나가고 팀원만 남아있으면 hostName은 null이다', () => {
+    const room = createRoom({ classId: 'class-1' })
+    addPlayer(room.code, { socketId: 's1', name: '영희', character: 'ptsh', isHost: false })
+    const result = listPublicRoomsByClassId('class-1')
+    expect(result[0].hostName).toBeNull()
   })
 
   it("classId가 'unassigned'면 classId가 null인 방을 반환한다", () => {
