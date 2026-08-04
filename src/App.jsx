@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage'
 import NameInput from './pages/NameInput'
 import CharacterSelect from './pages/CharacterSelect'
 import Home from './pages/Home'
+import Lobby from './pages/Lobby'
 import Team from './pages/Team'
 import IndividualPage from './pages/IndividualPage'
 import RankingPage from './pages/RankingPage'
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/join" element={<NameInput />} />
       <Route path="/select" element={<CharacterSelect />} />
+      <Route path="/lobby" element={<Lobby />} />
       <Route path="/team" element={<Home />} />
       <Route path="/team/:code" element={<Team />} />
       <Route path="/team/:code/individual" element={<IndividualPage />} />
