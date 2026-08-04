@@ -56,27 +56,27 @@ export default function IndividualPage() {
           }
           const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
           const playerUuid = sessionStorage.getItem('player_uuid')
-          if (!stored || stored.code !== code) { navigate(`/lobby/${code}`); return }
+          if (!stored || stored.code !== code) { navigate(`/team/${code}`); return }
           socket.emit('join-room', {
             code, name: stored.name, affiliation: stored.affiliation,
             character: stored.character, isHost: false, playerUuid,
           }, ({ ok }) => {
-            if (!ok) { navigate(`/lobby/${code}`); return }
+            if (!ok) { navigate(`/team/${code}`); return }
             fetch(`/api/rooms/${code}`)
               .then(r => r.json())
               .then(data2 => {
                 const me2 = data2.players?.find(p => p.socketId === socket.id)
-                if (!me2) { navigate(`/lobby/${code}`); return }
+                if (!me2) { navigate(`/team/${code}`); return }
                 setPlayer(me2)
                 const gs = me2.gameState ?? defaultGameState()
                 setGameState(gs)
                 setCashDisplay(String(gs.cash ?? 0))
                 if (gs.job !== null) setCompletedUpTo(4)
               })
-              .catch(() => navigate(`/lobby/${code}`))
+              .catch(() => navigate(`/team/${code}`))
           })
         })
-        .catch(() => navigate(`/lobby/${code}`))
+        .catch(() => navigate(`/team/${code}`))
     }
 
     syncPlayer()
@@ -107,7 +107,7 @@ export default function IndividualPage() {
     const next = { ...gameState, cash: cashVal, isCompleted: true }
     setGameState(next)
     emitState(next)
-    navigate(`/lobby/${code}`)
+    navigate(`/team/${code}`)
   }
 
   if (!player) return null

@@ -6,7 +6,7 @@ import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
 import NumberInputModal from '../components/NumberInputModal'
 import { useSocketContext } from '../contexts/SocketContext'
-import styles from './Lobby.module.css'
+import styles from './Team.module.css'
 
 const STOCK_LABELS = {
   semiconductor: '반도체 IT',
@@ -41,7 +41,7 @@ const REAL_ESTATE_IMAGES = {
   maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
 }
 
-export default function Lobby({ readOnly = false, mockRoom = null }) {
+export default function Team({ readOnly = false, mockRoom = null }) {
   const { code: routeCode } = useParams()
   const code = readOnly ? mockRoom.code : routeCode
   const navigate = useNavigate()
@@ -221,7 +221,7 @@ export default function Lobby({ readOnly = false, mockRoom = null }) {
             <PlayerSlot
               key={i}
               player={player}
-              onEdit={!readOnly && player && myPlayer && player.socketId === myPlayer.socketId ? () => navigate(`/lobby/${code}/individual`) : undefined}
+              onEdit={!readOnly && player && myPlayer && player.socketId === myPlayer.socketId ? () => navigate(`/team/${code}/individual`) : undefined}
               onKick={
                 !readOnly && isHost && player && player.socketId !== socket?.id
                   ? () => socket?.emit('kick-player', { targetSocketId: player.socketId })

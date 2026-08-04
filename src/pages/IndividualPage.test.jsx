@@ -31,9 +31,9 @@ beforeEach(() => {
 function renderPage() {
   return render(
     <SocketProvider>
-      <MemoryRouter initialEntries={['/lobby/AB1234/individual']}>
+      <MemoryRouter initialEntries={['/team/AB1234/individual']}>
         <Routes>
-          <Route path="/lobby/:code/individual" element={<IndividualPage />} />
+          <Route path="/team/:code/individual" element={<IndividualPage />} />
         </Routes>
       </MemoryRouter>
     </SocketProvider>

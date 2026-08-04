@@ -23,31 +23,31 @@ vi.mock('socket.io-client', () => {
 
 import { io } from 'socket.io-client'
 import { SocketProvider } from '../contexts/SocketContext'
-import Lobby from './Lobby'
+import Team from './Team'
 
-function renderLobby() {
+function renderTeam() {
   return render(
     <SocketProvider>
-      <MemoryRouter initialEntries={['/lobby/ABC123']}>
-        <Routes><Route path="/lobby/:code" element={<Lobby />} /></Routes>
+      <MemoryRouter initialEntries={['/team/ABC123']}>
+        <Routes><Route path="/team/:code" element={<Team />} /></Routes>
       </MemoryRouter>
     </SocketProvider>
   )
 }
 
-describe('Lobby', () => {
+describe('Team', () => {
   afterEach(() => {
     mockRoomUpdatePlayers = DEFAULT_PLAYERS
     sessionStorage.clear()
   })
 
   it('shows the team code', () => {
-    renderLobby()
+    renderTeam()
     expect(screen.getByText(/ABC123/)).toBeInTheDocument()
   })
 
   it('shows joined player names', () => {
-    renderLobby()
+    renderTeam()
     expect(screen.getByText('철수')).toBeInTheDocument()
   })
 
@@ -56,7 +56,7 @@ describe('Lobby', () => {
       { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
       { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
     ]
-    renderLobby()
+    renderTeam()
     expect(screen.getByText('QR 코드')).toBeInTheDocument()
   })
 
@@ -65,7 +65,7 @@ describe('Lobby', () => {
       { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
       { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
     ]
-    renderLobby()
+    renderTeam()
     expect(screen.getByText('결과 등록')).toBeDisabled()
   })
 
@@ -74,7 +74,7 @@ describe('Lobby', () => {
       { name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' },
       { name: '영희', character: 'Guardian-판다', isHost: false, socketId: 's2' },
     ]
-    renderLobby()
+    renderTeam()
     const myCard = screen.getByText('철수').closest('[role]')
     const otherCard = screen.getByText('영희').closest('[role]')
     expect(myCard).toHaveAttribute('role', 'button')
@@ -82,7 +82,7 @@ describe('Lobby', () => {
   })
 
   it('소켓이 재연결되면 저장된 프로필로 join-room을 다시 보낸다', () => {
-    renderLobby()
+    renderTeam()
     const socket = io()
     const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
 
@@ -100,7 +100,7 @@ describe('Lobby', () => {
   })
 
   it('저장된 프로필의 방 코드가 다르면 재연결 시 join-room을 보내지 않는다', () => {
-    renderLobby()
+    renderTeam()
     const socket = io()
     const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
 
@@ -116,7 +116,7 @@ describe('Lobby', () => {
   })
 })
 
-describe('Lobby readOnly mode', () => {
+describe('Team readOnly mode', () => {
   const mockRoom = {
     code: 'ZZ9999',
     prices: {
@@ -128,11 +128,11 @@ describe('Lobby readOnly mode', () => {
     ],
   }
 
-  function renderReadOnlyLobby() {
+  function renderReadOnlyTeam() {
     return render(
       <SocketProvider>
         <MemoryRouter>
-          <Lobby readOnly mockRoom={mockRoom} />
+          <Team readOnly mockRoom={mockRoom} />
         </MemoryRouter>
       </SocketProvider>
     )
@@ -143,30 +143,30 @@ describe('Lobby readOnly mode', () => {
   })
 
   it('shows mock room code and player names', () => {
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
 
     expect(screen.getByText('ZZ9999')).toBeInTheDocument()
     expect(screen.getByText('민서')).toBeInTheDocument()
   })
 
   it('does not show the leave button', () => {
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
     expect(screen.queryByLabelText('팀 나가기')).toBeNull()
   })
 
   it('does not fetch live room data', () => {
     vi.stubGlobal('fetch', vi.fn())
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
     expect(fetch).not.toHaveBeenCalled()
   })
 
   it('shows the QR card in readOnly mode', () => {
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
     expect(screen.getByText('QR 코드')).toBeInTheDocument()
   })
 
   it('renders the QR preview as an in-browser data image', async () => {
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
 
     const qrImage = screen.getByAltText('QR 코드')
 
@@ -176,28 +176,28 @@ describe('Lobby readOnly mode', () => {
   })
 
   it('shows price and result actions in readOnly mode', () => {
-    renderReadOnlyLobby()
+    renderReadOnlyTeam()
     expect(screen.getByText('가격 설정')).toBeInTheDocument()
     expect(screen.getByText('결과 등록')).toBeInTheDocument()
   })
 })
 
-describe('Lobby price setting modal', () => {
+describe('Team price setting modal', () => {
   it('가격 설정 버튼을 누르면 팝업이 열리고 기본으로 주식 목록이 보인다', async () => {
-    renderLobby()
+    renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
     expect(screen.getByText('반도체 IT')).toBeInTheDocument()
   })
 
   it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
-    renderLobby()
+    renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
     await userEvent.click(screen.getByText('부동산'))
     expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
   })
 
   it('가격 pill을 누르면 숫자 입력 팝업이 열리고, 확인하면 가격이 갱신된다', async () => {
-    renderLobby()
+    renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
     await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
     expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
