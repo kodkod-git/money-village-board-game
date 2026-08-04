@@ -17,4 +17,14 @@ describe('LandingPage', () => {
     await userEvent.click(screen.getByLabelText('관리자 모드'))
     expect(mockNavigate).toHaveBeenCalledWith('/admin')
   })
+
+  it('참여하기 버튼이 더 이상 없다', () => {
+    render(<MemoryRouter><LandingPage /></MemoryRouter>)
+    expect(screen.queryByText('참여하기')).toBeNull()
+  })
+
+  it('QR 스캔 안내 문구를 보여준다', () => {
+    render(<MemoryRouter><LandingPage /></MemoryRouter>)
+    expect(screen.getByText('선생님이 보여주는 QR 코드를 스캔해 참여해주세요')).toBeInTheDocument()
+  })
 })
