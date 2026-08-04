@@ -130,7 +130,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
 
   useEffect(() => {
     if (readOnly || !socket) return
-    const handler = () => navigate('/team')
+    function handler() {
+      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+      const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
+      if (stored?.affiliation) params.set('affiliation', stored.affiliation)
+      if (stored?.classId) params.set('classId', stored.classId)
+      navigate(`/lobby?${params}`)
+    }
     socket.on('you-were-kicked', handler)
     return () => socket.off('you-were-kicked', handler)
   }, [socket, navigate, readOnly])

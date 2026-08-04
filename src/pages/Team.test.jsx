@@ -6,6 +6,12 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 const DEFAULT_PLAYERS = [{ name: '철수', character: 'Adventurer-강아지', isHost: true, socketId: 's1' }]
 let mockRoomUpdatePlayers = DEFAULT_PLAYERS
 
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
 vi.mock('socket.io-client', () => {
   const socket = {
     on: vi.fn((ev, cb) => {
@@ -113,6 +119,23 @@ describe('Team', () => {
     connectHandler()
 
     expect(socket.emit).not.toHaveBeenCalledWith('join-room', expect.anything())
+  })
+
+  it('추방당하면 저장된 프로필 정보를 담아 로비로 이동한다', () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '경영학과', isHost: false, classId: 'class-1',
+    }))
+    renderTeam()
+    const socket = io()
+    const [, kickedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'you-were-kicked')
+
+    kickedHandler()
+
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
+    const [calledWith] = mockNavigate.mock.calls[0]
+    expect(calledWith).toContain('classId=class-1')
+    expect(calledWith).toContain('name=%EC%B2%A0%EC%88%98')
+    expect(calledWith).toContain('character=Adventurer-%EA%B0%95%EC%95%84%EC%A7%80')
   })
 })
 

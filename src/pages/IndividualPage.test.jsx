@@ -22,6 +22,12 @@ vi.mock('socket.io-client', () => {
   return { io: vi.fn(() => socket) }
 })
 
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
 beforeEach(() => {
   global.fetch = vi.fn().mockResolvedValue({
     json: () => Promise.resolve({ players: [PLAYER], prices: {} }),
@@ -65,5 +71,20 @@ describe('IndividualPage', () => {
     connectHandler()
 
     expect(fetch).toHaveBeenCalledWith('/api/rooms/AB1234')
+  })
+
+  it('추방당하면 저장된 프로필 정보를 담아 로비로 이동한다', async () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'AB1234', name: '김민준', character: 'Innovator-사자', affiliation: '', classId: 'class-1',
+    }))
+    renderPage()
+    await screen.findByText('직업 선택')
+
+    const socket = io()
+    const [, kickedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'you-were-kicked')
+    kickedHandler()
+
+    const [calledWith] = mockNavigate.mock.calls.find(([url]) => url.startsWith('/lobby?'))
+    expect(calledWith).toContain('classId=class-1')
   })
 })
