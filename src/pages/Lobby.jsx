@@ -81,20 +81,19 @@ export default function Lobby() {
       <hr className={styles.divider} />
 
       <div className={styles.grid}>
-        <button className={styles.createCard} onClick={handleCreate} type="button">
-          <span className={styles.createIcon} aria-hidden="true">+</span>
-          <span className={styles.createLabel}>방 만들기</span>
-        </button>
         {rooms.map(room => (
           <RoomCard
             key={room.code}
             hostName={room.hostName}
             status={room.status}
-            playerCount={room.playerCount}
             characters={room.characters}
             onClick={() => joinRoom(room.code, false)}
           />
         ))}
+        <button className={styles.createCard} onClick={handleCreate} type="button">
+          <span className={styles.createIcon} aria-hidden="true">+</span>
+          <span className={styles.createLabel}>방 만들기</span>
+        </button>
       </div>
 
       {showCodeModal && (

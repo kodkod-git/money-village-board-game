@@ -56,6 +56,20 @@ describe('Lobby (team grid)', () => {
     expect(screen.queryByText('코드로 참가')).toBeNull()
   })
 
+  it('방 만들기 카드는 팀 목록 뒤 맨 마지막에 위치한다', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' },
+        { code: 'B1B1B1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '민수' },
+      ],
+    })
+    renderLobby()
+    await screen.findByText('민수님의 방')
+    const buttons = screen.getAllByRole('button').map(btn => btn.textContent)
+    expect(buttons.at(-1)).toContain('방 만들기')
+  })
+
   it('URL에 code가 있으면 CodeModal이 자동으로 열린다', () => {
     renderLobby('/lobby?classId=class-1&name=철수&character=c1&code=ABC123')
     expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toBeInTheDocument()

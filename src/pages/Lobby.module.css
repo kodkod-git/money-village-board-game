@@ -43,7 +43,7 @@
 .createCard {
   height: 100%;
   border-radius: var(--r-sm);
-  border: 1px dashed var(--purple);
+  border: 1px dashed var(--ghost);
   background: var(--white);
   display: flex;
   flex-direction: column;

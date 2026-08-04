@@ -2,17 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import RoomCard from './RoomCard'
 
-const BASE_PROPS = { hostName: '철수', status: 'live', playerCount: 2, characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
+const BASE_PROPS = { hostName: '철수', status: 'live', characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
 
 describe('RoomCard', () => {
   it('방장 닉네임을 "OO님의 방" 형태로 제목에 보여준다', () => {
     render(<RoomCard {...BASE_PROPS} />)
     expect(screen.getByText('철수님의 방')).toBeInTheDocument()
-  })
-
-  it('참여인원을 n/4 형태로 보여준다', () => {
-    render(<RoomCard {...BASE_PROPS} playerCount={3} />)
-    expect(screen.getByText('3/4')).toBeInTheDocument()
   })
 
   it('참여한 캐릭터만큼 이미지를 왼쪽부터 렌더링한다', () => {
@@ -29,7 +24,7 @@ describe('RoomCard', () => {
   })
 
   it('아무도 없으면 4자리 모두 플레이스홀더다', () => {
-    render(<RoomCard {...BASE_PROPS} playerCount={0} characters={[]} />)
+    render(<RoomCard {...BASE_PROPS} characters={[]} />)
     expect(screen.queryAllByRole('img')).toHaveLength(0)
     expect(screen.getAllByText('?')).toHaveLength(4)
   })

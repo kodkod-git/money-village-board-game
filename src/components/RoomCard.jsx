@@ -10,7 +10,7 @@ const STATUS_BADGE_CLASS = {
 
 const MAX_PLAYERS = 4
 
-export default function RoomCard({ hostName, status, playerCount, characters, onClick }) {
+export default function RoomCard({ hostName, status, characters, onClick }) {
   const badgeClassKey = STATUS_BADGE_CLASS[status]
   const slots = Array.from({ length: MAX_PLAYERS }, (_, i) => characters[i] ?? null)
   return (
@@ -30,7 +30,6 @@ export default function RoomCard({ hostName, status, playerCount, characters, on
           )
         ))}
       </div>
-      <span className={styles.count}>{playerCount}/4</span>
     </button>
   )
 }
