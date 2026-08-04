@@ -41,25 +41,19 @@ describe('Lobby (team grid)', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/rooms?classId=class-1'))
   })
 
-  it('조회된 팀을 카드로 렌더링한다', async () => {
+  it('조회된 팀을 방장 닉네임이 담긴 카드로 렌더링한다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 2, characters: ['c1', 'c2'] }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 2, characters: ['c1', 'c2'], hostName: '영희' }],
     })
     renderLobby()
-    expect(await screen.findByText('A3F9C1')).toBeInTheDocument()
+    expect(await screen.findByText('영희님의 방')).toBeInTheDocument()
   })
 
-  it('팀 만들기와 코드로 참가 버튼을 렌더링한다', () => {
+  it('방 만들기 카드를 렌더링하고, 코드로 참가 버튼은 더 이상 없다', () => {
     renderLobby()
-    expect(screen.getByText('+ 팀 만들기')).toBeInTheDocument()
-    expect(screen.getByText('코드로 참가')).toBeInTheDocument()
-  })
-
-  it('코드로 참가 버튼 클릭 시 CodeModal이 열린다', () => {
-    renderLobby()
-    fireEvent.click(screen.getByText('코드로 참가'))
-    expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toBeInTheDocument()
+    expect(screen.getByText('방 만들기')).toBeInTheDocument()
+    expect(screen.queryByText('코드로 참가')).toBeNull()
   })
 
   it('URL에 code가 있으면 CodeModal이 자동으로 열린다', () => {
@@ -88,16 +82,16 @@ describe('Lobby (team grid)', () => {
   it('카드를 클릭하면 join-room을 emit하고 팀 화면으로 이동한다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'] }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
-    fireEvent.click(await screen.findByText('A3F9C1'))
+    fireEvent.click(await screen.findByText('영희님의 방'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/A3F9C1'))
   })
 
-  it('팀 만들기 클릭 시 방장으로 새 팀을 만들어 팀 화면으로 이동한다', async () => {
+  it('방 만들기 클릭 시 방장으로 새 팀을 만들어 팀 화면으로 이동한다', async () => {
     fetch.mockImplementation((url, opts) => {
       if (opts?.method === 'POST') return Promise.resolve({ ok: true, json: async () => ({ code: 'NEW001' }) })
       return Promise.resolve({ ok: true, json: async () => [] })
@@ -105,7 +99,7 @@ describe('Lobby (team grid)', () => {
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
-    fireEvent.click(screen.getByText('+ 팀 만들기'))
+    fireEvent.click(screen.getByText('방 만들기'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/NEW001'))
   })
 })
