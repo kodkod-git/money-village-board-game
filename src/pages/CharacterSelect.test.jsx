@@ -48,4 +48,15 @@ describe('CharacterSelect', () => {
     fireEvent.click(screen.getByText('이 캐릭터로 시작하기'))
     expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('classId=class-1'))
   })
+
+  it('캐릭터 선택 완료 시 새 로비 화면으로 이동한다', () => {
+    render(
+      <MemoryRouter initialEntries={['/select?name=철수&classId=class-1']}>
+        <CharacterSelect />
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getAllByRole('button')[1])
+    fireEvent.click(screen.getByText('이 캐릭터로 시작하기'))
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringMatching(/^\/lobby\?/))
+  })
 })

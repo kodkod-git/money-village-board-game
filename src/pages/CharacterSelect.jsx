@@ -20,7 +20,7 @@ export default function CharacterSelect() {
     const params = new URLSearchParams({ affiliation, name, character: selected })
     if (code) params.set('code', code)
     if (classId) params.set('classId', classId)
-    navigate(`/team?${params}`)
+    navigate(`/lobby?${params}`)
   }
 
   function getState(id) {
