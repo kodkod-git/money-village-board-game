@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency, listPublicRoomsByClassId, getRoomBySocketId } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
@@ -26,9 +26,20 @@ if (process.env.NODE_ENV === 'production') {
 // Health check — must be before /:code route
 app.get('/api/rooms/health', (_req, res) => res.json({ ok: true }))
 
+function broadcastClassRooms(classId) {
+  io.to(`class:${classId ?? 'unassigned'}`).emit('class-rooms-updated')
+}
+
 app.post('/api/rooms', (req, res) => {
   const room = createRoom({ classId: req.body?.classId ?? null })
+  broadcastClassRooms(room.classId)
   res.json({ code: room.code })
+})
+
+app.get('/api/rooms', (req, res) => {
+  const { classId } = req.query
+  if (!classId) return res.status(400).json({ error: 'classId 쿼리 파라미터가 필요합니다' })
+  res.json(listPublicRoomsByClassId(classId))
 })
 
 app.get('/api/rooms/:code', (req, res) => {
@@ -304,6 +315,7 @@ io.on('connection', (socket) => {
       })
       socket.join(code.toUpperCase())
       io.to(code.toUpperCase()).emit('room-updated', { players: room.players })
+      broadcastClassRooms(room.classId)
       callback?.({ ok: true })
     } catch (err) {
       callback?.({ ok: false, error: err.message })
@@ -330,11 +342,22 @@ io.on('connection', (socket) => {
     const { room, targetSocketId } = result
     io.to(targetSocketId).emit('you-were-kicked')
     io.to(room.code).emit('room-updated', { players: room.players })
+    broadcastClassRooms(room.classId)
+  })
+
+  socket.on('watch-class-rooms', ({ classId }) => {
+    if (classId) socket.join(`class:${classId}`)
+  })
+
+  socket.on('unwatch-class-rooms', ({ classId }) => {
+    if (classId) socket.leave(`class:${classId}`)
   })
 
   socket.on('leave-room', () => {
+    const roomBefore = getRoomBySocketId(socket.id)
     const room = removePlayer(socket.id)
     if (room) io.to(room.code).emit('room-updated', { players: room.players })
+    if (roomBefore) broadcastClassRooms(roomBefore.classId)
   })
 
   socket.on('disconnect', () => {
