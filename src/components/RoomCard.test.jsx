@@ -2,12 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import RoomCard from './RoomCard'
 
-const BASE_PROPS = { code: 'A3F9C1', status: 'live', playerCount: 2, characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
+const BASE_PROPS = { hostName: '철수', status: 'live', playerCount: 2, characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
 
 describe('RoomCard', () => {
-  it('방 코드를 제목으로 보여준다', () => {
+  it('방장 닉네임을 "OO님의 방" 형태로 제목에 보여준다', () => {
     render(<RoomCard {...BASE_PROPS} />)
-    expect(screen.getByText('A3F9C1')).toBeInTheDocument()
+    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
   })
 
   it('참여인원을 n/4 형태로 보여준다', () => {
@@ -15,9 +15,23 @@ describe('RoomCard', () => {
     expect(screen.getByText('3/4')).toBeInTheDocument()
   })
 
-  it('참여자 수만큼 캐릭터 이미지를 렌더링한다', () => {
+  it('참여한 캐릭터만큼 이미지를 왼쪽부터 렌더링한다', () => {
     render(<RoomCard {...BASE_PROPS} />)
-    expect(screen.getAllByRole('img')).toHaveLength(2)
+    const images = screen.getAllByRole('img')
+    expect(images).toHaveLength(2)
+    expect(images[0]).toHaveAttribute('src', '/characters/Adventurer-강아지.png')
+    expect(images[1]).toHaveAttribute('src', '/characters/Guardian-판다.png')
+  })
+
+  it('빈 자리는 항상 4자리를 채우도록 물음표 플레이스홀더로 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} />)
+    expect(screen.getAllByText('?')).toHaveLength(2)
+  })
+
+  it('아무도 없으면 4자리 모두 플레이스홀더다', () => {
+    render(<RoomCard {...BASE_PROPS} playerCount={0} characters={[]} />)
+    expect(screen.queryAllByRole('img')).toHaveLength(0)
+    expect(screen.getAllByText('?')).toHaveLength(4)
   })
 
   it('상태 뱃지 라벨을 관리자 화면과 동일하게 보여준다', () => {
@@ -33,7 +47,7 @@ describe('RoomCard', () => {
   it('클릭 시 onClick을 호출한다', () => {
     const onClick = vi.fn()
     render(<RoomCard {...BASE_PROPS} onClick={onClick} />)
-    fireEvent.click(screen.getByText('A3F9C1'))
+    fireEvent.click(screen.getByText('철수님의 방'))
     expect(onClick).toHaveBeenCalled()
   })
 })

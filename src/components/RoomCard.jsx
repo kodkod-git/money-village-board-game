@@ -8,8 +8,11 @@ const STATUS_BADGE_CLASS = {
   'completed-but-unregistered': 'badgeUnregistered',
 }
 
-export default function RoomCard({ code, status, playerCount, characters, onClick }) {
+const MAX_PLAYERS = 4
+
+export default function RoomCard({ hostName, status, playerCount, characters, onClick }) {
   const badgeClassKey = STATUS_BADGE_CLASS[status]
+  const slots = Array.from({ length: MAX_PLAYERS }, (_, i) => characters[i] ?? null)
   return (
     <button className={styles.card} onClick={onClick} type="button">
       {badgeClassKey && (
@@ -17,10 +20,14 @@ export default function RoomCard({ code, status, playerCount, characters, onClic
           {ROOM_STATUS_LABELS[status]}
         </span>
       )}
-      <span className={styles.title}>{code}</span>
+      <span className={styles.title}>{hostName ?? '???'}님의 방</span>
       <div className={styles.characters}>
-        {characters.map((character, i) => (
-          <img key={i} src={`/characters/${character}.png`} alt={character} className={styles.characterImg} />
+        {slots.map((character, i) => (
+          character ? (
+            <img key={i} src={`/characters/${character}.png`} alt={character} className={styles.characterImg} />
+          ) : (
+            <span key={i} className={styles.emptySlot}>?</span>
+          )
         ))}
       </div>
       <span className={styles.count}>{playerCount}/4</span>
