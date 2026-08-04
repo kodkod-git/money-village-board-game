@@ -4,7 +4,8 @@ import {
   createRoom, getRoom, addPlayer, removePlayer, markDisconnected,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
-  deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency
+  deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency,
+  listPublicRoomsByClassId, getRoomBySocketId
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -509,5 +510,51 @@ describe('deleteRoomsByClassId', () => {
 
     expect(() => vi.advanceTimersByTime(10 * 60 * 1000 + 1)).not.toThrow()
     vi.useRealTimers()
+  })
+})
+
+describe('listPublicRoomsByClassId', () => {
+  it('해당 classId의 방만 반환하며 민감 정보는 제외한다', () => {
+    const room = createRoom({ classId: 'class-1' })
+    addPlayer(room.code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, affiliation: '경영학과' })
+    createRoom({ classId: 'class-2' })
+
+    const result = listPublicRoomsByClassId('class-1')
+
+    expect(result).toEqual([
+      { code: room.code, status: 'live', playerCount: 1, characters: ['ptsc'] },
+    ])
+  })
+
+  it("classId가 'unassigned'면 classId가 null인 방을 반환한다", () => {
+    const room = createRoom()
+    const result = listPublicRoomsByClassId('unassigned')
+    expect(result.map(r => r.code)).toEqual([room.code])
+  })
+
+  it('일치하는 방이 없으면 빈 배열을 반환한다', () => {
+    expect(listPublicRoomsByClassId('no-such-class')).toEqual([])
+  })
+
+  it('최근 갱신순으로 정렬한다', () => {
+    const older = createRoom({ classId: 'class-1' })
+    vi.useFakeTimers()
+    vi.advanceTimersByTime(1000)
+    const newer = createRoom({ classId: 'class-1' })
+    vi.useRealTimers()
+    const result = listPublicRoomsByClassId('class-1')
+    expect(result.map(r => r.code)).toEqual([newer.code, older.code])
+  })
+})
+
+describe('getRoomBySocketId', () => {
+  it('socketId로 소속된 방을 반환한다', () => {
+    const { code } = createRoom({ classId: 'class-1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    expect(getRoomBySocketId('s1').code).toBe(code)
+  })
+
+  it('알 수 없는 socketId는 null을 반환한다', () => {
+    expect(getRoomBySocketId('unknown')).toBeNull()
   })
 })

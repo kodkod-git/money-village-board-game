@@ -91,6 +91,11 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
   return room
 }
 
+export function getRoomBySocketId(socketId) {
+  const code = socketToRoom.get(socketId)
+  return code ? rooms.get(code) ?? null : null
+}
+
 export function removePlayer(socketId) {
   const code = socketToRoom.get(socketId)
   if (!code) return null
@@ -194,6 +199,17 @@ export function deleteRoomsByClassId(classId) {
 
 export function sortRoomsByRecency(rooms) {
   return [...rooms].sort((a, b) => new Date(b.updatedAt ?? b.createdAt) - new Date(a.updatedAt ?? a.createdAt))
+}
+
+export function listPublicRoomsByClassId(classId) {
+  const now = new Date()
+  const matches = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
+  return sortRoomsByRecency(listAllRooms().filter(matches)).map(room => ({
+    code: room.code,
+    status: computeLiveRoomStatus(room, now),
+    playerCount: room.players.length,
+    characters: room.players.map(p => p.character),
+  }))
 }
 
 export function isCharacterTaken(code, character, requestingSocketId) {
