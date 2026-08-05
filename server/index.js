@@ -355,8 +355,19 @@ io.on('connection', (socket) => {
 
   socket.on('leave-room', () => {
     const roomBefore = getRoomBySocketId(socket.id)
+    const leavingPlayer = roomBefore?.players.find(p => p.socketId === socket.id)
+    // 방장이 나가거나 마지막 남은 팀원이 나가면 그 방은 더 이상 관리할 사람이
+    // 없으므로, 유예 시간을 기다리지 않고 즉시 방을 닫는다.
+    const shouldCloseRoom = !!roomBefore && (leavingPlayer?.isHost || roomBefore.players.length === 1)
+
     const room = removePlayer(socket.id)
     if (room) io.to(room.code).emit('room-updated', { players: room.players })
+
+    if (shouldCloseRoom) {
+      io.to(roomBefore.code).emit('room-closed')
+      deleteRoomByCode(roomBefore.code)
+    }
+
     if (roomBefore) broadcastClassRooms(roomBefore.classId)
   })
 

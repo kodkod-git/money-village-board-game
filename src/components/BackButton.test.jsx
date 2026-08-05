@@ -40,4 +40,13 @@ describe('BackButton', () => {
     await userEvent.click(btn)
     expect(mockNavigate).toHaveBeenCalledWith('/')
   })
+
+  it('onClick을 지정하면 navigate 대신 그 함수를 호출한다', async () => {
+    const onClick = vi.fn()
+    mockNavigate.mockClear()
+    render(<MemoryRouter><BackButton onClick={onClick} /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    expect(onClick).toHaveBeenCalled()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
 })

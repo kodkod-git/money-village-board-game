@@ -53,6 +53,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   useEffect(() => {
     if (readOnly) return
@@ -141,9 +142,28 @@ export default function Team({ readOnly = false, mockRoom = null }) {
     return () => socket.off('you-were-kicked', handler)
   }, [socket, navigate, readOnly])
 
-  function handleLeave() {
+  useEffect(() => {
+    if (readOnly || !socket) return
+    function handler() {
+      alert('방장이 나가서 방이 삭제되었습니다.')
+      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+      const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
+      if (stored?.affiliation) params.set('affiliation', stored.affiliation)
+      if (stored?.classId) params.set('classId', stored.classId)
+      navigate(`/lobby?${params}`)
+    }
+    socket.on('room-closed', handler)
+    return () => socket.off('room-closed', handler)
+  }, [socket, navigate, readOnly])
+
+  function handleConfirmLeave() {
     socket?.emit('leave-room')
-    navigate('/')
+    setShowLeaveConfirm(false)
+    const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+    const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
+    if (stored?.affiliation) params.set('affiliation', stored.affiliation)
+    if (stored?.classId) params.set('classId', stored.classId)
+    navigate(`/lobby?${params}`)
   }
 
   function handlePriceConfirm(newPrices) {
@@ -175,7 +195,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
 
   return (
     <div className={styles.page}>
-      {!readOnly && <BackButton />}
+      {!readOnly && <BackButton onClick={() => setShowLeaveConfirm(true)} />}
       {canManageRoom && (
         <button
           className={styles.priceSettingBtn}
@@ -239,16 +259,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       </div>
 
       <div className={styles.bottomBar}>
-        {!readOnly && (
-          <button
-            className={styles.exitBtn}
-            onClick={handleLeave}
-            aria-label="팀 나가기"
-            type="button"
-          >
-            <img src="/icons/exit_to_app.png" alt="" className={styles.exitIcon} />
-          </button>
-        )}
         <button
           className={styles.actionBtn}
           onClick={() => setShowConfirmModal(true)}
@@ -259,6 +269,12 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       </div>
 
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
+      {!readOnly && showLeaveConfirm && (
+        <LeaveConfirmModal
+          onConfirm={handleConfirmLeave}
+          onClose={() => setShowLeaveConfirm(false)}
+        />
+      )}
       {canManageRoom && showConfirmModal && (
         <ConfirmModal
           onConfirm={handleSubmit}
@@ -272,6 +288,24 @@ export default function Team({ readOnly = false, mockRoom = null }) {
           onClose={() => setShowPriceModal(false)}
         />
       )}
+    </div>
+  )
+}
+
+function LeaveConfirmModal({ onConfirm, onClose }) {
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.popup}>
+        <div className={styles.popupTitle}>방 나가기</div>
+        <p className={styles.confirmText}>
+          현재 방을 나가시겠습니까?<br />
+          팀 인원이 혼자이거나 자신이 방장인 경우 현재 방이 사라질 수 있습니다.
+        </p>
+        <div className={styles.popupActions}>
+          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
+          <button className={styles.confirmBtn} onClick={onConfirm}>나가기</button>
+        </div>
+      </div>
     </div>
   )
 }
