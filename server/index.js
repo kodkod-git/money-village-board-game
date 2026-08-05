@@ -9,7 +9,7 @@ import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updateP
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -80,10 +80,10 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
 app.get('/api/rankings', async (req, res) => {
   try {
-    const { affiliation, category } = req.query
+    const { classId, category } = req.query
     const rankings = category
       ? await getBoothRankings(category)
-      : await getAllRankings(affiliation ?? null)
+      : await getAllRankings(classId ?? null)
     res.json(rankings)
   } catch (err) {
     console.error('rankings error:', err)
@@ -301,15 +301,19 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
 app.get('/api/results/:sessionId', async (req, res) => {
   try {
     const { session, results } = await getGameResult(req.params.sessionId)
+    const className = session.classes?.name ?? UNASSIGNED_CLASS
     res.json({
       teamCode: session.team_code,
       createdAt: session.created_at,
+      classId: session.class_id ?? null,
+      className,
       stockPrices: session.stock_prices,
       realEstatePrices: session.real_estate_prices,
       players: results.map((r, i) => ({
         rank: i + 1,
         name: r.name,
         affiliation: r.affiliation,
+        className,
         character: r.character,
         job: r.job,
         cash: r.cash,
