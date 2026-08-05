@@ -67,6 +67,7 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
     const sessionId = await saveGameResult(room)
     deleteRoomByCode(req.params.code.toUpperCase())
     io.to(req.params.code.toUpperCase()).emit('game-submitted', { sessionId })
+    broadcastClassRooms(room.classId)
     res.json({ sessionId })
   } catch (err) {
     if (err.code === '23505') {
@@ -227,10 +228,14 @@ app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
     return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
   }
 
-  if (deleteRoomByCode(code)) return res.json({ ok: true })
+  if (deleteRoomByCode(code)) {
+    broadcastClassRooms(classId)
+    return res.json({ ok: true })
+  }
 
   try {
     await deleteCompletedTeam(code)
+    broadcastClassRooms(classId)
     res.json({ ok: true })
   } catch (err) {
     console.error('admin delete error:', err)
@@ -252,6 +257,7 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
   const room = updatePlayerStateByUuid(code, playerUuid, partialGameState)
   if (room) {
     io.to(code).emit('room-updated', { players: room.players })
+    broadcastClassRooms(room.classId)
     const player = room.players.find(p => p.playerUuid === playerUuid)
     return res.json({
       playerUuid: player.playerUuid,
@@ -328,7 +334,10 @@ io.on('connection', (socket) => {
 
   socket.on('update-player-state', ({ code, gameState }) => {
     const room = updatePlayerState(socket.id, gameState)
-    if (room) io.to(room.code).emit('room-updated', { players: room.players })
+    if (room) {
+      io.to(room.code).emit('room-updated', { players: room.players })
+      broadcastClassRooms(room.classId)
+    }
   })
 
   socket.on('update-room-prices', ({ code, prices }) => {
