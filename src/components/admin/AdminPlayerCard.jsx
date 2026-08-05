@@ -6,7 +6,7 @@ import {
 } from '../../constants/gameData'
 import styles from './AdminPlayerCard.module.css'
 
-export default function AdminPlayerCard({ player, prices, onEdit }) {
+export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
   const earnedBadges = BADGE_NAMES.filter((_, i) => gameState.badges[i])
@@ -25,6 +25,9 @@ export default function AdminPlayerCard({ player, prices, onEdit }) {
           <span className={styles.job}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
         </div>
         <button type="button" className={styles.editBtn} onClick={onEdit}>수정</button>
+        {onKick && (
+          <button type="button" className={styles.kickBtn} onClick={onKick}>퇴장</button>
+        )}
       </div>
 
       <div className={styles.row}>

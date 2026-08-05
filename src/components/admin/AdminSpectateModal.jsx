@@ -13,6 +13,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [currentCode, setCurrentCode] = useState(rooms[initialIndex].code)
   const [editingPlayerUuid, setEditingPlayerUuid] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [kickTarget, setKickTarget] = useState(null)
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const pollTimer = useRef(null)
@@ -50,6 +51,13 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     if (!res.ok) return
     onRoomChanged()
     onClose()
+  }
+
+  async function handleKick(playerUuid) {
+    const res = await adminFetch(`/api/admin/rooms/${room.code}/players/${playerUuid}`, { method: 'DELETE' })
+    setKickTarget(null)
+    if (!res.ok) return
+    onRoomChanged?.()
   }
 
   async function handleRegister() {
@@ -112,6 +120,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
               player={player}
               prices={room.prices}
               onEdit={() => setEditingPlayerUuid(player.playerUuid)}
+              onKick={room.registered ? undefined : () => setKickTarget(player.playerUuid)}
             />
           ) : (
             <div key={i} className={styles.emptySlot}>대기중</div>
@@ -133,6 +142,18 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             <div className={styles.confirmActions}>
               <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>취소</button>
               <button type="button" className={styles.confirmDeleteBtn} onClick={handleDelete}>정말 삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {kickTarget && (
+        <div className={styles.confirmOverlay} onClick={() => setKickTarget(null)}>
+          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
+            <p className={styles.confirmText}>이 학생을 팀에서 퇴장시키겠습니까?</p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.confirmCancelBtn} onClick={() => setKickTarget(null)}>취소</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={() => handleKick(kickTarget)}>퇴장시키기</button>
             </div>
           </div>
         </div>

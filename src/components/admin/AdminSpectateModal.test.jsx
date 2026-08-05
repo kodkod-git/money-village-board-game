@@ -235,3 +235,47 @@ it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다
   await userEvent.click(screen.getByText('취소'))
   expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
 })
+
+describe('팀원 퇴장', () => {
+  it('플레이어 카드의 퇴장 버튼 클릭 시 확인 팝업을 보여준다', async () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    await userEvent.click(screen.getByText('퇴장'))
+    expect(screen.getByText(/퇴장시키겠습니까/)).toBeInTheDocument()
+  })
+
+  it('확인 시 DELETE 요청을 보내고 onRoomChanged를 호출한다', async () => {
+    const onRoomChanged = vi.fn()
+    global.fetch = vi.fn((_url, options) => {
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+    })
+
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+    await userEvent.click(screen.getByText('퇴장'))
+    await userEvent.click(screen.getByText('퇴장시키기'))
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/rooms/AB1234/players/AB1234-p1',
+      expect.objectContaining({ method: 'DELETE' })
+    )
+    expect(onRoomChanged).toHaveBeenCalled()
+  })
+
+  it('취소를 누르면 요청을 보내지 않는다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+    const onRoomChanged = vi.fn()
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+    await userEvent.click(screen.getByText('퇴장'))
+    await userEvent.click(screen.getByText('취소'))
+    expect(screen.queryByText(/퇴장시키겠습니까/)).not.toBeInTheDocument()
+    expect(onRoomChanged).not.toHaveBeenCalled()
+  })
+
+  it('등록 완료된 팀에는 퇴장 버튼을 보여주지 않는다', () => {
+    const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    expect(screen.queryByText('퇴장')).toBeNull()
+  })
+})

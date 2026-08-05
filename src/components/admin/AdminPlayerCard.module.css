@@ -29,6 +29,17 @@
   flex-shrink: 0;
 }
 
+.kickBtn {
+  background: var(--white);
+  color: var(--red);
+  border: 1px solid var(--red);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  flex-shrink: 0;
+}
+
 .row {
   display: flex;
   justify-content: space-between;

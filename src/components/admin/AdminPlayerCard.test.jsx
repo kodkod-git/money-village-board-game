@@ -52,4 +52,16 @@ describe('AdminPlayerCard', () => {
     render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} />)
     expect(screen.queryByText('연결 끊김')).toBeNull()
   })
+
+  it('onKick이 주어지면 퇴장 버튼을 렌더링하고 클릭 시 호출한다', async () => {
+    const onKick = vi.fn()
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} onKick={onKick} />)
+    await userEvent.click(screen.getByText('퇴장'))
+    expect(onKick).toHaveBeenCalled()
+  })
+
+  it('onKick이 없으면 퇴장 버튼을 렌더링하지 않는다', () => {
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} />)
+    expect(screen.queryByText('퇴장')).toBeNull()
+  })
 })
