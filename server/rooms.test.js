@@ -5,7 +5,7 @@ import {
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency,
-  listPublicRoomsByClassId, getRoomBySocketId
+  listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -571,5 +571,35 @@ describe('getRoomBySocketId', () => {
 
   it('알 수 없는 socketId는 null을 반환한다', () => {
     expect(getRoomBySocketId('unknown')).toBeNull()
+  })
+})
+
+describe('removePlayerByUuid', () => {
+  it('playerUuid로 플레이어를 찾아 방에서 제거한다', () => {
+    const { code } = createRoom({ classId: 'class-1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    addPlayer(code, { socketId: 's2', name: '영희', character: 'ptsh', isHost: false, playerUuid: 'p2' })
+
+    const result = removePlayerByUuid(code, 'p2')
+
+    expect(result.room.players.map(p => p.playerUuid)).toEqual(['p1'])
+    expect(result.targetSocketId).toBe('s2')
+  })
+
+  it('제거된 플레이어의 socketId는 더 이상 어떤 방에도 매핑되지 않는다', () => {
+    const { code } = createRoom({ classId: 'class-1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    removePlayerByUuid(code, 'p1')
+    expect(getRoomBySocketId('s1')).toBeNull()
+  })
+
+  it('존재하지 않는 방 코드는 null을 반환한다', () => {
+    expect(removePlayerByUuid('XXXXXX', 'p1')).toBeNull()
+  })
+
+  it('존재하지 않는 playerUuid는 null을 반환한다', () => {
+    const { code } = createRoom({ classId: 'class-1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    expect(removePlayerByUuid(code, 'unknown')).toBeNull()
   })
 })

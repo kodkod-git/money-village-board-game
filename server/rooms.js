@@ -233,6 +233,16 @@ export function kickPlayer(hostSocketId, targetSocketId) {
   return { room, targetSocketId }
 }
 
+export function removePlayerByUuid(code, playerUuid) {
+  const room = rooms.get(code)
+  if (!room) return null
+  const target = room.players.find(p => p.playerUuid === playerUuid)
+  if (!target) return null
+  room.players = room.players.filter(p => p.playerUuid !== playerUuid)
+  socketToRoom.delete(target.socketId)
+  return { room, targetSocketId: target.socketId }
+}
+
 export function updateRoomPrices(socketId, prices) {
   const code = socketToRoom.get(socketId)
   if (!code) return null
