@@ -48,6 +48,7 @@ export default function IndividualPage() {
   const [completedUpTo, setCompletedUpTo] = useState(-1)
   const [cashDisplay, setCashDisplay] = useState('0')
   const [showCashModal, setShowCashModal] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   useEffect(() => {
     if (!socket) return
@@ -141,7 +142,7 @@ export default function IndividualPage() {
 
   return (
     <div className={`${styles.page} ${isFillStep ? styles.pageFill : ''}`}>
-      <BackButton />
+      <BackButton onClick={() => setShowLeaveConfirm(true)} />
       <StepBar
         steps={STEPS}
         currentStep={step}
@@ -279,6 +280,31 @@ export default function IndividualPage() {
         >
           {step === 4 ? '완료' : '다음'}
         </button>
+      </div>
+
+      {showLeaveConfirm && (
+        <LeaveConfirmModal
+          onConfirm={() => { setShowLeaveConfirm(false); navigate(-1) }}
+          onClose={() => setShowLeaveConfirm(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function LeaveConfirmModal({ onConfirm, onClose }) {
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.popup}>
+        <div className={styles.popupTitle}>이전 화면으로 이동</div>
+        <p className={styles.confirmText}>
+          입력 도중에 뒤로가기 버튼을 누르는 경우, 현재까지 입력한 내용이 사라질 수 있습니다.<br />
+          이전 화면으로 돌아가시겠습니까?
+        </p>
+        <div className={styles.popupActions}>
+          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
+          <button className={styles.confirmBtn} onClick={onConfirm}>이동</button>
+        </div>
       </div>
     </div>
   )

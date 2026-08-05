@@ -29,6 +29,7 @@ vi.mock('react-router-dom', async () => {
 })
 
 beforeEach(() => {
+  mockNavigate.mockClear()
   global.fetch = vi.fn().mockResolvedValue({
     json: () => Promise.resolve({ players: [PLAYER], prices: {} }),
   })
@@ -115,5 +116,30 @@ describe('IndividualPage', () => {
       .filter(([event]) => event === 'update-player-state')
       .map(([, payload]) => payload.gameState)
     expect(emittedStates.some(gs => gs.badgesVisited === true)).toBe(true)
+  })
+
+  it('뒤로가기 버튼을 누르면 바로 이동하지 않고 확인 팝업이 뜬다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    expect(screen.getByText(/입력 도중에 뒤로가기 버튼을 누르는 경우/)).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('확인 팝업에서 취소를 누르면 화면에 남는다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    await userEvent.click(screen.getByText('취소'))
+    expect(screen.queryByText(/입력 도중에 뒤로가기 버튼을 누르는 경우/)).toBeNull()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('확인 팝업에서 이동을 누르면 이전 화면으로 이동한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    await userEvent.click(screen.getByText('이동'))
+    expect(mockNavigate).toHaveBeenCalledWith(-1)
   })
 })
