@@ -290,4 +290,21 @@ describe('Team price setting modal', () => {
 
     expect(screen.getByRole('button', { name: /9,000 원/ })).toBeInTheDocument()
   })
+
+  it('가격 입력값이 100만원을 초과하면 확인 시 100만원으로 제한된다', async () => {
+    renderTeam()
+    await userEvent.click(screen.getByText('가격 설정'))
+    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
+    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
+
+    for (let i = 0; i < 4; i++) {
+      await userEvent.click(screen.getByRole('button', { name: '←' }))
+    }
+    for (let i = 0; i < 7; i++) {
+      await userEvent.click(screen.getByRole('button', { name: '9' }))
+    }
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(screen.getByRole('button', { name: /1,000,000 원/ })).toBeInTheDocument()
+  })
 })

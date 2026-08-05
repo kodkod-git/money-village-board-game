@@ -5,6 +5,7 @@ import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
 import NumberInputModal from '../components/NumberInputModal'
+import { MAX_ASSET_PRICE } from '../constants/gameData'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Team.module.css'
 
@@ -396,6 +397,7 @@ function PriceSettingModal({ prices, onConfirm, onClose }) {
           title={editingLabel}
           initialValue={tempPrices[category][editingKey]}
           unit="원"
+          maxValue={MAX_ASSET_PRICE}
           onConfirm={val => {
             setTempPrices(prev => ({ ...prev, [category]: { ...prev[category], [editingKey]: val } }))
             setEditingKey(null)
