@@ -100,4 +100,20 @@ describe('IndividualPage', () => {
     expect(screen.getByText('현금').closest('button')).toBeDisabled()
     expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
   })
+
+  it('값 변경 없이 "다음"만 눌러 성공카드 단계를 지나가도 badgesVisited가 저장된다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('경영·금융'))
+    await userEvent.click(screen.getByText('다음'))
+    await screen.findByRole('heading', { name: '성공카드' })
+    await userEvent.click(screen.getByText('다음'))
+    await screen.findByRole('heading', { name: '부동산' })
+
+    const socket = io()
+    const emittedStates = socket.emit.mock.calls
+      .filter(([event]) => event === 'update-player-state')
+      .map(([, payload]) => payload.gameState)
+    expect(emittedStates.some(gs => gs.badgesVisited === true)).toBe(true)
+  })
 })

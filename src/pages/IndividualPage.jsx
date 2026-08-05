@@ -15,6 +15,7 @@ import styles from './IndividualPage.module.css'
 
 const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
 const STOCK_PRICE_LABELS = Object.fromEntries(Object.keys(STOCK_LABELS).map(key => [key, '가격 설정']))
+const VISITED_KEY_BY_STEP = { 1: 'badgesVisited', 2: 'realEstateVisited', 3: 'stocksVisited' }
 
 function defaultGameState() {
   return {
@@ -114,6 +115,14 @@ export default function IndividualPage() {
   function handleNext() {
     if (step === 0 && !gameState.job) return
     if (step === 4) { handleComplete(); return }
+
+    const visitedKey = VISITED_KEY_BY_STEP[step]
+    if (visitedKey && !gameState[visitedKey]) {
+      const next = { ...gameState, [visitedKey]: true }
+      setGameState(next)
+      emitState(next)
+    }
+
     setCompletedUpTo(prev => Math.max(prev, step))
     setStep(step + 1)
   }
