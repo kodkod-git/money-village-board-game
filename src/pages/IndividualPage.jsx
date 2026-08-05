@@ -22,8 +22,18 @@ function defaultGameState() {
     stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
-    stocksVisited: false, realEstateVisited: false, isCompleted: false,
+    badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
   }
+}
+
+function computeCompletedUpTo(gameState) {
+  let upTo = -1
+  if (gameState.job !== null) upTo = 0
+  if (gameState.badgesVisited) upTo = 1
+  if (gameState.realEstateVisited) upTo = 2
+  if (gameState.stocksVisited) upTo = 3
+  if (gameState.isCompleted) upTo = 4
+  return upTo
 }
 
 export default function IndividualPage() {
@@ -51,7 +61,7 @@ export default function IndividualPage() {
             const gs = me.gameState ?? defaultGameState()
             setGameState(gs)
             setCashDisplay(String(gs.cash ?? 0))
-            if (gs.job !== null) setCompletedUpTo(4)
+            setCompletedUpTo(computeCompletedUpTo(gs))
             return
           }
           const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
@@ -71,7 +81,7 @@ export default function IndividualPage() {
                 const gs = me2.gameState ?? defaultGameState()
                 setGameState(gs)
                 setCashDisplay(String(gs.cash ?? 0))
-                if (gs.job !== null) setCompletedUpTo(4)
+                setCompletedUpTo(computeCompletedUpTo(gs))
               })
               .catch(() => navigate(`/team/${code}`))
           })

@@ -13,7 +13,7 @@ const PLAYER = {
     stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
-    stocksVisited: false, realEstateVisited: false, isCompleted: false,
+    badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
   },
 }
 
@@ -86,5 +86,18 @@ describe('IndividualPage', () => {
 
     const [calledWith] = mockNavigate.mock.calls.find(([url]) => url.startsWith('/lobby?'))
     expect(calledWith).toContain('classId=class-1')
+  })
+
+  it('직업만 선택한 상태로 재입장하면 아직 방문하지 않은 단계는 완료 표시되지 않는다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({
+        players: [{ ...PLAYER, gameState: { ...PLAYER.gameState, job: 'a' } }],
+        prices: {},
+      }),
+    })
+    renderPage()
+    await screen.findByText('직업 선택')
+    expect(screen.getByText('현금').closest('button')).toBeDisabled()
+    expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
   })
 })
