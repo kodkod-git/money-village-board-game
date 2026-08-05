@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js'
+import { UNASSIGNED_CLASS } from './classes.js'
 
 export function calculateAssetBreakdown(gameState, prices) {
   const { cash, stocks, realEstate, badges } = gameState
@@ -60,7 +61,7 @@ export async function saveGameResult(room) {
 export async function getGameResult(sessionId) {
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
-    .select('*')
+    .select('*, classes(name)')
     .eq('id', sessionId)
     .single()
 
@@ -225,7 +226,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, game_sessions(team_code, stock_prices, real_estate_prices)'
+const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, game_sessions!inner(team_code, stock_prices, real_estate_prices, class_id, classes(name))'
 
 function mapRankingRow(r, i) {
   return {
@@ -244,19 +245,22 @@ function mapRankingRow(r, i) {
     sessionId: r.session_id,
     playerUuid: r.player_uuid,
     teamCode: r.game_sessions?.team_code ?? '',
+    className: r.game_sessions?.classes?.name ?? UNASSIGNED_CLASS,
     stockPrices: r.game_sessions?.stock_prices ?? null,
     realEstatePrices: r.game_sessions?.real_estate_prices ?? null,
   }
 }
 
-export async function getAllRankings(affiliation = null) {
+export async function getAllRankings(classId = null) {
   let query = supabase
     .from('game_results')
     .select(RANKING_SELECT)
     .order('total_assets', { ascending: false })
 
-  if (affiliation) {
-    query = query.eq('affiliation', affiliation)
+  if (classId === 'unassigned') {
+    query = query.is('game_sessions.class_id', null)
+  } else if (classId) {
+    query = query.eq('game_sessions.class_id', classId)
   }
 
   const { data, error } = await query

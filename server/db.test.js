@@ -6,6 +6,7 @@ function makeQueryBuilder(result) {
     select: vi.fn(() => builder),
     order: vi.fn(() => builder),
     eq: vi.fn(() => builder),
+    is: vi.fn(() => builder),
     single: vi.fn(() => Promise.resolve(result)),
     then: (resolve) => resolve(result),
   }
@@ -152,7 +153,7 @@ describe('saveGameResult', () => {
 })
 
 describe('getAllRankings', () => {
-  it('teamCode, stockValue, realEstateValue를 포함해 반환한다', async () => {
+  it('teamCode, className, stockValue, realEstateValue를 포함해 반환한다', async () => {
     const rows = [{
       player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
       job: 'a', cash: 10000,
@@ -161,7 +162,10 @@ describe('getAllRankings', () => {
       badges: [true, true, false, false, false, false],
       total_assets: 200000, stock_value: 4000, real_estate_value: 10000,
       session_id: 's1',
-      game_sessions: { team_code: 'AB1234', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate },
+      game_sessions: {
+        team_code: 'AB1234', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+        class_id: 'class-1', classes: { name: '1반' },
+      },
     }]
     mockFrom.mockReset()
     mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
@@ -176,20 +180,54 @@ describe('getAllRankings', () => {
       realEstateHoldings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
       badges: [true, true, false, false, false, false],
       totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
-      sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234',
+      sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234', className: '1반',
       stockPrices: PRICES.stocks, realEstatePrices: PRICES.realEstate,
     }])
   })
 
-  it('affiliation이 있으면 eq로 필터링을 건다', async () => {
+  it('수업 정보가 없으면 className이 미배정 수업으로 채워진다', async () => {
+    const rows = [{
+      player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
+      job: 'a', cash: 10000,
+      stock_holdings: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      real_estate_holdings: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+      total_assets: 0, stock_value: 0, real_estate_value: 0,
+      session_id: 's2',
+      game_sessions: {
+        team_code: 'CD5678', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+        class_id: null, classes: null,
+      },
+    }]
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
+
+    const { getAllRankings } = await import('./db.js')
+    const result = await getAllRankings()
+
+    expect(result[0].className).toBe('미배정 수업')
+  })
+
+  it('classId가 있으면 game_sessions.class_id로 eq 필터링을 건다', async () => {
     const builder = makeQueryBuilder({ data: [], error: null })
     mockFrom.mockReset()
     mockFrom.mockReturnValue(builder)
 
     const { getAllRankings } = await import('./db.js')
-    await getAllRankings('서울중')
+    await getAllRankings('class-1')
 
-    expect(builder.eq).toHaveBeenCalledWith('affiliation', '서울중')
+    expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'class-1')
+  })
+
+  it("classId가 'unassigned'면 game_sessions.class_id를 null로 필터링한다", async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getAllRankings } = await import('./db.js')
+    await getAllRankings('unassigned')
+
+    expect(builder.is).toHaveBeenCalledWith('game_sessions.class_id', null)
   })
 })
 
@@ -323,6 +361,30 @@ describe('updateGameResult', () => {
     }))
     expect(updated.gameState.cash).toBe(20000)
     expect(updated.playerUuid).toBe('p1')
+  })
+})
+
+describe('getGameResult', () => {
+  it('세션 조회 시 classes 이름을 함께 select한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({
+      data: { id: 'session-1', class_id: 'class-1', classes: { name: '1반' } },
+      error: null,
+    })
+    const mockEq = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSelect }
+      if (table === 'game_results') return makeQueryBuilder({ data: [], error: null })
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { getGameResult } = await import('./db.js')
+    const { session } = await getGameResult('session-1')
+
+    expect(mockSelect).toHaveBeenCalledWith('*, classes(name)')
+    expect(session.classes.name).toBe('1반')
   })
 })
 
