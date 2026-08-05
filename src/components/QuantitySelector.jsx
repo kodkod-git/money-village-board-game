@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import NumberInputModal from './NumberInputModal'
+import { MAX_ASSET_QUANTITY } from '../constants/gameData'
 import styles from './QuantitySelector.module.css'
 
 export default function QuantitySelector({ value, onChange, label }) {
@@ -20,7 +21,8 @@ export default function QuantitySelector({ value, onChange, label }) {
       </button>
       <button
         className={styles.plusBtn}
-        onClick={() => onChange(value + 1)}
+        onClick={() => onChange(Math.min(MAX_ASSET_QUANTITY, value + 1))}
+        disabled={value >= MAX_ASSET_QUANTITY}
         aria-label="수량 증가"
       >
         +
@@ -31,6 +33,7 @@ export default function QuantitySelector({ value, onChange, label }) {
           title={`${label} 수량`}
           initialValue={value}
           unit="개"
+          maxValue={MAX_ASSET_QUANTITY}
           onConfirm={next => {
             onChange(next)
             setShowModal(false)

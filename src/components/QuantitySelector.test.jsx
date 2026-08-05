@@ -33,16 +33,32 @@ describe('QuantitySelector', () => {
     expect(screen.getByLabelText('수량 감소')).toBeDisabled()
   })
 
-  it('값이 10 이상이어도 + 버튼이 비활성화되지 않는다', () => {
+  it('값이 100 미만이면 + 버튼이 비활성화되지 않는다', () => {
     render(<QuantitySelector value={10} onChange={vi.fn()} label="단독 가온개미" />)
     expect(screen.getByLabelText('수량 증가')).not.toBeDisabled()
   })
 
-  it('값이 10일 때 + 버튼을 클릭하면 11을 전달한다 (상한 없음)', async () => {
+  it('값이 99일 때 + 버튼을 클릭하면 100을 전달한다', async () => {
     const onChange = vi.fn()
-    render(<QuantitySelector value={10} onChange={onChange} label="단독 가온개미" />)
+    render(<QuantitySelector value={99} onChange={onChange} label="단독 가온개미" />)
     await userEvent.click(screen.getByLabelText('수량 증가'))
-    expect(onChange).toHaveBeenCalledWith(11)
+    expect(onChange).toHaveBeenCalledWith(100)
+  })
+
+  it('값이 100이면 + 버튼이 비활성화된다', () => {
+    render(<QuantitySelector value={100} onChange={vi.fn()} label="단독 가온개미" />)
+    expect(screen.getByLabelText('수량 증가')).toBeDisabled()
+  })
+
+  it('수량 입력 팝업에서 100을 초과하는 값을 입력해도 확인 시 100으로 제한된다', async () => {
+    const onChange = vi.fn()
+    render(<QuantitySelector value={3} onChange={onChange} label="단독 가온개미" />)
+    await userEvent.click(screen.getByRole('button', { name: '3' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+    expect(onChange).toHaveBeenCalledWith(100)
   })
 
   it('가운데 숫자를 클릭하면 라벨을 포함한 수량 입력 팝업이 열린다', async () => {
