@@ -20,6 +20,7 @@ export default function Lobby() {
   const classId = searchParams.get('classId') ?? ''
   const character = searchParams.get('character') ?? ''
   const initialCode = searchParams.get('code') ?? ''
+  const [codeInput, setCodeInput] = useState(initialCode.toUpperCase())
 
   const loadRooms = useCallback(() => {
     if (!classId) return
@@ -34,8 +35,8 @@ export default function Lobby() {
   }, [loadRooms])
 
   useEffect(() => {
-    if (initialCode) setShowCodeModal(true)
-  }, [initialCode])
+    if (initialCode && classId) setShowCodeModal(true)
+  }, [initialCode, classId])
 
   useEffect(() => {
     if (!socket || !classId) return
@@ -95,28 +96,50 @@ export default function Lobby() {
     <div className={styles.page}>
       <BackButton />
       <div className={styles.header}>
-        <h1 className={styles.title}>로비</h1>
-        <p className={styles.subtitle}>참여할 팀을 선택하거나 새 팀을 만드세요</p>
+        <h1 className={styles.title}>{classId ? '로비' : '팀 참여'}</h1>
+        <p className={styles.subtitle}>
+          {classId ? '참여할 팀을 선택하거나 새 팀을 만드세요' : '팀 코드를 입력해 참여하세요'}
+        </p>
       </div>
       <hr className={styles.divider} />
 
-      <div className={styles.grid}>
-        {rooms.map(room => (
-          <RoomCard
-            key={room.code}
-            hostName={room.hostName}
-            status={room.status}
-            characters={room.characters}
-            onClick={() => handleJoinRoomCard(room.code)}
+      {classId ? (
+        <div className={styles.grid}>
+          {rooms.map(room => (
+            <RoomCard
+              key={room.code}
+              hostName={room.hostName}
+              status={room.status}
+              characters={room.characters}
+              onClick={() => handleJoinRoomCard(room.code)}
+            />
+          ))}
+          <button className={styles.createCard} onClick={handleCreate} disabled={isJoining} type="button">
+            <span className={styles.createIcon} aria-hidden="true">+</span>
+            <span className={styles.createLabel}>방 만들기</span>
+          </button>
+        </div>
+      ) : (
+        <div className={styles.codeEntry}>
+          <input
+            className={styles.codeInput}
+            placeholder="팀 코드를 입력하세요"
+            value={codeInput}
+            onChange={e => setCodeInput(e.target.value.toUpperCase())}
+            maxLength={6}
           />
-        ))}
-        <button className={styles.createCard} onClick={handleCreate} disabled={isJoining} type="button">
-          <span className={styles.createIcon} aria-hidden="true">+</span>
-          <span className={styles.createLabel}>방 만들기</span>
-        </button>
-      </div>
+          <button
+            className={styles.codeSubmitBtn}
+            onClick={() => handleJoinByCode(codeInput)}
+            disabled={isJoining || !codeInput}
+            type="button"
+          >
+            참가
+          </button>
+        </div>
+      )}
 
-      {showCodeModal && (
+      {classId && showCodeModal && (
         <CodeModal
           initialCode={initialCode}
           onSubmit={handleJoinByCode}

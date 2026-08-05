@@ -185,3 +185,48 @@ describe('Lobby (team grid)', () => {
     expect(postCalls).toHaveLength(1)
   })
 })
+
+describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+    fetch.mockResolvedValue({ ok: true, json: async () => [] })
+  })
+
+  it('classId가 없으면 그리드 대신 코드 입력 화면을 보여준다', () => {
+    renderLobby('/lobby?name=철수&character=c1')
+    expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toBeInTheDocument()
+    expect(screen.queryByText('방 만들기')).toBeNull()
+  })
+
+  it('classId가 없으면 팀 목록을 조회하지 않는다', () => {
+    renderLobby('/lobby?name=철수&character=c1')
+    expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/rooms?classId'))
+  })
+
+  it('URL에 code가 있으면 입력창에 미리 채워진다', () => {
+    renderLobby('/lobby?name=철수&character=c1&code=abc123')
+    expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toHaveValue('ABC123')
+  })
+
+  it('코드를 입력하고 참가를 누르면 join-room을 emit하고 팀 화면으로 이동한다', () => {
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
+    renderLobby('/lobby?name=철수&character=c1')
+
+    fireEvent.change(screen.getByPlaceholderText('팀 코드를 입력하세요'), { target: { value: 'zz9999' } })
+    fireEvent.click(screen.getByText('참가'))
+
+    expect(socket.emit).toHaveBeenCalledWith(
+      'join-room',
+      expect.objectContaining({ code: 'ZZ9999', name: '철수', character: 'c1', isHost: false }),
+      expect.any(Function)
+    )
+    expect(mockNavigate).toHaveBeenCalledWith('/team/ZZ9999')
+  })
+
+  it('코드를 입력하지 않으면 참가 버튼이 비활성화된다', () => {
+    renderLobby('/lobby?name=철수&character=c1')
+    expect(screen.getByText('참가')).toBeDisabled()
+  })
+})

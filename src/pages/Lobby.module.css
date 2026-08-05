@@ -65,3 +65,45 @@
   font-weight: 800;
   color: var(--purple);
 }
+
+.codeEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 32px;
+}
+
+.codeInput {
+  height: 58px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--divider);
+  background: var(--slot-empty);
+  padding: 0 20px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-align: center;
+  color: var(--ink);
+}
+
+.codeInput::placeholder {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ghost);
+}
+
+.codeSubmitBtn {
+  height: 56px;
+  border-radius: var(--r-sm);
+  background: var(--grad-btn);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
+}
+
+.codeSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
