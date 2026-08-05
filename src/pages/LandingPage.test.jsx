@@ -18,9 +18,9 @@ describe('LandingPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/admin')
   })
 
-  it('게임 참여 버튼 클릭 시 /join으로 이동한다', async () => {
+  it('게임 참여 버튼 클릭 시 /join-code로 이동한다', async () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>)
     await userEvent.click(screen.getByText('게임 참여'))
-    expect(mockNavigate).toHaveBeenCalledWith('/join')
+    expect(mockNavigate).toHaveBeenCalledWith('/join-code')
   })
 })

@@ -30,7 +30,7 @@ export default function LandingPage() {
         <p className={styles.subtitle}>게임 결과를 기록해요!</p>
       </div>
       <div className={styles.buttons}>
-        <button className={styles.primaryBtn} onClick={() => navigate('/join')}>
+        <button className={styles.primaryBtn} onClick={() => navigate('/join-code')}>
           게임 참여
         </button>
         <button className={styles.secondaryBtn} onClick={() => navigate('/ranking')}>

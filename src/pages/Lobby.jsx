@@ -38,6 +38,15 @@ export default function Lobby() {
     if (initialCode && classId) setShowCodeModal(true)
   }, [initialCode, classId])
 
+  // classId 없이 코드만 들고 들어온 경우(랜딩페이지의 "게임 참여"나 팀 초대
+  // QR을 통한 진입) 이미 참여할 팀이 정해져 있으므로, 입력창을 다시 누르게
+  // 하지 않고 화면 진입과 동시에 바로 참가를 시도한다.
+  useEffect(() => {
+    if (!socket || classId || !initialCode) return
+    handleJoinByCode(initialCode.toUpperCase())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, classId, initialCode])
+
   useEffect(() => {
     if (!socket || !classId) return
     socket.emit('watch-class-rooms', { classId })

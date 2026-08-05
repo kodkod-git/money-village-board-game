@@ -209,6 +209,19 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
     expect(screen.getByPlaceholderText('팀 코드를 입력하세요')).toHaveValue('ABC123')
   })
 
+  it('classId 없이 code로 진입하면 클릭 없이 자동으로 참가한다', () => {
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
+    renderLobby('/lobby?name=철수&character=c1&code=abc123')
+
+    expect(socket.emit).toHaveBeenCalledWith(
+      'join-room',
+      expect.objectContaining({ code: 'ABC123', name: '철수', character: 'c1', isHost: false }),
+      expect.any(Function)
+    )
+    expect(mockNavigate).toHaveBeenCalledWith('/team/ABC123')
+  })
+
   it('코드를 입력하고 참가를 누르면 join-room을 emit하고 팀 화면으로 이동한다', () => {
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))

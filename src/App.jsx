@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
+import TeamCodeInput from './pages/TeamCodeInput'
 import NameInput from './pages/NameInput'
 import CharacterSelect from './pages/CharacterSelect'
 import Lobby from './pages/Lobby'
@@ -12,6 +13,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/join-code" element={<TeamCodeInput />} />
       <Route path="/join" element={<NameInput />} />
       <Route path="/select" element={<CharacterSelect />} />
       <Route path="/lobby" element={<Lobby />} />
