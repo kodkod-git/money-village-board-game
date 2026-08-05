@@ -5,22 +5,22 @@ import { MemoryRouter } from 'react-router-dom'
 import RankingTable from './RankingTable'
 
 const mockRows = [
-  { rank: 1, name: '홍길동', affiliation: '경영학과', teamCode: 'AB1234', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1' },
-  { rank: 2, name: '김철수', affiliation: '공학부', teamCode: 'CD5678', character: 'cat', totalAssets: 120000, playerUuid: 'uuid-2' },
+  { rank: 1, name: '홍길동', className: '1반', character: 'fox', totalAssets: 150000, playerUuid: 'uuid-1' },
+  { rank: 2, name: '김철수', className: '2반', character: 'cat', totalAssets: 120000, playerUuid: 'uuid-2' },
 ]
 
 describe('RankingTable', () => {
-  it('등수, 이름, 소속, 팀, 총자산을 렌더링한다', () => {
+  it('등수, 이름, 수업, 총자산을 렌더링한다', () => {
     render(<MemoryRouter><RankingTable rows={mockRows} /></MemoryRouter>)
     expect(screen.getByText('1위')).toBeInTheDocument()
     expect(screen.getByText('홍길동')).toBeInTheDocument()
-    expect(screen.getByText('경영학과 · AB1234')).toBeInTheDocument()
+    expect(screen.getByText('1반')).toBeInTheDocument()
     expect(screen.getByText('150,000원')).toBeInTheDocument()
   })
 
   it('valueKey를 지정하면 해당 필드 값을 표시한다', () => {
     const boothRows = [
-      { rank: 1, name: '정우성', affiliation: '수도고', teamCode: 'EF9012', character: 'tiger', stockValue: 172000, playerUuid: 'uuid-3' },
+      { rank: 1, name: '정우성', className: '3반', character: 'tiger', stockValue: 172000, playerUuid: 'uuid-3' },
     ]
     render(<MemoryRouter><RankingTable rows={boothRows} valueKey="stockValue" /></MemoryRouter>)
     expect(screen.getByText('172,000원')).toBeInTheDocument()

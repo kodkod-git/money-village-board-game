@@ -29,7 +29,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
             />
             <div className={styles.info}>
               <span className={styles.name}>{row.name}</span>
-              <span className={styles.sub}>{row.affiliation} · {row.teamCode}</span>
+              <span className={styles.sub}>{row.className}</span>
             </div>
             <span className={styles.value}>{formatValue(row)}</span>
           </div>
@@ -51,7 +51,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
           />
           <div className={styles.pinnedInfo}>
             <span className={styles.pinnedName}>{pinnedRow.name}</span>
-            <span className={styles.pinnedAffiliation}>{pinnedRow.affiliation} · {pinnedRow.teamCode}</span>
+            <span className={styles.pinnedAffiliation}>{pinnedRow.className}</span>
           </div>
           <span className={styles.pinnedAssets}>{formatValue(pinnedRow)}</span>
         </div>
