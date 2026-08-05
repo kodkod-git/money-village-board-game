@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
@@ -136,6 +136,61 @@ describe('Team', () => {
     expect(calledWith).toContain('classId=class-1')
     expect(calledWith).toContain('name=%EC%B2%A0%EC%88%98')
     expect(calledWith).toContain('character=Adventurer-%EA%B0%95%EC%95%84%EC%A7%80')
+  })
+
+  it('처음으로 돌아가는 아이콘 버튼은 더 이상 없다', () => {
+    renderTeam()
+    expect(screen.queryByLabelText('팀 나가기')).toBeNull()
+  })
+
+  it('뒤로가기 버튼을 누르면 바로 나가지 않고 확인 팝업이 뜬다', () => {
+    renderTeam()
+    fireEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    expect(screen.getByText(/현재 방을 나가시겠습니까/)).toBeInTheDocument()
+    const socket = io()
+    expect(socket.emit).not.toHaveBeenCalledWith('leave-room')
+  })
+
+  it('확인 팝업에서 취소를 누르면 방에 남는다', () => {
+    renderTeam()
+    fireEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    fireEvent.click(screen.getByText('취소'))
+    expect(screen.queryByText(/현재 방을 나가시겠습니까/)).toBeNull()
+    const socket = io()
+    expect(socket.emit).not.toHaveBeenCalledWith('leave-room')
+  })
+
+  it('확인 팝업에서 나가기를 누르면 leave-room을 emit하고 저장된 프로필로 로비로 이동한다', () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: true, classId: 'class-1',
+    }))
+    renderTeam()
+    fireEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    fireEvent.click(screen.getByText('나가기'))
+
+    const socket = io()
+    expect(socket.emit).toHaveBeenCalledWith('leave-room')
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
+    const [calledWith] = mockNavigate.mock.calls.at(-1)
+    expect(calledWith).toContain('classId=class-1')
+  })
+
+  it('방장이 나가서 방이 삭제되면 안내 후 저장된 프로필로 로비로 이동한다', () => {
+    vi.stubGlobal('alert', vi.fn())
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'ABC123', name: '영희', character: 'Guardian-판다', affiliation: '', isHost: false, classId: 'class-1',
+    }))
+    renderTeam()
+    const socket = io()
+    const [, closedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'room-closed')
+
+    closedHandler()
+
+    expect(alert).toHaveBeenCalled()
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
+    const [calledWith] = mockNavigate.mock.calls.at(-1)
+    expect(calledWith).toContain('classId=class-1')
+    vi.unstubAllGlobals()
   })
 })
 
