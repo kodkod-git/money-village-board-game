@@ -4,6 +4,7 @@ import AdminTableView from '../components/admin/AdminTableView'
 import AdminSpectateModal from '../components/admin/AdminSpectateModal'
 import ClassQRModal from '../components/admin/ClassQRModal'
 import { adminFetch } from '../utils/adminAuth'
+import { useSocketContext } from '../contexts/SocketContext'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
@@ -12,6 +13,7 @@ const TABS = [
 ]
 
 export default function AdminClassDashboard({ classId, initialName, onBack }) {
+  const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
@@ -29,6 +31,16 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   useEffect(() => {
     loadRooms()
   }, [loadRooms])
+
+  useEffect(() => {
+    if (!socket || !classId) return
+    socket.emit('watch-class-rooms', { classId })
+    socket.on('class-rooms-updated', loadRooms)
+    return () => {
+      socket.emit('unwatch-class-rooms', { classId })
+      socket.off('class-rooms-updated', loadRooms)
+    }
+  }, [socket, classId, loadRooms])
 
   function handlePlayerUpdate(code, updatedPlayer) {
     setRooms(prev => prev.map(room => {

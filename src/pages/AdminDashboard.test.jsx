@@ -4,9 +4,19 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminDashboard from './AdminDashboard'
 import { clearAdminSession } from '../utils/adminAuth'
+import { SocketProvider } from '../contexts/SocketContext'
+
+vi.mock('socket.io-client', () => {
+  const socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn(), connected: true, id: 's1' }
+  return { io: vi.fn(() => socket) }
+})
 
 function renderDashboard() {
-  return render(<MemoryRouter><AdminDashboard /></MemoryRouter>)
+  return render(
+    <SocketProvider>
+      <MemoryRouter><AdminDashboard /></MemoryRouter>
+    </SocketProvider>
+  )
 }
 
 beforeEach(() => {

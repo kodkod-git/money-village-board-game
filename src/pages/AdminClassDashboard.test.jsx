@@ -3,10 +3,18 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassDashboard from './AdminClassDashboard'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
+import { SocketProvider } from '../contexts/SocketContext'
 
 vi.mock('qrcode', () => ({
   default: { toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,fake') },
 }))
+
+vi.mock('socket.io-client', () => {
+  const socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn(), connected: true, id: 's1' }
+  return { io: vi.fn(() => socket) }
+})
+
+import { io } from 'socket.io-client'
 
 const PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
@@ -43,7 +51,11 @@ afterEach(() => {
 })
 
 function renderDashboard(onBack = vi.fn()) {
-  return render(<AdminClassDashboard classId="class-1" initialName="3학년 2반" onBack={onBack} />)
+  return render(
+    <SocketProvider>
+      <AdminClassDashboard classId="class-1" initialName="3학년 2반" onBack={onBack} />
+    </SocketProvider>
+  )
 }
 
 describe('AdminClassDashboard', () => {
@@ -165,8 +177,36 @@ describe('AdminClassDashboard', () => {
   })
 
   it('미배정 수업(unassigned)에는 삭제 버튼을 보여주지 않는다', async () => {
-    render(<AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />)
+    render(
+      <SocketProvider>
+        <AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />
+      </SocketProvider>
+    )
     await screen.findByText('홍길동')
     expect(screen.queryByText('수업 삭제')).not.toBeInTheDocument()
+  })
+
+  it('마운트 시 watch-class-rooms를 emit하고 언마운트 시 unwatch-class-rooms를 emit한다', async () => {
+    const socket = io()
+    const { unmount } = renderDashboard()
+    await screen.findByText('홍길동')
+    expect(socket.emit).toHaveBeenCalledWith('watch-class-rooms', { classId: 'class-1' })
+    unmount()
+    expect(socket.emit).toHaveBeenCalledWith('unwatch-class-rooms', { classId: 'class-1' })
+  })
+
+  it('class-rooms-updated 이벤트를 받으면 팀 목록을 다시 조회한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    const socket = io()
+    const [, updateHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'class-rooms-updated')
+    global.fetch.mockClear()
+
+    updateHandler()
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/rooms?classId=class-1',
+      expect.anything()
+    )
   })
 })
