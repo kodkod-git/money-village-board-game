@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency, listPublicRoomsByClassId, getRoomBySocketId } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
@@ -241,6 +241,26 @@ app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
     console.error('admin delete error:', err)
     res.status(404).json({ error: 'Room not found' })
   }
+})
+
+app.delete('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const { playerUuid } = req.params
+
+  const classId = await findRoomClassId(code)
+  if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasClassAccess(req.admin, classId || 'unassigned'))) {
+    return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+  }
+
+  const result = removePlayerByUuid(code, playerUuid)
+  if (!result) return res.status(404).json({ error: 'Player not found' })
+
+  const { room, targetSocketId } = result
+  io.to(targetSocketId).emit('you-were-kicked')
+  io.to(room.code).emit('room-updated', { players: room.players })
+  broadcastClassRooms(room.classId)
+  res.json({ ok: true })
 })
 
 app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
