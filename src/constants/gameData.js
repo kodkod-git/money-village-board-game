@@ -35,6 +35,9 @@ export const STOCK_IMAGES = {
 
 export const MAX_CASH = 1000000000
 
+export const MAX_ASSET_PRICE = 1000000
+export const MAX_ASSET_QUANTITY = 100
+
 export const ROOM_STATUS_LABELS = {
   live: '미입력',
   stale: '정체',

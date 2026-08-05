@@ -3,6 +3,7 @@ import {
   JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
   STOCK_LABELS, STOCK_IMAGES, ROOM_STATUS_LABELS,
+  MAX_ASSET_PRICE, MAX_ASSET_QUANTITY,
 } from './gameData'
 
 describe('gameData constants', () => {
@@ -32,5 +33,10 @@ describe('gameData constants', () => {
 
   it('방 상태 라벨은 live/stale/abandoned/completed-but-unregistered 키를 갖는다', () => {
     expect(Object.keys(ROOM_STATUS_LABELS)).toEqual(['live', 'stale', 'abandoned', 'completed-but-unregistered'])
+  })
+
+  it('자산 가격/수량 상한값이 정의되어 있다', () => {
+    expect(MAX_ASSET_PRICE).toBe(1000000)
+    expect(MAX_ASSET_QUANTITY).toBe(100)
   })
 })
