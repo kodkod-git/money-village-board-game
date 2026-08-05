@@ -77,12 +77,14 @@
   max-width: 360px;
 }
 
-.hint {
-  font-size: 15px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  text-align: center;
-  line-height: 1.5;
+.primaryBtn {
+  background: #ffffff;
+  color: var(--purple);
+  border-radius: var(--r-sm);
+  height: 76px;
+  font-size: 26px;
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
 }
 
 .secondaryBtn {

@@ -30,7 +30,9 @@ export default function LandingPage() {
         <p className={styles.subtitle}>게임 결과를 기록해요!</p>
       </div>
       <div className={styles.buttons}>
-        <p className={styles.hint}>선생님이 보여주는 QR 코드를 스캔해 참여해주세요</p>
+        <button className={styles.primaryBtn} onClick={() => navigate('/join')}>
+          게임 참여
+        </button>
         <button className={styles.secondaryBtn} onClick={() => navigate('/ranking')}>
           랭킹 보기
         </button>

@@ -18,13 +18,9 @@ describe('LandingPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/admin')
   })
 
-  it('참여하기 버튼이 더 이상 없다', () => {
+  it('게임 참여 버튼 클릭 시 /join으로 이동한다', async () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>)
-    expect(screen.queryByText('참여하기')).toBeNull()
-  })
-
-  it('QR 스캔 안내 문구를 보여준다', () => {
-    render(<MemoryRouter><LandingPage /></MemoryRouter>)
-    expect(screen.getByText('선생님이 보여주는 QR 코드를 스캔해 참여해주세요')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('게임 참여'))
+    expect(mockNavigate).toHaveBeenCalledWith('/join')
   })
 })
