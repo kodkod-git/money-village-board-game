@@ -19,24 +19,26 @@ beforeEach(() => {
   global.fetch = vi.fn((url) => {
     if (url.startsWith('/api/rankings?category=stock')) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
-        { rank: 1, name: '정우성', affiliation: '수도고', teamCode: 'EF9012', character: 'tiger', stockValue: 172000, totalAssets: 300000, playerUuid: 'p1' },
+        { rank: 1, name: '정우성', className: '3반', teamCode: 'EF9012', character: 'tiger', stockValue: 172000, totalAssets: 300000, playerUuid: 'p1' },
       ]) })
     }
     if (url.startsWith('/api/rankings?category=realEstate')) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
-        { rank: 1, name: '한소희', affiliation: '미래고', teamCode: 'GH3456', character: 'toucan', realEstateValue: 90000, totalAssets: 250000, playerUuid: 'p2' },
+        { rank: 1, name: '한소희', className: '4반', teamCode: 'GH3456', character: 'toucan', realEstateValue: 90000, totalAssets: 250000, playerUuid: 'p2' },
       ]) })
     }
     if (url.startsWith('/api/results/')) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({
         teamCode: 'AB1234',
+        classId: 'class-1',
+        className: '1반',
         players: [
-          { rank: 1, name: '홍길동', affiliation: '서울중', teamCode: 'AB1234', character: 'fox', totalAssets: 50000, playerUuid: 'p3' },
+          { rank: 1, name: '홍길동', className: '1반', teamCode: 'AB1234', character: 'fox', totalAssets: 50000, playerUuid: 'p3' },
         ],
       }) })
     }
     return Promise.resolve({ ok: true, json: () => Promise.resolve([
-      { rank: 1, name: '김민준', affiliation: '서울중', teamCode: 'AB1234', character: 'lion', totalAssets: 200000, playerUuid: 'p4' },
+      { rank: 1, name: '김민준', className: '1반', teamCode: 'AB1234', character: 'lion', totalAssets: 200000, playerUuid: 'p4' },
     ]) })
   })
 })
@@ -50,14 +52,23 @@ describe('RankingPage', () => {
     renderAt('/ranking')
     await userEvent.click(screen.getByText('부스 랭킹'))
     expect(screen.getByText('주식')).toBeInTheDocument()
-    expect(screen.queryByText('소속')).toBeNull()
+    expect(screen.queryByText('수업')).toBeNull()
   })
 
-  it('결과등록 후 진입(sessionId 있음)에서 전체 랭킹 탭은 기존 소속/팀 서브탭을 유지한다', async () => {
+  it('결과등록 후 진입(sessionId 있음)에서 전체 랭킹 탭은 기존 수업/팀 서브탭을 유지한다', async () => {
     renderAt('/result/session-1')
     await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
-    expect(screen.getByText('소속')).toBeInTheDocument()
+    expect(screen.getByText('수업')).toBeInTheDocument()
     expect(screen.getByText('팀')).toBeInTheDocument()
+  })
+
+  it('수업 탭을 선택하면 내 세션의 classId로 /api/rankings를 호출한다', async () => {
+    renderAt('/result/session-1')
+    await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('수업'))
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?classId=class-1')
+    })
   })
 
   it('부스 랭킹 + 주식 카테고리 선택 시 /api/rankings?category=stock을 호출한다', async () => {

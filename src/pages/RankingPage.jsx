@@ -15,7 +15,7 @@ const TOP_TABS = [
 
 const TABS = [
   { key: 'global', label: '전체' },
-  { key: 'affiliation', label: '소속' },
+  { key: 'class', label: '수업' },
   { key: 'team', label: '팀' },
 ]
 
@@ -54,24 +54,21 @@ export default function RankingPage() {
   const [activeTab, setActiveTab] = useState('global')
   const [boothCategory, setBoothCategory] = useState('stock')
   const [rows, setRows] = useState([])
-  const [myAffiliation, setMyAffiliation] = useState(null)
+  const [myClassId, setMyClassId] = useState(undefined)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [viewingPlayer, setViewingPlayer] = useState(null)
 
   const myPlayerUuid = getPlayerUuid()
 
-  // V2: 내 소속 파악을 위해 팀 결과에서 내 기록 찾기
+  // V2: 내 수업 파악을 위해 세션 정보에서 classId 조회
   useEffect(() => {
     if (!isV2) return
     fetch(`/api/results/${sessionId}`)
       .then(r => r.json())
-      .then(data => {
-        const me = data.players?.find(p => p.playerUuid === myPlayerUuid)
-        if (me) setMyAffiliation(me.affiliation)
-      })
+      .then(data => setMyClassId(data.classId ?? 'unassigned'))
       .catch(() => {})
-  }, [sessionId, isV2, myPlayerUuid])
+  }, [sessionId, isV2])
 
   useEffect(() => {
     setLoading(true)
@@ -85,13 +82,13 @@ export default function RankingPage() {
       return
     }
 
-    if (isV2 && activeTab === 'affiliation' && myAffiliation === null) return
+    if (isV2 && activeTab === 'class' && myClassId === undefined) return
 
     let url = '/api/rankings'
 
     if (isV2) {
-      if (activeTab === 'affiliation' && myAffiliation) {
-        url = `/api/rankings?affiliation=${encodeURIComponent(myAffiliation)}`
+      if (activeTab === 'class') {
+        url = `/api/rankings?classId=${encodeURIComponent(myClassId)}`
       } else if (activeTab === 'team') {
         fetch(`/api/results/${sessionId}`)
           .then(r => { if (!r.ok) throw new Error(); return r.json() })
@@ -113,7 +110,7 @@ export default function RankingPage() {
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(data => { setRows(data); setLoading(false) })
       .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-  }, [activeTab, sessionId, isV2, myAffiliation, topTab, boothCategory])
+  }, [activeTab, sessionId, isV2, myClassId, topTab, boothCategory])
 
   const valueKey = topTab === 'booth' ? BOOTH_VALUE_KEYS[boothCategory] : 'totalAssets'
   const podiumRows = rows.slice(0, 3)
