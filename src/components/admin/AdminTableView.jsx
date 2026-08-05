@@ -18,6 +18,10 @@ function getInputStatus(gameState) {
   return '❌ 미입력'
 }
 
+function connectionLabel(connected) {
+  return connected === false ? '🔴 연결 끊김' : '🟢 연결됨'
+}
+
 function roomStatusLabel(room) {
   if (room.registered) return '등록 완료'
   return ROOM_STATUS_LABELS[room.status] ?? '-'
@@ -44,6 +48,7 @@ function flattenRows(rooms) {
         stockValue: breakdown?.stockValue ?? null,
         totalAssets: breakdown?.totalAssets ?? null,
         status: getInputStatus(player.gameState),
+        connection: connectionLabel(player.connected),
         roomStatus: roomStatusLabel(room),
       }
     })
@@ -65,6 +70,7 @@ export default function AdminTableView({ rooms }) {
             <th className={styles.th}>주식총액</th>
             <th className={styles.th}>총자산</th>
             <th className={styles.th}>상태</th>
+            <th className={styles.th}>연결</th>
             <th className={styles.th}>방 상태</th>
           </tr>
         </thead>
@@ -79,6 +85,7 @@ export default function AdminTableView({ rooms }) {
               <td className={styles.td}>{formatWon(row.stockValue)}</td>
               <td className={styles.td}>{formatWon(row.totalAssets)}</td>
               <td className={`${styles.td} ${styles.status}`}>{row.status}</td>
+              <td className={styles.td}>{row.connection}</td>
               <td className={styles.td}>{row.roomStatus}</td>
             </tr>
           ))}

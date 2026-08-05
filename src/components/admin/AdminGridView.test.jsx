@@ -90,4 +90,22 @@ describe('AdminGridView', () => {
     render(<AdminGridView rooms={liveRooms} onSpectate={vi.fn()} />)
     expect(screen.getByText('미입력')).toBeInTheDocument()
   })
+
+  it('연결이 끊긴 플레이어에는 연결 끊김 표시를 보여준다', () => {
+    const disconnectedRooms = [{
+      code: 'AB1234', registered: false, status: 'live',
+      players: [{ character: 'Adventurer-강아지', name: '김민준', connected: false }],
+    }]
+    render(<AdminGridView rooms={disconnectedRooms} onSpectate={vi.fn()} />)
+    expect(screen.getByText('연결 끊김')).toBeInTheDocument()
+  })
+
+  it('연결이 유지된 플레이어에는 연결 끊김 표시를 보여주지 않는다', () => {
+    const connectedRooms = [{
+      code: 'AB1234', registered: false, status: 'live',
+      players: [{ character: 'Adventurer-강아지', name: '김민준', connected: true }],
+    }]
+    render(<AdminGridView rooms={connectedRooms} onSpectate={vi.fn()} />)
+    expect(screen.queryByText('연결 끊김')).not.toBeInTheDocument()
+  })
 })

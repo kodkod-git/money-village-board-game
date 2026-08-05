@@ -101,3 +101,12 @@
 .emptyName {
   color: var(--ghost);
 }
+
+.disconnectedBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #e65100;
+  background: #fff3e0;
+  border-radius: var(--r-pill);
+  padding: 2px 8px;
+}

@@ -77,6 +77,20 @@ describe('AdminTableView', () => {
     expect(screen.getByText('❌ 미입력')).toBeInTheDocument()
   })
 
+  it('연결 컬럼에 연결 끊김 여부를 표시한다', () => {
+    const disconnectedRooms = [{
+      code: 'GH3456', prices,
+      players: [
+        { playerUuid: 'p1', name: '이서연', affiliation: '', gameState: blankGameState, connected: false },
+        { playerUuid: 'p2', name: '박도윤', affiliation: '', gameState: blankGameState, connected: true },
+      ],
+    }]
+    render(<AdminTableView rooms={disconnectedRooms} />)
+    expect(screen.getByText('연결')).toBeInTheDocument()
+    expect(screen.getByText('🔴 연결 끊김')).toBeInTheDocument()
+    expect(screen.getByText('🟢 연결됨')).toBeInTheDocument()
+  })
+
   it('방 상태 컬럼에 정체/등록 완료를 표시한다', () => {
     const mixedRooms = [
       {

@@ -32,6 +32,9 @@ export default function AdminGridView({ rooms, onSpectate }) {
                 <div key={i} className={styles.slot} data-testid="admin-player-slot">
                   {player ? (
                     <>
+                      {player.connected === false && (
+                        <span className={styles.disconnectedBadge}>연결 끊김</span>
+                      )}
                       <img
                         src={`/characters/${player.character}.png`}
                         alt={player.name}
