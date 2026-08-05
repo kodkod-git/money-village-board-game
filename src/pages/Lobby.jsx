@@ -13,6 +13,7 @@ export default function Lobby() {
   const { socket } = useSocketContext()
   const [rooms, setRooms] = useState([])
   const [showCodeModal, setShowCodeModal] = useState(false)
+  const [isJoining, setIsJoining] = useState(false)
 
   const name = searchParams.get('name') ?? ''
   const affiliation = searchParams.get('affiliation') ?? ''
@@ -47,16 +48,27 @@ export default function Lobby() {
   }, [socket, classId, loadRooms])
 
   function joinRoom(code, isHost) {
-    const playerUuid = resetPlayerUuid()
+    // 이미 이 방에 참여한 적이 있다면(같은 code) 기존 playerUuid를 재사용해
+    // 재접속으로 처리되게 한다 — 매번 새 uuid를 발급하면 같은 사람이 같은
+    // 방에 중복으로 들어가는 것처럼 보이는 문제가 생긴다.
+    const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+    const existingUuid = sessionStorage.getItem('player_uuid')
+    const playerUuid = (stored?.code === code && existingUuid) ? existingUuid : resetPlayerUuid()
+
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) {
         sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost, classId }))
         navigate(`/team/${code}`)
-      } else alert(error)
+      } else {
+        setIsJoining(false)
+        alert(error)
+      }
     })
   }
 
   async function handleCreate() {
+    if (isJoining) return
+    setIsJoining(true)
     const res = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,7 +78,15 @@ export default function Lobby() {
     joinRoom(code, true)
   }
 
+  function handleJoinRoomCard(code) {
+    if (isJoining) return
+    setIsJoining(true)
+    joinRoom(code, false)
+  }
+
   function handleJoinByCode(code) {
+    if (isJoining) return
+    setIsJoining(true)
     setShowCodeModal(false)
     joinRoom(code, false)
   }
@@ -87,10 +107,10 @@ export default function Lobby() {
             hostName={room.hostName}
             status={room.status}
             characters={room.characters}
-            onClick={() => joinRoom(room.code, false)}
+            onClick={() => handleJoinRoomCard(room.code)}
           />
         ))}
-        <button className={styles.createCard} onClick={handleCreate} type="button">
+        <button className={styles.createCard} onClick={handleCreate} disabled={isJoining} type="button">
           <span className={styles.createIcon} aria-hidden="true">+</span>
           <span className={styles.createLabel}>방 만들기</span>
         </button>

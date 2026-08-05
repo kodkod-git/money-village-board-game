@@ -116,4 +116,72 @@ describe('Lobby (team grid)', () => {
     fireEvent.click(screen.getByText('방 만들기'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/NEW001'))
   })
+
+  it('이미 참여했던 방을 다시 클릭하면 기존 playerUuid를 재사용한다(중복 참가 방지)', async () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      name: '철수', character: 'c1', code: 'A3F9C1', isHost: false, classId: 'class-1',
+    }))
+    sessionStorage.setItem('player_uuid', 'existing-uuid')
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
+    renderLobby()
+    fireEvent.click(await screen.findByText('영희님의 방'))
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalled())
+
+    const [, payload] = socket.emit.mock.calls.find(([ev]) => ev === 'join-room')
+    expect(payload.playerUuid).toBe('existing-uuid')
+  })
+
+  it('다른 방에서 왔거나 처음 참여하면 새 playerUuid를 발급한다', async () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      name: '철수', character: 'c1', code: 'OTHER1', isHost: false, classId: 'class-1',
+    }))
+    sessionStorage.setItem('player_uuid', 'stale-uuid')
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
+    renderLobby()
+    fireEvent.click(await screen.findByText('영희님의 방'))
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalled())
+
+    const [, payload] = socket.emit.mock.calls.find(([ev]) => ev === 'join-room')
+    expect(payload.playerUuid).not.toBe('stale-uuid')
+  })
+
+  it('카드를 연속으로 두 번 클릭해도 join-room은 한 번만 emit된다(중복 클릭 방지)', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation(() => {}) // ack never fires, simulating a still-pending request
+    renderLobby()
+    const card = await screen.findByText('영희님의 방')
+    fireEvent.click(card)
+    fireEvent.click(card)
+
+    const joinCalls = socket.emit.mock.calls.filter(([ev]) => ev === 'join-room')
+    expect(joinCalls).toHaveLength(1)
+  })
+
+  it('방 만들기를 연속으로 두 번 클릭해도 방은 한 번만 생성된다(중복 클릭 방지)', () => {
+    fetch.mockImplementation((url, opts) => {
+      if (opts?.method === 'POST') return new Promise(() => {}) // still-pending POST
+      return Promise.resolve({ ok: true, json: async () => [] })
+    })
+    renderLobby()
+    const createBtn = screen.getByText('방 만들기')
+    fireEvent.click(createBtn)
+    fireEvent.click(createBtn)
+
+    const postCalls = fetch.mock.calls.filter(([, opts]) => opts?.method === 'POST')
+    expect(postCalls).toHaveLength(1)
+  })
 })
