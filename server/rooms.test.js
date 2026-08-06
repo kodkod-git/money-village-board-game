@@ -4,7 +4,7 @@ import {
   createRoom, getRoom, addPlayer, removePlayer, markDisconnected,
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
-  deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency,
+  deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
   listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid
 } from './rooms.js'
 
@@ -411,39 +411,43 @@ describe('computeLiveRoomStatus', () => {
   })
 })
 
-describe('sortRoomsByRecency', () => {
-  it('updatedAt 기준 내림차순(최신순)으로 정렬한다', () => {
+describe('sortRoomsByCreationOrder', () => {
+  it('createdAt 기준 오름차순(생성순)으로 정렬한다', () => {
     const rooms = [
-      { code: 'A', updatedAt: new Date('2026-01-01T00:00:00Z') },
-      { code: 'B', updatedAt: new Date('2026-01-03T00:00:00Z') },
-      { code: 'C', updatedAt: new Date('2026-01-02T00:00:00Z') },
+      { code: 'A', createdAt: new Date('2026-01-01T00:00:00Z') },
+      { code: 'B', createdAt: new Date('2026-01-03T00:00:00Z') },
+      { code: 'C', createdAt: new Date('2026-01-02T00:00:00Z') },
     ]
-    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['B', 'C', 'A'])
+    expect(sortRoomsByCreationOrder(rooms).map(r => r.code)).toEqual(['A', 'C', 'B'])
   })
 
-  it('updatedAt이 없으면 createdAt을 기준으로 정렬한다 (완료된 팀)', () => {
+  it('방 안에서 플레이어들의 활동으로 updatedAt이 바뀌어도 순서는 그대로 유지된다', () => {
     const rooms = [
-      { code: 'A', createdAt: '2026-01-01T00:00:00Z' },
-      { code: 'B', createdAt: '2026-01-03T00:00:00Z' },
+      { code: 'A', createdAt: new Date('2026-01-01T00:00:00Z'), updatedAt: new Date('2026-01-01T00:00:00Z') },
+      { code: 'B', createdAt: new Date('2026-01-02T00:00:00Z'), updatedAt: new Date('2026-01-02T00:00:00Z') },
     ]
-    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['B', 'A'])
+    expect(sortRoomsByCreationOrder(rooms).map(r => r.code)).toEqual(['A', 'B'])
+
+    // B의 플레이어가 방금 활동해 updatedAt이 A보다 최신이 되어도, 생성 순서(A가 먼저)는 바뀌지 않는다
+    rooms[1].updatedAt = new Date('2026-01-05T00:00:00Z')
+    expect(sortRoomsByCreationOrder(rooms).map(r => r.code)).toEqual(['A', 'B'])
   })
 
-  it('진행중인 방과 완료된 팀이 섞여 있어도 하나의 시간 기준으로 정렬한다', () => {
+  it('진행중인 방과 완료된 팀이 섞여 있어도 createdAt 기준으로 함께 정렬한다', () => {
     const rooms = [
       { code: 'completed-old', createdAt: '2026-01-01T00:00:00Z' },
-      { code: 'live-new', updatedAt: new Date('2026-01-05T00:00:00Z') },
+      { code: 'live-new', createdAt: new Date('2026-01-05T00:00:00Z') },
       { code: 'completed-new', createdAt: '2026-01-04T00:00:00Z' },
     ]
-    expect(sortRoomsByRecency(rooms).map(r => r.code)).toEqual(['live-new', 'completed-new', 'completed-old'])
+    expect(sortRoomsByCreationOrder(rooms).map(r => r.code)).toEqual(['completed-old', 'completed-new', 'live-new'])
   })
 
   it('원본 배열을 변형하지 않는다', () => {
     const rooms = [
-      { code: 'A', updatedAt: new Date('2026-01-01T00:00:00Z') },
-      { code: 'B', updatedAt: new Date('2026-01-02T00:00:00Z') },
+      { code: 'A', createdAt: new Date('2026-01-01T00:00:00Z') },
+      { code: 'B', createdAt: new Date('2026-01-02T00:00:00Z') },
     ]
-    sortRoomsByRecency(rooms)
+    sortRoomsByCreationOrder(rooms)
     expect(rooms.map(r => r.code)).toEqual(['A', 'B'])
   })
 })
@@ -551,14 +555,28 @@ describe('listPublicRoomsByClassId', () => {
     expect(listPublicRoomsByClassId('no-such-class')).toEqual([])
   })
 
-  it('최근 갱신순으로 정렬한다', () => {
+  it('생성 순서대로 정렬한다', () => {
     const older = createRoom({ classId: 'class-1' })
     vi.useFakeTimers()
     vi.advanceTimersByTime(1000)
     const newer = createRoom({ classId: 'class-1' })
     vi.useRealTimers()
     const result = listPublicRoomsByClassId('class-1')
-    expect(result.map(r => r.code)).toEqual([newer.code, older.code])
+    expect(result.map(r => r.code)).toEqual([older.code, newer.code])
+  })
+
+  it('방에 새 플레이어가 들어오거나 활동해도(updatedAt 변경) 방 순서는 바뀌지 않는다', () => {
+    const older = createRoom({ classId: 'class-1' })
+    vi.useFakeTimers()
+    vi.advanceTimersByTime(1000)
+    const newer = createRoom({ classId: 'class-1' })
+    vi.useRealTimers()
+
+    addPlayer(newer.code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
+    updatePlayerState('s1', { job: 'a' })
+
+    const result = listPublicRoomsByClassId('class-1')
+    expect(result.map(r => r.code)).toEqual([older.code, newer.code])
   })
 })
 

@@ -197,14 +197,18 @@ export function deleteRoomsByClassId(classId) {
   }
 }
 
-export function sortRoomsByRecency(rooms) {
-  return [...rooms].sort((a, b) => new Date(b.updatedAt ?? b.createdAt) - new Date(a.updatedAt ?? a.createdAt))
+// Sorted by creation time (ascending) rather than last-activity time, so a
+// room's position stays fixed once shown — sorting by recency instead made
+// every room jump around in admin/lobby lists whenever any player in any
+// room did anything, since that constantly changed each room's updatedAt.
+export function sortRoomsByCreationOrder(rooms) {
+  return [...rooms].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 }
 
 export function listPublicRoomsByClassId(classId) {
   const now = new Date()
   const matches = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
-  return sortRoomsByRecency(listAllRooms().filter(matches)).map(room => ({
+  return sortRoomsByCreationOrder(listAllRooms().filter(matches)).map(room => ({
     code: room.code,
     status: computeLiveRoomStatus(room, now),
     playerCount: room.players.length,

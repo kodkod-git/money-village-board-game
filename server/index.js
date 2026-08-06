@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByRecency, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
 import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
@@ -196,6 +196,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
       code: room.code,
       status: computeLiveRoomStatus(room, now),
       registered: false,
+      createdAt: room.createdAt,
       updatedAt: room.updatedAt,
       classId: room.classId,
       prices: room.prices,
@@ -213,7 +214,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
 
     const matchesClass = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
 
-    res.json(sortRoomsByRecency(allRooms.filter(matchesClass)))
+    res.json(sortRoomsByCreationOrder(allRooms.filter(matchesClass)))
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })
