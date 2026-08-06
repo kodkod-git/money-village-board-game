@@ -108,4 +108,21 @@ describe('AdminGridView', () => {
     render(<AdminGridView rooms={connectedRooms} onSpectate={vi.fn()} />)
     expect(screen.queryByText('연결 끊김')).not.toBeInTheDocument()
   })
+
+  it('onCreate가 주어지면 방 만들기 카드를 보여준다', () => {
+    render(<AdminGridView rooms={rooms} onSpectate={vi.fn()} onCreate={vi.fn()} />)
+    expect(screen.getByText('방 만들기')).toBeInTheDocument()
+  })
+
+  it('onCreate가 없으면 방 만들기 카드를 보여주지 않는다', () => {
+    render(<AdminGridView rooms={rooms} onSpectate={vi.fn()} />)
+    expect(screen.queryByText('방 만들기')).not.toBeInTheDocument()
+  })
+
+  it('방 만들기 카드 클릭 시 onCreate를 호출한다', async () => {
+    const onCreate = vi.fn()
+    render(<AdminGridView rooms={rooms} onSpectate={vi.fn()} onCreate={onCreate} />)
+    await userEvent.click(screen.getByText('방 만들기'))
+    expect(onCreate).toHaveBeenCalled()
+  })
 })

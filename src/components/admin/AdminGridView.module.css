@@ -123,3 +123,29 @@
   border-radius: var(--r-pill);
   padding: 2px 8px;
 }
+
+.createCard {
+  min-height: 276px;
+  border-radius: var(--r-sm);
+  border: 1px dashed var(--ghost);
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.createIcon {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--purple);
+}
+
+.createLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--purple);
+}

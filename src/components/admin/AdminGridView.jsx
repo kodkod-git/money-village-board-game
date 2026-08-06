@@ -8,7 +8,7 @@ const STATUS_BADGE_CLASS = {
   'completed-but-unregistered': 'badgeUnregistered',
 }
 
-export default function AdminGridView({ rooms, onSpectate }) {
+export default function AdminGridView({ rooms, onSpectate, onCreate }) {
   return (
     <div className={styles.grid}>
       {rooms.map(room => {
@@ -55,6 +55,12 @@ export default function AdminGridView({ rooms, onSpectate }) {
           </button>
         )
       })}
+      {onCreate && (
+        <button className={styles.createCard} onClick={onCreate} type="button">
+          <span className={styles.createIcon} aria-hidden="true">+</span>
+          <span className={styles.createLabel}>방 만들기</span>
+        </button>
+      )}
     </div>
   )
 }
