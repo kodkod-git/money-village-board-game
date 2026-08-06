@@ -21,6 +21,7 @@ export default function AdminGridView({ rooms, onSpectate }) {
             onClick={() => onSpectate(room)}
             type="button"
           >
+            <span className={styles.codeBadge}>{room.code}</span>
             {room.registered && <span className={styles.badge}>등록 완료</span>}
             {badgeClassKey && (
               <span className={`${styles.badge} ${styles[badgeClassKey]}`}>

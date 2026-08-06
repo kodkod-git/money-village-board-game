@@ -22,11 +22,11 @@ const rooms = [
 ]
 
 describe('AdminGridView', () => {
-  it('does not show team codes inside room cards', () => {
+  it('각 카드 왼쪽 상단에 팀코드를 보여준다', () => {
     render(<AdminGridView rooms={rooms} onSpectate={vi.fn()} />)
 
-    expect(screen.queryByText('AB1234')).not.toBeInTheDocument()
-    expect(screen.queryByText('GH3456')).not.toBeInTheDocument()
+    expect(screen.getByText('AB1234')).toBeInTheDocument()
+    expect(screen.getByText('GH3456')).toBeInTheDocument()
   })
 
   it('shows player names in each room card', () => {
