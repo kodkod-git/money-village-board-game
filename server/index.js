@@ -221,6 +221,23 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
   }
 })
 
+app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
+  const { classId } = req.body ?? {}
+  if (!classId) return res.status(400).json({ error: 'classId가 필요합니다' })
+
+  try {
+    const allowed = await hasClassAccess(req.admin, classId)
+    if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+
+    const room = createRoom({ classId: classId === 'unassigned' ? null : classId })
+    broadcastClassRooms(room.classId)
+    res.json({ code: room.code })
+  } catch (err) {
+    console.error('admin room create error:', err)
+    res.status(500).json({ error: 'Failed to create room' })
+  }
+})
+
 app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
   const classId = await findRoomClassId(code)
