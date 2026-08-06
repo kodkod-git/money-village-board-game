@@ -59,7 +59,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* "safe" keeps content centered while it fits, but falls back to
+     top-alignment once it's taller than the container — plain `center`
+     centers overflowing content symmetrically, which pushes part of it
+     above the container's top edge where a scrollable box can never
+     reach (scrollTop can't go negative), permanently hiding the first
+     row of cards on short viewports. */
+  justify-content: safe center;
   overflow-y: auto;
   scrollbar-width: none;
   padding-bottom: 24px;
@@ -114,17 +120,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   width: 100%;
   padding-bottom: 0;
-  /* Centers vertically inside .fillWrapper when it fits, but top-aligns
-     instead of overflowing symmetrically when it doesn't — a flex item
-     centered via the parent's justify-content becomes partly unreachable
-     by scroll when it's taller than the container, because the browser
-     can't scroll to a negative offset to reveal the clipped top portion.
-     Auto margins on the item itself avoid that: they absorb all the free
-     space when there's room to center, and collapse to 0 (not negative)
-     once the content overflows, so the top edge lines up with the
-     container and normal scrolling reaches every card. */
-  margin-top: auto;
-  margin-bottom: auto;
 }
 
 /* Once the 2-column cards would comfortably exceed ~260px each, switch to
