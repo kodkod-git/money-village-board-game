@@ -52,8 +52,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   useEffect(() => {
@@ -173,25 +171,9 @@ export default function Team({ readOnly = false, mockRoom = null }) {
     setShowPriceModal(false)
   }
 
-  async function handleSubmit() {
-    setShowConfirmModal(false)
-    if (readOnly) return
-    setIsSubmitting(true)
-    try {
-      const res = await fetch(`/api/rooms/${code}/submit`, { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-    } catch (err) {
-      alert(err.message)
-      setIsSubmitting(false)
-    }
-  }
-
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = !readOnly && (players.find(p => p.socketId === socket?.id)?.isHost ?? false)
-  const allCompleted = isHost && players.length > 0 && players.every(p => p.gameState?.isCompleted)
   const canManageRoom = readOnly || isHost
-  const canSubmitResult = readOnly || allCompleted
   const myPlayer = readOnly ? null : players.find(p => p.socketId === socket?.id)
 
   return (
@@ -259,27 +241,11 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         </div>
       </div>
 
-      <div className={styles.bottomBar}>
-        <button
-          className={styles.actionBtn}
-          onClick={() => setShowConfirmModal(true)}
-          disabled={!canManageRoom || !canSubmitResult || isSubmitting}
-        >
-          {isSubmitting ? '제출 중...' : '결과 등록'}
-        </button>
-      </div>
-
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {!readOnly && showLeaveConfirm && (
         <LeaveConfirmModal
           onConfirm={handleConfirmLeave}
           onClose={() => setShowLeaveConfirm(false)}
-        />
-      )}
-      {canManageRoom && showConfirmModal && (
-        <ConfirmModal
-          onConfirm={handleSubmit}
-          onClose={() => setShowConfirmModal(false)}
         />
       )}
       {canManageRoom && showPriceModal && (
@@ -305,21 +271,6 @@ function LeaveConfirmModal({ onConfirm, onClose }) {
         <div className={styles.popupActions}>
           <button className={styles.cancelBtn} onClick={onClose}>취소</button>
           <button className={styles.confirmBtn} onClick={onConfirm}>나가기</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ConfirmModal({ onConfirm, onClose }) {
-  return (
-    <div className={styles.overlay}>
-      <div className={styles.popup}>
-        <div className={styles.popupTitle}>결과 등록</div>
-        <p className={styles.confirmText}>더 이상 수정할 수 없습니다.<br />결과를 등록하시겠습니까?</p>
-        <div className={styles.popupActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>취소</button>
-          <button className={styles.confirmBtn} onClick={onConfirm}>등록</button>
         </div>
       </div>
     </div>

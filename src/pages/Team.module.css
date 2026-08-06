@@ -154,33 +154,6 @@
   }
 }
 
-.bottomBar {
-  display: flex;
-  gap: 10px;
-  margin: 32px auto 0;
-  max-width: 480px;
-}
-
-.actionBtn {
-  flex: 1;
-  background: var(--ink);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 800;
-  border-radius: var(--r-sm);
-  height: 46px;
-  padding: 0 12px;
-  box-shadow: var(--shadow-card);
-}
-
-.actionBtn:disabled {
-  background: var(--slot-empty);
-  color: var(--disabled);
-  border: 1px solid var(--line);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
 .overlay {
   position: fixed;
   inset: 0;
