@@ -209,4 +209,80 @@ describe('AdminClassDashboard', () => {
       expect.anything()
     )
   })
+
+  it('classId가 있는 수업 탭에는 방 만들기 카드를 보여준다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    expect(screen.getByText('방 만들기')).toBeInTheDocument()
+  })
+
+  it('미배정 수업(unassigned)에는 방 만들기 카드를 보여주지 않는다', async () => {
+    render(
+      <SocketProvider>
+        <AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />
+      </SocketProvider>
+    )
+    await screen.findByText('홍길동')
+    expect(screen.queryByText('방 만들기')).not.toBeInTheDocument()
+  })
+
+  it('방 만들기 카드 클릭 시 현재 classId로 방을 생성하고 목록을 새로고침한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ code: 'NEW123' }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+
+    await userEvent.click(screen.getByText('방 만들기'))
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/rooms',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
+        body: JSON.stringify({ classId: 'class-1' }),
+      })
+    )
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms?classId=class-1', expect.anything())
+  })
+
+  it('방 생성에 실패하면 alert로 안내한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: '방 생성에 실패했습니다' }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    alertSpy.mockClear()
+
+    await userEvent.click(screen.getByText('방 만들기'))
+
+    expect(alertSpy).toHaveBeenCalledWith('방 생성에 실패했습니다')
+  })
+
+  it('네트워크 오류로 요청이 실패해도 alert를 보여준다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.reject(new Error('network error'))
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    alertSpy.mockClear()
+
+    await userEvent.click(screen.getByText('방 만들기'))
+
+    expect(alertSpy).toHaveBeenCalledWith('방 생성에 실패했습니다')
+  })
 })

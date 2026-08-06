@@ -20,6 +20,7 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   const [name, setName] = useState(initialName)
   const [showQr, setShowQr] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
@@ -41,6 +42,28 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
       socket.off('class-rooms-updated', loadRooms)
     }
   }, [socket, classId, loadRooms])
+
+  async function handleCreateRoom() {
+    if (isCreating) return
+    setIsCreating(true)
+    try {
+      const res = await adminFetch('/api/admin/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ classId }),
+      })
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({}))
+        alert(error || '방 생성에 실패했습니다')
+        return
+      }
+      loadRooms()
+    } catch {
+      alert('방 생성에 실패했습니다')
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   function handlePlayerUpdate(code, updatedPlayer) {
     setRooms(prev => prev.map(room => {
@@ -125,7 +148,11 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
       </div>
 
       {activeTab === 'grid' && (
-        <AdminGridView rooms={rooms} onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))} />
+        <AdminGridView
+          rooms={rooms}
+          onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}
+          onCreate={classId === 'unassigned' ? undefined : handleCreateRoom}
+        />
       )}
       {activeTab === 'table' && <AdminTableView rooms={rooms} />}
 
