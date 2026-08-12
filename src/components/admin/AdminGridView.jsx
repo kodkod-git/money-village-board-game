@@ -22,8 +22,8 @@ export default function AdminGridView({ rooms, onSpectate, onCreate }) {
             type="button"
           >
             <div className={styles.topLeft}>
-              <span className={styles.codeBadge}>{room.code}</span>
               {room.title && <span className={styles.titleBadge}>{room.title}</span>}
+              <span className={styles.codeBadge}>{room.code}</span>
             </div>
             {room.registered && <span className={styles.badge}>등록 완료</span>}
             {badgeClassKey && (
