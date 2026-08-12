@@ -67,7 +67,8 @@
 }
 
 .registerBtn,
-.deleteBtn {
+.deleteBtn,
+.priceBtn {
   flex: 1;
   max-width: 220px;
   height: 46px;
@@ -79,6 +80,8 @@
 .registerBtn { background: var(--ink); color: var(--white); }
 
 .deleteBtn { background: var(--slot-empty); color: var(--red); }
+
+.priceBtn { background: var(--slot-empty); color: var(--ink); border: 1px solid var(--line); }
 
 .confirmOverlay {
   position: fixed;

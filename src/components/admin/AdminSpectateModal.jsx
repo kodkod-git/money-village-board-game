@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminPlayerCard from './AdminPlayerCard'
 import AdminEditModal from './AdminEditModal'
+import PriceSettingModal from './PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import styles from './AdminSpectateModal.module.css'
 
@@ -14,6 +15,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [editingPlayerUuid, setEditingPlayerUuid] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [kickTarget, setKickTarget] = useState(null)
+  const [showPriceModal, setShowPriceModal] = useState(false)
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const pollTimer = useRef(null)
@@ -77,6 +79,17 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       setTitleDraft(room.title ?? '')
       return
     }
+    onRoomChanged?.()
+  }
+
+  async function handlePriceConfirm(newPrices) {
+    const res = await adminFetch(`/api/admin/rooms/${room.code}/prices`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPrices),
+    })
+    setShowPriceModal(false)
+    if (!res.ok) return
     onRoomChanged?.()
   }
 
@@ -158,6 +171,9 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       </div>
 
       <div className={styles.actions}>
+        {!room.registered && (
+          <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
+        )}
         {room.status === 'completed-but-unregistered' && (
           <button type="button" className={styles.registerBtn} onClick={handleRegister}>결과 등록</button>
         )}
@@ -186,6 +202,14 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             </div>
           </div>
         </div>
+      )}
+
+      {showPriceModal && (
+        <PriceSettingModal
+          prices={room.prices}
+          onConfirm={handlePriceConfirm}
+          onClose={() => setShowPriceModal(false)}
+        />
       )}
     </div>
   )

@@ -274,6 +274,42 @@ it('제목을 바꾸고 blur하면 PATCH 요청을 보내고 onRoomChanged를 �
   expect(onRoomChanged).toHaveBeenCalled()
 })
 
+it('등록 완료되지 않은 방에는 가격 설정 버튼을 보여준다', () => {
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+  expect(screen.getByText('가격 설정')).toBeInTheDocument()
+})
+
+it('등록 완료된 방에는 가격 설정 버튼을 보여주지 않는다', () => {
+  const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+  render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+  expect(screen.queryByText('가격 설정')).not.toBeInTheDocument()
+})
+
+it('가격 설정 버튼 클릭 시 모달이 열리고, 확인하면 PATCH 요청 후 방을 새로고침한다', async () => {
+  const onRoomChanged = vi.fn()
+  global.fetch = vi.fn((_url, options) => {
+    if (options?.method === 'PATCH') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ prices: PRICES }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+  await userEvent.click(screen.getByText('가격 설정'))
+  expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('확인하기'))
+
+  expect(global.fetch).toHaveBeenCalledWith(
+    '/api/admin/rooms/AB1234/prices',
+    expect.objectContaining({
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
+      body: JSON.stringify(PRICES),
+    })
+  )
+  expect(onRoomChanged).toHaveBeenCalled()
+})
+
 describe('팀원 퇴장', () => {
   it('플레이어 카드의 퇴장 버튼 클릭 시 확인 팝업을 보여준다', async () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
