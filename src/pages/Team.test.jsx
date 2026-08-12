@@ -1,5 +1,4 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
@@ -183,6 +182,11 @@ describe('Team', () => {
     expect(calledWith).toContain('classId=class-1')
     vi.unstubAllGlobals()
   })
+
+  it('방장이어도 가격 설정 진입점이 없다', () => {
+    renderTeam()
+    expect(screen.queryByText('가격 설정')).not.toBeInTheDocument()
+  })
 })
 
 describe('Team readOnly mode', () => {
@@ -244,57 +248,8 @@ describe('Team readOnly mode', () => {
     })
   })
 
-  it('shows price setting action in readOnly mode', () => {
+  it('가격 설정 진입점이 더 이상 없다', () => {
     renderReadOnlyTeam()
-    expect(screen.getByText('가격 설정')).toBeInTheDocument()
-  })
-})
-
-describe('Team price setting modal', () => {
-  it('가격 설정 버튼을 누르면 팝업이 열리고 기본으로 주식 목록이 보인다', async () => {
-    renderTeam()
-    await userEvent.click(screen.getByText('가격 설정'))
-    expect(screen.getByText('반도체 IT')).toBeInTheDocument()
-  })
-
-  it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
-    renderTeam()
-    await userEvent.click(screen.getByText('가격 설정'))
-    await userEvent.click(screen.getByText('부동산'))
-    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
-  })
-
-  it('가격 pill을 누르면 숫자 입력 팝업이 열리고, 확인하면 가격이 갱신된다', async () => {
-    renderTeam()
-    await userEvent.click(screen.getByText('가격 설정'))
-    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
-    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
-
-    for (let i = 0; i < 4; i++) {
-      await userEvent.click(screen.getByRole('button', { name: '←' }))
-    }
-    await userEvent.click(screen.getByRole('button', { name: '9' }))
-    await userEvent.click(screen.getByRole('button', { name: '0' }))
-    await userEvent.click(screen.getByRole('button', { name: '00' }))
-    await userEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    expect(screen.getByRole('button', { name: /9,000 원/ })).toBeInTheDocument()
-  })
-
-  it('가격 입력값이 100만원을 초과하면 확인 시 100만원으로 제한된다', async () => {
-    renderTeam()
-    await userEvent.click(screen.getByText('가격 설정'))
-    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
-    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
-
-    for (let i = 0; i < 4; i++) {
-      await userEvent.click(screen.getByRole('button', { name: '←' }))
-    }
-    for (let i = 0; i < 7; i++) {
-      await userEvent.click(screen.getByRole('button', { name: '9' }))
-    }
-    await userEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    expect(screen.getByRole('button', { name: /1,000,000 원/ })).toBeInTheDocument()
+    expect(screen.queryByText('가격 설정')).not.toBeInTheDocument()
   })
 })

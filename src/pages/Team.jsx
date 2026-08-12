@@ -4,43 +4,8 @@ import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
-import NumberInputModal from '../components/NumberInputModal'
-import { MAX_ASSET_PRICE } from '../constants/gameData'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Team.module.css'
-
-const STOCK_LABELS = {
-  semiconductor: '반도체 IT',
-  finance: '금융',
-  industrial: '산업재·기계',
-  auto: '소재·화학',
-  bio: '바이오·헬스케어',
-  content: '콘텐츠·소비재',
-}
-
-const REAL_ESTATE_LABELS = {
-  gaon: '공동 가온개미',
-  nuri: '공동 누리고양이',
-  dami: '다세대 다미원숭이',
-  maru: '다세대 마루수리',
-  chorong: '아파트 초롱부엉이',
-  hani: '아파트 하니여우',
-}
-
-const DEFAULT_PRICES = {
-  stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
-  realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
-}
-
-const STOCK_IMAGES = {
-  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
-  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
-}
-
-const REAL_ESTATE_IMAGES = {
-  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
-  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
-}
 
 export default function Team({ readOnly = false, mockRoom = null }) {
   const { code: routeCode } = useParams()
@@ -50,8 +15,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [players, setPlayers] = useState(readOnly ? mockRoom.players : [])
   const [roomFetched, setRoomFetched] = useState(readOnly)
   const [showQR, setShowQR] = useState(false)
-  const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
-  const [showPriceModal, setShowPriceModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   useEffect(() => {
@@ -60,7 +23,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       .then(r => r.json())
       .then(data => {
         if (data.players) setPlayers(data.players)
-        if (data.prices) setPrices(data.prices)
       })
       .catch(() => {})
       .finally(() => setRoomFetched(true))
@@ -116,13 +78,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
 
   useEffect(() => {
     if (readOnly || !socket) return
-    const handler = ({ prices }) => setPrices(prices)
-    socket.on('room-prices-updated', handler)
-    return () => socket.off('room-prices-updated', handler)
-  }, [socket, readOnly])
-
-  useEffect(() => {
-    if (readOnly || !socket) return
     const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
     socket.on('game-submitted', handler)
     return () => socket.off('game-submitted', handler)
@@ -165,29 +120,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
     navigate(`/lobby?${params}`)
   }
 
-  function handlePriceConfirm(newPrices) {
-    if (!readOnly) socket?.emit('update-room-prices', { code, prices: newPrices })
-    setPrices(newPrices)
-    setShowPriceModal(false)
-  }
-
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = !readOnly && (players.find(p => p.socketId === socket?.id)?.isHost ?? false)
-  const canManageRoom = readOnly || isHost
   const myPlayer = readOnly ? null : players.find(p => p.socketId === socket?.id)
 
   return (
     <div className={styles.page}>
       {!readOnly && <BackButton onClick={() => setShowLeaveConfirm(true)} />}
-      {canManageRoom && (
-        <button
-          className={styles.priceSettingBtn}
-          onClick={() => setShowPriceModal(true)}
-          type="button"
-        >
-          <span aria-hidden="true">⚙️</span> 가격 설정
-        </button>
-      )}
 
       <div className={styles.header}>
         <h1 className={styles.title}>팀 만들기</h1>
@@ -248,13 +187,6 @@ export default function Team({ readOnly = false, mockRoom = null }) {
           onClose={() => setShowLeaveConfirm(false)}
         />
       )}
-      {canManageRoom && showPriceModal && (
-        <PriceSettingModal
-          prices={prices}
-          onConfirm={handlePriceConfirm}
-          onClose={() => setShowPriceModal(false)}
-        />
-      )}
     </div>
   )
 }
@@ -274,88 +206,5 @@ function LeaveConfirmModal({ onConfirm, onClose }) {
         </div>
       </div>
     </div>
-  )
-}
-
-function PriceSettingModal({ prices, onConfirm, onClose }) {
-  const [category, setCategory] = useState('stocks')
-  const [tempPrices, setTempPrices] = useState(prices)
-  const [editingKey, setEditingKey] = useState(null)
-
-  function handleReset() {
-    setTempPrices(prev => ({ ...prev, [category]: DEFAULT_PRICES[category] }))
-  }
-
-  const labels = category === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
-  const images = category === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
-  const folder = category === 'stocks' ? 'stock' : 'estate'
-  const editingLabel = editingKey ? labels[editingKey] : null
-
-  return (
-    <>
-      <div className={styles.overlay} onClick={onClose}>
-        <div className={styles.priceModal} onClick={e => e.stopPropagation()}>
-          <div className={styles.priceModalHeader}>
-            <button className={styles.priceBackBtn} onClick={onClose} type="button">‹ 뒤로</button>
-            <span className={styles.priceModalTitle}>가격 설정</span>
-            <button className={styles.priceResetBtn} onClick={handleReset} type="button">초기화</button>
-          </div>
-
-          <div className={styles.priceTabs}>
-            <button
-              className={`${styles.priceTab} ${category === 'stocks' ? styles.priceTabActive : ''}`}
-              onClick={() => setCategory('stocks')}
-              type="button"
-            >
-              주식
-            </button>
-            <button
-              className={`${styles.priceTab} ${category === 'realEstate' ? styles.priceTabActive : ''}`}
-              onClick={() => setCategory('realEstate')}
-              type="button"
-            >
-              부동산
-            </button>
-          </div>
-
-          <div className={styles.priceList}>
-            {Object.keys(labels).map(key => (
-              <div key={key} className={styles.priceRow}>
-                <img src={`/badges/${folder}/${images[key]}.png`} alt="" className={styles.priceIcon} />
-                <div className={styles.priceInfo}>
-                  <span className={styles.priceLabel}>{labels[key]}</span>
-                  <span className={styles.priceUnit}>단위: 원</span>
-                </div>
-                <button
-                  className={styles.pricePill}
-                  onClick={() => setEditingKey(key)}
-                  type="button"
-                >
-                  {tempPrices[category][key].toLocaleString()} 원 ›
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <button className={styles.priceConfirmBtn} onClick={() => onConfirm(tempPrices)} type="button">
-            확인하기
-          </button>
-        </div>
-      </div>
-
-      {editingKey && (
-        <NumberInputModal
-          title={editingLabel}
-          initialValue={tempPrices[category][editingKey]}
-          unit="원"
-          maxValue={MAX_ASSET_PRICE}
-          onConfirm={val => {
-            setTempPrices(prev => ({ ...prev, [category]: { ...prev[category], [editingKey]: val } }))
-            setEditingKey(null)
-          }}
-          onClose={() => setEditingKey(null)}
-        />
-      )}
-    </>
   )
 }
