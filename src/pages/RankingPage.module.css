@@ -116,6 +116,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
+  padding: 24px 0;
   z-index: 500;
 }
 
@@ -125,7 +127,7 @@
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-card);
   width: min(420px, 92vw);
-  max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
