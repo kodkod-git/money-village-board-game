@@ -236,6 +236,44 @@ it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다
   expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
 })
 
+it('room.title이 있으면 입력창으로 편집 가능한 제목을 보여준다', () => {
+  const room = { ...makeRoom('AB1234', '김민준'), title: 'TEAM 1' }
+  render(<AdminSpectateModal rooms={[room]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+  expect(screen.getByDisplayValue('TEAM 1')).toBeInTheDocument()
+})
+
+it('room.title이 없으면(학생 생성 방) 편집 입력창을 보여주지 않는다', () => {
+  render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+})
+
+it('제목을 바꾸고 blur하면 PATCH 요청을 보내고 onRoomChanged를 호출한다', async () => {
+  const onRoomChanged = vi.fn()
+  const room = { ...makeRoom('AB1234', '김민준'), title: 'TEAM 1' }
+  global.fetch = vi.fn((_url, options) => {
+    if (options?.method === 'PATCH') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ title: 'TEAM A' }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+
+  render(<AdminSpectateModal rooms={[room]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+  const input = screen.getByDisplayValue('TEAM 1')
+  await userEvent.clear(input)
+  await userEvent.type(input, 'TEAM A')
+  await userEvent.tab()
+
+  expect(global.fetch).toHaveBeenCalledWith(
+    '/api/admin/rooms/AB1234',
+    expect.objectContaining({
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-token' },
+      body: JSON.stringify({ title: 'TEAM A' }),
+    })
+  )
+  expect(onRoomChanged).toHaveBeenCalled()
+})
+
 describe('팀원 퇴장', () => {
   it('플레이어 카드의 퇴장 버튼 클릭 시 확인 팝업을 보여준다', async () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)

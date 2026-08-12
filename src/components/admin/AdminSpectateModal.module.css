@@ -17,6 +17,17 @@
 
 .teamName { font-size: 22px; font-weight: 900; color: var(--ink); }
 
+.teamNameInput {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ink);
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  width: 140px;
+}
+
 .teamCount { font-size: 12px; font-weight: 700; color: var(--ghost); }
 
 .dots { display: flex; justify-content: center; gap: 6px; }

@@ -17,6 +17,11 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const pollTimer = useRef(null)
+  const [titleDraft, setTitleDraft] = useState(room.title ?? '')
+
+  useEffect(() => {
+    setTitleDraft(room.title ?? '')
+  }, [room.code, room.title])
 
   useEffect(() => {
     if (room.registered) return undefined
@@ -60,6 +65,21 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     onRoomChanged?.()
   }
 
+  async function handleTitleBlur() {
+    const trimmed = titleDraft.trim()
+    if (!trimmed || trimmed === room.title) return
+    const res = await adminFetch(`/api/admin/rooms/${room.code}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: trimmed }),
+    })
+    if (!res.ok) {
+      setTitleDraft(room.title ?? '')
+      return
+    }
+    onRoomChanged?.()
+  }
+
   async function handleRegister() {
     const res = await fetch(`/api/rooms/${room.code}/submit`, { method: 'POST' })
     if (!res.ok) return
@@ -92,7 +112,16 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           ‹
         </button>
         <div className={styles.navTitle}>
-          <span className={styles.teamName}>{index + 1}팀</span>
+          {room.title != null ? (
+            <input
+              className={styles.teamNameInput}
+              value={titleDraft}
+              onChange={e => setTitleDraft(e.target.value)}
+              onBlur={handleTitleBlur}
+            />
+          ) : (
+            <span className={styles.teamName}>{index + 1}팀</span>
+          )}
           <span className={styles.teamCount}>{index + 1} / {rooms.length}</span>
         </div>
         <button
