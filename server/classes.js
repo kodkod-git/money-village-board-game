@@ -61,6 +61,25 @@ export async function updateClassName(classId, name) {
   return data
 }
 
+export async function incrementRoomCounter(classId) {
+  const { data: cls, error: fetchError } = await supabase
+    .from('classes')
+    .select('room_counter')
+    .eq('id', classId)
+    .single()
+  if (fetchError) throw fetchError
+
+  const next = (cls.room_counter ?? 0) + 1
+
+  const { error: updateError } = await supabase
+    .from('classes')
+    .update({ room_counter: next })
+    .eq('id', classId)
+  if (updateError) throw updateError
+
+  return next
+}
+
 export async function deleteClass(classId) {
   const { error } = await supabase.from('classes').delete().eq('id', classId)
   if (error) throw error

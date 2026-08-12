@@ -7,7 +7,7 @@ vi.mock('./supabase.js', () => ({
   supabase: { from: (...args) => mockFrom(...args) },
 }))
 
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, incrementRoomCounter, UNASSIGNED_CLASS } from './classes.js'
 
 beforeEach(() => {
   mockFrom.mockReset()
@@ -133,5 +133,39 @@ describe('deleteClass', () => {
     mockFrom.mockReturnValue({ delete: mockDelete })
 
     await expect(deleteClass('class-1')).rejects.toEqual({ message: 'boom' })
+  })
+})
+
+describe('incrementRoomCounter', () => {
+  it('현재 room_counter를 읽어 1 증가시키고, 새 값으로 UPDATE한 뒤 그 값을 반환한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { room_counter: 2 }, error: null })
+    const mockSelectEq = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockSelectEq })
+    const mockUpdateEq = vi.fn().mockResolvedValue({ error: null })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq })
+
+    mockFrom.mockImplementation(() => ({ select: mockSelect, update: mockUpdate }))
+
+    const next = await incrementRoomCounter('class-1')
+
+    expect(mockSelect).toHaveBeenCalledWith('room_counter')
+    expect(mockSelectEq).toHaveBeenCalledWith('id', 'class-1')
+    expect(mockUpdate).toHaveBeenCalledWith({ room_counter: 3 })
+    expect(mockUpdateEq).toHaveBeenCalledWith('id', 'class-1')
+    expect(next).toBe(3)
+  })
+
+  it('room_counter가 0(기본값)이면 1을 반환한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { room_counter: 0 }, error: null })
+    const mockSelectEq = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockSelectEq })
+    const mockUpdateEq = vi.fn().mockResolvedValue({ error: null })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq })
+
+    mockFrom.mockImplementation(() => ({ select: mockSelect, update: mockUpdate }))
+
+    const next = await incrementRoomCounter('class-1')
+
+    expect(next).toBe(1)
   })
 })
