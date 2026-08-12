@@ -5,11 +5,11 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
+import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPrices, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
+import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, incrementRoomCounter, UNASSIGNED_CLASS } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -199,6 +199,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
       classId: room.classId,
+      title: room.title,
       prices: room.prices,
       players: room.players.map(p => ({
         playerUuid: p.playerUuid,
@@ -229,12 +230,41 @@ app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
     const allowed = await hasClassAccess(req.admin, classId)
     if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
-    const room = createRoom({ classId: classId === 'unassigned' ? null : classId })
+    const resolvedClassId = classId === 'unassigned' ? null : classId
+    const title = resolvedClassId ? `TEAM ${await incrementRoomCounter(resolvedClassId)}` : null
+
+    const room = createRoom({ classId: resolvedClassId, title })
     broadcastClassRooms(room.classId)
     res.json({ code: room.code })
   } catch (err) {
     console.error('admin room create error:', err)
     res.status(500).json({ error: 'Failed to create room' })
+  }
+})
+
+app.patch('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const title = req.body?.title?.trim()
+  if (!title) return res.status(400).json({ error: 'title이 필요합니다' })
+
+  const classId = await findRoomClassId(code)
+  if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasClassAccess(req.admin, classId || 'unassigned'))) {
+    return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+  }
+
+  const room = updateRoomTitle(code, title)
+  if (room) {
+    broadcastClassRooms(room.classId)
+    return res.json({ title: room.title })
+  }
+
+  try {
+    await updateSessionTitle(code, title)
+    res.json({ title })
+  } catch (err) {
+    console.error('admin room title update error:', err)
+    res.status(404).json({ error: 'Room not found' })
   }
 })
 
