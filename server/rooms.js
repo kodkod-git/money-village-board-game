@@ -247,9 +247,7 @@ export function removePlayerByUuid(code, playerUuid) {
   return { room, targetSocketId: target.socketId }
 }
 
-export function updateRoomPrices(socketId, prices) {
-  const code = socketToRoom.get(socketId)
-  if (!code) return null
+export function updateRoomPricesByCode(code, prices) {
   const room = rooms.get(code)
   if (!room) return null
   room.prices = prices

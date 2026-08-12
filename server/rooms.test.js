@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   createRoom, getRoom, addPlayer, removePlayer, markDisconnected,
-  isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
+  isCharacterTaken, clearRooms, updateRoomPricesByCode, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
   listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle
@@ -293,21 +293,20 @@ describe('createRoom prices', () => {
   })
 })
 
-describe('updateRoomPrices', () => {
-  it('방의 가격을 업데이트하고 방 객체를 반환한다', () => {
+describe('updateRoomPricesByCode', () => {
+  it('code로 방을 찾아 가격을 갱신한다', () => {
     const { code } = createRoom()
-    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true })
     const newPrices = {
-      stocks: { semiconductor: 4000, finance: 6000, industrial: 2000, auto: 8000, bio: 10000, content: 12000 },
-      realEstate: { gaon: 20000, nuri: 30000, dami: 10000, maru: 40000, chorong: 50000, hani: 60000 },
+      stocks: { semiconductor: 5000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+      realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
     }
-    const room = updateRoomPrices('s1', newPrices)
-    expect(room).not.toBeNull()
+    const room = updateRoomPricesByCode(code, newPrices)
     expect(room.prices).toEqual(newPrices)
+    expect(getRoom(code).prices).toEqual(newPrices)
   })
 
-  it('존재하지 않는 socketId는 null을 반환한다', () => {
-    expect(updateRoomPrices('unknown', {})).toBeNull()
+  it('없는 코드면 null을 반환한다', () => {
+    expect(updateRoomPricesByCode('XXXXXX', {})).toBeNull()
   })
 })
 
