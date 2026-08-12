@@ -3,23 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
-import BoothCategoryTabs from '../components/BoothCategoryTabs'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
 import styles from './RankingPage.module.css'
 
-const TOP_TABS = [
-  { key: 'overall', label: '전체 랭킹' },
-  { key: 'booth', label: '부스 랭킹' },
+const CATEGORY_TABS = [
+  { key: 'totalAssets', label: '총자산' },
+  { key: 'stock', label: '주식' },
+  { key: 'realEstate', label: '부동산' },
 ]
 
-const TABS = [
+const SCOPE_TABS = [
   { key: 'global', label: '전체' },
   { key: 'class', label: '수업' },
   { key: 'team', label: '팀' },
 ]
 
-const BOOTH_VALUE_KEYS = { stock: 'stockValue', realEstate: 'realEstateValue' }
+const VALUE_KEYS = { totalAssets: 'totalAssets', stock: 'stockValue', realEstate: 'realEstateValue' }
 
 function toAdminPlayer(row) {
   return {
@@ -50,9 +50,8 @@ export default function RankingPage() {
   const navigate = useNavigate()
   const isV2 = Boolean(sessionId)
 
-  const [topTab, setTopTab] = useState('overall')
-  const [activeTab, setActiveTab] = useState('global')
-  const [boothCategory, setBoothCategory] = useState('stock')
+  const [category, setCategory] = useState('totalAssets')
+  const [scope, setScope] = useState('global')
   const [rows, setRows] = useState([])
   const [myClassId, setMyClassId] = useState(undefined)
   const [loading, setLoading] = useState(true)
@@ -74,45 +73,28 @@ export default function RankingPage() {
     setLoading(true)
     setError(null)
 
-    if (topTab === 'booth') {
-      fetch(`/api/rankings?category=${boothCategory}`)
+    if (isV2 && scope === 'class' && myClassId === undefined) return
+
+    if (isV2 && scope === 'team') {
+      fetch(`/api/results/${sessionId}`)
         .then(r => { if (!r.ok) throw new Error(); return r.json() })
-        .then(data => { setRows(data); setLoading(false) })
+        .then(data => { setRows(data.players ?? []); setLoading(false) })
         .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
       return
     }
 
-    if (isV2 && activeTab === 'class' && myClassId === undefined) return
+    const params = new URLSearchParams()
+    if (isV2 && scope === 'class') params.set('classId', myClassId)
+    if (category !== 'totalAssets') params.set('category', category)
+    const query = params.toString()
 
-    let url = '/api/rankings'
-
-    if (isV2) {
-      if (activeTab === 'class') {
-        url = `/api/rankings?classId=${encodeURIComponent(myClassId)}`
-      } else if (activeTab === 'team') {
-        fetch(`/api/results/${sessionId}`)
-          .then(r => { if (!r.ok) throw new Error(); return r.json() })
-          .then(data => {
-            const players = (data.players ?? []).map(p => ({
-              ...p,
-              stockPrices: data.stockPrices,
-              realEstatePrices: data.realEstatePrices,
-            }))
-            setRows(players)
-            setLoading(false)
-          })
-          .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-        return
-      }
-    }
-
-    fetch(url)
+    fetch(`/api/rankings${query ? `?${query}` : ''}`)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(data => { setRows(data); setLoading(false) })
       .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-  }, [activeTab, sessionId, isV2, myClassId, topTab, boothCategory])
+  }, [category, scope, sessionId, isV2, myClassId])
 
-  const valueKey = topTab === 'booth' ? BOOTH_VALUE_KEYS[boothCategory] : 'totalAssets'
+  const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
 
   function handleRowClick(row) {
@@ -133,15 +115,15 @@ export default function RankingPage() {
         </div>
         <hr className={styles.divider} />
         <div className={styles.topTabs}>
-          {TOP_TABS.map(tab => (
+          {CATEGORY_TABS.map(tab => (
             <button
               key={tab.key}
-              className={`${styles.topTab} ${topTab === tab.key ? styles.topTabActive : ''}`}
+              className={`${styles.topTab} ${category === tab.key ? styles.topTabActive : ''}`}
               onClick={() => {
                 // rows를 함께 비워야 이전 탭의 데이터(다른 valueKey 형태)가
                 // 새 탭의 렌더에 잘못 섞여 RankingPodium이 깨지는 것을 막는다.
                 setRows([])
-                setTopTab(tab.key)
+                setCategory(tab.key)
               }}
             >
               {tab.label}
@@ -149,31 +131,21 @@ export default function RankingPage() {
           ))}
         </div>
 
-        {topTab === 'overall' && isV2 && (
+        {isV2 && (
           <div className={styles.tabs}>
-            {TABS.map(tab => (
+            {SCOPE_TABS.map(tab => (
               <button
                 key={tab.key}
-                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
+                className={`${styles.tab} ${scope === tab.key ? styles.tabActive : ''}`}
                 onClick={() => {
                   setRows([])
-                  setActiveTab(tab.key)
+                  setScope(tab.key)
                 }}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-        )}
-
-        {topTab === 'booth' && (
-          <BoothCategoryTabs
-            activeCategory={boothCategory}
-            onSelect={category => {
-              setRows([])
-              setBoothCategory(category)
-            }}
-          />
         )}
 
         {loading && <p className={styles.message}>불러오는 중...</p>}
