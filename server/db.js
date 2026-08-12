@@ -253,11 +253,16 @@ function mapRankingRow(r, i) {
   }
 }
 
-export async function getAllRankings(classId = null) {
+const RANKING_ORDER_COLUMN = { stock: 'stock_value', realEstate: 'real_estate_value' }
+
+export async function getRankings({ classId = null, category = null } = {}) {
+  const column = category ? RANKING_ORDER_COLUMN[category] : 'total_assets'
+  if (!column) throw new Error(`Unknown ranking category: ${category}`)
+
   let query = supabase
     .from('game_results')
     .select(RANKING_SELECT)
-    .order('total_assets', { ascending: false })
+    .order(column, { ascending: false })
 
   if (classId === 'unassigned') {
     query = query.is('game_sessions.class_id', null)
@@ -266,22 +271,6 @@ export async function getAllRankings(classId = null) {
   }
 
   const { data, error } = await query
-  if (error) throw error
-
-  return data.map(mapRankingRow)
-}
-
-const BOOTH_ORDER_COLUMN = { stock: 'stock_value', realEstate: 'real_estate_value' }
-
-export async function getBoothRankings(category) {
-  const column = BOOTH_ORDER_COLUMN[category]
-  if (!column) throw new Error(`Unknown booth category: ${category}`)
-
-  const { data, error } = await supabase
-    .from('game_results')
-    .select(RANKING_SELECT)
-    .order(column, { ascending: false })
-
   if (error) throw error
 
   return data.map(mapRankingRow)

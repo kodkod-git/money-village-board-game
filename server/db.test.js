@@ -185,7 +185,79 @@ describe('saveGameResult', () => {
   })
 })
 
-describe('getAllRankings', () => {
+describe('getRankings', () => {
+  it('category 없이 호출하면 total_assets 컬럼 기준으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({})
+
+    expect(builder.order).toHaveBeenCalledWith('total_assets', { ascending: false })
+  })
+
+  it('category가 stock이면 stock_value 컬럼 기준으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ category: 'stock' })
+
+    expect(builder.order).toHaveBeenCalledWith('stock_value', { ascending: false })
+  })
+
+  it('category가 realEstate이면 real_estate_value 컬럼 기준으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ category: 'realEstate' })
+
+    expect(builder.order).toHaveBeenCalledWith('real_estate_value', { ascending: false })
+  })
+
+  it('알 수 없는 category는 에러를 던진다', async () => {
+    const { getRankings } = await import('./db.js')
+    await expect(getRankings({ category: 'unknown' })).rejects.toThrow('Unknown ranking category: unknown')
+  })
+
+  it('classId가 있으면 game_sessions.class_id로 eq 필터링을 건다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ classId: 'class-1' })
+
+    expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'class-1')
+  })
+
+  it("classId가 'unassigned'면 game_sessions.class_id를 null로 필터링한다", async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ classId: 'unassigned' })
+
+    expect(builder.is).toHaveBeenCalledWith('game_sessions.class_id', null)
+  })
+
+  it('classId와 category를 동시에 적용할 수 있다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ classId: 'class-1', category: 'stock' })
+
+    expect(builder.order).toHaveBeenCalledWith('stock_value', { ascending: false })
+    expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'class-1')
+  })
+
   it('teamCode, className, stockValue, realEstateValue를 포함해 반환한다', async () => {
     const rows = [{
       player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
@@ -203,8 +275,8 @@ describe('getAllRankings', () => {
     mockFrom.mockReset()
     mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
 
-    const { getAllRankings } = await import('./db.js')
-    const result = await getAllRankings()
+    const { getRankings } = await import('./db.js')
+    const result = await getRankings({})
 
     expect(result).toEqual([{
       rank: 1, name: '김민준', affiliation: '서울중', character: 'lion',
@@ -235,61 +307,10 @@ describe('getAllRankings', () => {
     mockFrom.mockReset()
     mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
 
-    const { getAllRankings } = await import('./db.js')
-    const result = await getAllRankings()
+    const { getRankings } = await import('./db.js')
+    const result = await getRankings({})
 
     expect(result[0].className).toBe('미배정 수업')
-  })
-
-  it('classId가 있으면 game_sessions.class_id로 eq 필터링을 건다', async () => {
-    const builder = makeQueryBuilder({ data: [], error: null })
-    mockFrom.mockReset()
-    mockFrom.mockReturnValue(builder)
-
-    const { getAllRankings } = await import('./db.js')
-    await getAllRankings('class-1')
-
-    expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'class-1')
-  })
-
-  it("classId가 'unassigned'면 game_sessions.class_id를 null로 필터링한다", async () => {
-    const builder = makeQueryBuilder({ data: [], error: null })
-    mockFrom.mockReset()
-    mockFrom.mockReturnValue(builder)
-
-    const { getAllRankings } = await import('./db.js')
-    await getAllRankings('unassigned')
-
-    expect(builder.is).toHaveBeenCalledWith('game_sessions.class_id', null)
-  })
-})
-
-describe('getBoothRankings', () => {
-  it('stock 카테고리는 stock_value 컬럼 기준 내림차순으로 정렬 요청한다', async () => {
-    const builder = makeQueryBuilder({ data: [], error: null })
-    mockFrom.mockReset()
-    mockFrom.mockReturnValue(builder)
-
-    const { getBoothRankings } = await import('./db.js')
-    await getBoothRankings('stock')
-
-    expect(builder.order).toHaveBeenCalledWith('stock_value', { ascending: false })
-  })
-
-  it('realEstate 카테고리는 real_estate_value 컬럼 기준 내림차순으로 정렬 요청한다', async () => {
-    const builder = makeQueryBuilder({ data: [], error: null })
-    mockFrom.mockReset()
-    mockFrom.mockReturnValue(builder)
-
-    const { getBoothRankings } = await import('./db.js')
-    await getBoothRankings('realEstate')
-
-    expect(builder.order).toHaveBeenCalledWith('real_estate_value', { ascending: false })
-  })
-
-  it('알 수 없는 카테고리는 에러를 던진다', async () => {
-    const { getBoothRankings } = await import('./db.js')
-    await expect(getBoothRankings('unknown')).rejects.toThrow('Unknown booth category: unknown')
   })
 })
 
