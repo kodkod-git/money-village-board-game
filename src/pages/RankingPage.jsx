@@ -78,7 +78,15 @@ export default function RankingPage() {
     if (isV2 && scope === 'team') {
       fetch(`/api/results/${sessionId}`)
         .then(r => { if (!r.ok) throw new Error(); return r.json() })
-        .then(data => { setRows(data.players ?? []); setLoading(false) })
+        .then(data => {
+          const players = (data.players ?? []).map(p => ({
+            ...p,
+            stockPrices: data.stockPrices,
+            realEstatePrices: data.realEstatePrices,
+          }))
+          setRows(players)
+          setLoading(false)
+        })
         .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
       return
     }
