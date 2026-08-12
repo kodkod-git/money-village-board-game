@@ -5,7 +5,7 @@ import {
   isCharacterTaken, clearRooms, updateRoomPrices, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
-  listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid
+  listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -31,6 +31,16 @@ describe('createRoom', () => {
   it('classId를 지정하면 방에 저장한다', () => {
     const room = createRoom({ classId: 'class-1' })
     expect(room.classId).toBe('class-1')
+  })
+
+  it('title을 지정하지 않으면 null로 초기화한다', () => {
+    const room = createRoom()
+    expect(room.title).toBeNull()
+  })
+
+  it('title을 지정하면 방에 저장한다', () => {
+    const room = createRoom({ title: 'TEAM 1' })
+    expect(room.title).toBe('TEAM 1')
   })
 })
 
@@ -298,6 +308,19 @@ describe('updateRoomPrices', () => {
 
   it('존재하지 않는 socketId는 null을 반환한다', () => {
     expect(updateRoomPrices('unknown', {})).toBeNull()
+  })
+})
+
+describe('updateRoomTitle', () => {
+  it('방 제목을 변경한다', () => {
+    const { code } = createRoom({ title: 'TEAM 1' })
+    const room = updateRoomTitle(code, 'TEAM A')
+    expect(room.title).toBe('TEAM A')
+    expect(getRoom(code).title).toBe('TEAM A')
+  })
+
+  it('없는 코드면 null을 반환한다', () => {
+    expect(updateRoomTitle('XXXXXX', 'TEAM A')).toBeNull()
   })
 })
 

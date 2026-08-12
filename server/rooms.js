@@ -46,11 +46,11 @@ function defaultPrices() {
   }
 }
 
-export function createRoom({ classId = null } = {}) {
+export function createRoom({ classId = null, title = null } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title }
   rooms.set(code, room)
   return room
 }
@@ -253,6 +253,13 @@ export function updateRoomPrices(socketId, prices) {
   const room = rooms.get(code)
   if (!room) return null
   room.prices = prices
+  return room
+}
+
+export function updateRoomTitle(code, title) {
+  const room = rooms.get(code)
+  if (!room) return null
+  room.title = title
   return room
 }
 
