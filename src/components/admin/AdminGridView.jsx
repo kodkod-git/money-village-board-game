@@ -28,6 +28,7 @@ export default function AdminGridView({ rooms, onSpectate, onCreate }) {
                 {ROOM_STATUS_LABELS[room.status]}
               </span>
             )}
+            {room.title && <span className={styles.titleLabel}>{room.title}</span>}
             <div className={styles.slots}>
               {slots.map((player, i) => (
                 <div key={i} className={styles.slot} data-testid="admin-player-slot">

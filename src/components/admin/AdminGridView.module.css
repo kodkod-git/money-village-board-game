@@ -58,6 +58,16 @@
 
 .badgeUnregistered { background: var(--violet); }
 
+/* 카드 상단 절대배치 배지(top:12px, 높이 약 27px)와 겹치지 않도록 여유를 둔다 */
+.titleLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+  margin: 28px 0 4px;
+}
+
 .slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

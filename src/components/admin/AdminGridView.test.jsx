@@ -125,4 +125,15 @@ describe('AdminGridView', () => {
     await userEvent.click(screen.getByText('방 만들기'))
     expect(onCreate).toHaveBeenCalled()
   })
+
+  it('room.title이 있으면 카드에 제목을 보여준다', () => {
+    const roomsWithTitle = [{ ...rooms[0], title: 'TEAM 1' }]
+    render(<AdminGridView rooms={roomsWithTitle} onSpectate={vi.fn()} />)
+    expect(screen.getByText('TEAM 1')).toBeInTheDocument()
+  })
+
+  it('room.title이 없으면 제목을 보여주지 않는다', () => {
+    render(<AdminGridView rooms={[rooms[0]]} onSpectate={vi.fn()} />)
+    expect(screen.queryByText(/^TEAM /)).not.toBeInTheDocument()
+  })
 })
