@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
-import { saveGameResult, getGameResult, getAllRankings, getBoothRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, incrementRoomCounter, UNASSIGNED_CLASS } from './classes.js'
@@ -81,9 +81,7 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 app.get('/api/rankings', async (req, res) => {
   try {
     const { classId, category } = req.query
-    const rankings = category
-      ? await getBoothRankings(category)
-      : await getAllRankings(classId ?? null)
+    const rankings = await getRankings({ classId: classId ?? null, category: category ?? null })
     res.json(rankings)
   } catch (err) {
     console.error('rankings error:', err)
@@ -385,6 +383,8 @@ app.get('/api/results/:sessionId', async (req, res) => {
         realEstateHoldings: r.real_estate_holdings,
         badges: r.badges,
         totalAssets: Number(r.total_assets),
+        stockValue: r.stock_value != null ? Number(r.stock_value) : null,
+        realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
         playerUuid: r.player_uuid,
         teamCode: session.team_code,
       })),
