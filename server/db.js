@@ -18,7 +18,7 @@ export function calculateAssetBreakdown(gameState, prices) {
 }
 
 export async function saveGameResult(room) {
-  const { code, prices, players, classId = null } = room
+  const { code, prices, players, classId = null, title = null } = room
 
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
@@ -27,6 +27,7 @@ export async function saveGameResult(room) {
       stock_prices: prices.stocks,
       real_estate_prices: prices.realEstate,
       class_id: classId,
+      title,
     })
     .select('id')
     .single()
@@ -95,6 +96,7 @@ export async function getAllCompletedTeams() {
     registered: true,
     createdAt: session.created_at,
     classId: session.class_id ?? null,
+    title: session.title ?? null,
     prices: { stocks: session.stock_prices, realEstate: session.real_estate_prices },
     players: results
       .filter(r => r.session_id === session.id)
@@ -283,4 +285,15 @@ export async function getBoothRankings(category) {
   if (error) throw error
 
   return data.map(mapRankingRow)
+}
+
+export async function updateSessionTitle(teamCode, title) {
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .update({ title })
+    .eq('team_code', teamCode)
+    .select('id')
+    .single()
+  if (error) throw error
+  return data
 }

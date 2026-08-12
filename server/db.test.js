@@ -150,6 +150,39 @@ describe('saveGameResult', () => {
       }),
     ])
   })
+
+  it('room.title이 있으면 game_sessions에 title로 저장한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { saveGameResult } = await import('./db.js')
+
+    const room = {
+      code: 'AB1234', prices: PRICES, classId: 'class-1', title: 'TEAM 1',
+      players: [{
+        playerUuid: 'p1', name: '홍길동', affiliation: '서울중', character: 'fox',
+        gameState: {
+          job: 'a', cash: 10000,
+          stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+          realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+          badges: [false, false, false, false, false, false],
+        },
+      }],
+    }
+
+    await saveGameResult(room)
+
+    expect(mockSessionInsert).toHaveBeenCalledWith(expect.objectContaining({ title: 'TEAM 1' }))
+  })
 })
 
 describe('getAllRankings', () => {
@@ -265,7 +298,7 @@ describe('getAllCompletedTeams', () => {
     const sessions = [{
       id: 'session-1', team_code: 'AB1234', created_at: '2026-01-01T00:00:00Z',
       stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
-      class_id: 'class-1',
+      class_id: 'class-1', title: 'TEAM 1',
     }]
     const results = [{
       session_id: 'session-1', player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
@@ -291,6 +324,7 @@ describe('getAllCompletedTeams', () => {
       registered: true,
       createdAt: '2026-01-01T00:00:00Z',
       classId: 'class-1',
+      title: 'TEAM 1',
       prices: { stocks: PRICES.stocks, realEstate: PRICES.realEstate },
       players: [{
         playerUuid: 'p1', name: '김민준', character: 'lion', affiliation: '서울중',
@@ -361,6 +395,37 @@ describe('updateGameResult', () => {
     }))
     expect(updated.gameState.cash).toBe(20000)
     expect(updated.playerUuid).toBe('p1')
+  })
+})
+
+describe('updateSessionTitle', () => {
+  it('team_code로 세션을 찾아 title을 UPDATE한다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockEq = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue({ update: mockUpdate })
+
+    const { updateSessionTitle } = await import('./db.js')
+    const result = await updateSessionTitle('AB1234', 'TEAM A')
+
+    expect(mockUpdate).toHaveBeenCalledWith({ title: 'TEAM A' })
+    expect(mockEq).toHaveBeenCalledWith('team_code', 'AB1234')
+    expect(result).toEqual({ id: 'session-1' })
+  })
+
+  it('세션을 찾지 못하면 에러를 던진다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'not found' } })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockEq = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue({ update: mockUpdate })
+
+    const { updateSessionTitle } = await import('./db.js')
+
+    await expect(updateSessionTitle('AB1234', 'TEAM A')).rejects.toEqual({ message: 'not found' })
   })
 })
 
