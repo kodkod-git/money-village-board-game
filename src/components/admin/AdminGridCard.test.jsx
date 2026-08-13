@@ -92,6 +92,12 @@ describe('AdminGridCard', () => {
     expect(screen.getByText('등록 완료')).toBeInTheDocument()
   })
 
+  it('등록 완료된 방이라도 주식/부동산 탭에서는 등록 완료 배지를 보여주지 않는다', async () => {
+    render(<AdminGridCard room={makeRoom({ registered: true })} onSpectate={vi.fn()} />)
+    await userEvent.click(screen.getByText('주식'))
+    expect(screen.queryByText('등록 완료')).not.toBeInTheDocument()
+  })
+
   it('연결이 끊긴 플레이어에는 연결 끊김 표시를 보여준다', () => {
     render(<AdminGridCard room={makeRoom({
       players: [{ character: 'Adventurer-강아지', name: '김민준', connected: false }],

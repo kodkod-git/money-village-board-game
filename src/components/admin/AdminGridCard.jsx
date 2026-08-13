@@ -69,7 +69,9 @@ export default function AdminGridCard({ room, onSpectate, onRoomChanged }) {
       </div>
 
       <button className={styles.card} onClick={handleCardClick} type="button">
-        {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
+        {tab === 'lobby' && room.registered && (
+          <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>
+        )}
         {badgeClassKey && (
           <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
             {ROOM_STATUS_LABELS[room.status]}
