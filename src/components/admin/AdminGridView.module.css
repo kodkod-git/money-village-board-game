@@ -5,6 +5,7 @@
 }
 
 .card {
+  position: relative;
   min-height: 320px;
   background: var(--white);
   border-radius: var(--r-sm);
@@ -27,23 +28,21 @@
 
 .cardHeader {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--slot-empty);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
   margin-bottom: 14px;
   flex-shrink: 0;
 }
 
-.headerLeft {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-}
-
 .badge {
-  flex-shrink: 0;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
@@ -56,7 +55,8 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--ink-2);
-  background: var(--slot-empty);
+  background: var(--white);
+  border: 1px solid var(--line);
   border-radius: var(--r-pill);
   padding: 4px 10px;
   white-space: nowrap;
