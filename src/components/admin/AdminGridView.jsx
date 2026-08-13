@@ -21,7 +21,7 @@ export default function AdminGridView({ rooms, onSpectate, onCreate }) {
               <span className={styles.codeBadge}>{room.code}</span>
             </div>
             <button
-              className={`${styles.card} ${room.registered ? styles.registered : ''}`}
+              className={styles.card}
               onClick={() => onSpectate(room)}
               type="button"
             >

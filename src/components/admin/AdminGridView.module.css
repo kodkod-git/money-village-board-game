@@ -38,10 +38,6 @@
   border-color: var(--purple);
 }
 
-.registered {
-  border-color: rgba(111, 66, 193, 0.32);
-}
-
 .badge {
   position: absolute;
   top: 12px;
