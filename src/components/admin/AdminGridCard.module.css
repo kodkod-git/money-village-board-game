@@ -27,7 +27,9 @@
 
 .tabs {
   display: flex;
-  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -36,16 +38,18 @@
   font-weight: 700;
   color: var(--ink-2);
   background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
   padding: 4px 8px;
   white-space: nowrap;
+  border-right: 1px solid var(--line);
+}
+
+.tab:last-child {
+  border-right: none;
 }
 
 .tabActive {
   color: var(--white);
   background: var(--ink);
-  border-color: var(--ink);
 }
 
 .card {
