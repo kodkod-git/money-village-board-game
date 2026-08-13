@@ -3,7 +3,7 @@ import NumberInputModal from './NumberInputModal'
 import { MAX_ASSET_PRICE } from '../constants/gameData'
 import styles from './PriceSettingModal.module.css'
 
-const STOCK_LABELS = {
+export const STOCK_LABELS = {
   semiconductor: '반도체 IT',
   finance: '금융',
   industrial: '산업재·기계',
@@ -12,7 +12,7 @@ const STOCK_LABELS = {
   content: '콘텐츠·소비재',
 }
 
-const REAL_ESTATE_LABELS = {
+export const REAL_ESTATE_LABELS = {
   gaon: '공동 가온개미',
   nuri: '공동 누리고양이',
   dami: '다세대 다미원숭이',
@@ -26,18 +26,18 @@ export const DEFAULT_PRICES = {
   realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
 }
 
-const STOCK_IMAGES = {
+export const STOCK_IMAGES = {
   semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
   auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
 }
 
-const REAL_ESTATE_IMAGES = {
+export const REAL_ESTATE_IMAGES = {
   gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
   maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
 }
 
-export default function PriceSettingModal({ prices, onConfirm, onClose }) {
-  const [category, setCategory] = useState('stocks')
+export default function PriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks' }) {
+  const [category, setCategory] = useState(initialCategory)
   const [tempPrices, setTempPrices] = useState(prices)
   const [editingKey, setEditingKey] = useState(null)
 

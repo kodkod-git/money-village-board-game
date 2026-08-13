@@ -1,64 +1,12 @@
-import { ROOM_STATUS_LABELS } from '../../constants/gameData'
+import AdminGridCard from './AdminGridCard'
 import styles from './AdminGridView.module.css'
 
-const STATUS_BADGE_CLASS = {
-  live: 'badgeLive',
-  stale: 'badgeStale',
-  abandoned: 'badgeAbandoned',
-  'completed-but-unregistered': 'badgeUnregistered',
-}
-
-export default function AdminGridView({ rooms, onSpectate, onCreate }) {
+export default function AdminGridView({ rooms, onSpectate, onCreate, onRoomChanged }) {
   return (
     <div className={styles.grid}>
-      {rooms.map(room => {
-        const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
-        const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
-        return (
-          <div key={room.code} className={styles.cardWrapper}>
-            <div className={styles.cardHeader}>
-              {room.title && <span className={styles.titleBadge}>{room.title}</span>}
-              <span className={styles.codeBadge}>{room.code}</span>
-            </div>
-            <button
-              className={styles.card}
-              onClick={() => onSpectate(room)}
-              type="button"
-            >
-              {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
-              {badgeClassKey && (
-                <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
-                  {ROOM_STATUS_LABELS[room.status]}
-                </span>
-              )}
-              <div className={styles.slots}>
-                {slots.map((player, i) => (
-                  <div key={i} className={styles.slot} data-testid="admin-player-slot">
-                    {player ? (
-                      <>
-                        {player.connected === false && (
-                          <span className={styles.disconnectedBadge}>연결 끊김</span>
-                        )}
-                        <img
-                          src={`/characters/${player.character}.png`}
-                          alt={player.name}
-                          className={styles.slotImg}
-                        />
-                        <span className={styles.slotName}>{player.name}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.slotEmpty}>?</span>
-                        <span className={styles.emptyName}>대기중</span>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </button>
-          </div>
-        )
-      })}
+      {rooms.map(room => (
+        <AdminGridCard key={room.code} room={room} onSpectate={onSpectate} onRoomChanged={onRoomChanged} />
+      ))}
       {onCreate && (
         <button className={styles.createCard} onClick={onCreate} type="button">
           <span className={styles.createIcon} aria-hidden="true">+</span>

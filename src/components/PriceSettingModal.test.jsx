@@ -48,6 +48,11 @@ describe('PriceSettingModal', () => {
     expect(screen.getAllByRole('button', { name: /2,000 원/ })[0]).toBeInTheDocument()
   })
 
+  it('initialCategory가 realEstate이면 부동산 목록을 먼저 보여준다', () => {
+    render(<PriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={vi.fn()} initialCategory="realEstate" />)
+    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+  })
+
   it('뒤로 버튼을 누르면 onClose가 호출된다', async () => {
     const onClose = vi.fn()
     render(<PriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={onClose} />)
