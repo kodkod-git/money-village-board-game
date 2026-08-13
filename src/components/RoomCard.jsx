@@ -20,7 +20,7 @@ export default function RoomCard({ title, hostName, status, characters, onClick 
           {ROOM_STATUS_LABELS[status]}
         </span>
       )}
-      <span className={styles.title}>{title ?? `${hostName ?? '???'}님의 방`}</span>
+      <span className={styles.title}>{title || `${hostName ?? '???'}님의 방`}</span>
       <div className={styles.characters}>
         {slots.map((character, i) => (
           character ? (

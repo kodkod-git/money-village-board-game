@@ -9,7 +9,7 @@ import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updateP
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, incrementRoomCounter, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -229,7 +229,9 @@ app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
     if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
     const resolvedClassId = classId === 'unassigned' ? null : classId
-    const title = resolvedClassId ? `TEAM ${await incrementRoomCounter(resolvedClassId)}` : null
+    // 관리자가 만든 방은 title을 빈 문자열로 시작한다(null이 아님 → 편집 가능한 방으로 구분되지만,
+    // 이름을 직접 정할 때까지는 로비에서 학생 방과 동일하게 방장 이름 기반 표시로 폴백한다).
+    const title = resolvedClassId ? '' : null
 
     const room = createRoom({ classId: resolvedClassId, title })
     broadcastClassRooms(room.classId)

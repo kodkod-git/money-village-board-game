@@ -51,4 +51,9 @@ describe('RoomCard', () => {
     expect(screen.getByText('TEAM 1')).toBeInTheDocument()
     expect(screen.queryByText('철수님의 방')).toBeNull()
   })
+
+  it('title이 빈 문자열이면(관리자가 이름을 아직 정하지 않은 방) hostName 기반 표시로 폴백한다', () => {
+    render(<RoomCard {...BASE_PROPS} title="" />)
+    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
+  })
 })
