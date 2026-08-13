@@ -430,6 +430,15 @@ io.on('connection', (socket) => {
     }
   })
 
+  // 방에 속한 플레이어라면 누구나 가격을 바꿀 수 있다 — 클라이언트가 보낸 code는 신뢰하지 않고,
+  // 이 소켓이 실제로 속한 방을 서버에서 직접 찾아 그 방의 가격만 갱신한다.
+  socket.on('update-room-prices', ({ prices }) => {
+    const room = getRoomBySocketId(socket.id)
+    if (!room) return
+    const updated = updateRoomPricesByCode(room.code, prices)
+    if (updated) io.to(updated.code).emit('room-prices-updated', { prices: updated.prices })
+  })
+
   socket.on('kick-player', ({ targetSocketId: tid }) => {
     const result = kickPlayer(socket.id, tid)
     if (!result) return

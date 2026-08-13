@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
+import PriceSettingModal, { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Team.module.css'
 
@@ -15,6 +16,8 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [players, setPlayers] = useState(readOnly ? mockRoom.players : [])
   const [roomFetched, setRoomFetched] = useState(readOnly)
   const [showQR, setShowQR] = useState(false)
+  const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
+  const [showPriceModal, setShowPriceModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   useEffect(() => {
@@ -23,6 +26,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       .then(r => r.json())
       .then(data => {
         if (data.players) setPlayers(data.players)
+        if (data.prices) setPrices(data.prices)
       })
       .catch(() => {})
       .finally(() => setRoomFetched(true))
@@ -78,6 +82,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
 
   useEffect(() => {
     if (readOnly || !socket) return
+    const handler = ({ prices }) => setPrices(prices)
+    socket.on('room-prices-updated', handler)
+    return () => socket.off('room-prices-updated', handler)
+  }, [socket, readOnly])
+
+  useEffect(() => {
+    if (readOnly || !socket) return
     const handler = ({ sessionId }) => navigate(`/result/${sessionId}`)
     socket.on('game-submitted', handler)
     return () => socket.off('game-submitted', handler)
@@ -120,6 +131,12 @@ export default function Team({ readOnly = false, mockRoom = null }) {
     navigate(`/lobby?${params}`)
   }
 
+  function handlePriceConfirm(newPrices) {
+    if (!readOnly) socket?.emit('update-room-prices', { code, prices: newPrices })
+    setPrices(newPrices)
+    setShowPriceModal(false)
+  }
+
   const slots = Array.from({ length: 4 }, (_, i) => players[i] ?? null)
   const isHost = !readOnly && (players.find(p => p.socketId === socket?.id)?.isHost ?? false)
   const myPlayer = readOnly ? null : players.find(p => p.socketId === socket?.id)
@@ -127,6 +144,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   return (
     <div className={styles.page}>
       {!readOnly && <BackButton onClick={() => setShowLeaveConfirm(true)} />}
+      <button
+        className={styles.priceSettingBtn}
+        onClick={() => setShowPriceModal(true)}
+        type="button"
+      >
+        <span aria-hidden="true">⚙️</span> 가격 설정
+      </button>
 
       <div className={styles.header}>
         <h1 className={styles.title}>팀 만들기</h1>
@@ -185,6 +209,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         <LeaveConfirmModal
           onConfirm={handleConfirmLeave}
           onClose={() => setShowLeaveConfirm(false)}
+        />
+      )}
+      {showPriceModal && (
+        <PriceSettingModal
+          prices={prices}
+          onConfirm={handlePriceConfirm}
+          onClose={() => setShowPriceModal(false)}
         />
       )}
     </div>

@@ -12,6 +12,24 @@
   display: none;
 }
 
+.priceSettingBtn {
+  position: absolute;
+  top: 32px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+
 .header {
   padding-top: 96px;
   flex-shrink: 0;

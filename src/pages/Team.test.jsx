@@ -1,4 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
@@ -183,9 +184,56 @@ describe('Team', () => {
     vi.unstubAllGlobals()
   })
 
-  it('방장이어도 가격 설정 진입점이 없다', () => {
+  it('방장이 아닌 팀원도 가격 설정 버튼을 볼 수 있다', () => {
+    mockRoomUpdatePlayers = [
+      { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
+      { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
+    ]
     renderTeam()
-    expect(screen.queryByText('가격 설정')).not.toBeInTheDocument()
+    expect(screen.getByText('가격 설정')).toBeInTheDocument()
+  })
+})
+
+describe('Team price setting modal', () => {
+  it('가격 설정 버튼을 누르면 팝업이 열리고 기본으로 주식 목록이 보인다', async () => {
+    renderTeam()
+    await userEvent.click(screen.getByText('가격 설정'))
+    expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+  })
+
+  it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
+    renderTeam()
+    await userEvent.click(screen.getByText('가격 설정'))
+    await userEvent.click(screen.getByText('부동산'))
+    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+  })
+
+  it('방장이 아닌 팀원이 가격을 바꿔도 update-room-prices를 emit한다', async () => {
+    mockRoomUpdatePlayers = [
+      { name: '영희', character: 'Guardian-판다', isHost: true, socketId: 's2' },
+      { name: '철수', character: 'Adventurer-강아지', isHost: false, socketId: 's1' },
+    ]
+    renderTeam()
+    await userEvent.click(screen.getByText('가격 설정'))
+    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
+    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
+
+    for (let i = 0; i < 4; i++) {
+      await userEvent.click(screen.getByRole('button', { name: '←' }))
+    }
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '0' }))
+    await userEvent.click(screen.getByRole('button', { name: '00' }))
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+    await userEvent.click(screen.getByText('확인하기'))
+
+    const socket = io()
+    expect(socket.emit).toHaveBeenCalledWith('update-room-prices', {
+      code: 'ABC123',
+      prices: expect.objectContaining({
+        stocks: expect.objectContaining({ semiconductor: 9000 }),
+      }),
+    })
   })
 })
 
@@ -248,8 +296,8 @@ describe('Team readOnly mode', () => {
     })
   })
 
-  it('가격 설정 진입점이 더 이상 없다', () => {
+  it('shows price setting action in readOnly mode', () => {
     renderReadOnlyTeam()
-    expect(screen.queryByText('가격 설정')).not.toBeInTheDocument()
+    expect(screen.getByText('가격 설정')).toBeInTheDocument()
   })
 })

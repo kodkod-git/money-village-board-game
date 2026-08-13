@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminPlayerCard from './AdminPlayerCard'
 import AdminEditModal from './AdminEditModal'
-import PriceSettingModal from './PriceSettingModal'
+import PriceSettingModal from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import styles from './AdminSpectateModal.module.css'
 

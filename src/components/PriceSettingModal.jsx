@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import NumberInputModal from '../NumberInputModal'
-import { MAX_ASSET_PRICE } from '../../constants/gameData'
+import NumberInputModal from './NumberInputModal'
+import { MAX_ASSET_PRICE } from '../constants/gameData'
 import styles from './PriceSettingModal.module.css'
 
 const STOCK_LABELS = {
