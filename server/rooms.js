@@ -107,12 +107,16 @@ export function removePlayer(socketId) {
   room.players = room.players.filter(p => p.socketId !== socketId)
   socketToRoom.delete(socketId)
   if (room.players.length === 0) {
-    // Keep room alive for the grace period so a reconnecting player can rejoin
-    const timer = setTimeout(() => {
-      if (rooms.get(code)?.players.length === 0) rooms.delete(code)
-      roomDeletionTimers.delete(code)
-    }, ROOM_EMPTY_GRACE_MS)
-    roomDeletionTimers.set(code, timer)
+    // 관리자가 만든 방(title이 null이 아님)은 참가자가 모두 나가도 자동 삭제하지 않는다 —
+    // 관리자가 "방 삭제"로 직접 정리할 때까지 유지한다.
+    if (room.title === null) {
+      // Keep room alive for the grace period so a reconnecting player can rejoin
+      const timer = setTimeout(() => {
+        if (rooms.get(code)?.players.length === 0) rooms.delete(code)
+        roomDeletionTimers.delete(code)
+      }, ROOM_EMPTY_GRACE_MS)
+      roomDeletionTimers.set(code, timer)
+    }
     return null
   }
   return room

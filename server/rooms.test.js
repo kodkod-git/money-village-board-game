@@ -189,6 +189,17 @@ describe('removePlayer', () => {
     expect(() => removePlayer('s1')).not.toThrow()
     expect(removePlayer('s1')).toBeNull()
   })
+
+  it('관리자가 만든 방(title이 null이 아님)은 마지막 플레이어가 나가도 삭제 타이머를 걸지 않는다', () => {
+    vi.useFakeTimers()
+    const { code } = createRoom({ title: 'TEAM 1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: false })
+    removePlayer('s1')
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
+    expect(getRoom(code)).not.toBeNull()
+    expect(getRoom(code).players).toHaveLength(0)
+    vi.useRealTimers()
+  })
 })
 
 describe('markDisconnected', () => {

@@ -460,8 +460,10 @@ io.on('connection', (socket) => {
     const roomBefore = getRoomBySocketId(socket.id)
     const leavingPlayer = roomBefore?.players.find(p => p.socketId === socket.id)
     // 방장이 나가거나 마지막 남은 팀원이 나가면 그 방은 더 이상 관리할 사람이
-    // 없으므로, 유예 시간을 기다리지 않고 즉시 방을 닫는다.
-    const shouldCloseRoom = !!roomBefore && (leavingPlayer?.isHost || roomBefore.players.length === 1)
+    // 없으므로, 유예 시간을 기다리지 않고 즉시 방을 닫는다. 다만 관리자가 만든 방
+    // (title이 null이 아님)은 참가자가 없어져도 관리자가 직접 삭제할 때까지 유지한다.
+    const shouldCloseRoom = !!roomBefore && roomBefore.title === null &&
+      (leavingPlayer?.isHost || roomBefore.players.length === 1)
 
     const room = removePlayer(socket.id)
     if (room) io.to(room.code).emit('room-updated', { players: room.players })
