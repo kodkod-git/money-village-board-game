@@ -69,6 +69,8 @@
   white-space: nowrap;
 }
 
+.badgeRegistered { background: var(--green); }
+
 .badgeLive { background: var(--muted); }
 
 .badgeStale { background: var(--amber); }
