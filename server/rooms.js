@@ -214,6 +214,7 @@ export function listPublicRoomsByClassId(classId) {
     playerCount: room.players.length,
     characters: room.players.map(p => p.character),
     hostName: room.players.find(p => p.isHost)?.name ?? null,
+    title: room.title,
   }))
 }
 

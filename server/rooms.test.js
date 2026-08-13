@@ -548,7 +548,7 @@ describe('listPublicRoomsByClassId', () => {
     const result = listPublicRoomsByClassId('class-1')
 
     expect(result).toEqual([
-      { code: room.code, status: 'live', playerCount: 1, characters: ['ptsc'], hostName: '철수' },
+      { code: room.code, status: 'live', playerCount: 1, characters: ['ptsc'], hostName: '철수', title: null },
     ])
   })
 
@@ -556,8 +556,14 @@ describe('listPublicRoomsByClassId', () => {
     const room = createRoom({ classId: 'class-1' })
     const result = listPublicRoomsByClassId('class-1')
     expect(result).toEqual([
-      { code: room.code, status: 'live', playerCount: 0, characters: [], hostName: null },
+      { code: room.code, status: 'live', playerCount: 0, characters: [], hostName: null, title: null },
     ])
+  })
+
+  it('room.title이 있으면 그대로 포함한다', () => {
+    const room = createRoom({ classId: 'class-1', title: 'TEAM 1' })
+    const result = listPublicRoomsByClassId('class-1')
+    expect(result[0].title).toBe('TEAM 1')
   })
 
   it('방장이 나가고 팀원만 남아있으면 hostName은 null이다', () => {

@@ -117,6 +117,7 @@ export default function Lobby() {
           {rooms.map(room => (
             <RoomCard
               key={room.code}
+              title={room.title}
               hostName={room.hostName}
               status={room.status}
               characters={room.characters}

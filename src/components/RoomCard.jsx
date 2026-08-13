@@ -10,7 +10,7 @@ const STATUS_BADGE_CLASS = {
 
 const MAX_PLAYERS = 4
 
-export default function RoomCard({ hostName, status, characters, onClick }) {
+export default function RoomCard({ title, hostName, status, characters, onClick }) {
   const badgeClassKey = STATUS_BADGE_CLASS[status]
   const slots = Array.from({ length: MAX_PLAYERS }, (_, i) => characters[i] ?? null)
   return (
@@ -20,7 +20,7 @@ export default function RoomCard({ hostName, status, characters, onClick }) {
           {ROOM_STATUS_LABELS[status]}
         </span>
       )}
-      <span className={styles.title}>{hostName ?? '???'}님의 방</span>
+      <span className={styles.title}>{title ?? `${hostName ?? '???'}님의 방`}</span>
       <div className={styles.characters}>
         {slots.map((character, i) => (
           character ? (

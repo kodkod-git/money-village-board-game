@@ -45,4 +45,10 @@ describe('RoomCard', () => {
     fireEvent.click(screen.getByText('철수님의 방'))
     expect(onClick).toHaveBeenCalled()
   })
+
+  it('title이 있으면(관리자가 만든 방) hostName 대신 title을 그대로 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} title="TEAM 1" />)
+    expect(screen.getByText('TEAM 1')).toBeInTheDocument()
+    expect(screen.queryByText('철수님의 방')).toBeNull()
+  })
 })
