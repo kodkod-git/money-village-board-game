@@ -21,16 +21,18 @@ export default function AdminGridView({ rooms, onSpectate, onCreate }) {
             onClick={() => onSpectate(room)}
             type="button"
           >
-            <div className={styles.topLeft}>
-              {room.title && <span className={styles.titleBadge}>{room.title}</span>}
-              <span className={styles.codeBadge}>{room.code}</span>
+            <div className={styles.cardHeader}>
+              <div className={styles.headerLeft}>
+                {room.title && <span className={styles.titleBadge}>{room.title}</span>}
+                <span className={styles.codeBadge}>{room.code}</span>
+              </div>
+              {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
+              {badgeClassKey && (
+                <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
+                  {ROOM_STATUS_LABELS[room.status]}
+                </span>
+              )}
             </div>
-            {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
-            {badgeClassKey && (
-              <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
-                {ROOM_STATUS_LABELS[room.status]}
-              </span>
-            )}
             <div className={styles.slots}>
               {slots.map((player, i) => (
                 <div key={i} className={styles.slot} data-testid="admin-player-slot">
