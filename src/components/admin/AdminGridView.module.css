@@ -34,10 +34,6 @@
   text-align: left;
 }
 
-.card:hover {
-  border-color: var(--purple);
-}
-
 .badge {
   position: absolute;
   top: 12px;
