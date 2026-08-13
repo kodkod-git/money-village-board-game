@@ -4,26 +4,9 @@
   gap: 16px;
 }
 
-.card {
-  position: relative;
-  min-height: 320px;
-  background: var(--white);
-  border-radius: var(--r-sm);
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--divider);
-  padding: 16px;
-  cursor: pointer;
-  text-align: left;
+.cardWrapper {
   display: flex;
   flex-direction: column;
-}
-
-.card:hover {
-  border-color: var(--purple);
-}
-
-.registered {
-  border-color: rgba(111, 66, 193, 0.32);
 }
 
 .cardHeader {
@@ -32,10 +15,31 @@
   flex-wrap: wrap;
   gap: 6px;
   background: var(--slot-empty);
-  border-radius: var(--r-sm);
+  border: 1px solid var(--divider);
+  border-bottom: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
   padding: 8px 10px;
-  margin-bottom: 14px;
   flex-shrink: 0;
+}
+
+.card {
+  position: relative;
+  min-height: 276px;
+  background: var(--white);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--divider);
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card:hover {
+  border-color: var(--purple);
+}
+
+.registered {
+  border-color: rgba(111, 66, 193, 0.32);
 }
 
 .badge {
@@ -86,7 +90,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  flex: 1;
+  height: 100%;
 }
 
 .slot {

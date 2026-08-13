@@ -15,47 +15,48 @@ export default function AdminGridView({ rooms, onSpectate, onCreate }) {
         const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
         const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
         return (
-          <button
-            key={room.code}
-            className={`${styles.card} ${room.registered ? styles.registered : ''}`}
-            onClick={() => onSpectate(room)}
-            type="button"
-          >
+          <div key={room.code} className={styles.cardWrapper}>
             <div className={styles.cardHeader}>
               {room.title && <span className={styles.titleBadge}>{room.title}</span>}
               <span className={styles.codeBadge}>{room.code}</span>
             </div>
-            {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
-            {badgeClassKey && (
-              <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
-                {ROOM_STATUS_LABELS[room.status]}
-              </span>
-            )}
-            <div className={styles.slots}>
-              {slots.map((player, i) => (
-                <div key={i} className={styles.slot} data-testid="admin-player-slot">
-                  {player ? (
-                    <>
-                      {player.connected === false && (
-                        <span className={styles.disconnectedBadge}>연결 끊김</span>
-                      )}
-                      <img
-                        src={`/characters/${player.character}.png`}
-                        alt={player.name}
-                        className={styles.slotImg}
-                      />
-                      <span className={styles.slotName}>{player.name}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className={styles.slotEmpty}>?</span>
-                      <span className={styles.emptyName}>대기중</span>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </button>
+            <button
+              className={`${styles.card} ${room.registered ? styles.registered : ''}`}
+              onClick={() => onSpectate(room)}
+              type="button"
+            >
+              {room.registered && <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>}
+              {badgeClassKey && (
+                <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
+                  {ROOM_STATUS_LABELS[room.status]}
+                </span>
+              )}
+              <div className={styles.slots}>
+                {slots.map((player, i) => (
+                  <div key={i} className={styles.slot} data-testid="admin-player-slot">
+                    {player ? (
+                      <>
+                        {player.connected === false && (
+                          <span className={styles.disconnectedBadge}>연결 끊김</span>
+                        )}
+                        <img
+                          src={`/characters/${player.character}.png`}
+                          alt={player.name}
+                          className={styles.slotImg}
+                        />
+                        <span className={styles.slotName}>{player.name}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.slotEmpty}>?</span>
+                        <span className={styles.emptyName}>대기중</span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </button>
+          </div>
         )
       })}
       {onCreate && (
