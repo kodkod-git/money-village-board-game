@@ -285,4 +285,63 @@ describe('AdminClassDashboard', () => {
 
     expect(alertSpy).toHaveBeenCalledWith('방 생성에 실패했습니다')
   })
+
+  it('일괄 결과등록 버튼 클릭 시 현재 classId로 등록 대기 팀들을 일괄 등록하고 목록을 새로고침한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 2, total: 2 }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+
+    await userEvent.click(screen.getByText('일괄 결과등록'))
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/classes/class-1/submit-pending',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ Authorization: 'Bearer test-token' }),
+      })
+    )
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms?classId=class-1', expect.anything())
+  })
+
+  it('등록 대기 중인 팀이 없으면 alert로 안내한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 0, total: 0 }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    alertSpy.mockClear()
+
+    await userEvent.click(screen.getByText('일괄 결과등록'))
+
+    expect(alertSpy).toHaveBeenCalledWith('등록 대기 중인 팀이 없습니다')
+  })
+
+  it('일괄 결과등록이 실패하면 alert로 안내한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: '일괄 결과등록에 실패했습니다' }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    alertSpy.mockClear()
+
+    await userEvent.click(screen.getByText('일괄 결과등록'))
+
+    expect(alertSpy).toHaveBeenCalledWith('일괄 결과등록에 실패했습니다')
+  })
 })

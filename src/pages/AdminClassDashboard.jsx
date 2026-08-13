@@ -21,6 +21,7 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   const [showQr, setShowQr] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [isBulkRegistering, setIsBulkRegistering] = useState(false)
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
@@ -86,6 +87,26 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
     if (!res.ok) setName(initialName)
   }
 
+  async function handleBulkRegister() {
+    if (isBulkRegistering) return
+    setIsBulkRegistering(true)
+    try {
+      const res = await adminFetch(`/api/admin/classes/${classId}/submit-pending`, { method: 'POST' })
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({}))
+        alert(error || '일괄 결과등록에 실패했습니다')
+        return
+      }
+      const { total } = await res.json()
+      if (total === 0) alert('등록 대기 중인 팀이 없습니다')
+      loadRooms()
+    } catch {
+      alert('일괄 결과등록에 실패했습니다')
+    } finally {
+      setIsBulkRegistering(false)
+    }
+  }
+
   async function handleConfirmDelete() {
     const res = await adminFetch(`/api/admin/classes/${classId}`, { method: 'DELETE' })
     setConfirmDelete(false)
@@ -111,6 +132,14 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
         <div className={styles.headerActions}>
           <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
           <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR 코드</button>
+          <button
+            className={styles.bulkRegisterBtn}
+            onClick={handleBulkRegister}
+            disabled={isBulkRegistering}
+            type="button"
+          >
+            일괄 결과등록
+          </button>
           {classId !== 'unassigned' && (
             <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)} type="button">수업 삭제</button>
           )}

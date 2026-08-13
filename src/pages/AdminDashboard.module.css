@@ -42,6 +42,21 @@
   color: var(--ink-2);
 }
 
+.bulkRegisterBtn {
+  background: var(--ink);
+  border: none;
+  border-radius: var(--r-sm);
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.bulkRegisterBtn:disabled {
+  opacity: 0.5;
+}
+
 .title {
   font-size: 30px;
   font-weight: 900;

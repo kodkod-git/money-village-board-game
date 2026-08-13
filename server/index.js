@@ -173,6 +173,38 @@ app.delete('/api/admin/classes/:id', requireAdmin, async (req, res) => {
   }
 })
 
+app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req, res) => {
+  const { classId } = req.params
+  try {
+    const allowed = await hasClassAccess(req.admin, classId)
+    if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+
+    const resolvedClassId = classId === 'unassigned' ? null : classId
+    const now = new Date()
+    const pendingRooms = listAllRooms().filter(room =>
+      room.classId === resolvedClassId && computeLiveRoomStatus(room, now) === 'completed-but-unregistered'
+    )
+
+    let registered = 0
+    for (const room of pendingRooms) {
+      try {
+        const sessionId = await saveGameResult(room)
+        deleteRoomByCode(room.code)
+        io.to(room.code).emit('game-submitted', { sessionId })
+        registered += 1
+      } catch (err) {
+        console.error(`bulk submit error for room ${room.code}:`, err)
+      }
+    }
+
+    broadcastClassRooms(resolvedClassId)
+    res.json({ registered, total: pendingRooms.length })
+  } catch (err) {
+    console.error('bulk submit error:', err)
+    res.status(500).json({ error: 'Failed to submit pending results' })
+  }
+})
+
 async function findRoomClassId(code) {
   const liveRoom = getRoom(code)
   if (liveRoom) return liveRoom.classId
