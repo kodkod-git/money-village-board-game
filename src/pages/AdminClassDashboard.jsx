@@ -1,16 +1,27 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import AdminGridView from '../components/admin/AdminGridView'
 import AdminTableView from '../components/admin/AdminTableView'
 import AdminSpectateModal from '../components/admin/AdminSpectateModal'
 import ClassQRModal from '../components/admin/ClassQRModal'
+import AdminStatCards from '../components/admin/AdminStatCards'
+import AdminEmptyState from '../components/admin/AdminEmptyState'
 import { adminFetch } from '../utils/adminAuth'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
-  { key: 'grid', label: '그리드 뷰' },
-  { key: 'table', label: '테이블 뷰' },
+  { key: 'grid', label: '그리드 뷰', icon: '▦' },
+  { key: 'table', label: '테이블 뷰', icon: '☰' },
 ]
+
+function matchesSearch(room, query) {
+  if (!query) return true
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  if (room.title?.toLowerCase().includes(q)) return true
+  if (room.code?.toLowerCase().includes(q)) return true
+  return room.players.some(p => p?.name?.toLowerCase().includes(q))
+}
 
 export default function AdminClassDashboard({ classId, initialName, onBack }) {
   const { socket } = useSocketContext()
@@ -19,9 +30,10 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
   const [spectateIndex, setSpectateIndex] = useState(null)
   const [name, setName] = useState(initialName)
   const [showQr, setShowQr] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [isBulkRegistering, setIsBulkRegistering] = useState(false)
+  const [search, setSearch] = useState('')
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
@@ -43,6 +55,8 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
       socket.off('class-rooms-updated', loadRooms)
     }
   }, [socket, classId, loadRooms])
+
+  const filteredRooms = useMemo(() => rooms.filter(room => matchesSearch(room, search)), [rooms, search])
 
   async function handleCreateRoom() {
     if (isCreating) return
@@ -107,11 +121,19 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
     }
   }
 
-  async function handleConfirmDelete() {
-    const res = await adminFetch(`/api/admin/classes/${classId}`, { method: 'DELETE' })
-    setConfirmDelete(false)
-    if (!res.ok) return
-    onBack()
+  async function handleConfirmDeleteAll() {
+    setConfirmDeleteAll(false)
+    await Promise.all(rooms.map(room => adminFetch(`/api/admin/rooms/${room.code}`, { method: 'DELETE' })))
+    loadRooms()
+  }
+
+  async function handleDeleteSelectedPlayers(entries) {
+    await Promise.all(
+      entries.map(({ roomCode, playerUuid }) =>
+        adminFetch(`/api/admin/rooms/${roomCode}/players/${playerUuid}`, { method: 'DELETE' })
+      )
+    )
+    loadRooms()
   }
 
   return (
@@ -127,64 +149,89 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
               onBlur={handleTitleBlur}
             />
           </div>
-          <p className={styles.subtitle}>진행중인 팀과 완료된 팀을 확인하고 수정할 수 있습니다</p>
+          <p className={styles.subtitle}>진행중인 팀과 완료한 팀을 확인하고 수정할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.refreshBtn} onClick={loadRooms} type="button">↻ 새로고침</button>
+          <input
+            className={styles.searchInput}
+            placeholder="이름 또는 팀 검색..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <div className={styles.viewToggle}>
+            {TABS.map(tab => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`${styles.viewToggleBtn} ${activeTab === tab.key ? styles.viewToggleBtnActive : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                <span className={styles.viewToggleIcon} aria-hidden="true">{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
           <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR 코드</button>
+          <button
+            className={styles.deleteAllBtn}
+            onClick={() => setConfirmDeleteAll(true)}
+            disabled={rooms.length === 0}
+            type="button"
+          >
+            전체 삭제
+          </button>
           <button
             className={styles.bulkRegisterBtn}
             onClick={handleBulkRegister}
             disabled={isBulkRegistering}
             type="button"
           >
-            일괄 결과등록
+            전체 등록
           </button>
-          {classId !== 'unassigned' && (
-            <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)} type="button">수업 삭제</button>
-          )}
           <button className={styles.exitBtn} onClick={onBack} type="button">← 수업 목록</button>
         </div>
       </div>
 
+      <AdminStatCards rooms={rooms} />
+
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
 
-      {confirmDelete && (
-        <div className={styles.overlay} onClick={() => setConfirmDelete(false)}>
+      {confirmDeleteAll && (
+        <div className={styles.overlay} onClick={() => setConfirmDeleteAll(false)}>
           <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
             <p className={styles.confirmText}>
-              '{name}' 수업을 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?
+              이 수업의 모든 팀을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?
             </p>
             <div className={styles.confirmActions}>
-              <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>정말 삭제</button>
+              <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDeleteAll(false)}>취소</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDeleteAll}>삭제</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className={styles.tabs}>
-        {TABS.map(tab => (
-          <button
-            key={tab.key}
-            className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab(tab.key)}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'grid' && (
-        <AdminGridView
-          rooms={rooms}
-          onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}
-          onCreate={classId === 'unassigned' ? undefined : handleCreateRoom}
-          onRoomChanged={loadRooms}
+      {rooms.length === 0 ? (
+        <AdminEmptyState
+          title="등록된 팀 정보가 없습니다."
+          subtitle="팀을 등록하면 팀 현황을 확인할 수 있습니다."
+          actionLabel={classId !== 'unassigned' ? '팀 등록' : undefined}
+          onAction={classId !== 'unassigned' ? handleCreateRoom : undefined}
         />
+      ) : (
+        <>
+          {activeTab === 'grid' && (
+            <AdminGridView
+              rooms={filteredRooms}
+              onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}
+              onCreate={classId === 'unassigned' ? undefined : handleCreateRoom}
+              onRoomChanged={loadRooms}
+            />
+          )}
+          {activeTab === 'table' && (
+            <AdminTableView rooms={filteredRooms} onDeletePlayers={handleDeleteSelectedPlayers} />
+          )}
+        </>
       )}
-      {activeTab === 'table' && <AdminTableView rooms={rooms} />}
 
       {spectateIndex !== null && (
         <div className={styles.overlay} onClick={() => setSpectateIndex(null)}>

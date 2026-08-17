@@ -98,7 +98,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
             </p>
             <div className={styles.confirmActions}>
               <button type="button" className={styles.confirmCancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>정말 삭제</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>삭제</button>
             </div>
           </div>
         </div>

@@ -4,8 +4,8 @@ import styles from './AdminGridView.module.css'
 export default function AdminGridView({ rooms, onSpectate, onCreate, onRoomChanged }) {
   return (
     <div className={styles.grid}>
-      {rooms.map(room => (
-        <AdminGridCard key={room.code} room={room} onSpectate={onSpectate} onRoomChanged={onRoomChanged} />
+      {rooms.map((room, i) => (
+        <AdminGridCard key={room.code} room={room} index={i} onSpectate={onSpectate} onRoomChanged={onRoomChanged} />
       ))}
       {onCreate && (
         <button className={styles.createCard} onClick={onCreate} type="button">

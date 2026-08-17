@@ -38,8 +38,9 @@ describe('AdminGridCard', () => {
     expect(screen.getByText('TEAM 1')).toBeInTheDocument()
   })
 
-  it('room.title이 없으면 제목을 보여주지 않는다', () => {
-    render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
+  it('room.title이 없으면 팀 순번으로 표시한다', () => {
+    render(<AdminGridCard room={makeRoom()} index={2} onSpectate={vi.fn()} />)
+    expect(screen.getByText('팀 3')).toBeInTheDocument()
     expect(screen.queryByText(/^TEAM /)).not.toBeInTheDocument()
   })
 

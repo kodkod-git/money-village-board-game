@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi } from 'vitest'
 import AdminTableView from './AdminTableView'
 
 const prices = {
@@ -67,44 +68,39 @@ describe('AdminTableView', () => {
     expect(screen.getByText('10,000원')).toBeInTheDocument()
     expect(screen.getByText('4,000원')).toBeInTheDocument()
     expect(screen.getByText('46,000원')).toBeInTheDocument()
-    expect(screen.getByText('✅ 입력완료')).toBeInTheDocument()
+    expect(screen.getByText('입력 완료')).toBeInTheDocument()
   })
 
   it('shows in-progress and not-started statuses', () => {
     render(<AdminTableView rooms={rooms} />)
 
-    expect(screen.getByText('🟡 입력중')).toBeInTheDocument()
-    expect(screen.getByText('❌ 미입력')).toBeInTheDocument()
+    expect(screen.getByText('진행중')).toBeInTheDocument()
+    expect(screen.getByText('미등록')).toBeInTheDocument()
   })
 
-  it('연결 컬럼에 연결 끊김 여부를 표시한다', () => {
-    const disconnectedRooms = [{
-      code: 'GH3456', prices,
-      players: [
-        { playerUuid: 'p1', name: '이서연', affiliation: '', gameState: blankGameState, connected: false },
-        { playerUuid: 'p2', name: '박도윤', affiliation: '', gameState: blankGameState, connected: true },
-      ],
-    }]
-    render(<AdminTableView rooms={disconnectedRooms} />)
-    expect(screen.getByText('연결')).toBeInTheDocument()
-    expect(screen.getByText('🔴 연결 끊김')).toBeInTheDocument()
-    expect(screen.getByText('🟢 연결됨')).toBeInTheDocument()
+  it('참가자 아바타와 소속을 함께 보여준다', () => {
+    render(<AdminTableView rooms={rooms} />)
+    const avatar = screen.getAllByAltText('')[0]
+    expect(avatar).toHaveAttribute('src', expect.stringContaining('/characters/'))
+    expect(screen.getAllByText('미래고').length).toBeGreaterThan(0)
   })
 
-  it('방 상태 컬럼에 정체/등록 완료를 표시한다', () => {
-    const mixedRooms = [
-      {
-        code: 'A1', registered: false, status: 'stale', prices,
-        players: [{ playerUuid: 'x1', name: '가나다', affiliation: '', gameState: blankGameState }],
-      },
-      {
-        code: 'A2', registered: true, prices,
-        players: [{ playerUuid: 'x2', name: '라마바', affiliation: '', gameState: blankGameState }],
-      },
-    ]
-    render(<AdminTableView rooms={mixedRooms} />)
-    expect(screen.getByText('방 상태')).toBeInTheDocument()
-    expect(screen.getByText('정체')).toBeInTheDocument()
-    expect(screen.getByText('등록 완료')).toBeInTheDocument()
+  it('행 체크박스를 선택하고 선택 삭제를 누르면 onDeletePlayers를 호출한다', async () => {
+    const onDeletePlayers = vi.fn().mockResolvedValue()
+    render(<AdminTableView rooms={rooms} onDeletePlayers={onDeletePlayers} />)
+
+    await userEvent.click(screen.getByRole('checkbox', { name: '이서연 선택' }))
+    await userEvent.click(screen.getByText('선택 삭제'))
+
+    expect(onDeletePlayers).toHaveBeenCalledWith([{ roomCode: 'GH3456', playerUuid: 'p1' }])
+  })
+
+  it('상태 헤더를 두 번 클릭하면 정렬 순서가 반대로 바뀐다', async () => {
+    render(<AdminTableView rooms={rooms} />)
+    const rowsBefore = screen.getAllByRole('row').slice(1).map(r => r.textContent)
+    await userEvent.click(screen.getByText('상태'))
+    await userEvent.click(screen.getByText('상태'))
+    const rowsAfter = screen.getAllByRole('row').slice(1).map(r => r.textContent)
+    expect(rowsAfter).not.toEqual(rowsBefore)
   })
 })

@@ -12,15 +12,16 @@ const STATUS_BADGE_CLASS = {
 }
 
 const TABS = [
-  { key: 'lobby', label: '로비' },
+  { key: 'lobby', label: '팀' },
   { key: 'stocks', label: '주식' },
   { key: 'realEstate', label: '부동산' },
 ]
 
-export default function AdminGridCard({ room, onSpectate, onRoomChanged }) {
+export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged }) {
   const [tab, setTab] = useState('lobby')
   const [showPriceModal, setShowPriceModal] = useState(false)
 
+  const displayName = room.title || `팀 ${index + 1}`
   const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
   const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
   const priceLabels = tab === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
@@ -51,7 +52,7 @@ export default function AdminGridCard({ room, onSpectate, onRoomChanged }) {
     <div className={styles.cardWrapper}>
       <div className={styles.cardHeader}>
         <div className={styles.headerLeft}>
-          {room.title && <span className={styles.titleBadge}>{room.title}</span>}
+          <span className={styles.titleBadge}>{displayName}</span>
           <span className={styles.codeBadge}>{room.code}</span>
         </div>
         <div className={styles.tabs}>
@@ -84,6 +85,7 @@ export default function AdminGridCard({ room, onSpectate, onRoomChanged }) {
               <div key={i} className={styles.slot} data-testid="admin-player-slot">
                 {player ? (
                   <>
+                    {i === 0 && <span className={styles.leaderBadge} aria-hidden="true">★</span>}
                     {player.connected === false && (
                       <span className={styles.disconnectedBadge}>연결 끊김</span>
                     )}

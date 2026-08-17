@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
 
 :root {
   --design-width: 390;
@@ -150,6 +151,29 @@ body.admin-mode {
   padding: 0;
   align-items: stretch;
   justify-content: stretch;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
+  --admin-bg:          #f5f7fc;
+  --admin-surface:     #ffffff;
+  --admin-border:      #e5e8f0;
+  --admin-text:        #1a1d2e;
+  --admin-text-2:      #888888;
+  --admin-text-3:      #9ca3af;
+  --admin-blue:        #1051c2;
+  --admin-blue-soft:   #eef2fa;
+  --admin-blue-tint:   rgba(112, 166, 254, 0.15);
+  --admin-blue-tint-2: rgba(112, 166, 254, 0.5);
+  --admin-blue-line:   #6c9aff;
+  --admin-blue-faint:  #cdddfa;
+  --admin-yellow-tint: #fff3c2;
+  --admin-orange:      #f19b23;
+  --admin-purple:      #7c5fe8;
+  --admin-purple-tint: #f3f0ff;
+  --admin-input-bg:    #f8f9fd;
+  --admin-icon-bg:     #f9fafb;
+  --admin-disabled:    #bbbbbb;
+  --admin-r-sm:        8px;
+  --admin-r-md:        12px;
+  --admin-r-lg:        16px;
 }
 
 body.admin-mode::before,

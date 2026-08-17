@@ -1,6 +1,10 @@
 .cardWrapper {
   display: flex;
   flex-direction: column;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+  overflow: hidden;
 }
 
 .cardHeader {
@@ -9,11 +13,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px;
-  background: var(--slot-empty);
-  border: 1px solid var(--divider);
-  border-bottom: none;
-  border-radius: var(--r-sm) var(--r-sm) 0 0;
-  padding: 8px 10px;
+  border-bottom: 1px solid var(--admin-border);
+  padding: 8px 14px;
   flex-shrink: 0;
 }
 
@@ -21,45 +22,40 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
 .tabs {
   display: flex;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  overflow: hidden;
+  gap: 2px;
+  background: var(--admin-blue-tint);
+  border-radius: 10px;
+  padding: 3px;
   flex-shrink: 0;
 }
 
 .tab {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--ink-2);
-  background: var(--white);
-  padding: 4px 8px;
+  color: var(--admin-text-2);
+  background: none;
+  padding: 5px 10px;
+  border-radius: 8px;
   white-space: nowrap;
-  border-right: 1px solid var(--line);
-}
-
-.tab:last-child {
-  border-right: none;
 }
 
 .tabActive {
-  color: var(--white);
-  background: var(--ink);
+  color: var(--admin-blue);
+  background: var(--admin-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .card {
   position: relative;
-  height: 320px;
-  background: var(--white);
-  border-radius: 0 0 var(--r-sm) var(--r-sm);
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--divider);
-  padding: 16px;
+  height: 400px;
+  background: var(--admin-surface);
+  padding: 14px;
   cursor: pointer;
   text-align: left;
 }
@@ -72,41 +68,36 @@
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
-  background: var(--purple);
-  border-radius: var(--r-pill);
-  padding: 4px 10px;
+  background: var(--admin-blue);
+  border-radius: 20px;
+  padding: 5px 12px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
 }
 
 .codeBadge {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--ink-2);
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  padding: 4px 10px;
+  color: var(--admin-blue);
+  letter-spacing: 1px;
   white-space: nowrap;
 }
 
 .titleBadge {
   font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-  background: var(--purple);
-  border-radius: var(--r-pill);
-  padding: 4px 10px;
+  font-weight: 700;
+  color: var(--admin-text);
   white-space: nowrap;
 }
 
-.badgeRegistered { background: var(--green); }
+.badgeRegistered { background: var(--admin-blue); }
 
-.badgeLive { background: var(--muted); }
+.badgeLive { background: var(--admin-text-3); }
 
-.badgeStale { background: var(--amber); }
+.badgeStale { background: var(--admin-orange); }
 
-.badgeAbandoned { background: var(--red); }
+.badgeAbandoned { background: #e5484d; }
 
-.badgeUnregistered { background: var(--violet); }
+.badgeUnregistered { background: var(--admin-purple); }
 
 .slots {
   display: grid;
@@ -116,10 +107,12 @@
 }
 
 .slot {
+  position: relative;
   min-width: 0;
   min-height: 112px;
-  border-radius: var(--r-sm);
-  background: var(--slot-empty);
+  border-radius: var(--admin-r-md);
+  background: var(--admin-blue-tint);
+  border: 1px solid var(--admin-blue-line);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -127,6 +120,14 @@
   gap: 6px;
   overflow: hidden;
   padding: 8px;
+}
+
+.leaderBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 12px;
+  color: #f19b23;
 }
 
 .slotImg {
@@ -139,9 +140,9 @@
 .emptyName {
   width: 100%;
   min-height: 18px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -151,66 +152,70 @@
 .slotEmpty {
   width: 72px;
   height: 72px;
-  border-radius: var(--r-sm);
+  border-radius: var(--admin-r-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--ghost);
-  background: #ffffff;
+  color: var(--admin-disabled);
+  background: var(--admin-surface);
 }
 
 .emptyName {
-  color: var(--ghost);
+  color: var(--admin-disabled);
 }
 
 .disconnectedBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   font-size: 10px;
   font-weight: 700;
   color: #e65100;
   background: #fff3e0;
-  border-radius: var(--r-pill);
+  border-radius: 20px;
   padding: 2px 8px;
 }
 
 .priceList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   height: 100%;
   overflow-y: auto;
 }
 
 .priceRow {
-  display: grid;
-  grid-template-columns: 24px 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: var(--r-sm);
-  background: var(--slot-empty);
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--admin-r-md);
+  border: 1px solid var(--admin-blue-faint);
 }
 
 .priceIcon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .priceLabel {
+  flex: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--admin-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .priceValue {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
   white-space: nowrap;
 }

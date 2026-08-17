@@ -221,7 +221,7 @@ it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE �
   await userEvent.click(screen.getByText('삭제'))
   expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
-  await userEvent.click(screen.getByText('정말 삭제'))
+  await userEvent.click(screen.getAllByText('삭제')[1])
 
   expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms/AB1234', expect.objectContaining({ method: 'DELETE' }))
   expect(onRoomChanged).toHaveBeenCalled()

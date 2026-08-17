@@ -88,7 +88,7 @@ describe('AdminClassList', () => {
     await userEvent.click(screen.getByText('삭제'))
     expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByText('정말 삭제'))
+    await userEvent.click(screen.getAllByText('삭제')[1])
 
     expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1', expect.objectContaining({
       method: 'DELETE',

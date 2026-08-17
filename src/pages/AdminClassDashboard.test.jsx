@@ -106,7 +106,7 @@ describe('AdminClassDashboard', () => {
     renderDashboard()
     await screen.findByText('홍길동')
     await userEvent.click(screen.getByText('테이블 뷰'))
-    expect(screen.getByText('이름')).toBeInTheDocument()
+    expect(screen.getByText('참가자')).toBeInTheDocument()
   })
 
   it('팀 카드 클릭 시 관전 팝업을 연다', async () => {
@@ -122,17 +122,6 @@ describe('AdminClassDashboard', () => {
     expect(screen.queryByText('1팀')).toBeNull()
   })
 
-  it('새로고침 버튼 클릭 시 /api/admin/rooms를 다시 호출한다', async () => {
-    renderDashboard()
-    await screen.findByText('홍길동')
-    global.fetch.mockClear()
-    await userEvent.click(screen.getByText('↻ 새로고침'))
-    expect(global.fetch).toHaveBeenCalledWith(
-      '/api/admin/rooms?classId=class-1',
-      expect.anything()
-    )
-  })
-
   it('← 수업 목록 버튼 클릭 시 onBack을 호출한다', async () => {
     const onBack = vi.fn()
     renderDashboard(onBack)
@@ -141,9 +130,8 @@ describe('AdminClassDashboard', () => {
     expect(onBack).toHaveBeenCalled()
   })
 
-  it('수업 삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onBack을 호출한다', async () => {
-    const onBack = vi.fn()
-    renderDashboard(onBack)
+  it('전체 삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 모든 방을 삭제한다', async () => {
+    renderDashboard()
     await screen.findByText('홍길동')
 
     global.fetch = vi.fn((url, options) => {
@@ -153,37 +141,26 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
 
-    await userEvent.click(screen.getByText('수업 삭제'))
+    await userEvent.click(screen.getByText('전체 삭제'))
     expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByText('정말 삭제'))
+    await userEvent.click(screen.getByText('삭제'))
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1', expect.objectContaining({
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms/CD5678', expect.objectContaining({
       method: 'DELETE',
     }))
-    expect(onBack).toHaveBeenCalled()
   })
 
-  it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다', async () => {
+  it('전체 삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
     global.fetch.mockClear()
 
-    await userEvent.click(screen.getByText('수업 삭제'))
+    await userEvent.click(screen.getByText('전체 삭제'))
     await userEvent.click(screen.getByText('취소'))
 
     expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
     expect(global.fetch).not.toHaveBeenCalled()
-  })
-
-  it('미배정 수업(unassigned)에는 삭제 버튼을 보여주지 않는다', async () => {
-    render(
-      <SocketProvider>
-        <AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />
-      </SocketProvider>
-    )
-    await screen.findByText('홍길동')
-    expect(screen.queryByText('수업 삭제')).not.toBeInTheDocument()
   })
 
   it('마운트 시 watch-class-rooms를 emit하고 언마운트 시 unwatch-class-rooms를 emit한다', async () => {
@@ -297,7 +274,7 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
 
-    await userEvent.click(screen.getByText('일괄 결과등록'))
+    await userEvent.click(screen.getByText('전체 등록'))
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/admin/classes/class-1/submit-pending',
@@ -322,7 +299,7 @@ describe('AdminClassDashboard', () => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     alertSpy.mockClear()
 
-    await userEvent.click(screen.getByText('일괄 결과등록'))
+    await userEvent.click(screen.getByText('전체 등록'))
 
     expect(alertSpy).toHaveBeenCalledWith('등록 대기 중인 팀이 없습니다')
   })
@@ -340,7 +317,7 @@ describe('AdminClassDashboard', () => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     alertSpy.mockClear()
 
-    await userEvent.click(screen.getByText('일괄 결과등록'))
+    await userEvent.click(screen.getByText('전체 등록'))
 
     expect(alertSpy).toHaveBeenCalledWith('일괄 결과등록에 실패했습니다')
   })

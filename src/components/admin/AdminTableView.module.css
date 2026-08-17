@@ -1,5 +1,30 @@
 .tableWrapper {
-  overflow-x: auto;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+  overflow: hidden;
+}
+
+.selectionBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--admin-blue-soft);
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-blue);
+}
+
+.selectionDeleteBtn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--admin-r-sm);
+  background: #e53935;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .table {
@@ -7,28 +32,97 @@
   border-collapse: collapse;
 }
 
+.thCheckbox {
+  width: 40px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
 .th {
   padding: 10px 12px;
   text-align: left;
   font-size: 12px;
   font-weight: 700;
-  color: var(--ink-2);
-  border-bottom: 1px solid var(--divider);
+  color: var(--admin-text-2);
+  border-bottom: 1px solid var(--admin-border);
   white-space: nowrap;
 }
 
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text-2);
+}
+
+.sortIcon { font-size: 9px; opacity: 0.6; }
+
 .tr:hover {
-  background: var(--slot-empty);
+  background: var(--admin-bg);
 }
 
 .td {
   padding: 10px 12px;
-  font-size: 14px;
-  color: var(--ink);
-  border-bottom: 1px solid var(--divider);
+  font-size: 13px;
+  color: var(--admin-text);
+  border-bottom: 1px solid var(--admin-border);
   white-space: nowrap;
 }
 
-.status {
-  font-weight: 800;
+.participant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--admin-icon-bg);
+}
+
+.participantText {
+  display: flex;
+  flex-direction: column;
+}
+
+.participantName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.participantAffiliation {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--admin-text-3);
+}
+
+.totalAssets {
+  font-weight: 700;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.statusPill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tone-blue { color: var(--admin-blue); }
+.tone-yellow { color: var(--admin-orange); }
+.tone-gray { color: var(--admin-text-3); }

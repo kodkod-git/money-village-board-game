@@ -1,6 +1,21 @@
+import { useMemo, useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
-import { JOB_LABELS, ROOM_STATUS_LABELS } from '../../constants/gameData'
 import styles from './AdminTableView.module.css'
+
+const COLUMNS = [
+  { key: 'cash', label: '현금', sortable: true },
+  { key: 'realEstateValue', label: '부동산총액', sortable: true },
+  { key: 'stockValue', label: '주식총액', sortable: true },
+  { key: 'totalAssets', label: '총자산', sortable: true },
+  { key: 'status', label: '상태', sortable: true },
+]
+
+const STATUS_ORDER = { 입력완료: 2, 진행중: 1, 미등록: 0 }
+const STATUS_META = {
+  입력완료: { label: '입력 완료', tone: 'blue' },
+  진행중: { label: '진행중', tone: 'yellow' },
+  미등록: { label: '미등록', tone: 'gray' },
+}
 
 function hasAnyInput(gameState) {
   if (!gameState) return false
@@ -12,19 +27,10 @@ function hasAnyInput(gameState) {
   return false
 }
 
-function getInputStatus(gameState) {
-  if (gameState?.isCompleted) return '✅ 입력완료'
-  if (hasAnyInput(gameState)) return '🟡 입력중'
-  return '❌ 미입력'
-}
-
-function connectionLabel(connected) {
-  return connected === false ? '🔴 연결 끊김' : '🟢 연결됨'
-}
-
-function roomStatusLabel(room) {
-  if (room.registered) return '등록 완료'
-  return ROOM_STATUS_LABELS[room.status] ?? '-'
+function getStatusKey(gameState) {
+  if (gameState?.isCompleted) return '입력완료'
+  if (hasAnyInput(gameState)) return '진행중'
+  return '미등록'
 }
 
 function formatWon(value) {
@@ -38,57 +44,133 @@ function flattenRows(rooms) {
       const breakdown = isCompleted
         ? calculateAssetBreakdown(player.gameState, room.prices)
         : null
+      const statusKey = getStatusKey(player.gameState)
       return {
-        key: `${room.code}-${player.playerUuid}`,
+        id: `${room.code}-${player.playerUuid}`,
+        roomCode: room.code,
+        playerUuid: player.playerUuid,
         name: player.name,
+        character: player.character,
         affiliation: player.affiliation,
-        job: isCompleted ? JOB_LABELS[player.gameState.job] : null,
         cash: breakdown?.cash ?? null,
         realEstateValue: breakdown?.realEstateValue ?? null,
         stockValue: breakdown?.stockValue ?? null,
         totalAssets: breakdown?.totalAssets ?? null,
-        status: getInputStatus(player.gameState),
-        connection: connectionLabel(player.connected),
-        roomStatus: roomStatusLabel(room),
+        statusKey,
       }
     })
   )
 }
 
-export default function AdminTableView({ rooms }) {
-  const rows = flattenRows(rooms)
+function compareRows(a, b, key, dir) {
+  let diff
+  if (key === 'status') {
+    diff = STATUS_ORDER[a.statusKey] - STATUS_ORDER[b.statusKey]
+  } else {
+    const av = a[key] ?? -Infinity
+    const bv = b[key] ?? -Infinity
+    diff = av - bv
+  }
+  return dir === 'asc' ? diff : -diff
+}
+
+export default function AdminTableView({ rooms, onDeletePlayers }) {
+  const [sort, setSort] = useState({ key: null, dir: 'desc' })
+  const [selected, setSelected] = useState(() => new Set())
+
+  const rows = useMemo(() => {
+    const flat = flattenRows(rooms)
+    if (!sort.key) return flat
+    return [...flat].sort((a, b) => compareRows(a, b, sort.key, sort.dir))
+  }, [rooms, sort])
+
+  const allSelected = rows.length > 0 && rows.every(r => selected.has(r.id))
+
+  function toggleSort(key) {
+    setSort(prev => (prev.key === key ? { key, dir: prev.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: 'desc' }))
+  }
+
+  function toggleRow(id) {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAll() {
+    setSelected(prev => (allSelected ? new Set() : new Set(rows.map(r => r.id))))
+  }
+
+  async function handleDeleteSelected() {
+    const entries = rows
+      .filter(r => selected.has(r.id))
+      .map(r => ({ roomCode: r.roomCode, playerUuid: r.playerUuid }))
+    if (entries.length === 0) return
+    await onDeletePlayers?.(entries)
+    setSelected(new Set())
+  }
+
   return (
     <div className={styles.tableWrapper}>
+      {selected.size > 0 && (
+        <div className={styles.selectionBar}>
+          <span>{selected.size}명 선택됨</span>
+          <button type="button" className={styles.selectionDeleteBtn} onClick={handleDeleteSelected}>선택 삭제</button>
+        </div>
+      )}
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.th}>이름</th>
-            <th className={styles.th}>소속</th>
-            <th className={styles.th}>직업</th>
-            <th className={styles.th}>현금</th>
-            <th className={styles.th}>부동산총액</th>
-            <th className={styles.th}>주식총액</th>
-            <th className={styles.th}>총자산</th>
-            <th className={styles.th}>상태</th>
-            <th className={styles.th}>연결</th>
-            <th className={styles.th}>방 상태</th>
+            <th className={styles.thCheckbox}>
+              <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="전체 선택" />
+            </th>
+            <th className={styles.th}>참가자</th>
+            {COLUMNS.map(col => (
+              <th key={col.key} className={styles.th}>
+                <button type="button" className={styles.sortBtn} onClick={() => toggleSort(col.key)}>
+                  {col.label}
+                  <span className={styles.sortIcon} aria-hidden="true">
+                    {sort.key === col.key ? (sort.dir === 'asc' ? '▲' : '▼') : '⌄'}
+                  </span>
+                </button>
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => (
-            <tr key={row.key} className={styles.tr}>
-              <td className={styles.td}>{row.name}</td>
-              <td className={styles.td}>{row.affiliation}</td>
-              <td className={styles.td}>{row.job ?? '-'}</td>
-              <td className={styles.td}>{formatWon(row.cash)}</td>
-              <td className={styles.td}>{formatWon(row.realEstateValue)}</td>
-              <td className={styles.td}>{formatWon(row.stockValue)}</td>
-              <td className={styles.td}>{formatWon(row.totalAssets)}</td>
-              <td className={`${styles.td} ${styles.status}`}>{row.status}</td>
-              <td className={styles.td}>{row.connection}</td>
-              <td className={styles.td}>{row.roomStatus}</td>
-            </tr>
-          ))}
+          {rows.map(row => {
+            const meta = STATUS_META[row.statusKey]
+            return (
+              <tr key={row.id} className={styles.tr}>
+                <td className={styles.td}>
+                  <input
+                    type="checkbox"
+                    checked={selected.has(row.id)}
+                    onChange={() => toggleRow(row.id)}
+                    aria-label={`${row.name} 선택`}
+                  />
+                </td>
+                <td className={styles.td}>
+                  <div className={styles.participant}>
+                    <img src={`/characters/${row.character}.png`} alt="" className={styles.avatar} />
+                    <div className={styles.participantText}>
+                      <span className={styles.participantName}>{row.name}</span>
+                      <span className={styles.participantAffiliation}>{row.affiliation}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className={styles.td}>{formatWon(row.cash)}</td>
+                <td className={styles.td}>{formatWon(row.realEstateValue)}</td>
+                <td className={styles.td}>{formatWon(row.stockValue)}</td>
+                <td className={`${styles.td} ${styles.totalAssets}`}>{formatWon(row.totalAssets)}</td>
+                <td className={styles.td}>
+                  <span className={`${styles.statusPill} ${styles[`tone-${meta.tone}`]}`}>{meta.label}</span>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

@@ -186,7 +186,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             <p className={styles.confirmText}>이 방을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</p>
             <div className={styles.confirmActions}>
               <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleDelete}>정말 삭제</button>
+              <button type="button" className={styles.confirmDeleteBtn} onClick={handleDelete}>삭제</button>
             </div>
           </div>
         </div>

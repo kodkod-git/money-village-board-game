@@ -5,6 +5,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
+import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import styles from './RankingPage.module.css'
 
 const CATEGORY_TABS = [
@@ -20,30 +21,6 @@ const SCOPE_TABS = [
 ]
 
 const VALUE_KEYS = { totalAssets: 'totalAssets', stock: 'stockValue', realEstate: 'realEstateValue' }
-
-function toAdminPlayer(row) {
-  return {
-    playerUuid: row.playerUuid,
-    name: row.name,
-    character: row.character,
-    affiliation: row.affiliation,
-    gameState: {
-      job: row.job ?? null,
-      cash: row.cash ?? 0,
-      stocks: row.stockHoldings ?? {},
-      realEstate: row.realEstateHoldings ?? {},
-      badges: row.badges ?? [false, false, false, false, false, false],
-      isCompleted: true,
-    },
-  }
-}
-
-function toAdminPrices(row) {
-  return {
-    stocks: row.stockPrices ?? {},
-    realEstate: row.realEstatePrices ?? {},
-  }
-}
 
 export default function RankingPage() {
   const { sessionId } = useParams()

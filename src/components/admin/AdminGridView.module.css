@@ -1,14 +1,14 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .createCard {
   min-height: 360px;
-  border-radius: var(--r-sm);
-  border: 1px dashed var(--ghost);
-  background: var(--white);
+  border-radius: var(--admin-r-lg);
+  border: 1.5px dashed var(--admin-disabled);
+  background: var(--admin-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,11 +21,11 @@
   font-size: 26px;
   font-weight: 700;
   line-height: 1;
-  color: var(--purple);
+  color: var(--admin-blue);
 }
 
 .createLabel {
   font-size: 13px;
-  font-weight: 800;
-  color: var(--purple);
+  font-weight: 700;
+  color: var(--admin-blue);
 }

@@ -1,0 +1,44 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 120px 24px;
+  text-align: center;
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-icon-bg);
+  color: var(--admin-disabled);
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-2);
+  margin-bottom: 12px;
+}
+
+.actionBtn {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: var(--admin-r-sm);
+  background: var(--admin-blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
