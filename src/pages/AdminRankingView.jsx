@@ -3,6 +3,7 @@ import RankBadge from '../components/admin/RankBadge'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
+import { JOB_LABELS } from '../constants/gameData'
 import styles from './AdminRankingView.module.css'
 
 const CATEGORY_TABS = [
@@ -159,10 +160,11 @@ export default function AdminRankingView({ classId, classDisplayName }) {
                           <div className={styles.participantText}>
                             <span className={styles.participantName}>{row.name}</span>
                             <span className={styles.participantAffiliation}>{row.affiliation}</span>
+                            <span className={styles.participantJob}>{JOB_LABELS[row.job] ?? '미입력'}</span>
                           </div>
                         </div>
                       </td>
-                      <td className={styles.td}>{row.teamCode}</td>
+                      <td className={styles.td}>{row.teamName || row.teamCode}</td>
                       <td className={styles.tdRight}>{formatWon(row.cash)}</td>
                       <td className={styles.tdRight}>{formatWon(row.realEstateValue)}</td>
                       <td className={styles.tdRight}>{formatWon(row.stockValue)}</td>

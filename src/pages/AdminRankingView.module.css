@@ -264,7 +264,7 @@
   white-space: nowrap;
 }
 
-.thRank,
+.thRank { text-align: center; }
 .th { text-align: left; }
 .thRight { text-align: right; }
 
@@ -282,6 +282,7 @@
   white-space: nowrap;
 }
 
+.tdRank { text-align: center; }
 .tdRight { text-align: right; color: #374151; }
 
 .totalAssets { font-weight: 700; color: var(--admin-text); }
@@ -315,6 +316,12 @@
   font-size: 12px;
   font-weight: 400;
   color: var(--admin-text-2);
+}
+
+.participantJob {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--admin-text-3);
 }
 
 .overlay {

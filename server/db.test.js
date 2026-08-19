@@ -279,7 +279,7 @@ describe('getRankings', () => {
       total_assets: 200000, stock_value: 4000, real_estate_value: 10000,
       session_id: 's1',
       game_sessions: {
-        team_code: 'AB1234', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+        team_code: 'AB1234', title: 'TEAM 1', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
         class_id: 'class-1', classes: { name: '1반' },
       },
     }]
@@ -296,9 +296,32 @@ describe('getRankings', () => {
       realEstateHoldings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
       badges: [true, true, false, false, false, false],
       totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
-      sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234', className: '1반',
+      sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234', teamName: 'TEAM 1', className: '1반',
       stockPrices: PRICES.stocks, realEstatePrices: PRICES.realEstate,
     }])
+  })
+
+  it('팀 이름이 없으면 teamName이 team_code로 대체된다', async () => {
+    const rows = [{
+      player_uuid: 'p1', name: '김민준', affiliation: '서울중', character: 'lion',
+      job: 'a', cash: 10000,
+      stock_holdings: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      real_estate_holdings: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+      total_assets: 0, stock_value: 0, real_estate_value: 0,
+      session_id: 's3',
+      game_sessions: {
+        team_code: 'EF9012', title: null, stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+        class_id: 'class-1', classes: { name: '1반' },
+      },
+    }]
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
+
+    const { getRankings } = await import('./db.js')
+    const result = await getRankings({})
+
+    expect(result[0].teamName).toBe('EF9012')
   })
 
   it('수업 정보가 없으면 className이 미배정 수업으로 채워진다', async () => {
