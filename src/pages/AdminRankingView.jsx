@@ -14,6 +14,7 @@ const CATEGORY_TABS = [
 
 const VALUE_KEYS = { totalAssets: 'totalAssets', cash: 'cash', stock: 'stockValue', realEstate: 'realEstateValue' }
 const PODIUM_ORDER = [1, 0, 2]
+const BADGE_SIZES = { 1: 36, 2: 32, 3: 28 }
 
 function formatWon(value) {
   return value != null ? `${value.toLocaleString()}원` : '-원'
@@ -122,10 +123,10 @@ export default function AdminRankingView({ classId, classDisplayName }) {
                       </div>
                       <span className={styles.podiumName}>{row.name}</span>
                       <div className={styles.podiumBlock}>
-                        <span className={styles.podiumBlockBadge}>
-                          <RankBadge rank={row.rank} size={row.rank === 1 ? 36 : 28} />
-                        </span>
-                        <span className={styles.podiumValue}>{formatManwon(row[valueKey])}</span>
+                        <div className={styles.podiumBadgeValue}>
+                          <RankBadge rank={row.rank} size={BADGE_SIZES[row.rank]} />
+                          <span className={styles.podiumValue}>{formatManwon(row[valueKey])}</span>
+                        </div>
                       </div>
                     </button>
                   ))}

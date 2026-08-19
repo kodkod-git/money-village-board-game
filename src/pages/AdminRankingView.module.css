@@ -210,11 +210,11 @@
   white-space: nowrap;
 }
 
-.podiumBlockBadge {
-  position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
+.podiumBadgeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
 .podium-1 .podiumAvatarWrap { width: 84px; height: 84px; border-color: #f59e0b; }
