@@ -173,18 +173,14 @@
 
 .popup {
   position: relative;
+  display: flex;
+  align-items: stretch;
   background: var(--admin-surface);
-  border-radius: var(--admin-r-lg);
+  border-radius: 24px;
   box-shadow: 0 20px 60px rgba(17, 24, 39, 0.18);
-  width: min(760px, 92vw);
+  width: min(820px, 94vw);
   max-height: 90vh;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.popup::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
 }
 
 .confirmPopup {

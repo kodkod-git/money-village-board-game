@@ -18,10 +18,12 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
       <div className={styles.header}>
         <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
         <div className={styles.identity}>
-          <span className={styles.name}>{player.name}</span>
-          {player.connected === false && (
-            <span className={styles.disconnectedBadge}>연결 끊김</span>
-          )}
+          <div className={styles.nameRow}>
+            <span className={styles.name}>{player.name}</span>
+            {player.connected === false && (
+              <span className={styles.disconnectedBadge}>연결 끊김</span>
+            )}
+          </div>
           <span className={styles.job}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
         </div>
         <button type="button" className={styles.editBtn} onClick={onEdit}>수정</button>
@@ -39,7 +41,9 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
         <span className={styles.sectionLabel}>성공카드</span>
         <div className={styles.iconRow}>
           {earnedBadges.map(name => (
-            <img key={name} src={`/badges/${name}.png`} alt={name} className={styles.badgeIcon} />
+            <span key={name} className={styles.badgeCircle}>
+              <img src={`/badges/${name}.png`} alt={name} className={styles.badgeIcon} />
+            </span>
           ))}
         </div>
       </div>

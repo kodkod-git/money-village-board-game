@@ -53,6 +53,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
           <span className={styles.name}>{player.name}</span>
         </div>
+        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
       </div>
 
       <div className={`${styles.columns} ${readOnly ? styles.columnsSingle : ''}`}>
