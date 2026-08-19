@@ -14,7 +14,7 @@ const CATEGORY_TABS = [
 
 const VALUE_KEYS = { totalAssets: 'totalAssets', cash: 'cash', stock: 'stockValue', realEstate: 'realEstateValue' }
 const PODIUM_ORDER = [1, 0, 2]
-const BADGE_SIZES = { 1: 36, 2: 32, 3: 28 }
+const BADGE_SIZES = { 1: 46, 2: 38, 3: 28 }
 
 function formatWon(value) {
   return value != null ? `${value.toLocaleString()}원` : '-원'
