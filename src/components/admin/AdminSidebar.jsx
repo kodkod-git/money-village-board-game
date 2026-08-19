@@ -2,10 +2,10 @@ import { useState } from 'react'
 import styles from './AdminSidebar.module.css'
 
 const NAV_ITEMS = [
-  { key: 'classes', label: '수업 목록', icon: '▦' },
-  { key: 'team-status', label: '팀 현황', icon: '👥' },
-  { key: 'ranking', label: '랭킹 보기', icon: '📈' },
-  { key: 'settings', label: '설정', icon: '⚙️' },
+  { key: 'classes', label: '수업 목록', icon: '/icons/IconClasses.png' },
+  { key: 'team-status', label: '팀 현황', icon: '/icons/IconTeams.png' },
+  { key: 'ranking', label: '랭킹 보기', icon: '/icons/IconRankings.png' },
+  { key: 'settings', label: '설정', icon: '/icons/IconSettings.png' },
 ]
 
 export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisabled }) {
@@ -35,7 +35,11 @@ export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisa
               disabled={disabled}
               title={collapsed ? item.label : undefined}
             >
-              <span className={styles.navIcon} aria-hidden="true">{item.icon}</span>
+              <span
+                className={styles.navIcon}
+                style={{ WebkitMaskImage: `url(${item.icon})`, maskImage: `url(${item.icon})` }}
+                aria-hidden="true"
+              />
               {!collapsed && <span className={styles.navLabel}>{item.label}</span>}
             </button>
           )
