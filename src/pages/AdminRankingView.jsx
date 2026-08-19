@@ -119,20 +119,13 @@ export default function AdminRankingView({ classId, classDisplayName }) {
                     >
                       <div className={styles.podiumAvatarWrap}>
                         <img src={`/characters/${row.character}.png`} alt={row.name} className={styles.podiumAvatar} />
-                        {row.rank === 1 && (
-                          <span className={styles.podiumAvatarBadge}>
-                            <RankBadge rank={1} size={36} />
-                          </span>
-                        )}
                       </div>
                       <span className={styles.podiumName}>{row.name}</span>
                       <div className={styles.podiumBlock}>
+                        <span className={styles.podiumBlockBadge}>
+                          <RankBadge rank={row.rank} size={row.rank === 1 ? 36 : 28} />
+                        </span>
                         <span className={styles.podiumValue}>{formatManwon(row[valueKey])}</span>
-                        {row.rank !== 1 && (
-                          <span className={styles.podiumBlockBadge}>
-                            <RankBadge rank={row.rank} size={28} />
-                          </span>
-                        )}
                       </div>
                     </button>
                   ))}
