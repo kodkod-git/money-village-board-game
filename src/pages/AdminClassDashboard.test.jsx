@@ -50,10 +50,10 @@ afterEach(() => {
   clearAdminSession()
 })
 
-function renderDashboard(onBack = vi.fn()) {
+function renderDashboard() {
   return render(
     <SocketProvider>
-      <AdminClassDashboard classId="class-1" initialName="3학년 2반" onBack={onBack} />
+      <AdminClassDashboard classId="class-1" initialName="3학년 2반" />
     </SocketProvider>
   )
 }
@@ -105,7 +105,7 @@ describe('AdminClassDashboard', () => {
   it('테이블 뷰 탭 클릭 시 테이블을 보여준다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
-    await userEvent.click(screen.getByText('테이블 뷰'))
+    await userEvent.click(screen.getByRole('button', { name: '테이블 뷰' }))
     expect(screen.getByText('참가자')).toBeInTheDocument()
   })
 
@@ -120,14 +120,6 @@ describe('AdminClassDashboard', () => {
     await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
     await userEvent.click(container.querySelector('[class*="overlay"]'))
     expect(screen.queryByText('1팀')).toBeNull()
-  })
-
-  it('← 수업 목록 버튼 클릭 시 onBack을 호출한다', async () => {
-    const onBack = vi.fn()
-    renderDashboard(onBack)
-    await screen.findByText('홍길동')
-    await userEvent.click(screen.getByText('← 수업 목록'))
-    expect(onBack).toHaveBeenCalled()
   })
 
   it('전체 삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 모든 방을 삭제한다', async () => {
@@ -196,7 +188,7 @@ describe('AdminClassDashboard', () => {
   it('미배정 수업(unassigned)에는 방 만들기 카드를 보여주지 않는다', async () => {
     render(
       <SocketProvider>
-        <AdminClassDashboard classId="unassigned" initialName="미배정 수업" onBack={vi.fn()} />
+        <AdminClassDashboard classId="unassigned" initialName="미배정 수업" />
       </SocketProvider>
     )
     await screen.findByText('홍길동')

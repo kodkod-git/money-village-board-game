@@ -55,7 +55,6 @@ export default function AdminDashboard() {
         <AdminClassDashboard
           classId={selectedClass.id}
           initialName={selectedClass.name}
-          onBack={() => setSection('classes')}
         />
       )}
       {section === 'ranking' && selectedClass && (

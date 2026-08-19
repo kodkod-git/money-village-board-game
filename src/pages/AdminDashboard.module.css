@@ -42,24 +42,33 @@
 .viewToggleBtn {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  width: 36px;
   height: 32px;
-  padding: 0 10px;
   background: var(--admin-surface);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--admin-text-2);
 }
 
 .viewToggleBtnActive {
   background: var(--admin-blue-soft);
-  color: var(--admin-blue);
 }
 
-.viewToggleIcon { width: 13px; height: 13px; object-fit: contain; }
+.viewToggleIcon {
+  width: 14px;
+  height: 14px;
+  background-color: var(--admin-text-2);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
-.qrBtn,
-.exitBtn {
+.viewToggleBtnActive .viewToggleIcon {
+  background-color: var(--admin-blue);
+}
+
+.qrBtn {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-r-sm);

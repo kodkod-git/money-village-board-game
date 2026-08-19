@@ -23,7 +23,7 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName, onBack }) {
+export default function AdminClassDashboard({ classId, initialName }) {
   const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
   const [rooms, setRooms] = useState([])
@@ -163,11 +163,15 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
               <button
                 key={tab.key}
                 type="button"
+                aria-label={tab.label}
                 className={`${styles.viewToggleBtn} ${activeTab === tab.key ? styles.viewToggleBtnActive : ''}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <img src={tab.icon} alt="" className={styles.viewToggleIcon} />
-                <span>{tab.label}</span>
+                <span
+                  className={styles.viewToggleIcon}
+                  style={{ WebkitMaskImage: `url(${tab.icon})`, maskImage: `url(${tab.icon})` }}
+                  aria-hidden="true"
+                />
               </button>
             ))}
           </div>
@@ -190,7 +194,6 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
             <img src="/icons/IconRegister.png" alt="" className={styles.btnIcon} />
             <span>전체 등록</span>
           </button>
-          <button className={styles.exitBtn} onClick={onBack} type="button">← 수업 목록</button>
         </div>
       </div>
 

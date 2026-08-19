@@ -78,6 +78,6 @@ describe('AdminDashboard', () => {
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
     await userEvent.click(await screen.findByText('3학년 2반'))
-    expect(await screen.findByText('← 수업 목록')).toBeInTheDocument()
+    expect(await screen.findByPlaceholderText('이름 또는 팀 검색...')).toBeInTheDocument()
   })
 })
