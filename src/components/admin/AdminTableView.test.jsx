@@ -85,12 +85,14 @@ describe('AdminTableView', () => {
     expect(screen.getAllByText('미래고').length).toBeGreaterThan(0)
   })
 
-  it('행 체크박스를 선택하고 선택 삭제를 누르면 onDeletePlayers를 호출한다', async () => {
+  it('행 체크박스를 선택하고 선택 삭제 확인 시 onDeletePlayers를 호출한다', async () => {
     const onDeletePlayers = vi.fn().mockResolvedValue()
     render(<AdminTableView rooms={rooms} onDeletePlayers={onDeletePlayers} />)
 
     await userEvent.click(screen.getByRole('checkbox', { name: '이서연 선택' }))
     await userEvent.click(screen.getByText('선택 삭제'))
+    expect(onDeletePlayers).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByText('예'))
 
     expect(onDeletePlayers).toHaveBeenCalledWith([{ roomCode: 'GH3456', playerUuid: 'p1' }])
   })

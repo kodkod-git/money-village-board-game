@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
+import ConfirmDialog from './ConfirmDialog'
 import styles from './AdminTableView.module.css'
 
 const COLUMNS = [
@@ -77,6 +78,7 @@ function compareRows(a, b, key, dir) {
 export default function AdminTableView({ rooms, onDeletePlayers }) {
   const [sort, setSort] = useState({ key: null, dir: 'desc' })
   const [selected, setSelected] = useState(() => new Set())
+  const [confirmDeleteSelected, setConfirmDeleteSelected] = useState(false)
 
   const rows = useMemo(() => {
     const flat = flattenRows(rooms)
@@ -117,8 +119,18 @@ export default function AdminTableView({ rooms, onDeletePlayers }) {
       {selected.size > 0 && (
         <div className={styles.selectionBar}>
           <span>{selected.size}명 선택됨</span>
-          <button type="button" className={styles.selectionDeleteBtn} onClick={handleDeleteSelected}>선택 삭제</button>
+          <button type="button" className={styles.selectionDeleteBtn} onClick={() => setConfirmDeleteSelected(true)}>선택 삭제</button>
         </div>
+      )}
+
+      {confirmDeleteSelected && (
+        <ConfirmDialog
+          tone="danger"
+          title="선택 삭제"
+          description={<>선택한 {selected.size}명을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          onCancel={() => setConfirmDeleteSelected(false)}
+          onConfirm={() => { setConfirmDeleteSelected(false); handleDeleteSelected() }}
+        />
       )}
       <table className={styles.table}>
         <thead>

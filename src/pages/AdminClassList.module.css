@@ -48,21 +48,3 @@
   border-radius: var(--admin-r-sm); height: 32px; padding: 0 12px;
   font-size: 12px; font-weight: 700; color: #e53935;
 }
-
-.confirmOverlay {
-  position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 600;
-}
-.confirmPopup {
-  background: var(--admin-surface); border-radius: var(--admin-r-lg); box-shadow: 0 20px 60px rgba(17, 24, 39, 0.18);
-  padding: 24px; width: min(320px, 88vw);
-  display: flex; flex-direction: column; gap: 16px;
-}
-.confirmText { font-size: 13px; font-weight: 700; color: var(--admin-text); text-align: center; line-height: 1.5; }
-.confirmActions { display: flex; gap: 8px; }
-.confirmCancelBtn,
-.confirmDeleteBtn { flex: 1; height: 40px; border-radius: var(--admin-r-sm); font-size: 13px; font-weight: 700; }
-.confirmCancelBtn { background: var(--admin-bg); color: var(--admin-text-2); border: 1px solid var(--admin-border); }
-.confirmDeleteBtn { background: #e53935; color: white; border: none; }

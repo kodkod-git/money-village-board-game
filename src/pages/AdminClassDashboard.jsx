@@ -5,6 +5,7 @@ import AdminSpectateModal from '../components/admin/AdminSpectateModal'
 import ClassQRModal from '../components/admin/ClassQRModal'
 import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
+import ConfirmDialog from '../components/admin/ConfirmDialog'
 import { adminFetch } from '../utils/adminAuth'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './AdminDashboard.module.css'
@@ -31,6 +32,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
   const [name, setName] = useState(initialName)
   const [showQr, setShowQr] = useState(false)
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
+  const [confirmBulkRegister, setConfirmBulkRegister] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [isBulkRegistering, setIsBulkRegistering] = useState(false)
   const [search, setSearch] = useState('')
@@ -187,7 +189,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
           </button>
           <button
             className={styles.bulkRegisterBtn}
-            onClick={handleBulkRegister}
+            onClick={() => setConfirmBulkRegister(true)}
             disabled={isBulkRegistering}
             type="button"
           >
@@ -202,17 +204,23 @@ export default function AdminClassDashboard({ classId, initialName }) {
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
 
       {confirmDeleteAll && (
-        <div className={styles.overlay} onClick={() => setConfirmDeleteAll(false)}>
-          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
-            <p className={styles.confirmText}>
-              이 수업의 모든 팀을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?
-            </p>
-            <div className={styles.confirmActions}>
-              <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDeleteAll(false)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDeleteAll}>삭제</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          tone="danger"
+          title="전체 삭제"
+          description={<>이 수업의 모든 팀을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          onCancel={() => setConfirmDeleteAll(false)}
+          onConfirm={handleConfirmDeleteAll}
+        />
+      )}
+
+      {confirmBulkRegister && (
+        <ConfirmDialog
+          tone="primary"
+          title="전체 등록"
+          description="등록 대기 중인 팀을 모두 결과 등록하시겠습니까?"
+          onCancel={() => setConfirmBulkRegister(false)}
+          onConfirm={() => { setConfirmBulkRegister(false); handleBulkRegister() }}
+        />
       )}
 
       {rooms.length === 0 ? (

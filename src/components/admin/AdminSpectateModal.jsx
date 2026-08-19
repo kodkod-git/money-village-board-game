@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminPlayerCard from './AdminPlayerCard'
 import AdminEditModal from './AdminEditModal'
-import PriceSettingModal from '../PriceSettingModal'
+import AdminPriceSettingModal from './AdminPriceSettingModal'
+import ConfirmDialog from './ConfirmDialog'
 import { adminFetch } from '../../utils/adminAuth'
 import styles from './AdminSpectateModal.module.css'
 
@@ -15,6 +16,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [editingPlayerUuid, setEditingPlayerUuid] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [kickTarget, setKickTarget] = useState(null)
+  const [confirmRegister, setConfirmRegister] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
@@ -175,37 +177,44 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
         )}
         {room.status === 'completed-but-unregistered' && (
-          <button type="button" className={styles.registerBtn} onClick={handleRegister}>결과 등록</button>
+          <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
         )}
         <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
       </div>
 
       {confirmDelete && (
-        <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(false)}>
-          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
-            <p className={styles.confirmText}>이 방을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</p>
-            <div className={styles.confirmActions}>
-              <button type="button" className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleDelete}>삭제</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          tone="danger"
+          title="팀 삭제"
+          description={<>이 방을 삭제하면 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={handleDelete}
+        />
       )}
 
       {kickTarget && (
-        <div className={styles.confirmOverlay} onClick={() => setKickTarget(null)}>
-          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
-            <p className={styles.confirmText}>이 학생을 팀에서 퇴장시키겠습니까?</p>
-            <div className={styles.confirmActions}>
-              <button type="button" className={styles.confirmCancelBtn} onClick={() => setKickTarget(null)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={() => handleKick(kickTarget)}>퇴장시키기</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          tone="danger"
+          title="학생 퇴장"
+          description="이 학생을 팀에서 퇴장시키겠습니까?"
+          confirmLabel="퇴장시키기"
+          onCancel={() => setKickTarget(null)}
+          onConfirm={() => handleKick(kickTarget)}
+        />
+      )}
+
+      {confirmRegister && (
+        <ConfirmDialog
+          tone="primary"
+          title="결과 등록"
+          description="이 팀의 결과를 등록하시겠습니까?"
+          onCancel={() => setConfirmRegister(false)}
+          onConfirm={() => { setConfirmRegister(false); handleRegister() }}
+        />
       )}
 
       {showPriceModal && (
-        <PriceSettingModal
+        <AdminPriceSettingModal
           prices={room.prices}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}

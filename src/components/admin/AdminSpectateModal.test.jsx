@@ -190,7 +190,7 @@ it('live/등록완료 상태에는 결과 등록 버튼을 보여주지 않는�
   expect(screen.queryByText('결과 등록')).not.toBeInTheDocument()
 })
 
-it('결과 등록 버튼 클릭 시 확인 팝업 없이 바로 등록 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
+it('결과 등록 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 등록 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
   const onClose = vi.fn()
   const onRoomChanged = vi.fn()
   global.fetch = vi.fn((url, options) => {
@@ -203,6 +203,8 @@ it('결과 등록 버튼 클릭 시 확인 팝업 없이 바로 등록 요청 �
   const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
   render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={onClose} onRoomChanged={onRoomChanged} />)
   await userEvent.click(screen.getByText('결과 등록'))
+  expect(screen.getByText(/결과를 등록하시겠습니까/)).toBeInTheDocument()
+  await userEvent.click(screen.getByText('예'))
 
   expect(global.fetch).toHaveBeenCalledWith('/api/rooms/AB1234/submit', expect.objectContaining({ method: 'POST' }))
   expect(onRoomChanged).toHaveBeenCalled()
@@ -223,7 +225,7 @@ it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE �
   await userEvent.click(screen.getByText('삭제'))
   expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
-  await userEvent.click(screen.getAllByText('삭제')[1])
+  await userEvent.click(screen.getByText('예'))
 
   expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms/AB1234', expect.objectContaining({ method: 'DELETE' }))
   expect(onRoomChanged).toHaveBeenCalled()
@@ -234,7 +236,7 @@ it('삭제 확인 팝업에서 취소를 누르면 요청을 보내지 않는다
   global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
   render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
   await userEvent.click(screen.getByText('삭제'))
-  await userEvent.click(screen.getByText('취소'))
+  await userEvent.click(screen.getByText('아니요'))
   expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
 })
 
@@ -344,7 +346,7 @@ describe('팀원 퇴장', () => {
     const onRoomChanged = vi.fn()
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
     await userEvent.click(screen.getByText('퇴장'))
-    await userEvent.click(screen.getByText('취소'))
+    await userEvent.click(screen.getByText('아니요'))
     expect(screen.queryByText(/퇴장시키겠습니까/)).not.toBeInTheDocument()
     expect(onRoomChanged).not.toHaveBeenCalled()
   })

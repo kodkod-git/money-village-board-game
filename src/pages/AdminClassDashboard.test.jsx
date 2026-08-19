@@ -136,7 +136,7 @@ describe('AdminClassDashboard', () => {
     await userEvent.click(screen.getByText('전체 삭제'))
     expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByText('삭제'))
+    await userEvent.click(screen.getByText('예'))
 
     expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms/CD5678', expect.objectContaining({
       method: 'DELETE',
@@ -149,7 +149,7 @@ describe('AdminClassDashboard', () => {
     global.fetch.mockClear()
 
     await userEvent.click(screen.getByText('전체 삭제'))
-    await userEvent.click(screen.getByText('취소'))
+    await userEvent.click(screen.getByText('아니요'))
 
     expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
     expect(global.fetch).not.toHaveBeenCalled()
@@ -267,6 +267,8 @@ describe('AdminClassDashboard', () => {
     })
 
     await userEvent.click(screen.getByText('전체 등록'))
+    expect(screen.getByText(/결과 등록하시겠습니까/)).toBeInTheDocument()
+    await userEvent.click(screen.getByText('예'))
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/admin/classes/class-1/submit-pending',
@@ -276,6 +278,18 @@ describe('AdminClassDashboard', () => {
       })
     )
     expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms?classId=class-1', expect.anything())
+  })
+
+  it('전체 등록 확인 팝업에서 취소를 누르면 요청을 보내지 않는다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    global.fetch.mockClear()
+
+    await userEvent.click(screen.getByText('전체 등록'))
+    await userEvent.click(screen.getByText('아니요'))
+
+    expect(screen.queryByText(/결과 등록하시겠습니까/)).not.toBeInTheDocument()
+    expect(global.fetch).not.toHaveBeenCalled()
   })
 
   it('등록 대기 중인 팀이 없으면 alert로 안내한다', async () => {
@@ -292,6 +306,7 @@ describe('AdminClassDashboard', () => {
     alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('전체 등록'))
+    await userEvent.click(screen.getByText('예'))
 
     expect(alertSpy).toHaveBeenCalledWith('등록 대기 중인 팀이 없습니다')
   })
@@ -310,6 +325,7 @@ describe('AdminClassDashboard', () => {
     alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('전체 등록'))
+    await userEvent.click(screen.getByText('예'))
 
     expect(alertSpy).toHaveBeenCalledWith('일괄 결과등록에 실패했습니다')
   })

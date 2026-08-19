@@ -1,0 +1,67 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 800;
+  padding: 24px;
+}
+
+.card {
+  background: var(--admin-surface);
+  border-radius: 20px;
+  box-shadow: 0 24px 32px rgba(0, 0, 0, 0.18);
+  padding: 32px 32px 24px;
+  width: min(420px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.iconBadge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconBadgeDanger { background: #fee2e2; color: #dc2626; }
+.iconBadgePrimary { background: var(--admin-blue-soft); color: var(--admin-blue); }
+
+.textGroup { display: flex; flex-direction: column; gap: 8px; }
+
+.title { font-size: 18px; font-weight: 900; color: var(--admin-text); }
+
+.description {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--admin-text-2);
+  line-height: 1.6;
+}
+
+.actions { display: flex; gap: 10px; padding-top: 4px; }
+
+.cancelBtn,
+.confirmBtn {
+  flex: 1;
+  height: 45px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cancelBtn {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: #374151;
+}
+
+.confirmBtn { color: #ffffff; border: none; }
+
+.confirmBtnDanger { background: #dc2626; }
+.confirmBtnPrimary { background: var(--admin-blue); }

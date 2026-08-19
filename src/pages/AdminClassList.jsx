@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { adminFetch } from '../utils/adminAuth'
 import ClassQRModal from '../components/admin/ClassQRModal'
+import ConfirmDialog from '../components/admin/ConfirmDialog'
 import styles from './AdminClassList.module.css'
 
 function formatDate(isoString) {
@@ -91,17 +92,13 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
       {qrClass && <ClassQRModal classId={qrClass.id} name={qrClass.name} onClose={() => setQrClass(null)} />}
 
       {deleteTarget && (
-        <div className={styles.confirmOverlay} onClick={() => setDeleteTarget(null)}>
-          <div className={styles.confirmPopup} onClick={e => e.stopPropagation()}>
-            <p className={styles.confirmText}>
-              '{deleteTarget.name}' 수업을 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?
-            </p>
-            <div className={styles.confirmActions}>
-              <button type="button" className={styles.confirmCancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
-              <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>삭제</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          tone="danger"
+          title="수업 삭제"
+          description={<>'{deleteTarget.name}' 수업을 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDelete}
+        />
       )}
     </div>
   )
