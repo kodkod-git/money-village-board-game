@@ -10,8 +10,8 @@ import { useSocketContext } from '../contexts/SocketContext'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
-  { key: 'grid', label: '그리드 뷰', icon: '▦' },
-  { key: 'table', label: '테이블 뷰', icon: '☰' },
+  { key: 'grid', label: '그리드 뷰', icon: '/icons/IconGrid.png' },
+  { key: 'table', label: '테이블 뷰', icon: '/icons/IconTable.png' },
 ]
 
 function matchesSearch(room, query) {
@@ -166,7 +166,7 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
                 className={`${styles.viewToggleBtn} ${activeTab === tab.key ? styles.viewToggleBtnActive : ''}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <span className={styles.viewToggleIcon} aria-hidden="true">{tab.icon}</span>
+                <img src={tab.icon} alt="" className={styles.viewToggleIcon} />
                 <span>{tab.label}</span>
               </button>
             ))}
@@ -178,7 +178,8 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
             disabled={rooms.length === 0}
             type="button"
           >
-            전체 삭제
+            <img src="/icons/IconDelete.png" alt="" className={styles.btnIcon} />
+            <span>전체 삭제</span>
           </button>
           <button
             className={styles.bulkRegisterBtn}
@@ -186,7 +187,8 @@ export default function AdminClassDashboard({ classId, initialName, onBack }) {
             disabled={isBulkRegistering}
             type="button"
           >
-            전체 등록
+            <img src="/icons/IconRegister.png" alt="" className={styles.btnIcon} />
+            <span>전체 등록</span>
           </button>
           <button className={styles.exitBtn} onClick={onBack} type="button">← 수업 목록</button>
         </div>

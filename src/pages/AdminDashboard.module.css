@@ -56,11 +56,10 @@
   color: var(--admin-blue);
 }
 
-.viewToggleIcon { font-size: 12px; }
+.viewToggleIcon { width: 13px; height: 13px; object-fit: contain; }
 
 .qrBtn,
-.exitBtn,
-.deleteAllBtn {
+.exitBtn {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-r-sm);
@@ -72,11 +71,11 @@
   white-space: nowrap;
 }
 
-.deleteAllBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
+.deleteAllBtn,
 .bulkRegisterBtn {
-  background: var(--admin-blue);
-  border: 1px solid var(--admin-blue);
+  display: flex;
+  align-items: center;
+  gap: 5px;
   border-radius: var(--admin-r-sm);
   height: 32px;
   padding: 0 14px;
@@ -86,7 +85,21 @@
   white-space: nowrap;
 }
 
+.deleteAllBtn {
+  background: var(--admin-disabled);
+  border: 1px solid var(--admin-disabled);
+}
+
+.deleteAllBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bulkRegisterBtn {
+  background: var(--admin-blue);
+  border: 1px solid var(--admin-blue);
+}
+
 .bulkRegisterBtn:disabled { opacity: 0.5; }
+
+.btnIcon { width: 14px; height: 14px; object-fit: contain; }
 
 .title {
   font-size: 22px;
