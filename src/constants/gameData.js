@@ -3,6 +3,10 @@ export const JOB_LABELS = {
   d: '문화·콘텐츠', e: '서비스·판매', f: '생산·운송',
 }
 export const JOB_ICONS = { a: '💼', b: '⚙️', c: '🏥', d: '🎨', e: '🛒', f: '🚚' }
+export const JOB_IMAGES = {
+  a: '경영금융', b: '연구기술', c: '보건교육',
+  d: '문화콘텐츠', e: '서비스판매', f: '생산운송',
+}
 
 export const BADGE_NAMES = ['communication', 'global', 'idea', 'money', 'thinking', 'trust']
 export const BADGE_LABELS = {

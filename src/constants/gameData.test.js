@@ -1,16 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import {
-  JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
+  JOB_LABELS, JOB_ICONS, JOB_IMAGES, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
   STOCK_LABELS, STOCK_IMAGES, ROOM_STATUS_LABELS,
   MAX_ASSET_PRICE, MAX_ASSET_QUANTITY,
 } from './gameData'
 
 describe('gameData constants', () => {
-  it('직업은 6개이며 라벨과 아이콘 키가 일치한다', () => {
+  it('직업은 6개이며 라벨과 아이콘/이미지 키가 일치한다', () => {
     const keys = Object.keys(JOB_LABELS)
     expect(keys).toHaveLength(6)
     expect(Object.keys(JOB_ICONS)).toEqual(keys)
+    expect(Object.keys(JOB_IMAGES)).toEqual(keys)
   })
 
   it('성공카드는 6개이며 이름과 라벨 키가 일치한다', () => {

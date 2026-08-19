@@ -3,11 +3,11 @@ import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import {
   JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
-  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
+  STOCK_LABELS, STOCK_IMAGES,
 } from '../../constants/gameData'
-import NumberInputModal from '../NumberInputModal'
 import JobEditModal from './JobEditModal'
 import BadgeEditModal from './BadgeEditModal'
+import CashEditModal from './CashEditModal'
 import RealEstateEditModal from './RealEstateEditModal'
 import StockEditModal from './StockEditModal'
 import styles from './AdminEditModal.module.css'
@@ -161,21 +161,14 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
       {editingField === 'badges' && (
         <BadgeEditModal
           badges={gameState.badges}
-          onToggle={i => {
-            const badges = [...gameState.badges]
-            badges[i] = !badges[i]
-            onSave('badges', badges)
-          }}
+          onChange={next => onSave('badges', next)}
           onClose={() => setEditingField(null)}
         />
       )}
       {editingField === 'cash' && (
-        <NumberInputModal
-          title="현금 수정"
+        <CashEditModal
           initialValue={gameState.cash ?? 0}
-          unit="원"
-          maxValue={MAX_CASH}
-          onConfirm={val => { onSave('cash', val); setEditingField(null) }}
+          onConfirm={val => onSave('cash', val)}
           onClose={() => setEditingField(null)}
         />
       )}

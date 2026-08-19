@@ -40,11 +40,12 @@ describe('AdminEditModal', () => {
     expect(screen.getByText('69,500원')).toBeInTheDocument()
   })
 
-  it('직업 수정 버튼 클릭 후 직업 선택 시 onSave("job", key)를 호출한다', async () => {
+  it('직업 수정 버튼 클릭 후 직업 선택 및 확인 시 onSave("job", key)를 호출한다', async () => {
     const onSave = vi.fn()
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
     await userEvent.click(screen.getByTestId('edit-job'))
     await userEvent.click(screen.getByText('보건·교육'))
+    await userEvent.click(screen.getByText('확인'))
     expect(onSave).toHaveBeenCalledWith('job', 'c')
   })
 
@@ -52,11 +53,9 @@ describe('AdminEditModal', () => {
     const onSave = vi.fn()
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
     await userEvent.click(screen.getByTestId('edit-cash'))
-    // 기존 현금(125000, 6자리)이 미리 채워져 있으므로 백스페이스로 지운 뒤 입력한다.
-    for (let i = 0; i < 6; i++) {
-      await userEvent.click(screen.getByText('←'))
-    }
-    await userEvent.click(screen.getByText('5'))
+    const input = screen.getByLabelText('현금')
+    await userEvent.clear(input)
+    await userEvent.type(input, '5')
     await userEvent.click(screen.getByText('확인'))
     expect(onSave).toHaveBeenCalledWith('cash', 5)
   })
@@ -65,12 +64,9 @@ describe('AdminEditModal', () => {
     const onSave = vi.fn()
     render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={onSave} onClose={vi.fn()} />)
     await userEvent.click(screen.getByTestId('edit-cash'))
-    for (let i = 0; i < 6; i++) {
-      await userEvent.click(screen.getByText('←'))
-    }
-    for (let i = 0; i < 10; i++) {
-      await userEvent.click(screen.getByRole('button', { name: '9' }))
-    }
+    const input = screen.getByLabelText('현금')
+    await userEvent.clear(input)
+    await userEvent.type(input, '9999999999')
     await userEvent.click(screen.getByText('확인'))
     expect(onSave).toHaveBeenCalledWith('cash', 1000000000)
   })

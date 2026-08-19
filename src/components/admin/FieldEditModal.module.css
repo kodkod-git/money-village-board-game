@@ -1,28 +1,221 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 600;
+  z-index: 700;
+  padding: 24px;
 }
 
 .sheet {
-  background: var(--white);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card);
-  width: min(420px, 92vw);
-  max-height: 85vh;
-  overflow-y: auto;
-  padding: 20px;
+  background: var(--admin-bg);
+  border-radius: 24px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.28);
+  width: min(680px, 94vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
+  flex-shrink: 0;
+  background: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-blue-faint);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  padding: 20px 28px 16px;
 }
 
-.title { font-size: 16px; font-weight: 800; color: var(--ink); }
+.headerText { display: flex; flex-direction: column; }
+
+.title {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--admin-text);
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text-2);
+  margin-top: 4px;
+}
+
+.closeBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--admin-border);
+  color: var(--admin-text-2);
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.footer {
+  flex-shrink: 0;
+  background: var(--admin-surface);
+  border-top: 1px solid var(--admin-blue-faint);
+  padding: 16px 28px;
+}
+
+.confirmBtn {
+  width: 100%;
+  background: var(--admin-blue);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(16, 81, 194, 0.3);
+}
+
+/* Picker grid (job / badges) */
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.pickerTile {
+  background: var(--admin-surface);
+  border: 2px solid var(--admin-blue-faint);
+  border-radius: 16px;
+  padding: 32px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.pickerTileSelected {
+  background: var(--admin-blue-tint);
+  border-color: var(--admin-blue-line);
+}
+
+.pickerIcon { width: 56px; height: 56px; object-fit: contain; }
+
+.pickerLabel {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--admin-text);
+  text-align: center;
+}
+
+/* Asset grid (real estate / stock) */
+
+.assetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.assetTile {
+  background: var(--admin-surface);
+  border: 2px solid var(--admin-blue-faint);
+  border-radius: 16px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.assetTileHead { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.assetTileIcon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+
+.assetTileInfo { display: flex; flex-direction: column; min-width: 0; }
+
+.assetTileName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assetTilePrice { font-size: 12px; color: var(--admin-text-2); margin-top: 2px; }
+
+.qtyBox {
+  height: 45px;
+  border-radius: 20px;
+  border: 1px solid var(--admin-blue-faint);
+  background: var(--admin-surface);
+}
+
+.qtyBoxActive {
+  background: var(--admin-blue-tint);
+  border-color: var(--admin-blue);
+}
+
+.qtyInput {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--admin-text);
+  border-radius: inherit;
+}
+
+.qtyInput:focus { outline: none; }
+
+/* Cash editor */
+
+.cashBody { display: flex; align-items: center; justify-content: center; padding: 32px 0; }
+
+.cashCard {
+  background: var(--admin-surface);
+  border: 2px solid var(--admin-blue-faint);
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(400px, 100%);
+}
+
+.cashLabel { font-size: 13px; font-weight: 700; color: var(--admin-text-2); }
+
+.cashInputBox {
+  background: #f9fbff;
+  border: 1px solid var(--admin-blue-faint);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.cashInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.cashInput:focus { outline: none; }
+
+.cashWords { font-size: 13px; font-weight: 600; color: var(--admin-blue); }

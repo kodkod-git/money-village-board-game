@@ -87,6 +87,7 @@ describe('AdminSpectateModal', () => {
     await userEvent.click(screen.getByText('수정'))
     await userEvent.click(screen.getByTestId('edit-job'))
     await userEvent.click(screen.getByText('보건·교육'))
+    await userEvent.click(screen.getByText('확인'))
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/admin/rooms/AB1234/players/AB1234-p1',
@@ -112,6 +113,7 @@ describe('AdminSpectateModal', () => {
     await userEvent.click(screen.getByText('수정'))
     await userEvent.click(screen.getByTestId('edit-job'))
     await userEvent.click(screen.getByText('보건·교육'))
+    await userEvent.click(screen.getByText('확인'))
 
     expect(onRoomChanged).toHaveBeenCalled()
   })
