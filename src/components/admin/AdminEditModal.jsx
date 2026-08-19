@@ -57,81 +57,91 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
       </div>
 
       <div className={`${styles.columns} ${readOnly ? styles.columnsSingle : ''}`}>
-        <div className={styles.card}>
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>직업</span>
-              {!readOnly && (
-                <button type="button" data-testid="edit-job" className={styles.editBtn} onClick={() => setEditingField('job')}>수정</button>
-              )}
-            </div>
-            <span className={styles.fieldValue}>
-              {gameState.job ? (
-                <>
-                  <span aria-hidden="true">{JOB_ICONS[gameState.job]}</span>{' '}
-                  <span>{JOB_LABELS[gameState.job]}</span>
-                </>
-              ) : '미입력'}
-            </span>
-          </div>
-
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>성공카드</span>
-              {!readOnly && (
-                <button type="button" data-testid="edit-badges" className={styles.editBtn} onClick={() => setEditingField('badges')}>수정</button>
-              )}
-            </div>
-            <div className={styles.chipRow}>
-              {earnedBadges.length === 0 && <span className={styles.fieldValue}>미입력</span>}
-              {earnedBadges.map(name => <span key={name} className={styles.chip}>{BADGE_LABELS[name]}</span>)}
+        <div className={styles.column}>
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>직업</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-job" className={styles.editBtn} onClick={() => setEditingField('job')}>수정</button>
+                )}
+              </div>
+              <span className={styles.fieldValue}>
+                {gameState.job ? (
+                  <>
+                    <span aria-hidden="true">{JOB_ICONS[gameState.job]}</span>{' '}
+                    <span>{JOB_LABELS[gameState.job]}</span>
+                  </>
+                ) : '미입력'}
+              </span>
             </div>
           </div>
 
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>현금</span>
-              {!readOnly && (
-                <button type="button" data-testid="edit-cash" className={styles.editBtn} onClick={() => setEditingField('cash')}>수정</button>
-              )}
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>성공카드</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-badges" className={styles.editBtn} onClick={() => setEditingField('badges')}>수정</button>
+                )}
+              </div>
+              <div className={styles.chipRow}>
+                {earnedBadges.length === 0 && <span className={styles.fieldValue}>미입력</span>}
+                {earnedBadges.map(name => <span key={name} className={styles.chip}>{BADGE_LABELS[name]}</span>)}
+              </div>
             </div>
-            <span className={styles.fieldValue}>{(gameState.cash ?? 0).toLocaleString()}원</span>
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>현금</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-cash" className={styles.editBtn} onClick={() => setEditingField('cash')}>수정</button>
+                )}
+              </div>
+              <span className={styles.fieldValue}>{(gameState.cash ?? 0).toLocaleString()}원</span>
+            </div>
           </div>
         </div>
 
-        <div className={styles.card}>
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>부동산</span>
-              {!readOnly && (
-                <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
-              )}
+        <div className={styles.column}>
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>부동산</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
+                )}
+              </div>
+              <AssetSummaryList
+                labels={REAL_ESTATE_LABELS}
+                images={ESTATE_IMAGES}
+                values={gameState.realEstate}
+                folder="estate"
+                unit="개"
+                testIdPrefix="admin-real-estate-holding"
+              />
             </div>
-            <AssetSummaryList
-              labels={REAL_ESTATE_LABELS}
-              images={ESTATE_IMAGES}
-              values={gameState.realEstate}
-              folder="estate"
-              unit="개"
-              testIdPrefix="admin-real-estate-holding"
-            />
           </div>
 
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>주식</span>
-              {!readOnly && (
-                <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
-              )}
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>주식</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
+                )}
+              </div>
+              <AssetSummaryList
+                labels={STOCK_LABELS}
+                images={STOCK_IMAGES}
+                values={gameState.stocks}
+                folder="stock"
+                unit="주"
+                testIdPrefix="admin-stock-holding"
+              />
             </div>
-            <AssetSummaryList
-              labels={STOCK_LABELS}
-              images={STOCK_IMAGES}
-              values={gameState.stocks}
-              folder="stock"
-              unit="주"
-              testIdPrefix="admin-stock-holding"
-            />
           </div>
         </div>
       </div>

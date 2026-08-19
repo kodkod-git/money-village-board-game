@@ -59,6 +59,13 @@
 
 .columnsSingle { grid-template-columns: 1fr; }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
 .card {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
