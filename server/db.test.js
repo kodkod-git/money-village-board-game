@@ -208,6 +208,17 @@ describe('getRankings', () => {
     expect(builder.order).toHaveBeenCalledWith('stock_value', { ascending: false })
   })
 
+  it('category가 cash이면 cash 컬럼 기준으로 정렬 요청한다', async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    await getRankings({ category: 'cash' })
+
+    expect(builder.order).toHaveBeenCalledWith('cash', { ascending: false })
+  })
+
   it('category가 realEstate이면 real_estate_value 컬럼 기준으로 정렬 요청한다', async () => {
     const builder = makeQueryBuilder({ data: [], error: null })
     mockFrom.mockReset()

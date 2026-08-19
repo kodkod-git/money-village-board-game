@@ -1,0 +1,11 @@
+.badge {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.plainRank {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text-3);
+}

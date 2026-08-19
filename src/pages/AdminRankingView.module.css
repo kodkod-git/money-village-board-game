@@ -11,8 +11,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  height: 60px;
-  padding: 0 25px;
+  min-height: 60px;
+  padding: 12px 25px;
   background: var(--admin-surface);
   border-bottom: 1px solid var(--admin-border);
 }
@@ -30,33 +30,78 @@
   margin-top: 2px;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchWrap {
+  position: relative;
+  width: 216px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-text-3);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 33px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-sm);
+  background: var(--admin-input-bg);
+  font-size: 12px;
+  color: var(--admin-text);
+}
+
 .tabs {
   display: flex;
-  gap: 2px;
-  background: var(--admin-blue-tint);
+  border: 1px solid var(--admin-border);
   border-radius: 10px;
-  padding: 3px;
+  overflow: hidden;
 }
 
 .tab {
+  height: 32px;
+  padding: 0 14px;
+  background: var(--admin-surface);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--admin-text-2);
-  background: none;
-  padding: 6px 14px;
-  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .tabActive {
+  background: var(--admin-blue);
+  color: #ffffff;
+}
+
+.adminBadge {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 13px;
+  border-radius: var(--admin-r-lg);
+  background: var(--admin-blue-soft);
+  border: 1px solid var(--admin-blue);
   color: var(--admin-blue);
-  background: var(--admin-surface);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px 28px;
 }
 
 .message {
@@ -65,6 +110,213 @@
   font-weight: 500;
   color: var(--admin-text-2);
   padding: 60px 0;
+}
+
+/* Hero podium banner */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  margin: -24px -28px 24px;
+  padding: 32px 24px 0;
+  min-height: 280px;
+  background: linear-gradient(135deg, rgba(16, 81, 194, 0.88), rgba(45, 123, 239, 0.88));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroBlobLeft,
+.heroBlobRight,
+.heroBlobBottom {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.heroBlobLeft { width: 180px; height: 180px; left: -50px; top: -50px; }
+.heroBlobRight { width: 120px; height: 120px; right: -40px; top: 0; background: rgba(255, 255, 255, 0.04); }
+.heroBlobBottom { width: 140px; height: 140px; right: 60px; bottom: -40px; background: rgba(255, 255, 255, 0.04); }
+
+.heroHeading {
+  position: relative;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.podium {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.podiumCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  text-align: center;
+}
+
+.podiumAvatarWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--admin-text-3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  margin-bottom: 10px;
+}
+
+.podiumAvatar {
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.podiumAvatarBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+}
+
+.podiumName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podiumBlock {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.podiumValue {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.podiumBlockBadge {
+  position: absolute;
+  top: -14px;
+}
+
+.podium-1 .podiumAvatarWrap { width: 84px; height: 84px; border-color: #f59e0b; }
+.podium-1 .podiumAvatar { width: 68px; height: 68px; }
+.podium-1 .podiumName { color: #ffffff; }
+.podium-1 .podiumBlock { width: 140px; height: 130px; background: linear-gradient(180deg, #fbbf24, #f59e0b); }
+.podium-1 .podiumValue { color: #ffffff; }
+
+.podium-2 .podiumAvatarWrap { width: 66px; height: 66px; border-color: #9ca3af; }
+.podium-2 .podiumAvatar { width: 54px; height: 54px; }
+.podium-2 .podiumBlock { width: 116px; height: 92px; background: linear-gradient(180deg, #e2e8f0, #cbd5e1); }
+.podium-2 .podiumValue { color: #6b7280; }
+
+.podium-3 .podiumAvatarWrap { width: 66px; height: 66px; border-color: #f97316; }
+.podium-3 .podiumAvatar { width: 54px; height: 54px; }
+.podium-3 .podiumBlock { width: 116px; height: 68px; background: linear-gradient(180deg, #fb923c, #f35f12); }
+.podium-3 .podiumValue { color: #ba3504; }
+
+/* Ranking table */
+
+.tableWrapper {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thRank,
+.th,
+.thRight {
+  position: sticky;
+  top: 0;
+  background: #f8f9fd;
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--admin-text-2);
+  border-bottom: 1px solid var(--admin-border);
+  white-space: nowrap;
+}
+
+.thRank,
+.th { text-align: left; }
+.thRight { text-align: right; }
+
+.tr { cursor: pointer; }
+
+.tr:hover { background: var(--admin-bg); }
+
+.tdRank,
+.td,
+.tdRight {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--admin-text);
+  border-bottom: 1px solid #f0f2f8;
+  white-space: nowrap;
+}
+
+.tdRight { text-align: right; color: #374151; }
+
+.totalAssets { font-weight: 700; color: var(--admin-text); }
+
+.participant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--admin-blue-tint-2);
+}
+
+.participantText {
+  display: flex;
+  flex-direction: column;
+}
+
+.participantName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.participantAffiliation {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--admin-text-2);
 }
 
 .overlay {

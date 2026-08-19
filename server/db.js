@@ -253,7 +253,7 @@ function mapRankingRow(r, i) {
   }
 }
 
-const RANKING_ORDER_COLUMN = { stock: 'stock_value', realEstate: 'real_estate_value' }
+const RANKING_ORDER_COLUMN = { cash: 'cash', stock: 'stock_value', realEstate: 'real_estate_value' }
 
 export async function getRankings({ classId = null, category = null } = {}) {
   const column = category ? RANKING_ORDER_COLUMN[category] : 'total_assets'
