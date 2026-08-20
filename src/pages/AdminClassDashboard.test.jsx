@@ -102,6 +102,25 @@ describe('AdminClassDashboard', () => {
     )
   })
 
+  it('등록된 팀이 있으면 전체 팀/미등록/등록 완료/전체 팀원 현황판을 보여준다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    expect(screen.getByText('전체 팀')).toBeInTheDocument()
+    expect(screen.getByText('미등록')).toBeInTheDocument()
+    expect(screen.getByText('등록 완료')).toBeInTheDocument()
+    expect(screen.getByText('전체 팀원')).toBeInTheDocument()
+  })
+
+  it('등록된 팀이 없으면 현황판을 숨긴다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve([]) })
+    renderDashboard()
+    await screen.findByText('등록된 팀 정보가 없습니다.')
+    expect(screen.queryByText('전체 팀')).not.toBeInTheDocument()
+    expect(screen.queryByText('미등록')).not.toBeInTheDocument()
+    expect(screen.queryByText('등록 완료')).not.toBeInTheDocument()
+    expect(screen.queryByText('전체 팀원')).not.toBeInTheDocument()
+  })
+
   it('테이블 뷰 탭 클릭 시 테이블을 보여준다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')

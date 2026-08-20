@@ -199,7 +199,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
         </div>
       </div>
 
-      <AdminStatCards rooms={rooms} />
+      {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
 
