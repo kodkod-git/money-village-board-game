@@ -16,6 +16,12 @@
   --green:       #2fb463;
   --violet:      #9b5fd4;
   --blue-accent: #70a6fe;
+  --blue-100:    #1051c2;
+  --blue-75:     #6c9aff;
+  --blue-10:     #cdddfa;
+  --blue-15:     rgba(112, 166, 254, 0.15);
+  --blue-50:     rgba(190, 219, 255, 0.5);
+  --gray-10:     #f7f7f7;
   --blob:        #a3b3ff;
   --grad-page:   linear-gradient(160deg, #6ea6fd 0%, #949dfe 50%, #9191fb 100%);
   --grad-btn:    linear-gradient(90deg, #5b7cf0 0%, #9b5fd4 100%);

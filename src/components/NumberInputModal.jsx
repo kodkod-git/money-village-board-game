@@ -39,7 +39,12 @@ export default function NumberInputModal({ title, initialValue, unit, maxValue, 
         </div>
         <div className={styles.keypad}>
           {KEYS.map(key => (
-            <button key={key} type="button" className={styles.key} onClick={() => handleKey(key)}>
+            <button
+              key={key}
+              type="button"
+              className={`${styles.key} ${key === '←' ? styles.keyBackspace : ''}`}
+              onClick={() => handleKey(key)}
+            >
               {key}
             </button>
           ))}

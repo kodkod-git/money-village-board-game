@@ -53,52 +53,49 @@ export default function PriceSettingModal({ prices, onConfirm, onClose, initialC
   return (
     <>
       <div className={styles.overlay} onClick={onClose}>
-        <div className={styles.priceModal} onClick={e => e.stopPropagation()}>
-          <div className={styles.priceModalHeader}>
-            <button className={styles.priceBackBtn} onClick={onClose} type="button">‹ 뒤로</button>
-            <span className={styles.priceModalTitle}>가격 설정</span>
-            <button className={styles.priceResetBtn} onClick={handleReset} type="button">초기화</button>
+        <div className={styles.sheet} onClick={e => e.stopPropagation()}>
+          <div className={styles.header}>
+            <button type="button" className={styles.backBtn} onClick={onClose}>‹ 뒤로</button>
+            <span className={styles.title}>가격 설정</span>
+            <button type="button" className={styles.resetBtn} onClick={handleReset}>초기화</button>
           </div>
 
-          <div className={styles.priceTabs}>
+          <div className={styles.tabs}>
             <button
-              className={`${styles.priceTab} ${category === 'stocks' ? styles.priceTabActive : ''}`}
-              onClick={() => setCategory('stocks')}
               type="button"
+              className={`${styles.tab} ${category === 'stocks' ? styles.tabActive : ''}`}
+              onClick={() => setCategory('stocks')}
             >
               주식
             </button>
             <button
-              className={`${styles.priceTab} ${category === 'realEstate' ? styles.priceTabActive : ''}`}
-              onClick={() => setCategory('realEstate')}
               type="button"
+              className={`${styles.tab} ${category === 'realEstate' ? styles.tabActive : ''}`}
+              onClick={() => setCategory('realEstate')}
             >
               부동산
             </button>
           </div>
 
-          <div className={styles.priceList}>
+          <div className={styles.list}>
             {Object.keys(labels).map(key => (
-              <div key={key} className={styles.priceRow}>
-                <img src={`/badges/${folder}/${images[key]}.png`} alt="" className={styles.priceIcon} />
-                <div className={styles.priceInfo}>
-                  <span className={styles.priceLabel}>{labels[key]}</span>
-                  <span className={styles.priceUnit}>단위: 원</span>
+              <div key={key} className={styles.row}>
+                <img src={`/badges/${folder}/${images[key]}.png`} alt="" className={styles.rowIcon} />
+                <div className={styles.rowInfo}>
+                  <span className={styles.rowLabel}>{labels[key]}</span>
+                  <span className={styles.rowUnit}>단위: 원</span>
                 </div>
-                <button
-                  className={styles.pricePill}
-                  onClick={() => setEditingKey(key)}
-                  type="button"
-                >
-                  {tempPrices[category][key].toLocaleString()} 원 ›
+                <button type="button" className={styles.pricePill} onClick={() => setEditingKey(key)}>
+                  <span className={styles.priceValue}>{tempPrices[category][key].toLocaleString()}</span>{' '}
+                  <span className={styles.priceUnitLabel}>원 ›</span>
                 </button>
               </div>
             ))}
           </div>
 
-          <button className={styles.priceConfirmBtn} onClick={() => onConfirm(tempPrices)} type="button">
-            확인하기
-          </button>
+          <div className={styles.footer}>
+            <button type="button" className={styles.confirmBtn} onClick={() => onConfirm(tempPrices)}>확인하기</button>
+          </div>
         </div>
       </div>
 

@@ -12,15 +12,20 @@ vi.mock('react-router-dom', async () => {
 import LandingPage from './LandingPage'
 
 describe('LandingPage', () => {
-  it('톱니바퀴 버튼 클릭 시 /admin으로 이동한다', async () => {
+  it('관리자 버튼 클릭 시 /admin으로 이동한다', async () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>)
-    await userEvent.click(screen.getByLabelText('관리자 모드'))
+    await userEvent.click(screen.getByText('관리자'))
     expect(mockNavigate).toHaveBeenCalledWith('/admin')
   })
 
-  it('게임 참여 버튼 클릭 시 /join-code로 이동한다', async () => {
+  it('시작하기 버튼 클릭 시 /join-code로 이동한다', async () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>)
-    await userEvent.click(screen.getByText('게임 참여'))
+    await userEvent.click(screen.getByText('시작하기'))
     expect(mockNavigate).toHaveBeenCalledWith('/join-code')
+  })
+
+  it('관전자 버튼은 비활성화되어 있다', () => {
+    render(<MemoryRouter><LandingPage /></MemoryRouter>)
+    expect(screen.getByText('관전자').closest('button')).toBeDisabled()
   })
 })

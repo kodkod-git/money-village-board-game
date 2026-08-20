@@ -149,7 +149,8 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         onClick={() => setShowPriceModal(true)}
         type="button"
       >
-        <span aria-hidden="true">⚙️</span> 가격 설정
+        <img src="/icons/settings-outline.svg" alt="" className={styles.priceSettingIcon} />
+        가격 설정
       </button>
 
       <div className={styles.header}>
@@ -203,6 +204,18 @@ export default function Team({ readOnly = false, mockRoom = null }) {
           ))}
         </div>
       </div>
+
+      {!readOnly && myPlayer && (
+        <div className={styles.bottomBar}>
+          <button
+            className={styles.assetEntryBtn}
+            onClick={() => navigate(`/team/${code}/individual`)}
+            type="button"
+          >
+            자산 입력
+          </button>
+        </div>
+      )}
 
       {showQR && <QRModal code={code} onClose={() => setShowQR(false)} />}
       {!readOnly && showLeaveConfirm && (

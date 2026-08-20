@@ -10,10 +10,10 @@ describe('JobPicker', () => {
     expect(screen.getByText('생산·운송')).toBeInTheDocument()
   })
 
-  it('선택된 직업 타일에 체크 표시를 보여준다', () => {
+  it('선택된 직업 타일에 선택 스타일을 적용한다', () => {
     render(<JobPicker value="b" onChange={vi.fn()} />)
     const tile = screen.getByText('연구·기술').closest('button')
-    expect(tile).toHaveTextContent('✓')
+    expect(tile.className).toMatch(/tileSelected/)
   })
 
   it('타일 클릭 시 onChange를 해당 키로 호출한다', async () => {

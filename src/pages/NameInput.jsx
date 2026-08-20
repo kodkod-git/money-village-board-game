@@ -21,7 +21,7 @@ export default function NameInput() {
 
   return (
     <div className={styles.page}>
-      <BackButton variant="intro" />
+      <BackButton />
       <div className={styles.header}>
         <h1 className={styles.title}>로그인</h1>
         <p className={styles.subtitle}>팀에 참가하신 것을 환영합니다!</p>

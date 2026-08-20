@@ -4,16 +4,17 @@ export default function StepBar({ steps, currentStep, completedUpTo = -1, onStep
   return (
     <div className={styles.container}>
       {steps.map((label, i) => {
-        const isActiveOrDone = i <= currentStep || i <= completedUpTo
+        const isReached = i <= currentStep || i <= completedUpTo
+        const isCurrent = i === currentStep
         const isClickable = onStepClick != null && i <= completedUpTo
         return (
           <button
             key={label}
-            className={`${styles.step} ${isActiveOrDone ? styles.stepActive : styles.stepInactive}`}
+            className={`${styles.step} ${isCurrent ? styles.stepActive : styles.stepInactive}`}
             onClick={isClickable ? () => onStepClick(i) : undefined}
             disabled={!isClickable}
           >
-            <div className={`${styles.line} ${isActiveOrDone ? styles.lineActive : ''}`} />
+            <div className={`${styles.line} ${isReached ? styles.lineActive : ''}`} />
             <span className={styles.label}>{label}</span>
           </button>
         )

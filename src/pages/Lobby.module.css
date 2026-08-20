@@ -6,6 +6,7 @@
   flex-direction: column;
   padding: 0 24px 24px;
   position: relative;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .header {
@@ -13,13 +14,13 @@
 }
 
 .title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink-2);
   margin-top: 2px;
@@ -27,7 +28,7 @@
 
 .divider {
   border: none;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--blue-10);
   margin: 10px 0 20px;
 }
 
@@ -43,7 +44,7 @@
 .createCard {
   height: 100%;
   border-radius: var(--r-sm);
-  border: 1px dashed var(--ghost);
+  border: 2px dashed var(--blue-10);
   background: var(--white);
   display: flex;
   flex-direction: column;
@@ -57,53 +58,11 @@
   font-size: 26px;
   font-weight: 700;
   line-height: 1;
-  color: var(--purple);
+  color: var(--blue-100);
 }
 
 .createLabel {
   font-size: 13px;
   font-weight: 800;
-  color: var(--purple);
-}
-
-.codeEntry {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-top: 32px;
-}
-
-.codeInput {
-  height: 58px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--divider);
-  background: var(--slot-empty);
-  padding: 0 20px;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  text-align: center;
-  color: var(--ink);
-}
-
-.codeInput::placeholder {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: var(--ghost);
-}
-
-.codeSubmitBtn {
-  height: 56px;
-  border-radius: var(--r-sm);
-  background: var(--grad-btn);
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 800;
-  box-shadow: var(--shadow-card);
-}
-
-.codeSubmitBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  color: var(--blue-100);
 }

@@ -1,7 +1,7 @@
 .page {
   min-height: 100%;
   height: 100%;
-  background: var(--grad-page);
+  background: var(--white);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,6 +9,7 @@
   position: relative;
   padding: 0 clamp(24px, 9vw, 49px);
   overflow: hidden;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .header {
@@ -19,24 +20,23 @@
 .title {
   font-size: 36px;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
 .subtitle {
   font-size: 16px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--ink-2);
 }
 
 .card {
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
-  border: none;
+  background: var(--white);
+  border: 2px solid var(--blue-75);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card);
-  padding: 32px;
+  padding: 26px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -59,8 +59,8 @@
 }
 
 .tabActive {
-  color: var(--purple);
-  border-bottom-color: var(--purple);
+  color: var(--blue-100);
+  border-bottom-color: var(--blue-100);
 }
 
 .form {
@@ -70,18 +70,18 @@
 }
 
 .input {
-  height: 58px;
+  height: 56px;
   border-radius: var(--r-sm);
-  border: 1px solid #c8d8ff;
-  background: #e8f0fe;
+  border: 2px solid rgba(190, 219, 255, 0.5);
+  background: rgba(112, 166, 254, 0.15);
   padding: 0 22px;
   font-size: 16px;
   color: var(--ink);
   outline: none;
 }
 
-.input::placeholder { color: var(--muted); }
-.input:focus { border-color: var(--blue-accent); }
+.input::placeholder { color: var(--disabled); }
+.input:focus { border-color: var(--blue-75); }
 
 .error {
   color: #e53935;
@@ -90,10 +90,10 @@
 
 .submitBtn {
   height: 56px;
-  background: var(--grad-btn);
-  color: #ffffff;
+  background: var(--blue-100);
+  color: var(--white);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   border-radius: var(--r-sm);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
 }

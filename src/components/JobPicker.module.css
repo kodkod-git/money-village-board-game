@@ -24,8 +24,7 @@
 .tile {
   background: var(--white);
   border-radius: var(--r-sm);
-  border: 2px solid transparent;
-  box-shadow: var(--shadow-card);
+  border: 2px solid var(--blue-10);
   padding: 16px 8px;
   display: flex;
   flex-direction: column;
@@ -38,30 +37,20 @@
   position: relative;
 }
 
-.tileBadge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--white);
-  color: var(--ink);
-  font-size: 11px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tileSelected {
+  background: var(--blue-15);
+  border-color: var(--blue-75);
 }
 
-.tileSelected { background: var(--ink); border-color: var(--ink); }
-.tileSelected .label { color: var(--white); }
-
-.icon { font-size: 40px; }
+.icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 
 .label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
   line-height: 1.2;

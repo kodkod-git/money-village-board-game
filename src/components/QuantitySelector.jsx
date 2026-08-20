@@ -17,7 +17,9 @@ export default function QuantitySelector({ value, onChange, label }) {
         −
       </button>
       <button type="button" className={styles.count} onClick={() => setShowModal(true)}>
-        {value}
+        <span className={value > 0 ? styles.countValue : styles.countEmpty}>
+          {value > 0 ? value : '-'}
+        </span>
       </button>
       <button
         className={styles.plusBtn}

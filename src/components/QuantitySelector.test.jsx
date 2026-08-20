@@ -9,9 +9,9 @@ describe('QuantitySelector', () => {
     expect(screen.getByText('3')).toBeInTheDocument()
   })
 
-  it('값이 0이면 0을 표시한다', () => {
+  it('값이 0이면 -를 표시한다', () => {
     render(<QuantitySelector value={0} onChange={vi.fn()} label="단독 가온개미" />)
-    expect(screen.getByText('0')).toBeInTheDocument()
+    expect(screen.getByText('-')).toBeInTheDocument()
   })
 
   it('+ 버튼 클릭 시 onChange에 value+1을 전달한다', async () => {

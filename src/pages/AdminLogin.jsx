@@ -27,7 +27,7 @@ export default function AdminLogin({ onLogin }) {
 
   return (
     <div className={styles.page}>
-      <BackButton variant="intro" />
+      <BackButton />
       <div className={styles.header}>
         <h1 className={styles.title}>관리자</h1>
         <p className={styles.subtitle}>선생님 계정으로 로그인해주세요</p>

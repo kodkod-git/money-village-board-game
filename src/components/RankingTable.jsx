@@ -17,7 +17,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
         {rows.map(row => (
           <div
             key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
-            className={styles.row}
+            className={`${styles.row} ${row.rank <= 3 ? styles.rowTop3 : ''}`}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             style={onRowClick ? { cursor: 'pointer' } : undefined}
           >
@@ -31,7 +31,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
               <span className={styles.name}>{row.name}</span>
               <span className={styles.sub}>{row.className}</span>
             </div>
-            <span className={styles.value}>{formatValue(row)}</span>
+            <span className={`${styles.value} ${row.rank <= 3 ? styles.valueTop3 : ''}`}>{formatValue(row)}</span>
           </div>
         ))}
       </div>
@@ -50,7 +50,10 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
             className={styles.characterImg}
           />
           <div className={styles.pinnedInfo}>
-            <span className={styles.pinnedName}>{pinnedRow.name}</span>
+            <span className={styles.pinnedNameRow}>
+              <span className={styles.pinnedName}>{pinnedRow.name}</span>
+              <span className={styles.meBadge}>나</span>
+            </span>
             <span className={styles.pinnedAffiliation}>{pinnedRow.className}</span>
           </div>
           <span className={styles.pinnedAssets}>{formatValue(pinnedRow)}</span>

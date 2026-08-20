@@ -18,16 +18,16 @@
 .line {
   height: 3px;
   border-radius: var(--r-pill);
-  background: var(--line);
+  background: var(--blue-10);
   margin-bottom: 6px;
 }
 
-.lineActive { background: var(--ink); }
+.lineActive { background: var(--blue-100); }
 
 .label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--disabled);
 }
 
-.stepActive .label { color: var(--ink); }
+.stepActive .label { color: var(--blue-100); }

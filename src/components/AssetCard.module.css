@@ -1,12 +1,11 @@
 .card {
   background: var(--white);
-  border: 1px solid var(--line);
+  border: 2px solid var(--blue-10);
   border-radius: var(--r-sm);
-  box-shadow: var(--shadow-card);
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -17,8 +16,8 @@
 }
 
 .img {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -37,7 +36,7 @@
 }
 
 .price {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--ink-2);
 }

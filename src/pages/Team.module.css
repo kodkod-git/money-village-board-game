@@ -6,6 +6,7 @@
   position: relative;
   overflow-y: auto;
   scrollbar-width: none;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .page::-webkit-scrollbar {
@@ -20,14 +21,18 @@
   align-items: center;
   gap: 6px;
   background: var(--white);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--blue-100);
   border-radius: var(--r-pill);
-  height: 40px;
-  padding: 0 16px;
-  font-size: 14px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--ink);
-  box-shadow: var(--shadow-card);
+  color: var(--blue-100);
+}
+
+.priceSettingIcon {
+  width: 16px;
+  height: 16px;
 }
 
 .header {
@@ -36,13 +41,13 @@
 }
 
 .title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink-2);
   margin-top: 2px;
@@ -50,7 +55,7 @@
 
 .divider {
   border: none;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--blue-10);
   margin: 10px 0 24px;
 }
 
@@ -66,7 +71,7 @@
 .qrCard {
   background: var(--white);
   border-radius: var(--r-sm);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 2px 10px rgba(45, 123, 239, 0.07);
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
@@ -74,7 +79,7 @@
   justify-content: center;
   gap: 8px;
   min-height: 120px;
-  border: 1px solid var(--divider);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .qrCard {
@@ -82,10 +87,10 @@
 }
 
 .codeLabel {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 900;
   color: var(--ink-2);
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
 }
 
@@ -104,10 +109,11 @@
 
 .copyBtn {
   background: transparent;
-  border: none;
-  width: 24px;
-  height: 24px;
-  padding: 3px;
+  border: 1px solid var(--blue-10);
+  border-radius: var(--r-pill);
+  width: 32px;
+  height: 32px;
+  padding: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -132,10 +138,10 @@
 .section { margin: 8px auto 0; max-width: 810px; }
 
 .sectionLabel {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 900;
   color: var(--ink-2);
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   display: block;
   margin-bottom: 16px;
@@ -152,6 +158,22 @@
     grid-template-columns: repeat(4, minmax(140px, 190px));
     justify-content: center;
   }
+}
+
+.bottomBar {
+  max-width: 360px;
+  margin: 28px auto 0;
+}
+
+.assetEntryBtn {
+  width: 100%;
+  height: 64px;
+  background: var(--blue-100);
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
 }
 
 .overlay {
@@ -202,7 +224,7 @@
   flex: 1;
   height: 48px;
   border-radius: var(--r-sm);
-  background: var(--purple);
+  background: var(--blue-100);
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;

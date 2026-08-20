@@ -1,9 +1,9 @@
 .card {
   width: 100%;
   aspect-ratio: 1;
-  background: #ffffff;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid var(--blue-10);
+  border-radius: var(--r-sm);
   cursor: pointer;
   position: relative;
   transition: border-color 0.15s;
@@ -15,15 +15,15 @@
   min-height: 0;
   overflow: hidden;
 }
-.card.idle:hover { border-color: var(--ink); }
+.card.idle:hover { border-color: var(--blue-100); }
 .card.selected {
-  border-color: var(--ink);
+  border-color: var(--blue-100);
 }
 .card.locked { opacity: 0.35; cursor: not-allowed; }
 .badge {
   position: absolute; top: 4px; right: 4px;
   z-index: 1;
-  background: var(--ink); color: white;
+  background: var(--blue-100); color: white;
   border-radius: 50%; width: 18px; height: 18px;
   font-size: 10px;
   display: flex; align-items: center; justify-content: center;

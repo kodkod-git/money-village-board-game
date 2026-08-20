@@ -20,7 +20,7 @@ export default function PlayerSlot({ player, onKick, onEdit }) {
 
   return (
     <div
-      className={`${styles.slot} ${onEdit ? styles.clickable : ''}`}
+      className={`${styles.slot} ${styles.filled} ${onEdit ? styles.clickable : ''}`}
       onClick={onEdit}
       onKeyDown={handleKeyDown}
       role={onEdit ? 'button' : undefined}

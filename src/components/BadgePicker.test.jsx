@@ -12,11 +12,11 @@ describe('BadgePicker', () => {
     expect(screen.getByText('신용과 신뢰')).toBeInTheDocument()
   })
 
-  it('선택된 카드에 체크 표시를 보여준다', () => {
+  it('선택된 카드에 선택 스타일을 적용한다', () => {
     const badges = [true, false, false, false, false, false]
     render(<BadgePicker badges={badges} onToggle={vi.fn()} />)
     const tile = screen.getByText('의사소통 및 협상능력').closest('button')
-    expect(tile).toHaveTextContent('✓')
+    expect(tile.className).toMatch(/tileSelected/)
   })
 
   it('타일 클릭 시 onToggle을 해당 인덱스로 호출한다', async () => {

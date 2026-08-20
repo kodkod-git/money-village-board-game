@@ -11,8 +11,7 @@ export default function BadgePicker({ badges, onToggle, fill = false }) {
           className={`${styles.tile} ${badges[i] ? styles.tileSelected : ''}`}
           onClick={() => onToggle(i)}
         >
-          {badges[i] && <span className={styles.tileBadge}>✓</span>}
-          <img src={`/badges/${name}.png`} alt={name} className={styles.img} />
+          <img src={`/badges/${name}.png`} alt="" className={styles.img} />
           <span className={styles.label}>{BADGE_LABELS[name]}</span>
         </button>
       ))}

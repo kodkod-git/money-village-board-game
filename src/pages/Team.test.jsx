@@ -192,6 +192,12 @@ describe('Team', () => {
     renderTeam()
     expect(screen.getByText('가격 설정')).toBeInTheDocument()
   })
+
+  it('자산 입력 버튼을 누르면 개인 자산입력 화면으로 이동한다', async () => {
+    renderTeam()
+    await userEvent.click(screen.getByText('자산 입력'))
+    expect(mockNavigate).toHaveBeenCalledWith('/team/ABC123/individual')
+  })
 })
 
 describe('Team price setting modal', () => {
@@ -299,5 +305,10 @@ describe('Team readOnly mode', () => {
   it('shows price setting action in readOnly mode', () => {
     renderReadOnlyTeam()
     expect(screen.getByText('가격 설정')).toBeInTheDocument()
+  })
+
+  it('does not show the asset entry button in readOnly mode', () => {
+    renderReadOnlyTeam()
+    expect(screen.queryByText('자산 입력')).toBeNull()
   })
 })

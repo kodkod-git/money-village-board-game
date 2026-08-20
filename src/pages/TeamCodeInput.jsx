@@ -14,17 +14,17 @@ export default function TeamCodeInput() {
 
   return (
     <div className={styles.page}>
-      <BackButton variant="intro" />
+      <BackButton />
       <div className={styles.header}>
         <h1 className={styles.title}>팀 참여</h1>
-        <p className={styles.subtitle}>팀원에게 전달받은 코드를 입력하세요</p>
+        <p className={styles.subtitle}>팀장에게 받은 코드를 입력해주세요</p>
       </div>
       <div className={styles.card}>
         <div className={styles.inputGroup}>
-          <label className={styles.label}>팀 코드를 입력하세요</label>
+          <label className={styles.label}>초대 코드</label>
           <input
             className={styles.input}
-            placeholder="예) A3F9C1"
+            placeholder="예: A3B2C1"
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === 'Enter' && handleNext()}
@@ -32,7 +32,7 @@ export default function TeamCodeInput() {
           />
         </div>
         <button className={styles.gradBtn} onClick={handleNext} disabled={!code.trim()}>
-          다음 →
+          팀 참여하기
         </button>
       </div>
     </div>

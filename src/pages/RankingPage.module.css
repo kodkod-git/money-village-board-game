@@ -9,6 +9,7 @@
   align-items: stretch;
   position: relative;
   overflow: hidden;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .inner {
@@ -24,16 +25,17 @@
 .header {
   padding-top: 96px;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink-2);
   margin-top: 2px;
@@ -41,14 +43,14 @@
 
 .divider {
   border: none;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--blue-10);
   margin: 10px 0 20px;
   flex-shrink: 0;
 }
 
 .topTabs {
   display: flex;
-  border: 1px solid var(--line);
+  border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
   overflow: hidden;
   margin-bottom: 12px;
@@ -57,12 +59,12 @@
 
 .topTab {
   flex: 1;
-  height: 40px;
+  height: 44px;
   background: var(--white);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 900;
   color: var(--ink-2);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--blue-10);
 }
 
 .topTab:last-child {
@@ -70,13 +72,13 @@
 }
 
 .topTabActive {
-  background: var(--ink);
+  background: var(--blue-100);
   color: var(--white);
 }
 
 .tabs {
   display: flex;
-  border: 1px solid var(--line);
+  border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
   overflow: hidden;
   margin-bottom: 24px;
@@ -86,11 +88,11 @@
 .tab {
   flex: 1;
   background: var(--white);
-  height: 36px;
-  font-size: 12px;
+  height: 40px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--ink-2);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--blue-10);
 }
 
 .tab:last-child {
@@ -99,7 +101,7 @@
 
 .tabActive {
   color: var(--white);
-  background: var(--ink);
+  background: var(--blue-100);
 }
 
 .message {

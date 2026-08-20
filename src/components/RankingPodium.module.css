@@ -40,9 +40,10 @@
 
 .box {
   width: 100%;
-  background: var(--slot-empty);
-  border: 1px solid var(--line);
+  background: rgba(112, 166, 254, 0.15);
+  border: 1px solid var(--blue-10);
   border-radius: var(--r-sm) var(--r-sm) 0 0;
+  box-shadow: 0 2px 20px rgba(45, 123, 239, 0.07);
   padding: 16px 8px;
   display: flex;
   flex-direction: column;
@@ -53,7 +54,7 @@
 .rank {
   font-size: 18px;
   font-weight: 900;
-  color: var(--ink);
+  color: var(--ink-2);
 }
 
 .value {
@@ -64,7 +65,9 @@
 }
 
 .first .box {
-  background: var(--ink);
+  background: var(--blue-100);
+  border-color: var(--blue-100);
+  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
   padding-top: 24px;
   padding-bottom: 24px;
 }
