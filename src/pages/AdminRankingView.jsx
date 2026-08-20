@@ -6,6 +6,14 @@ import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import { JOB_LABELS } from '../constants/gameData'
 import styles from './AdminRankingView.module.css'
 
+const EMPTY_ICON = (
+  <svg viewBox="0 0 28 28" width="28" height="28" fill="none">
+    <path d="M7 22V12L14 4L21 12V22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 16H12C11.4477 16 11 16.4477 11 17V21C11 21.5523 11.4477 22 12 22H16C16.5523 22 17 21.5523 17 21V17C17 16.4477 16.5523 16 16 16Z" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M4 22H24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+)
+
 const CATEGORY_TABS = [
   { key: 'totalAssets', label: '총자산' },
   { key: 'cash', label: '현금' },
@@ -31,7 +39,7 @@ function matchesSearch(row, query) {
   return row.name?.toLowerCase().includes(q) || row.teamCode?.toLowerCase().includes(q)
 }
 
-export default function AdminRankingView({ classId, classDisplayName }) {
+export default function AdminRankingView({ classId, classDisplayName, onGoToTeamStatus }) {
   const [category, setCategory] = useState('totalAssets')
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -97,8 +105,13 @@ export default function AdminRankingView({ classId, classDisplayName }) {
         {error && <p className={styles.message}>{error}</p>}
         {!loading && !error && rows.length === 0 && (
           <AdminEmptyState
-            title="표시할 랭킹 데이터가 없습니다."
-            subtitle="팀 결과가 등록되면 랭킹을 확인할 수 있습니다."
+            icon={EMPTY_ICON}
+            tone="blue"
+            title="아직 랭킹 정보가 없습니다."
+            subtitle="게임 결과가 등록되면 랭킹을 확인할 수 있습니다."
+            actionLabel="팀 현황 보기"
+            actionVariant="outline"
+            onAction={onGoToTeamStatus}
           />
         )}
         {!loading && !error && rows.length > 0 && (

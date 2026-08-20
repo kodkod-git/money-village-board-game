@@ -58,7 +58,11 @@ export default function AdminDashboard() {
         />
       )}
       {section === 'ranking' && selectedClass && (
-        <AdminRankingView classId={selectedClass.id} classDisplayName={selectedClass.name} />
+        <AdminRankingView
+          classId={selectedClass.id}
+          classDisplayName={selectedClass.name}
+          onGoToTeamStatus={() => handleNavigate('team-status')}
+        />
       )}
       {section === 'settings' && <AdminSettings profile={profile} onLogout={handleLogout} />}
     </AdminShell>

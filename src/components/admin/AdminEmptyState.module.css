@@ -20,6 +20,11 @@
   margin-bottom: 8px;
 }
 
+.iconBlue {
+  background: var(--admin-blue-soft);
+  color: #94a3b8;
+}
+
 .title {
   font-size: 15px;
   font-weight: 700;
@@ -41,4 +46,10 @@
   color: #fff;
   font-size: 13px;
   font-weight: 700;
+}
+
+.actionBtnOutline {
+  background: var(--admin-surface);
+  color: #374151;
+  border: 1px solid var(--admin-border);
 }
