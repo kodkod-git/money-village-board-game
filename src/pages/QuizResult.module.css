@@ -1,0 +1,83 @@
+.page {
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px clamp(24px, 9vw, 49px);
+  text-align: center;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
+  color: var(--white);
+}
+
+.eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.groupName {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.tagline {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.description {
+  font-size: 15px;
+  font-weight: 600;
+  max-width: 360px;
+}
+
+.animals {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.axisRow {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.axisActive {
+  opacity: 1;
+  font-weight: 900;
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 24px;
+}
+
+.shareBtn,
+.retryBtn {
+  height: 56px;
+  border-radius: var(--r-sm);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.shareBtn {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.retryBtn {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid var(--white);
+}

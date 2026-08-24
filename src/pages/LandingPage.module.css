@@ -120,6 +120,16 @@
   font-weight: 800;
 }
 
+.quizBtn {
+  background: transparent;
+  color: var(--ink-2);
+  border: none;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .footer {
   position: absolute;
   bottom: 24px;

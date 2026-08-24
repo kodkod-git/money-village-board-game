@@ -34,6 +34,9 @@ export default function LandingPage() {
         <button className={styles.secondaryBtn} onClick={() => navigate('/ranking')}>
           랭킹 보기
         </button>
+        <button className={styles.quizBtn} onClick={() => navigate('/quiz')}>
+          우리 아이 경제 잠재력 테스트
+        </button>
       </div>
       <footer className={styles.footer}>© 2026 머니빌리지</footer>
     </div>

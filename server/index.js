@@ -7,6 +7,7 @@ import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, hasDisconnectedPlayer } from './rooms.js'
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
+import { saveQuizResult, getQuizResult } from './quiz.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
@@ -79,6 +80,31 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
     }
     console.error('submit error:', err)
     res.status(500).json({ error: 'Failed to save results', detail: err?.message, code: err?.code })
+  }
+})
+
+app.post('/api/quiz/results', async (req, res) => {
+  const { childName, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup } = req.body ?? {}
+  if (!childName?.trim() || !childAge || !answers || !axisTodayTomorrow || !axisSafetyAdventure || !resultGroup) {
+    return res.status(400).json({ error: 'childName, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup이 필요합니다' })
+  }
+  try {
+    const id = await saveQuizResult({
+      childName: childName.trim(), childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
+    })
+    res.json({ id })
+  } catch (err) {
+    console.error('quiz save error:', err)
+    res.status(500).json({ error: 'Failed to save quiz result' })
+  }
+})
+
+app.get('/api/quiz/results/:id', async (req, res) => {
+  try {
+    const result = await getQuizResult(req.params.id)
+    res.json(result)
+  } catch (err) {
+    res.status(404).json({ error: 'Result not found' })
   }
 })
 

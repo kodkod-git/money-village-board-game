@@ -8,6 +8,9 @@ import Team from './pages/Team'
 import IndividualPage from './pages/IndividualPage'
 import RankingPage from './pages/RankingPage'
 import AdminDashboard from './pages/AdminDashboard'
+import QuizIntro from './pages/QuizIntro'
+import QuizPlay from './pages/QuizPlay'
+import QuizResult from './pages/QuizResult'
 
 export default function App() {
   return (
@@ -22,6 +25,9 @@ export default function App() {
       <Route path="/ranking" element={<RankingPage />} />
       <Route path="/result/:sessionId" element={<RankingPage />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/quiz" element={<QuizIntro />} />
+      <Route path="/quiz/play" element={<QuizPlay />} />
+      <Route path="/quiz/result/:resultId" element={<QuizResult />} />
     </Routes>
   )
 }
