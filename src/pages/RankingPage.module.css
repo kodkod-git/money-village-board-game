@@ -128,7 +128,7 @@
   background: var(--white);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-card);
-  width: min(420px, 92vw);
+  width: min(760px, 94vw);
   max-height: 90dvh;
   overflow-y: auto;
   scrollbar-width: none;

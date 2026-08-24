@@ -5,6 +5,7 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
+  container-type: inline-size;
 }
 
 .header {
@@ -51,13 +52,17 @@
   min-height: 0;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   align-items: start;
   gap: 14px;
   padding: 20px 24px;
 }
 
-.columnsSingle { grid-template-columns: 1fr; }
+@container (min-width: 640px) {
+  .columns {
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  }
+}
 
 .column {
   display: flex;

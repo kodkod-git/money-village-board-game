@@ -95,15 +95,15 @@ describe('AdminEditModal', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('readOnly일 때는 단일 컬럼 레이아웃을, 아니면 2컬럼 레이아웃을 쓴다', () => {
+  it('readOnly 여부와 무관하게 같은 컬럼 레이아웃 클래스를 사용한다 (열 수는 컨테이너 폭에 따라 CSS가 반응형으로 결정)', () => {
     const { container: readOnlyContainer } = render(
       <AdminEditModal player={PLAYER} prices={PRICES} onClose={vi.fn()} readOnly />
     )
-    expect(readOnlyContainer.querySelector('[class*="columnsSingle"]')).toBeInTheDocument()
-
     const { container: editableContainer } = render(
       <AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />
     )
-    expect(editableContainer.querySelector('[class*="columnsSingle"]')).not.toBeInTheDocument()
+    const readOnlyColumns = readOnlyContainer.querySelector('[class*="columns"]')
+    const editableColumns = editableContainer.querySelector('[class*="columns"]')
+    expect(readOnlyColumns.className).toBe(editableColumns.className)
   })
 })

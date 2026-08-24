@@ -56,7 +56,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
       </div>
 
-      <div className={`${styles.columns} ${readOnly ? styles.columnsSingle : ''}`}>
+      <div className={styles.columns}>
         <div className={styles.column}>
           <div className={styles.card}>
             <div className={styles.field}>
