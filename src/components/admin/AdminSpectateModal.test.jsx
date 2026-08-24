@@ -211,6 +211,14 @@ it('결과 등록 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 �
   expect(onClose).toHaveBeenCalled()
 })
 
+it('연결 끊긴 팀원이 있으면 결과 등록 버튼을 비활성화하고 안내 문구를 보여준다', () => {
+  const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
+  pendingRoom.players[0] = { ...pendingRoom.players[0], connected: false }
+  render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  expect(screen.getByText('결과 등록')).toBeDisabled()
+  expect(screen.getByText('연결이 끊긴 팀원이 있어 등록할 수 없습니다')).toBeInTheDocument()
+})
+
 it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
   const onClose = vi.fn()
   const onRoomChanged = vi.fn()

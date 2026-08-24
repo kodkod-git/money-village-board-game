@@ -5,7 +5,8 @@ import {
   isCharacterTaken, clearRooms, updateRoomPricesByCode, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
-  listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle
+  listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle,
+  hasDisconnectedPlayer
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -441,6 +442,22 @@ describe('computeLiveRoomStatus', () => {
   it('플레이어가 없으면 completed-but-unregistered로 판정하지 않는다', () => {
     const room = makeRoom({ noPlayers: true, updatedAt: NOW })
     expect(computeLiveRoomStatus(room, NOW)).toBe('live')
+  })
+})
+
+describe('hasDisconnectedPlayer', () => {
+  it('연결 끊긴 플레이어가 있으면 true를 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    addPlayer(code, { socketId: 's2', name: '영희', character: 'edsu', isHost: false, playerUuid: 'p2' })
+    markDisconnected('s1')
+    expect(hasDisconnectedPlayer(getRoom(code))).toBe(true)
+  })
+
+  it('모든 플레이어가 연결되어 있으면 false를 반환한다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    expect(hasDisconnectedPlayer(getRoom(code))).toBe(false)
   })
 })
 

@@ -20,6 +20,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [showPriceModal, setShowPriceModal] = useState(false)
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
+  const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
   const pollTimer = useRef(null)
   const [titleDraft, setTitleDraft] = useState(room.title ?? '')
 
@@ -177,7 +178,19 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
         )}
         {room.status === 'completed-but-unregistered' && (
-          <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
+          <div className={styles.registerGroup}>
+            <button
+              type="button"
+              className={styles.registerBtn}
+              onClick={() => setConfirmRegister(true)}
+              disabled={hasDisconnectedPlayer}
+            >
+              결과 등록
+            </button>
+            {hasDisconnectedPlayer && (
+              <span className={styles.registerWarning}>연결이 끊긴 팀원이 있어 등록할 수 없습니다</span>
+            )}
+          </div>
         )}
         <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
       </div>

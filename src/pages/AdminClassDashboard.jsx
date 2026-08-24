@@ -113,8 +113,9 @@ export default function AdminClassDashboard({ classId, initialName }) {
         alert(error || '일괄 결과등록에 실패했습니다')
         return
       }
-      const { total } = await res.json()
-      if (total === 0) alert('등록 대기 중인 팀이 없습니다')
+      const { total, skipped } = await res.json()
+      if (total === 0 && !skipped) alert('등록 대기 중인 팀이 없습니다')
+      else if (skipped > 0) alert(`${skipped}개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다`)
       loadRooms()
     } catch {
       alert('일괄 결과등록에 실패했습니다')

@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
+import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, hasDisconnectedPlayer } from './rooms.js'
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
@@ -61,6 +61,10 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
   if (!room.players.every(p => p.gameState?.isCompleted)) {
     return res.status(400).json({ error: 'Not all players have completed' })
+  }
+
+  if (hasDisconnectedPlayer(room)) {
+    return res.status(400).json({ error: 'A player is disconnected' })
   }
 
   try {
@@ -181,9 +185,11 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
 
     const resolvedClassId = classId === 'unassigned' ? null : classId
     const now = new Date()
-    const pendingRooms = listAllRooms().filter(room =>
+    const allPendingRooms = listAllRooms().filter(room =>
       room.classId === resolvedClassId && computeLiveRoomStatus(room, now) === 'completed-but-unregistered'
     )
+    const pendingRooms = allPendingRooms.filter(room => !hasDisconnectedPlayer(room))
+    const skipped = allPendingRooms.length - pendingRooms.length
 
     let registered = 0
     for (const room of pendingRooms) {
@@ -198,7 +204,7 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
     }
 
     broadcastClassRooms(resolvedClassId)
-    res.json({ registered, total: pendingRooms.length })
+    res.json({ registered, total: pendingRooms.length, skipped })
   } catch (err) {
     console.error('bulk submit error:', err)
     res.status(500).json({ error: 'Failed to submit pending results' })

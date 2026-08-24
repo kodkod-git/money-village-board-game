@@ -330,6 +330,25 @@ describe('AdminClassDashboard', () => {
     expect(alertSpy).toHaveBeenCalledWith('등록 대기 중인 팀이 없습니다')
   })
 
+  it('연결 끊긴 팀원이 있는 팀은 제외되었다고 alert로 안내한다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 1, total: 1, skipped: 2 }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
+    })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    alertSpy.mockClear()
+
+    await userEvent.click(screen.getByText('전체 등록'))
+    await userEvent.click(screen.getByText('예'))
+
+    expect(alertSpy).toHaveBeenCalledWith('2개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다')
+  })
+
   it('일괄 결과등록이 실패하면 alert로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')

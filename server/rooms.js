@@ -181,6 +181,10 @@ export function computeLiveRoomStatus(room, now = new Date()) {
   return 'abandoned'
 }
 
+export function hasDisconnectedPlayer(room) {
+  return room.players.some(p => p.connected === false)
+}
+
 export function deleteRoomByCode(code) {
   const room = rooms.get(code)
   if (room) {
