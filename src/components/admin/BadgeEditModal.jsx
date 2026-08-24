@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BADGE_NAMES, BADGE_LABELS } from '../../constants/gameData'
+import { BADGE_NAMES, BADGE_LABELS, BADGE_DISPLAY_ORDER } from '../../constants/gameData'
 import styles from './FieldEditModal.module.css'
 
 export default function BadgeEditModal({ badges, onChange, onClose }) {
@@ -30,17 +30,20 @@ export default function BadgeEditModal({ badges, onChange, onClose }) {
         </div>
         <div className={styles.body}>
           <div className={styles.pickerGrid}>
-            {BADGE_NAMES.map((name, i) => (
-              <button
-                key={name}
-                type="button"
-                className={`${styles.pickerTile} ${selected[i] ? styles.pickerTileSelected : ''}`}
-                onClick={() => toggle(i)}
-              >
-                <img src={`/badges/${name}.png`} alt={BADGE_LABELS[name]} className={styles.pickerIcon} />
-                <span className={styles.pickerLabel}>{BADGE_LABELS[name]}</span>
-              </button>
-            ))}
+            {BADGE_DISPLAY_ORDER.map(name => {
+              const i = BADGE_NAMES.indexOf(name)
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  className={`${styles.pickerTile} ${selected[i] ? styles.pickerTileSelected : ''}`}
+                  onClick={() => toggle(i)}
+                >
+                  <img src={`/badges/${name}.png`} alt={BADGE_LABELS[name]} className={styles.pickerIcon} />
+                  <span className={styles.pickerLabel}>{BADGE_LABELS[name]}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
         <div className={styles.footer}>

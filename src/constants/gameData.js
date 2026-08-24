@@ -8,12 +8,17 @@ export const JOB_IMAGES = {
   d: '문화콘텐츠', e: '서비스판매', f: '생산운송',
 }
 
+// badges[] 저장 배열의 인덱스는 이 배열의 순서를 기준으로 하며, 기존에 저장된
+// 게임 결과와의 호환을 위해 순서를 바꾸지 않는다. 화면에 그릴 때 쓰는 순서는
+// BADGE_DISPLAY_ORDER를 따로 둔다.
 export const BADGE_NAMES = ['communication', 'global', 'idea', 'money', 'thinking', 'trust']
 export const BADGE_LABELS = {
   communication: '의사소통 및 협상능력', global: '글로벌경제이해력',
   idea: '문제해결능력', money: '재정관리능력',
   thinking: '기업가정신', trust: '신용과 신뢰',
 }
+// Figma 디자인(성공카드 수정 화면)과 동일한 표시 순서.
+export const BADGE_DISPLAY_ORDER = ['money', 'communication', 'global', 'idea', 'thinking', 'trust']
 
 export const REAL_ESTATE_LABELS = {
   gaon: '단독 가온개미', nuri: '단독 누리고양이', dami: '다세대 다미원숭이',
