@@ -51,11 +51,17 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   display: grid;
   grid-template-columns: 1fr;
   align-items: start;
   gap: 14px;
   padding: 20px 24px;
+}
+
+.columns::-webkit-scrollbar {
+  display: none;
 }
 
 @container (min-width: 640px) {

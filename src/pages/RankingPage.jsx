@@ -156,7 +156,7 @@ export default function RankingPage() {
 
       {viewingPlayer && (
         <div className={styles.overlay} onClick={() => setViewingPlayer(null)}>
-          <div className={styles.popup} onClick={e => e.stopPropagation()}>
+          <div className={`${styles.popup} admin-theme`} onClick={e => e.stopPropagation()}>
             <AdminEditModal
               player={toAdminPlayer(viewingPlayer)}
               prices={toAdminPrices(viewingPlayer)}

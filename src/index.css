@@ -153,11 +153,12 @@ body::after {
 input, button { font-family: inherit; }
 button { cursor: pointer; border: none; }
 
-body.admin-mode {
-  padding: 0;
-  align-items: stretch;
-  justify-content: stretch;
-  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
+/* --admin-* 변수는 admin-mode 전체 화면뿐 아니라, 플레이어 화면(예: 랭킹
+   페이지의 자산 확인 팝업)에 관리자 컴포넌트를 부분적으로 재사용할 때도
+   필요하다. .admin-theme을 그 컴포넌트를 감싸는 요소에 붙이면 body 전체를
+   admin-mode로 바꾸지 않고도(즉 #root 레이아웃은 그대로 두고) 같은 색상·반경
+   토큰을 쓸 수 있다. */
+:where(body.admin-mode, .admin-theme) {
   --admin-bg:          #f5f7fc;
   --admin-surface:     #ffffff;
   --admin-border:      #e5e8f0;
@@ -180,6 +181,13 @@ body.admin-mode {
   --admin-r-sm:        8px;
   --admin-r-md:        12px;
   --admin-r-lg:        16px;
+}
+
+body.admin-mode {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 body.admin-mode::before,
