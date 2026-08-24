@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import AssetQtyStepper from './AssetQtyStepper'
 import styles from './FieldEditModal.module.css'
 
 export default function RealEstateEditModal({ values, onChange, onClose }) {
@@ -41,18 +42,12 @@ export default function RealEstateEditModal({ values, onChange, onClose }) {
                     <span className={styles.assetTilePrice}>{ESTATE_PRICES[key]}</span>
                   </div>
                 </div>
-                <div className={`${styles.qtyBox} ${draft[key] > 0 ? styles.qtyBoxActive : ''}`}>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={MAX_ASSET_QUANTITY}
-                    className={styles.qtyInput}
-                    value={draft[key]}
-                    aria-label={`${REAL_ESTATE_LABELS[key]} 수량`}
-                    onChange={e => setQty(key, e.target.value)}
-                  />
-                </div>
+                <AssetQtyStepper
+                  value={draft[key]}
+                  onChange={raw => setQty(key, raw)}
+                  max={MAX_ASSET_QUANTITY}
+                  label={REAL_ESTATE_LABELS[key]}
+                />
               </div>
             ))}
           </div>

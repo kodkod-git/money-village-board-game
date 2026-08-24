@@ -162,6 +162,10 @@
   border-radius: 20px;
   border: 1px solid var(--admin-blue-faint);
   background: var(--admin-surface);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
 }
 
 .qtyBoxActive {
@@ -170,7 +174,8 @@
 }
 
 .qtyInput {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 100%;
   border: none;
   background: transparent;
@@ -182,6 +187,35 @@
 }
 
 .qtyInput:focus { outline: none; }
+
+.qtyMinusBtn,
+.qtyPlusBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.qtyMinusBtn {
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-blue-faint);
+  color: var(--admin-text-2);
+}
+
+.qtyPlusBtn {
+  background: var(--admin-blue);
+  border: none;
+  color: #ffffff;
+}
+
+.qtyMinusBtn:disabled,
+.qtyPlusBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 /* Cash editor */
 

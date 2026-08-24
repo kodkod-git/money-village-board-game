@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { STOCK_LABELS, STOCK_IMAGES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import AssetQtyStepper from './AssetQtyStepper'
 import styles from './FieldEditModal.module.css'
 
 export default function StockEditModal({ values, onChange, onClose }) {
@@ -40,18 +41,12 @@ export default function StockEditModal({ values, onChange, onClose }) {
                     <span className={styles.assetTileName}>{STOCK_LABELS[key]}</span>
                   </div>
                 </div>
-                <div className={`${styles.qtyBox} ${draft[key] > 0 ? styles.qtyBoxActive : ''}`}>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={MAX_ASSET_QUANTITY}
-                    className={styles.qtyInput}
-                    value={draft[key]}
-                    aria-label={`${STOCK_LABELS[key]} 수량`}
-                    onChange={e => setQty(key, e.target.value)}
-                  />
-                </div>
+                <AssetQtyStepper
+                  value={draft[key]}
+                  onChange={raw => setQty(key, raw)}
+                  max={MAX_ASSET_QUANTITY}
+                  label={STOCK_LABELS[key]}
+                />
               </div>
             ))}
           </div>
