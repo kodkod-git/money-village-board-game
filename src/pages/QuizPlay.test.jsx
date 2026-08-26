@@ -56,4 +56,13 @@ describe('QuizPlay', () => {
     expect(body.childAge).toBe(7)
     expect(body.resultGroup).toBe('Green Group')
   })
+
+  it('진행바가 현재 단계에 맞는 너비로 표시된다', () => {
+    render(<MemoryRouter><QuizPlay /></MemoryRouter>)
+    const fill = screen.getByTestId('quiz-progress-fill')
+    expect(parseFloat(fill.style.width)).toBeCloseTo((1 / 9) * 100, 5)
+
+    fireEvent.click(screen.getByText('다음 문제'))
+    expect(parseFloat(fill.style.width)).toBeCloseTo((2 / 9) * 100, 5)
+  })
 })

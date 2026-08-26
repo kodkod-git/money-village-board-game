@@ -75,6 +75,13 @@ export default function QuizPlay() {
       <BackButton />
       <div className={styles.header}>
         <h1 className={styles.title}>우리 아이 경제 잠재력 테스트</h1>
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            data-testid="quiz-progress-fill"
+            style={{ width: `${(currentStepNumber / TOTAL_STEPS) * 100}%` }}
+          />
+        </div>
         <p className={styles.subtitle}>{step === STEP_ERROR ? '문제가 발생했어요' : `${currentStepNumber}/${TOTAL_STEPS}`}</p>
       </div>
 
