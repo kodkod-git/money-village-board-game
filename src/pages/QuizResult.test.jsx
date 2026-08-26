@@ -44,7 +44,7 @@ describe('QuizResult', () => {
   it('링크 공유하기를 누르면 현재 URL을 클립보드에 복사하고 안내 문구를 보여준다', async () => {
     renderResult()
     await waitFor(() => screen.getByText('Green Group'))
-    fireEvent.click(screen.getByText('링크 공유하기'))
+    fireEvent.click(screen.getByLabelText('링크 공유하기'))
     expect(global.navigator.clipboard.writeText).toHaveBeenCalled()
     expect(screen.getByText('링크가 복사됐어요')).toBeInTheDocument()
   })
@@ -76,7 +76,7 @@ describe('QuizResult', () => {
   it('사진 공유하기는 그룹 일러스트를 다운로드하는 링크다', async () => {
     renderResult()
     await waitFor(() => screen.getByText('Green Group'))
-    const photoLink = screen.getByText('사진 공유하기')
+    const photoLink = screen.getByLabelText('사진 공유하기')
     expect(photoLink).toHaveAttribute('href', RESULT_GROUPS['Green Group'].illustration)
     expect(photoLink).toHaveAttribute('download')
   })
@@ -84,7 +84,7 @@ describe('QuizResult', () => {
   it('카카오 키가 없으면 카카오톡 공유하기 클릭 시 준비 중 안내를 보여준다', async () => {
     renderResult()
     await waitFor(() => screen.getByText('Green Group'))
-    fireEvent.click(screen.getByText('카카오톡 공유하기'))
+    fireEvent.click(screen.getByLabelText('카카오톡 공유하기'))
     expect(screen.getByText('카카오톡 공유는 준비 중이에요')).toBeInTheDocument()
   })
 })

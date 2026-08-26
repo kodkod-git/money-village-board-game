@@ -69,7 +69,7 @@ export default function QuizResult() {
 
   const isTodayTomorrowLeftActive = result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.leftValue
   const isSafetyAdventureLeftActive = result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.leftValue
-  const navBtnStyle = { color: group.color, borderColor: group.color }
+  const navBtnStyle = { background: group.color, borderColor: group.color }
 
   return (
     <div className={styles.page} style={{ background: group.color }}>
@@ -108,32 +108,44 @@ export default function QuizResult() {
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>더 알아보기</p>
-          <a className={styles.outlineBtn} style={navBtnStyle} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer">
             우리 아이 경제 그룹 자세히 보기
           </a>
-          <a className={styles.outlineBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
             다양한 경제 유형 알아보기
           </a>
-          <a className={styles.outlineBtn} style={navBtnStyle} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer">
             네이버 리뷰 작성하기
           </a>
         </div>
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>공유하기</p>
-          <button className={styles.kakaoBtn} onClick={() => handleKakaoShare(group, result.result_group)}>
-            카카오톡 공유하기
-          </button>
-          <button className={styles.shareBtn} onClick={handleCopyLink}>
-            링크 공유하기
-          </button>
-          <a className={styles.outlineBtn} href={group.illustration} download={group.illustration.split('/').pop()}>
-            사진 공유하기
-          </a>
+          <div className={styles.shareRow}>
+            <button
+              className={`${styles.iconBtn} ${styles.kakaoIconBtn}`}
+              onClick={() => handleKakaoShare(group, result.result_group)}
+              aria-label="카카오톡 공유하기"
+            >
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+                <path d="M12 3C6.48 3 2 6.58 2 11c0 2.79 1.83 5.24 4.6 6.66-.2.75-.73 2.72-.84 3.15-.13.53.2.52.42.38.17-.11 2.7-1.83 3.8-2.58.65.09 1.32.14 2.02.14 5.52 0 10-3.58 10-8s-4.48-8-10-8Z" />
+              </svg>
+            </button>
+            <button className={styles.iconBtn} onClick={handleCopyLink} aria-label="링크 공유하기">
+              <img src="/icons/복사하기.png" alt="" className={styles.iconImg} />
+            </button>
+            <a className={styles.iconBtn} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3v12" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M4 19h16" />
+              </svg>
+            </a>
+          </div>
           {notice && <p className={styles.notice}>{notice}</p>}
         </div>
 
-        <button className={styles.retryLink} onClick={() => navigate('/quiz')}>
+        <button className={styles.retryBtn} onClick={() => navigate('/quiz')}>
           다시 하기
         </button>
       </div>

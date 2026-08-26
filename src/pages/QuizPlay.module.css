@@ -123,9 +123,9 @@
   border-radius: var(--r-sm);
   font-size: 16px;
   font-weight: 700;
-  background: var(--white);
-  color: var(--blue-100);
-  border: 2px solid var(--blue-75);
+  background: var(--blue-100);
+  color: var(--white);
+  border: 2px solid var(--blue-100);
 }
 
 .statusWrap {
