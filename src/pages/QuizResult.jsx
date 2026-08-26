@@ -67,9 +67,13 @@ export default function QuizResult() {
 
   const group = RESULT_GROUPS[result.result_group]
 
+  const isTodayTomorrowLeftActive = result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.leftValue
+  const isSafetyAdventureLeftActive = result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.leftValue
+  const navBtnStyle = { color: group.color, borderColor: group.color }
+
   return (
-    <div className={styles.page}>
-      <div className={styles.hero} style={{ background: group.color }}>
+    <div className={styles.page} style={{ background: group.color }}>
+      <div className={styles.hero}>
         {group.illustration && (
           <img className={styles.illustration} src={group.illustration} alt={result.result_group} />
         )}
@@ -86,31 +90,31 @@ export default function QuizResult() {
         )}
 
         <div className={styles.axisRow}>
-          <span className={result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.leftValue ? styles.axisActive : ''}>
+          <span className={isTodayTomorrowLeftActive ? styles.axisActive : ''} style={isTodayTomorrowLeftActive ? { color: group.color } : undefined}>
             {AXIS_LABELS.axisTodayTomorrow.left}
           </span>
-          <span className={result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.rightValue ? styles.axisActive : ''}>
+          <span className={!isTodayTomorrowLeftActive ? styles.axisActive : ''} style={!isTodayTomorrowLeftActive ? { color: group.color } : undefined}>
             {AXIS_LABELS.axisTodayTomorrow.right}
           </span>
         </div>
         <div className={styles.axisRow}>
-          <span className={result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.leftValue ? styles.axisActive : ''}>
+          <span className={isSafetyAdventureLeftActive ? styles.axisActive : ''} style={isSafetyAdventureLeftActive ? { color: group.color } : undefined}>
             {AXIS_LABELS.axisSafetyAdventure.left}
           </span>
-          <span className={result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.rightValue ? styles.axisActive : ''}>
+          <span className={!isSafetyAdventureLeftActive ? styles.axisActive : ''} style={!isSafetyAdventureLeftActive ? { color: group.color } : undefined}>
             {AXIS_LABELS.axisSafetyAdventure.right}
           </span>
         </div>
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>더 알아보기</p>
-          <a className={styles.outlineBtn} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer">
+          <a className={styles.outlineBtn} style={navBtnStyle} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer">
             우리 아이 경제 그룹 자세히 보기
           </a>
-          <a className={styles.outlineBtn} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.outlineBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
             다양한 경제 유형 알아보기
           </a>
-          <a className={styles.outlineBtn} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.outlineBtn} style={navBtnStyle} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer">
             네이버 리뷰 작성하기
           </a>
         </div>

@@ -23,8 +23,8 @@
 .card {
   flex: 1;
   background: var(--white);
-  border-radius: var(--r-lg) var(--r-lg) 0 0;
-  margin-top: -24px;
+  border-radius: var(--r-lg);
+  margin: -24px clamp(16px, 6vw, 28px) 0;
   padding: 32px clamp(24px, 9vw, 40px) 40px;
   display: flex;
   flex-direction: column;
@@ -74,7 +74,6 @@
 }
 
 .axisActive {
-  color: var(--blue-100);
   font-weight: 900;
   text-decoration: underline;
 }
