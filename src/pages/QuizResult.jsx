@@ -145,7 +145,7 @@ export default function QuizResult() {
           {notice && <p className={styles.notice}>{notice}</p>}
         </div>
 
-        <button className={styles.retryBtn} onClick={() => navigate('/quiz')}>
+        <button className={styles.retryBtn} style={navBtnStyle} onClick={() => navigate('/quiz')}>
           다시 하기
         </button>
       </div>
