@@ -70,29 +70,43 @@ export const AXIS_LABELS = {
   axisSafetyAdventure: { left: '안전 지키기', leftValue: 'safety', right: '모험 즐기기', rightValue: 'adventure' },
 }
 
+export const NAVER_REVIEW_URL = 'https://m.place.naver.com/my/checkin'
+export const ECONOMIC_TYPES_URL = 'https://m.blog.naver.com/kodkod79/224205817036'
+
+export const GROUP_DETAIL_URLS = {
+  'Orange Group': 'https://blog.naver.com/kodkod79/224229258314',
+  'Blue Group': 'https://blog.naver.com/kodkod79/224229266592',
+  'Green Group': 'https://blog.naver.com/kodkod79/224229264370',
+  'Red Group': 'https://blog.naver.com/kodkod79/224229254511',
+}
+
 export const RESULT_GROUPS = {
   'Green Group': {
     color: '#4CAF7D',
     tagline: '오늘을 가꾸며 안정을 추구하는 그룹',
     description: '오늘의 일상을 소중히 가꾸고 편안하게 지켜가는 힘이 보여요',
     animals: ['판다', '캥거루', '고양이', '펭귄'],
+    illustration: '/groups/green.png',
   },
   'Red Group': {
     color: '#F26D6D',
     tagline: '지금 이 순간, 도전을 즐기는 그룹',
     description: '지금 이 순간을 즐기며 용감하게 움직이는 힘이 보여요',
     animals: ['강아지', '여우', '원숭이', '호랑이'],
+    illustration: '/groups/red.png',
   },
   'Orange Group': {
     color: '#F2A65A',
     tagline: '내일을 준비하며 안전을 지키는 그룹',
     description: '차분하게 준비하고 안정적으로 선택하는 힘이 보여요',
     animals: ['개미', '부엉이', '다람쥐', '수달'],
+    illustration: '/groups/orange.png',
   },
   'Blue Group': {
     color: '#5B8DEF',
     tagline: '미래에 과감히 투자하는 그룹',
     description: '미래를 바라보며 과감하게 도전하는 힘이 보여요',
     animals: ['독수리', '돌고래', '사자', '코끼리'],
+    illustration: '/groups/blue.png',
   },
 }
