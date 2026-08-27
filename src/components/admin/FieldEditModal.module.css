@@ -194,6 +194,17 @@
 
 .qtyInput:focus { outline: none; }
 
+/* 네이티브 숫자 입력 스피너(위/아래 화살표)를 숨긴다. 수량 조절은 −/+ 버튼으로만 한다. */
+.qtyInput::-webkit-outer-spin-button,
+.qtyInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qtyInput[type='number'] {
+  -moz-appearance: textfield;
+}
+
 .qtyMinusBtn,
 .qtyPlusBtn {
   width: 28px;
