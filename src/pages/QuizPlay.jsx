@@ -1,24 +1,28 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
-import { GUIDE_TEXT, NAME_LABEL, NAME_PLACEHOLDER, AGE_LABEL, AGE_PLACEHOLDER, QUESTIONS } from '../constants/quizData'
+import { GUIDE_TEXT, NAME_LABEL, NAME_PLACEHOLDER, GENDER_LABEL, GENDER_OPTIONS, AGE_LABEL, AGE_PLACEHOLDER, QUESTIONS } from '../constants/quizData'
 import { calcQuizResult } from '../utils/quizScoring'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizPlay.module.css'
 
 const STEP_GUIDE = 'guide'
 const STEP_NAME = 'name'
+const STEP_GENDER = 'gender'
 const STEP_AGE = 'age'
 const STEP_QUESTION = 'question'
 const STEP_ANALYZING = 'analyzing'
 const STEP_DONE = 'done'
 const STEP_ERROR = 'error'
-const TOTAL_STEPS = 3 + QUESTIONS.length // 안내 + 이름 + 나이 + 문항 수
+const TOTAL_STEPS = 4 + QUESTIONS.length // 안내 + 이름 + 성별 + 나이 + 문항 수
 
 export default function QuizPlay() {
   const navigate = useNavigate()
+  useBodyClass('quiz-mode')
   const [step, setStep] = useState(STEP_GUIDE)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [childName, setChildName] = useState('')
+  const [childGender, setChildGender] = useState('')
   const [childAge, setChildAge] = useState('')
   const [answers, setAnswers] = useState({})
   const [polarities, setPolarities] = useState({})
@@ -33,7 +37,7 @@ export default function QuizPlay() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        childName, childAge: Number(childAge), answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
+        childName, childGender, childAge: Number(childAge), answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
       }),
     })
       .then(r => { if (!r.ok) throw new Error('save failed'); return r.json() })
@@ -68,7 +72,12 @@ export default function QuizPlay() {
     )
   }
 
-  const currentStepNumber = step === STEP_GUIDE ? 1 : step === STEP_NAME ? 2 : step === STEP_AGE ? 3 : 4 + questionIndex
+  const currentStepNumber =
+    step === STEP_GUIDE ? 1
+    : step === STEP_NAME ? 2
+    : step === STEP_GENDER ? 3
+    : step === STEP_AGE ? 4
+    : 5 + questionIndex
 
   return (
     <div className={styles.page}>
@@ -110,7 +119,32 @@ export default function QuizPlay() {
               onChange={e => setChildName(e.target.value)}
             />
           </div>
-          <button className={styles.gradBtn} onClick={() => childName.trim() && setStep(STEP_AGE)} disabled={!childName.trim()}>
+          <button className={styles.gradBtn} onClick={() => childName.trim() && setStep(STEP_GENDER)} disabled={!childName.trim()}>
+            다음 문제
+          </button>
+        </div>
+      )}
+
+      {step === STEP_GENDER && (
+        <div className={styles.card}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>{GENDER_LABEL}</label>
+            <div className={styles.genderRow}>
+              {GENDER_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.genderBtn} ${childGender === option.value ? styles.genderBtnActive : ''}`}
+                  aria-pressed={childGender === option.value}
+                  onClick={() => setChildGender(option.value)}
+                >
+                  <span className={styles.genderEmoji} aria-hidden="true">{option.emoji}</span>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button className={styles.gradBtn} onClick={() => childGender && setStep(STEP_AGE)} disabled={!childGender}>
             다음 문제
           </button>
         </div>

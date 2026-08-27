@@ -26,6 +26,7 @@ describe('saveQuizResult', () => {
 
     const id = await saveQuizResult({
       childName: '철수',
+      childGender: 'male',
       childAge: 7,
       answers: {
         q_pocket_money: '바로 쓰며 기뻐하는 편이에요.',
@@ -44,6 +45,7 @@ describe('saveQuizResult', () => {
     expect(mockFrom).toHaveBeenCalledWith('efti_test_responses')
     expect(builder.insert).toHaveBeenCalledWith(expect.objectContaining({
       child_name: '철수',
+      child_gender: 'male',
       child_age: 7,
       q_pocket_money: '바로 쓰며 기뻐하는 편이에요.',
       axis_today_tomorrow: 'today',

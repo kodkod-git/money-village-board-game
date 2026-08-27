@@ -16,6 +16,9 @@ function answerAllQuestions() {
   // 이름
   fireEvent.change(screen.getByPlaceholderText('텍스트를 입력해 주세요.'), { target: { value: '철수' } })
   fireEvent.click(screen.getByText('다음 문제'))
+  // 성별
+  fireEvent.click(screen.getByRole('button', { name: /남자/ }))
+  fireEvent.click(screen.getByText('다음 문제'))
   // 나이
   fireEvent.change(screen.getByPlaceholderText('숫자를 입력해 주세요.'), { target: { value: '7' } })
   fireEvent.click(screen.getByText('다음 문제'))
@@ -53,16 +56,28 @@ describe('QuizPlay', () => {
 
     const body = JSON.parse(global.fetch.mock.calls[0][1].body)
     expect(body.childName).toBe('철수')
+    expect(body.childGender).toBe('male')
     expect(body.childAge).toBe(7)
     expect(body.resultGroup).toBe('Green Group')
+  })
+
+  it('성별을 선택하지 않으면 다음으로 넘어가지 않는다', () => {
+    render(<MemoryRouter><QuizPlay /></MemoryRouter>)
+    fireEvent.click(screen.getByText('다음 문제'))
+    fireEvent.change(screen.getByPlaceholderText('텍스트를 입력해 주세요.'), { target: { value: '철수' } })
+    fireEvent.click(screen.getByText('다음 문제'))
+    // 성별 단계
+    expect(screen.getByText('우리 아이의 성별을 선택해주세요.')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('다음 문제'))
+    expect(screen.getByText('우리 아이의 성별을 선택해주세요.')).toBeInTheDocument()
   })
 
   it('진행바가 현재 단계에 맞는 너비로 표시된다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
     const fill = screen.getByTestId('quiz-progress-fill')
-    expect(parseFloat(fill.style.width)).toBeCloseTo((1 / 9) * 100, 5)
+    expect(parseFloat(fill.style.width)).toBeCloseTo((1 / 10) * 100, 5)
 
     fireEvent.click(screen.getByText('다음 문제'))
-    expect(parseFloat(fill.style.width)).toBeCloseTo((2 / 9) * 100, 5)
+    expect(parseFloat(fill.style.width)).toBeCloseTo((2 / 10) * 100, 5)
   })
 })

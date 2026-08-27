@@ -22,6 +22,7 @@
   --blue-15:     rgba(112, 166, 254, 0.15);
   --blue-50:     rgba(190, 219, 255, 0.5);
   --gray-10:     #f7f7f7;
+  --bluish-white: #eef2fb;
   --blob:        #a3b3ff;
   --grad-page:   linear-gradient(160deg, #6ea6fd 0%, #949dfe 50%, #9191fb 100%);
   --grad-btn:    linear-gradient(90deg, #5b7cf0 0%, #9b5fd4 100%);
@@ -152,6 +153,34 @@ body::after {
 
 input, button { font-family: inherit; }
 button { cursor: pointer; border: none; }
+
+/* 퀴즈 화면은 기기·화면 크기와 무관하게 모바일 폭 한 장으로 보여준다.
+   공통 폰 프레임(#root의 둥근 테두리·그림자·고정 비율)을 벗어나고,
+   세로 길이는 제한 없이 내용만큼 늘어난다. */
+body.quiz-mode {
+  padding: 0;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--bluish-white);
+}
+
+body.quiz-mode::before,
+body.quiz-mode::after {
+  display: none;
+}
+
+body.quiz-mode #root {
+  width: min(100vw, var(--app-max-width));
+  height: auto;
+  min-height: 100dvh;
+  max-height: none;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  contain: none;
+}
 
 /* --admin-* 변수는 admin-mode 전체 화면뿐 아니라, 플레이어 화면(예: 랭킹
    페이지의 자산 확인 팝업)에 관리자 컴포넌트를 부분적으로 재사용할 때도

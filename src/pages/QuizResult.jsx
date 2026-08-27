@@ -7,6 +7,7 @@ import {
   NAVER_REVIEW_URL,
   ECONOMIC_TYPES_URL,
 } from '../constants/quizData'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizResult.module.css'
 
 const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY
@@ -14,6 +15,7 @@ const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY
 export default function QuizResult() {
   const { resultId } = useParams()
   const navigate = useNavigate()
+  useBodyClass('quiz-mode')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(false)
   const [notice, setNotice] = useState('')
@@ -70,9 +72,11 @@ export default function QuizResult() {
   const isTodayTomorrowLeftActive = result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.leftValue
   const isSafetyAdventureLeftActive = result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.leftValue
   const navBtnStyle = { background: group.color, borderColor: group.color }
+  const groupColorStyle = { color: group.color }
+  const iconBtnStyle = { background: group.color, borderColor: group.color, color: 'var(--white)' }
 
   return (
-    <div className={styles.page} style={{ background: group.color }}>
+    <div className={styles.page} style={{ background: group.bgColor || group.color }}>
       <div className={styles.hero}>
         {group.illustration && (
           <img className={styles.illustration} src={group.illustration} alt={result.result_group} />
@@ -81,8 +85,8 @@ export default function QuizResult() {
 
       <div className={styles.card}>
         <p className={styles.eyebrow}>우리 아이의 경제적 잠재력은</p>
-        <h1 className={styles.groupName}>{result.result_group}</h1>
-        <p className={styles.tagline}>[{group.tagline}]</p>
+        <h1 className={styles.groupName} style={groupColorStyle}>{result.result_group}</h1>
+        <p className={styles.tagline} style={groupColorStyle}>[{group.tagline}]</p>
         <p className={styles.description}>✅ {group.description}</p>
 
         {group.animals.length > 0 && (
@@ -131,18 +135,21 @@ export default function QuizResult() {
                 <path d="M12 3C6.48 3 2 6.58 2 11c0 2.79 1.83 5.24 4.6 6.66-.2.75-.73 2.72-.84 3.15-.13.53.2.52.42.38.17-.11 2.7-1.83 3.8-2.58.65.09 1.32.14 2.02.14 5.52 0 10-3.58 10-8s-4.48-8-10-8Z" />
               </svg>
             </button>
-            <button className={styles.iconBtn} onClick={handleCopyLink} aria-label="링크 공유하기">
-              <img src="/icons/복사하기.png" alt="" className={styles.iconImg} />
+            <button className={styles.iconBtn} style={iconBtnStyle} onClick={handleCopyLink} aria-label="링크 공유하기">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2.5" />
+                <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+              </svg>
             </button>
-            <a className={styles.iconBtn} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <a className={styles.iconBtn} style={iconBtnStyle} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3v12" />
                 <path d="M7 10l5 5 5-5" />
                 <path d="M4 19h16" />
               </svg>
             </a>
           </div>
-          {notice && <p className={styles.notice}>{notice}</p>}
+          {notice && <p className={styles.notice} style={groupColorStyle}>{notice}</p>}
         </div>
 
         <button className={styles.retryBtn} style={navBtnStyle} onClick={() => navigate('/quiz')}>

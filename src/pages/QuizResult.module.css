@@ -1,10 +1,8 @@
 .page {
-  min-height: 100%;
-  height: 100%;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
-  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -14,16 +12,14 @@
 }
 
 .hero {
-  flex: 0 0 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  line-height: 0;
 }
 
 .illustration {
-  width: 160px;
-  height: 160px;
-  object-fit: contain;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .card {
@@ -59,10 +55,10 @@
 .description {
   font-size: 15px;
   font-weight: 600;
-  max-width: 360px;
+  max-width: 320px;
   color: var(--ink-2);
-  text-align: left;
-  text-indent: 1em hanging;
+  text-align: center;
+  word-break: keep-all;
 }
 
 .animals {
@@ -133,12 +129,6 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-}
-
-.iconImg {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
 }
 
 .kakaoIconBtn {

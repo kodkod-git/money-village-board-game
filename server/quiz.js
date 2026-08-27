@@ -1,13 +1,14 @@
 import { supabaseSurvey } from './supabaseSurvey.js'
 
 export async function saveQuizResult({
-  childName, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
+  childName, childGender, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
 }) {
   const { data, error } = await supabaseSurvey
     .from('efti_test_responses')
     .insert({
       submitted_at: new Date().toISOString(),
       child_name: childName,
+      child_gender: childGender,
       child_age: childAge,
       q_pocket_money: answers.q_pocket_money,
       q_new_activity: answers.q_new_activity,

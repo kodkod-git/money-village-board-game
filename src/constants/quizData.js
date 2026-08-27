@@ -3,6 +3,13 @@ export const GUIDE_TEXT = '우리 아이와 가까운 모습을 선택해주세�
 export const NAME_LABEL = '우리 아이의 이름을 입력해주세요.'
 export const NAME_PLACEHOLDER = '텍스트를 입력해 주세요.'
 
+export const GENDER_LABEL = '우리 아이의 성별을 선택해주세요.'
+// value는 survey.efti_test_responses.child_gender 컬럼에 저장된다.
+export const GENDER_OPTIONS = [
+  { value: 'male', label: '남자', emoji: '👦' },
+  { value: 'female', label: '여자', emoji: '👧' },
+]
+
 export const AGE_LABEL = '우리 아이의 나이를 입력해주세요.'
 export const AGE_PLACEHOLDER = '숫자를 입력해 주세요.'
 
@@ -80,9 +87,12 @@ export const GROUP_DETAIL_URLS = {
   'Red Group': 'https://blog.naver.com/kodkod79/224229254511',
 }
 
+// bgColor는 각 일러스트(/groups/*.png)의 배경색 평균값이다. 결과 화면 배경을
+// 일러스트 배경과 맞춰 이음새가 보이지 않게 하려고 쓴다.
 export const RESULT_GROUPS = {
   'Green Group': {
     color: '#4CAF7D',
+    bgColor: '#99D8B0',
     tagline: '오늘을 가꾸며 안정을 추구하는 그룹',
     description: '오늘의 일상을 소중히 가꾸고 편안하게 지켜가는 힘이 보여요',
     animals: ['판다', '캥거루', '고양이', '펭귄'],
@@ -90,6 +100,7 @@ export const RESULT_GROUPS = {
   },
   'Red Group': {
     color: '#F26D6D',
+    bgColor: '#F39E91',
     tagline: '지금 이 순간, 도전을 즐기는 그룹',
     description: '지금 이 순간을 즐기며 용감하게 움직이는 힘이 보여요',
     animals: ['강아지', '여우', '원숭이', '호랑이'],
@@ -97,6 +108,7 @@ export const RESULT_GROUPS = {
   },
   'Orange Group': {
     color: '#F2A65A',
+    bgColor: '#F8AB66',
     tagline: '내일을 준비하며 안전을 지키는 그룹',
     description: '차분하게 준비하고 안정적으로 선택하는 힘이 보여요',
     animals: ['개미', '부엉이', '다람쥐', '수달'],
@@ -104,6 +116,7 @@ export const RESULT_GROUPS = {
   },
   'Blue Group': {
     color: '#5B8DEF',
+    bgColor: '#AACEF1',
     tagline: '미래에 과감히 투자하는 그룹',
     description: '미래를 바라보며 과감하게 도전하는 힘이 보여요',
     animals: ['독수리', '돌고래', '사자', '코끼리'],

@@ -84,13 +84,13 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 })
 
 app.post('/api/quiz/results', async (req, res) => {
-  const { childName, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup } = req.body ?? {}
-  if (!childName?.trim() || !childAge || !answers || !axisTodayTomorrow || !axisSafetyAdventure || !resultGroup) {
-    return res.status(400).json({ error: 'childName, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup이 필요합니다' })
+  const { childName, childGender, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup } = req.body ?? {}
+  if (!childName?.trim() || !childGender || !childAge || !answers || !axisTodayTomorrow || !axisSafetyAdventure || !resultGroup) {
+    return res.status(400).json({ error: 'childName, childGender, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup이 필요합니다' })
   }
   try {
     const id = await saveQuizResult({
-      childName: childName.trim(), childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
+      childName: childName.trim(), childGender, childAge, answers, axisTodayTomorrow, axisSafetyAdventure, resultGroup,
     })
     res.json({ id })
   } catch (err) {

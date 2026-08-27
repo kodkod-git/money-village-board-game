@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizIntro.module.css'
 
 export default function QuizIntro() {
   const navigate = useNavigate()
+  useBodyClass('quiz-mode')
 
   return (
     <div className={styles.page}>
