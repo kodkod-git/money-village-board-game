@@ -16,9 +16,8 @@ function answerAllQuestions() {
   // 이름
   fireEvent.change(screen.getByPlaceholderText('텍스트를 입력해 주세요.'), { target: { value: '철수' } })
   fireEvent.click(screen.getByText('다음 문제'))
-  // 성별
+  // 성별 (버튼을 누르면 바로 다음 단계로)
   fireEvent.click(screen.getByRole('button', { name: /남자/ }))
-  fireEvent.click(screen.getByText('다음 문제'))
   // 나이
   fireEvent.change(screen.getByPlaceholderText('숫자를 입력해 주세요.'), { target: { value: '7' } })
   fireEvent.click(screen.getByText('다음 문제'))
@@ -61,15 +60,16 @@ describe('QuizPlay', () => {
     expect(body.resultGroup).toBe('Green Group')
   })
 
-  it('성별을 선택하지 않으면 다음으로 넘어가지 않는다', () => {
+  it('성별 버튼을 누르면 곧바로 나이 입력 단계로 넘어간다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
     fireEvent.click(screen.getByText('다음 문제'))
     fireEvent.change(screen.getByPlaceholderText('텍스트를 입력해 주세요.'), { target: { value: '철수' } })
     fireEvent.click(screen.getByText('다음 문제'))
-    // 성별 단계
+    // 성별 단계 — 다음 문제 버튼 없이 선택 즉시 이동
     expect(screen.getByText('우리 아이의 성별을 선택해주세요.')).toBeInTheDocument()
-    fireEvent.click(screen.getByText('다음 문제'))
-    expect(screen.getByText('우리 아이의 성별을 선택해주세요.')).toBeInTheDocument()
+    expect(screen.queryByText('다음 문제')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /여자/ }))
+    expect(screen.getByPlaceholderText('숫자를 입력해 주세요.')).toBeInTheDocument()
   })
 
   it('진행바가 현재 단계에 맞는 너비로 표시된다', () => {

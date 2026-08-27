@@ -98,39 +98,6 @@
 }
 .input[type='number'] { -moz-appearance: textfield; }
 
-.genderRow {
-  display: flex;
-  gap: 12px;
-}
-
-.genderBtn {
-  flex: 1;
-  height: 104px;
-  border-radius: var(--r-sm);
-  border: 2px solid var(--blue-75);
-  background: var(--white);
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.genderBtnActive {
-  background: var(--blue-100);
-  border-color: var(--blue-100);
-  color: var(--white);
-}
-
-.genderEmoji {
-  font-size: 34px;
-  line-height: 1;
-}
-
 .gradBtn {
   height: 56px;
   background: var(--blue-100);

@@ -48,6 +48,11 @@ export default function QuizPlay() {
       .catch(() => setStep(STEP_ERROR))
   }
 
+  function handleGender(value) {
+    setChildGender(value)
+    setStep(STEP_AGE)
+  }
+
   function handleAnswer(question, option) {
     const nextAnswers = { ...answers, [question.key]: option.text }
     const nextPolarities = { ...polarities, [question.key]: option.polarity }
@@ -127,26 +132,19 @@ export default function QuizPlay() {
 
       {step === STEP_GENDER && (
         <div className={styles.card}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>{GENDER_LABEL}</label>
-            <div className={styles.genderRow}>
-              {GENDER_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`${styles.genderBtn} ${childGender === option.value ? styles.genderBtnActive : ''}`}
-                  aria-pressed={childGender === option.value}
-                  onClick={() => setChildGender(option.value)}
-                >
-                  <span className={styles.genderEmoji} aria-hidden="true">{option.emoji}</span>
-                  {option.label}
-                </button>
-              ))}
-            </div>
+          <p className={styles.questionPrompt}>{GENDER_LABEL}</p>
+          <div className={styles.optionList}>
+            {GENDER_OPTIONS.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                className={styles.optionBtn}
+                onClick={() => handleGender(option.value)}
+              >
+                <span aria-hidden="true">{option.emoji}</span> {option.label}
+              </button>
+            ))}
           </div>
-          <button className={styles.gradBtn} onClick={() => childGender && setStep(STEP_AGE)} disabled={!childGender}>
-            다음 문제
-          </button>
         </div>
       )}
 
