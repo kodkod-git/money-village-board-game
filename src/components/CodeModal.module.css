@@ -17,11 +17,11 @@
   border-radius: 50%; width: 28px; height: 28px; font-size: 14px;
 }
 .modal h2 { color: var(--ink); font-size: 16px; margin-bottom: 8px; }
-.divider { height: 1px; background: var(--divider); margin: 12px 0 20px; }
+.divider { height: 1px; background: var(--divider); margin: var(--space-md) 0 var(--space-xl); }
 .input {
   width: 100%; padding: 11px; border-radius: 8px;
   background: var(--slot-empty); border: 1px solid var(--line); color: var(--ink);
-  font-size: 16px; letter-spacing: 4px; text-align: center; margin-bottom: 16px;
+  font-size: 16px; letter-spacing: 4px; text-align: center; margin-bottom: var(--space-lg);
 }
 .input::placeholder { color: var(--ghost); }
 .btn {

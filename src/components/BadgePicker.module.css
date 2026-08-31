@@ -1,7 +1,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--space-lg);
   align-items: stretch;
 }
 
@@ -15,10 +15,10 @@
 }
 
 .gridFill {
-  --cell: min((100cqw - 32px) / 3, (100cqh - 16px) / 2);
+  --cell: min((100cqw - var(--space-3xl)) / 3, (100cqh - var(--space-lg)) / 2);
   grid-template-columns: repeat(3, var(--cell));
   grid-template-rows: repeat(2, minmax(var(--cell), auto));
-  width: calc(var(--cell) * 3 + 32px);
+  width: calc(var(--cell) * 3 + var(--space-3xl));
   margin: 0 auto;
 }
 
@@ -26,12 +26,12 @@
   background: var(--white);
   border-radius: var(--r-sm);
   border: 2px solid var(--blue-10);
-  padding: 20px 12px;
+  padding: var(--space-xl) var(--space-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-md);
   cursor: pointer;
   min-height: 100px;
   min-width: 0;

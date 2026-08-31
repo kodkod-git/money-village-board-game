@@ -108,7 +108,7 @@
   bottom: 8px;
   left: 8px;
   z-index: 1;
-  padding: 2px 8px;
+  padding: var(--space-2xs) var(--space-sm);
   border-radius: var(--r-pill);
   background: #fff3e0;
   color: #e65100;

@@ -2,7 +2,7 @@
   min-height: 100%;
   height: 100%;
   background: var(--gray-10);
-  padding: 32px 0;
+  padding: var(--space-3xl) 0;
   position: relative;
   overflow-y: auto;
   scrollbar-width: none;
@@ -22,12 +22,12 @@
 .divider {
   border: none;
   border-top: 1px solid var(--blue-10);
-  margin: 16px 24px 0;
+  margin: var(--space-lg) var(--space-2xl) 0;
   flex-shrink: 0;
 }
 
 .stepContent {
-  padding: 28px 24px 0;
+  padding: 28px var(--space-2xl) 0;
   flex: 1 0 auto;
 }
 
@@ -49,8 +49,8 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: 2px;
-  margin-bottom: 24px;
+  margin-top: var(--space-2xs);
+  margin-bottom: var(--space-2xl);
   flex-shrink: 0;
 }
 
@@ -70,7 +70,7 @@
   justify-content: safe center;
   overflow-y: auto;
   scrollbar-width: none;
-  padding-bottom: 24px;
+  padding-bottom: var(--space-2xl);
 }
 
 .fillWrapper::-webkit-scrollbar {
@@ -81,7 +81,7 @@
   position: static;
   display: flex;
   justify-content: flex-end;
-  padding: 24px 24px 0;
+  padding: var(--space-2xl) var(--space-2xl) 0;
   margin-top: auto;
   flex-shrink: 0;
 }
@@ -102,8 +102,8 @@
 .assetList {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding-bottom: 24px;
+  gap: var(--space-md);
+  padding-bottom: var(--space-2xl);
 }
 
 @media (min-width: 768px) {
@@ -136,10 +136,10 @@
   background: var(--white);
   border: 2px solid var(--blue-75);
   border-radius: var(--r-lg);
-  padding: 26px;
+  padding: var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   width: 100%;
   min-width: 280px;
   max-width: 420px;
@@ -158,7 +158,7 @@
   height: 56px;
   border-radius: var(--r-sm);
   border: 2px solid var(--blue-50);
-  padding: 0 22px;
+  padding: 0 var(--space-xl);
   text-align: left;
   background: var(--blue-15);
 }
@@ -188,11 +188,11 @@
 .popup {
   background: var(--white);
   border-radius: var(--r-lg);
-  padding: 32px;
+  padding: var(--space-3xl);
   width: min(320px, calc(100% - 28px));
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-xl);
   box-shadow: var(--shadow-card);
 }
 
@@ -205,7 +205,7 @@
 
 .popupActions {
   display: flex;
-  gap: 12px;
+  gap: var(--space-md);
 }
 
 .cancelBtn {

@@ -8,8 +8,8 @@
 .selectionBar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: var(--space-md);
+  padding: 10px var(--space-lg);
   background: var(--admin-blue-soft);
   border-bottom: 1px solid var(--admin-border);
   font-size: 12px;
@@ -19,7 +19,7 @@
 
 .selectionDeleteBtn {
   height: 28px;
-  padding: 0 12px;
+  padding: 0 var(--space-md);
   border-radius: var(--admin-r-sm);
   background: #e53935;
   color: #fff;
@@ -51,7 +51,7 @@
 .sortBtn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
   background: none;
   font-size: 12px;
   font-weight: 700;
@@ -75,7 +75,7 @@
 .participant {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-xs);
 }
 
 .avatar {

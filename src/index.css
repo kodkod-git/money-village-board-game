@@ -35,6 +35,23 @@
   --slot-empty:  #f9f9f9;
   --line:        #e0e0e0;
   --divider:     #ededed;
+
+  /* Spacing scale — Figma "앱" 페이지의 오토레이아웃 padding/gap 4,713건을 실측해
+     빈도가 높은 값들을 스냅한 것 (2026-08-31). Figma의 Spacing 변수 컬렉션과
+     이름을 맞춰뒀으니(spacing/xs → --space-xs 등), 새 화면 작업 시 이 값들을
+     우선 사용하고 벗어나는 경우에만 하드코딩할 것. */
+  --space-0:     0;
+  --space-2xs:   2px;
+  --space-xs:    4px;
+  --space-sm:    8px;
+  --space-md:    12px;
+  --space-lg:    16px;
+  --space-xl:    20px;
+  --space-2xl:   24px;
+  --space-3xl:   32px;
+  --space-4xl:   48px;
+  --space-hero:  75px;
+
   --r-sm:        16px;
   --r-md:        20px;
   --r-lg:        24px;

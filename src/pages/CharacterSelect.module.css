@@ -55,7 +55,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-sm);
   width: min(100cqw, 100cqh);
   aspect-ratio: 1;
 }
@@ -63,7 +63,7 @@
 .bottomBar {
   flex-shrink: 0;
   width: min(307px, calc(100% - 24px));
-  margin: 16px auto 24px;
+  margin: var(--space-lg) auto var(--space-2xl);
 }
 
 .ctaBtn {

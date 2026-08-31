@@ -3,8 +3,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 120px 24px;
+  gap: var(--space-sm);
+  padding: 120px var(--space-2xl);
   text-align: center;
 }
 
@@ -17,7 +17,7 @@
   justify-content: center;
   background: var(--admin-icon-bg);
   color: var(--admin-disabled);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-sm);
 }
 
 .iconBlue {
@@ -35,12 +35,12 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--admin-text-2);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-md);
 }
 
 .actionBtn {
   height: 40px;
-  padding: 0 20px;
+  padding: 0 var(--space-xl);
   border-radius: var(--admin-r-sm);
   background: var(--admin-blue);
   color: #fff;

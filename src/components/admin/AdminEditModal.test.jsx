@@ -32,9 +32,10 @@ describe('AdminEditModal', () => {
   })
 
   it('직업/현금/총자산 값을 보여준다', () => {
-    render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
-    expect(screen.getByText('💼')).toBeInTheDocument()
-    expect(screen.getByText('경영·금융')).toBeInTheDocument()
+    const { container } = render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
+    // 직업은 헤더(이름 아래)와 직업 카드 두 곳에 표시된다.
+    expect(screen.getAllByText('경영·금융')).toHaveLength(2)
+    expect(container.querySelector('img[src="/badges/job/경영금융.png"]')).toBeInTheDocument()
     expect(screen.getByText('125,000원')).toBeInTheDocument()
     // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → ×0.5 = 69,500원
     expect(screen.getByText('69,500원')).toBeInTheDocument()
@@ -88,7 +89,7 @@ describe('AdminEditModal', () => {
     expect(screen.queryByTestId('edit-realEstate')).not.toBeInTheDocument()
     expect(screen.queryByTestId('edit-stocks')).not.toBeInTheDocument()
 
-    expect(screen.getByText('경영·금융')).toBeInTheDocument()
+    expect(screen.getAllByText('경영·금융')).toHaveLength(2)
     expect(screen.getByText('125,000원')).toBeInTheDocument()
 
     await userEvent.click(screen.getByText('‹ 뒤로'))

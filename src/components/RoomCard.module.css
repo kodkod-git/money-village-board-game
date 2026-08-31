@@ -28,7 +28,7 @@
   color: #ffffff;
   background: var(--blue-100);
   border-radius: var(--r-pill);
-  padding: 3px 8px;
+  padding: 3px var(--space-sm);
 }
 
 .badgeLive { background: var(--muted); }

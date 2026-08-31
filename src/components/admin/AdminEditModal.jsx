@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import {
-  JOB_LABELS, JOB_ICONS, BADGE_NAMES, BADGE_LABELS,
+  JOB_LABELS, JOB_IMAGES, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
   STOCK_LABELS, STOCK_IMAGES,
 } from '../../constants/gameData'
@@ -51,7 +51,10 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
         <button type="button" className={styles.backBtn} onClick={onClose}>‹ 뒤로</button>
         <div className={styles.profileHeader}>
           <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
-          <span className={styles.name}>{player.name}</span>
+          <div className={styles.profileText}>
+            <span className={styles.name}>{player.name}</span>
+            <span className={styles.jobSubtitle}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
+          </div>
         </div>
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
       </div>
@@ -68,10 +71,14 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
               </div>
               <span className={styles.fieldValue}>
                 {gameState.job ? (
-                  <>
-                    <span aria-hidden="true">{JOB_ICONS[gameState.job]}</span>{' '}
+                  <span className={styles.jobValueRow}>
+                    <img
+                      src={`/badges/job/${JOB_IMAGES[gameState.job]}.png`}
+                      alt=""
+                      className={styles.jobIcon}
+                    />
                     <span>{JOB_LABELS[gameState.job]}</span>
-                  </>
+                  </span>
                 ) : '미입력'}
               </span>
             </div>
@@ -100,7 +107,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                   <button type="button" data-testid="edit-cash" className={styles.editBtn} onClick={() => setEditingField('cash')}>수정</button>
                 )}
               </div>
-              <span className={styles.fieldValue}>{(gameState.cash ?? 0).toLocaleString()}원</span>
+              <span className={styles.cashValue}>{(gameState.cash ?? 0).toLocaleString()}원</span>
             </div>
           </div>
         </div>

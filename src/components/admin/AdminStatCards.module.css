@@ -1,19 +1,19 @@
 .row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  gap: var(--space-md);
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-xl);
 }
 
 .card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-md);
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-r-lg);
-  padding: 13px 19px;
+  padding: var(--space-md) var(--space-lg);
 }
 
 .icon {

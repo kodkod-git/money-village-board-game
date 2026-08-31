@@ -2,17 +2,17 @@
   background: var(--white);
   border: 2px solid var(--blue-10);
   border-radius: var(--r-sm);
-  padding: 16px;
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-md);
   min-width: 0;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 
 .img {

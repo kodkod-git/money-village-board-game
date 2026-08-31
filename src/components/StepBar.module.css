@@ -1,7 +1,7 @@
 .container {
   display: flex;
-  gap: 12px;
-  padding: 76px 24px 0;
+  gap: var(--space-md);
+  padding: 76px var(--space-2xl) 0;
 }
 
 .step {

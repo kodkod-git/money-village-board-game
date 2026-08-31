@@ -12,9 +12,9 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-sm);
   border-bottom: 1px solid var(--admin-border);
-  padding: 8px 14px;
+  padding: var(--space-sm) var(--space-lg);
   flex-shrink: 0;
 }
 
@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-sm);
   min-width: 0;
 }
 
@@ -40,7 +40,7 @@
   font-weight: 700;
   color: var(--admin-text-2);
   background: none;
-  padding: 5px 10px;
+  padding: 5px var(--space-md);
   border-radius: 8px;
   white-space: nowrap;
 }
@@ -55,7 +55,7 @@
   position: relative;
   height: 400px;
   background: var(--admin-surface);
-  padding: 14px;
+  padding: var(--space-lg);
   cursor: pointer;
   text-align: left;
 }
@@ -70,7 +70,7 @@
   color: #ffffff;
   background: var(--admin-blue);
   border-radius: 20px;
-  padding: 5px 12px;
+  padding: var(--space-sm) var(--space-md);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
 }
 
@@ -102,7 +102,7 @@
 .slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--space-md);
   height: 100%;
 }
 
@@ -119,7 +119,7 @@
   justify-content: center;
   gap: 6px;
   overflow: hidden;
-  padding: 8px;
+  padding: var(--space-sm);
 }
 
 .leaderBadge {
@@ -190,8 +190,8 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: var(--space-md);
+  padding: 10px var(--space-md);
   border-radius: var(--admin-r-md);
   border: 1px solid var(--admin-blue-faint);
 }

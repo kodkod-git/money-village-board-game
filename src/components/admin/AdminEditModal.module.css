@@ -45,7 +45,11 @@
 
 .avatar { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
 
-.name { font-size: 18px; font-weight: 700; color: var(--admin-text); }
+.profileText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.name { font-size: 20px; font-weight: 700; color: var(--admin-text); }
+
+.jobSubtitle { font-size: 14px; font-weight: 400; color: var(--admin-text-2); }
 
 .columns {
   flex: 1;
@@ -91,9 +95,15 @@
 
 .fieldHeader { display: flex; justify-content: space-between; align-items: center; }
 
-.fieldLabel { font-size: 12px; font-weight: 700; color: var(--admin-disabled); }
+.fieldLabel { font-size: 12px; font-weight: 400; color: var(--admin-disabled); }
 
 .fieldValue { font-size: 16px; font-weight: 700; color: var(--admin-text); }
+
+.cashValue { font-size: 22px; font-weight: 700; color: var(--admin-text); }
+
+.jobValueRow { display: inline-flex; align-items: center; gap: var(--space-sm); }
+
+.jobIcon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
 
 .editBtn {
   background: var(--admin-surface);
@@ -161,4 +171,4 @@
 
 .footerLabel { font-size: 14px; font-weight: 700; color: var(--admin-disabled); }
 
-.footerValue { font-size: 24px; font-weight: 900; color: var(--admin-text); }
+.footerValue { font-size: 28px; font-weight: 900; color: var(--admin-text); }

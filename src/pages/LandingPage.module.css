@@ -18,7 +18,7 @@
   right: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   z-index: 1;
 }
 
@@ -95,7 +95,7 @@
 .buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-lg);
   width: 100%;
   max-width: 360px;
 }
