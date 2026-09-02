@@ -7,6 +7,7 @@ import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import { adminFetch } from '../utils/adminAuth'
+import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './AdminDashboard.module.css'
 
@@ -71,12 +72,12 @@ export default function AdminClassDashboard({ classId, initialName }) {
       })
       if (!res.ok) {
         const { error } = await res.json().catch(() => ({}))
-        alert(error || '방 생성에 실패했습니다')
+        toast(error || '방 생성에 실패했습니다')
         return
       }
       loadRooms()
     } catch {
-      alert('방 생성에 실패했습니다')
+      toast('방 생성에 실패했습니다')
     } finally {
       setIsCreating(false)
     }
@@ -110,15 +111,15 @@ export default function AdminClassDashboard({ classId, initialName }) {
       const res = await adminFetch(`/api/admin/classes/${classId}/submit-pending`, { method: 'POST' })
       if (!res.ok) {
         const { error } = await res.json().catch(() => ({}))
-        alert(error || '일괄 결과등록에 실패했습니다')
+        toast(error || '일괄 결과등록에 실패했습니다')
         return
       }
       const { total, skipped } = await res.json()
-      if (total === 0 && !skipped) alert('등록 대기 중인 팀이 없습니다')
-      else if (skipped > 0) alert(`${skipped}개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다`)
+      if (total === 0 && !skipped) toast('등록 대기 중인 팀이 없습니다')
+      else if (skipped > 0) toast(`${skipped}개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다`)
       loadRooms()
     } catch {
-      alert('일괄 결과등록에 실패했습니다')
+      toast('일괄 결과등록에 실패했습니다')
     } finally {
       setIsBulkRegistering(false)
     }

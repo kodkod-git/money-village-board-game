@@ -21,6 +21,21 @@
   margin: 0 auto;
 }
 
+/* 넓은 폭에서는 세로 맞춤 축소를 멈추고 본문 컬럼 전체 너비를 채운다
+   (헤더와 좌우 정렬을 맞추고, Figma 시안대로 정사각형 카드). */
+@container (min-width: 620px) {
+  .gridFill {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: none;
+    width: 100%;
+    gap: var(--space-2xl);
+  }
+
+  .gridFill .tile {
+    aspect-ratio: 1;
+  }
+}
+
 .tile {
   background: var(--white);
   border-radius: var(--r-sm);

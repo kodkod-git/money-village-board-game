@@ -22,4 +22,11 @@ describe('JobPicker', () => {
     await userEvent.click(screen.getByText('보건·교육'))
     expect(onChange).toHaveBeenCalledWith('c')
   })
+
+  it('이미 선택된 타일을 다시 클릭하면 onChange(null)로 선택을 해제한다 (무직)', async () => {
+    const onChange = vi.fn()
+    render(<JobPicker value="c" onChange={onChange} />)
+    await userEvent.click(screen.getByText('보건·교육'))
+    expect(onChange).toHaveBeenCalledWith(null)
+  })
 })

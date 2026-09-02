@@ -173,7 +173,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
                           <div className={styles.participantText}>
                             <span className={styles.participantName}>{row.name}</span>
                             <span className={styles.participantAffiliation}>{row.affiliation}</span>
-                            <span className={styles.participantJob}>{JOB_LABELS[row.job] ?? '미입력'}</span>
+                            <span className={styles.participantJob}>{JOB_LABELS[row.job] ?? '무직'}</span>
                           </div>
                         </div>
                       </td>

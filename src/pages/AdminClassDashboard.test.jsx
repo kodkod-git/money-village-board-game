@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassDashboard from './AdminClassDashboard'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
 import { SocketProvider } from '../contexts/SocketContext'
+import Toaster from '../components/Toaster'
+import { _resetToasts } from '../utils/toast'
 
 vi.mock('qrcode', () => ({
   default: { toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,fake') },
@@ -48,12 +50,14 @@ beforeEach(() => {
 afterEach(() => {
   document.body.classList.remove('admin-mode')
   clearAdminSession()
+  _resetToasts()
 })
 
 function renderDashboard() {
   return render(
     <SocketProvider>
       <AdminClassDashboard classId="class-1" initialName="3학년 2반" />
+      <Toaster />
     </SocketProvider>
   )
 }
@@ -238,7 +242,7 @@ describe('AdminClassDashboard', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/admin/rooms?classId=class-1', expect.anything())
   })
 
-  it('방 생성에 실패하면 alert로 안내한다', async () => {
+  it('방 생성에 실패하면 alert 없이 토스트로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
 
@@ -249,14 +253,14 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-    alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('방 만들기'))
 
-    expect(alertSpy).toHaveBeenCalledWith('방 생성에 실패했습니다')
+    expect(await screen.findByText('방 생성에 실패했습니다')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
   })
 
-  it('네트워크 오류로 요청이 실패해도 alert를 보여준다', async () => {
+  it('네트워크 오류로 요청이 실패해도 토스트로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
 
@@ -267,11 +271,11 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-    alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('방 만들기'))
 
-    expect(alertSpy).toHaveBeenCalledWith('방 생성에 실패했습니다')
+    expect(await screen.findByText('방 생성에 실패했습니다')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
   })
 
   it('일괄 결과등록 버튼 클릭 시 현재 classId로 등록 대기 팀들을 일괄 등록하고 목록을 새로고침한다', async () => {
@@ -311,7 +315,7 @@ describe('AdminClassDashboard', () => {
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
-  it('등록 대기 중인 팀이 없으면 alert로 안내한다', async () => {
+  it('등록 대기 중인 팀이 없으면 토스트로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
 
@@ -322,15 +326,15 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-    alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('전체 등록'))
     await userEvent.click(screen.getByText('예'))
 
-    expect(alertSpy).toHaveBeenCalledWith('등록 대기 중인 팀이 없습니다')
+    expect(await screen.findByText('등록 대기 중인 팀이 없습니다')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
   })
 
-  it('연결 끊긴 팀원이 있는 팀은 제외되었다고 alert로 안내한다', async () => {
+  it('연결 끊긴 팀원이 있는 팀은 제외되었다고 토스트로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
 
@@ -341,15 +345,15 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-    alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('전체 등록'))
     await userEvent.click(screen.getByText('예'))
 
-    expect(alertSpy).toHaveBeenCalledWith('2개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다')
+    expect(await screen.findByText('2개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
   })
 
-  it('일괄 결과등록이 실패하면 alert로 안내한다', async () => {
+  it('일괄 결과등록이 실패하면 토스트로 안내한다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')
 
@@ -360,11 +364,11 @@ describe('AdminClassDashboard', () => {
       return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
     })
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-    alertSpy.mockClear()
 
     await userEvent.click(screen.getByText('전체 등록'))
     await userEvent.click(screen.getByText('예'))
 
-    expect(alertSpy).toHaveBeenCalledWith('일괄 결과등록에 실패했습니다')
+    expect(await screen.findByText('일괄 결과등록에 실패했습니다')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
   })
 })

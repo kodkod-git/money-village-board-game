@@ -127,6 +127,14 @@
   text-align: center;
 }
 
+.hint {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-2);
+  text-align: center;
+}
+
 /* Asset grid (real estate / stock) */
 
 .assetGrid {

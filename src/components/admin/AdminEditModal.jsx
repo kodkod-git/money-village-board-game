@@ -53,7 +53,9 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           <img src={`/characters/${player.character}.png`} alt={player.character} className={styles.avatar} />
           <div className={styles.profileText}>
             <span className={styles.name}>{player.name}</span>
-            <span className={styles.jobSubtitle}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
+            <span className={styles.jobSubtitle}>
+              {gameState.job ? JOB_LABELS[gameState.job] : gameState.jobVisited ? '무직' : '직업 미입력'}
+            </span>
           </div>
         </div>
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
@@ -79,7 +81,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                     />
                     <span>{JOB_LABELS[gameState.job]}</span>
                   </span>
-                ) : '미입력'}
+                ) : gameState.jobVisited ? '무직' : '미입력'}
               </span>
             </div>
           </div>

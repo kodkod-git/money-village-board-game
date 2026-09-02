@@ -33,6 +33,7 @@ function defaultGameState() {
     stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
+    jobVisited: false,
     stocksVisited: false,
     realEstateVisited: false,
     isCompleted: false,
@@ -163,7 +164,9 @@ export function updatePlayerStateByUuid(code, playerUuid, partialGameState) {
   // 이 함수는 관리자 수정 라우트에서만 호출된다 — 관리자가 필드를 손대면
   // 그 플레이어는 입력 완료로 간주해, 전원 완료 시 "등록 대기" 상태로
   // 넘어가고 관리자가 결과 등록도 할 수 있게 한다.
-  player.gameState = { ...player.gameState, ...partialGameState, isCompleted: true }
+  // 직업을 수정하면(무직으로 비우는 것 포함) jobVisited도 함께 세운다.
+  const jobTouched = 'job' in partialGameState ? { jobVisited: true } : {}
+  player.gameState = { ...player.gameState, ...partialGameState, ...jobTouched, isCompleted: true }
   room.updatedAt = new Date()
   return room
 }

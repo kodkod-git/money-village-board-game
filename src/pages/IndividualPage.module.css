@@ -1,6 +1,11 @@
 .page {
   min-height: 100%;
   height: 100%;
+  /* 넓은 폭에서 본문을 Figma 시안의 ~770px 컬럼으로 묶어 가운데 정렬한다.
+     모바일에선 #root가 이보다 좁아 영향 없음. CharacterSelect와 동일. */
+  width: 100%;
+  max-width: 818px;
+  margin-inline: auto;
   background: var(--gray-10);
   padding: var(--space-3xl) 0;
   position: relative;
@@ -120,7 +125,12 @@
    when a label actually wraps to another line. */
 .assetListFill {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 위 @media 규칙의 max-width/margin/justify-content를 되돌려, 채움 모드에서는
+     본문 컬럼 전체 너비를 쓰고 헤더와 좌우 정렬을 맞춘다. */
   width: 100%;
+  max-width: none;
+  margin: 0;
+  justify-content: stretch;
   padding-bottom: 0;
 }
 
@@ -129,6 +139,7 @@
 @container (min-width: 540px) {
   .assetListFill {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2xl);
   }
 }
 

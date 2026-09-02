@@ -20,7 +20,7 @@ const STATUS_META = {
 
 function hasAnyInput(gameState) {
   if (!gameState) return false
-  if (gameState.job) return true
+  if (gameState.job || gameState.jobVisited) return true
   if (gameState.cash != null) return true
   if (Object.values(gameState.stocks ?? {}).some(count => count > 0)) return true
   if (Object.values(gameState.realEstate ?? {}).some(count => count > 0)) return true

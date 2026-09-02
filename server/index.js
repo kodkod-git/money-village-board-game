@@ -122,7 +122,7 @@ app.get('/api/rankings', async (req, res) => {
 app.post('/api/admin/signup', async (req, res) => {
   const { username, password } = req.body
   if (!username?.trim() || !password?.trim()) {
-    return res.status(400).json({ error: 'username과 password가 필요합니다' })
+    return res.status(400).json({ error: '아이디와 비밀번호를 입력해주세요' })
   }
   try {
     const admin = await createAdmin(username.trim(), password)
@@ -138,7 +138,7 @@ app.post('/api/admin/signup', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body
   if (!username?.trim() || !password?.trim()) {
-    return res.status(400).json({ error: 'username과 password가 필요합니다' })
+    return res.status(400).json({ error: '아이디와 비밀번호를 입력해주세요' })
   }
   const admin = await verifyAdminPassword(username.trim(), password)
   if (!admin) return res.status(401).json({ error: '아이디 또는 비밀번호가 올바르지 않습니다' })

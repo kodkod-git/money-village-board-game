@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, afterEach } from 'vitest'
@@ -45,11 +45,18 @@ describe('Team', () => {
   afterEach(() => {
     mockRoomUpdatePlayers = DEFAULT_PLAYERS
     sessionStorage.clear()
+    mockNavigate.mockClear()
   })
 
   it('shows the team code', () => {
     renderTeam()
     expect(screen.getByText(/ABC123/)).toBeInTheDocument()
+  })
+
+  it('화면 제목이 "팀 화면"이다 ("팀 만들기" 아님)', () => {
+    renderTeam()
+    expect(screen.getByRole('heading', { name: '팀 화면' })).toBeInTheDocument()
+    expect(screen.queryByText('팀 만들기')).toBeNull()
   })
 
   it('shows joined player names', () => {
@@ -112,7 +119,7 @@ describe('Team', () => {
     expect(socket.emit).not.toHaveBeenCalledWith('join-room', expect.anything())
   })
 
-  it('추방당하면 저장된 프로필 정보를 담아 로비로 이동한다', () => {
+  it('추방당하면 안내 모달을 띄우고, 확인을 눌러야 저장된 프로필로 로비로 이동한다', async () => {
     sessionStorage.setItem('player_profile', JSON.stringify({
       code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '경영학과', isHost: false, classId: 'class-1',
     }))
@@ -120,10 +127,15 @@ describe('Team', () => {
     const socket = io()
     const [, kickedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'you-were-kicked')
 
-    kickedHandler()
+    act(() => kickedHandler())
+
+    expect(screen.getByText(/내보냈어요|강퇴/)).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
 
     expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
-    const [calledWith] = mockNavigate.mock.calls[0]
+    const [calledWith] = mockNavigate.mock.calls.at(-1)
     expect(calledWith).toContain('classId=class-1')
     expect(calledWith).toContain('name=%EC%B2%A0%EC%88%98')
     expect(calledWith).toContain('character=Adventurer-%EA%B0%95%EC%95%84%EC%A7%80')
@@ -166,8 +178,8 @@ describe('Team', () => {
     expect(calledWith).toContain('classId=class-1')
   })
 
-  it('방장이 나가서 방이 삭제되면 안내 후 저장된 프로필로 로비로 이동한다', () => {
-    vi.stubGlobal('alert', vi.fn())
+  it('방장이 나가서 방이 삭제되면 alert 없이 안내 모달을 띄우고, 확인 시 로비로 이동한다', async () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     sessionStorage.setItem('player_profile', JSON.stringify({
       code: 'ABC123', name: '영희', character: 'Guardian-판다', affiliation: '', isHost: false, classId: 'class-1',
     }))
@@ -175,13 +187,18 @@ describe('Team', () => {
     const socket = io()
     const [, closedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'room-closed')
 
-    closedHandler()
+    act(() => closedHandler())
 
-    expect(alert).toHaveBeenCalled()
+    expect(alertSpy).not.toHaveBeenCalled()
+    expect(screen.getByText('방이 사라졌어요')).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+
     expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
     const [calledWith] = mockNavigate.mock.calls.at(-1)
     expect(calledWith).toContain('classId=class-1')
-    vi.unstubAllGlobals()
+    alertSpy.mockRestore()
   })
 
   it('방장이 아닌 팀원도 가격 설정 버튼을 볼 수 있다', () => {

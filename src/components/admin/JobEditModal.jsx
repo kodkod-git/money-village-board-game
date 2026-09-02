@@ -27,13 +27,16 @@ export default function JobEditModal({ value, onChange, onClose }) {
                 key={key}
                 type="button"
                 className={`${styles.pickerTile} ${selected === key ? styles.pickerTileSelected : ''}`}
-                onClick={() => setSelected(key)}
+                onClick={() => setSelected(selected === key ? null : key)}
               >
                 <img src={`/badges/job/${JOB_IMAGES[key]}.png`} alt={label} className={styles.pickerIcon} />
                 <span className={styles.pickerLabel}>{label}</span>
               </button>
             ))}
           </div>
+          {selected == null && (
+            <p className={styles.hint}>선택하지 않으면 무직으로 저장됩니다.</p>
+          )}
         </div>
         <div className={styles.footer}>
           <button type="button" className={styles.confirmBtn} onClick={handleConfirm}>확인</button>

@@ -1,0 +1,44 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  padding: var(--space-xl);
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  padding: var(--space-3xl);
+  width: min(320px, calc(100% - 28px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink);
+  text-align: center;
+}
+
+.message {
+  font-size: 15px;
+  color: var(--ink-2);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.confirmBtn {
+  height: 48px;
+  border-radius: var(--r-sm);
+  background: var(--blue-100);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}

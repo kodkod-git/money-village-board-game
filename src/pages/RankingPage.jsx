@@ -28,7 +28,9 @@ export default function RankingPage() {
   const isV2 = Boolean(sessionId)
 
   const [category, setCategory] = useState('totalAssets')
-  const [scope, setScope] = useState('global')
+  // 게임 직후(`/result/:sessionId`)엔 우리 팀 순위부터 보여준다.
+  // 홈 랭킹(`/ranking`)은 전체 순위로 시작.
+  const [scope, setScope] = useState(isV2 ? 'team' : 'global')
   const [rows, setRows] = useState([])
   const [myClassId, setMyClassId] = useState(undefined)
   const [loading, setLoading] = useState(true)
@@ -56,11 +58,19 @@ export default function RankingPage() {
       fetch(`/api/results/${sessionId}`)
         .then(r => { if (!r.ok) throw new Error(); return r.json() })
         .then(data => {
-          const players = (data.players ?? []).map(p => ({
-            ...p,
-            stockPrices: data.stockPrices,
-            realEstatePrices: data.realEstatePrices,
-          }))
+          // 서버는 항상 total_assets 순으로만 정렬해 내려주므로, 선택된
+          // 카테고리(총자산/주식/부동산) 값 기준으로 다시 정렬하고 등수를
+          // 새로 매긴다. 전체·수업 스코프는 서버가 정렬하지만 팀 스코프는
+          // 여기서 처리한다.
+          const vk = VALUE_KEYS[category]
+          const players = (data.players ?? [])
+            .map(p => ({
+              ...p,
+              stockPrices: data.stockPrices,
+              realEstatePrices: data.realEstatePrices,
+            }))
+            .sort((a, b) => (b[vk] ?? 0) - (a[vk] ?? 0))
+            .map((p, i) => ({ ...p, rank: i + 1 }))
           setRows(players)
           setLoading(false)
         })

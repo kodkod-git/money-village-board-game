@@ -9,7 +9,7 @@ export default function JobPicker({ value, onChange, fill = false }) {
           key={key}
           type="button"
           className={`${styles.tile} ${value === key ? styles.tileSelected : ''}`}
-          onClick={() => onChange(key)}
+          onClick={() => onChange(value === key ? null : key)}
         >
           <img src={`/badges/job/${JOB_IMAGES[key]}.png`} alt="" className={styles.icon} />
           <span className={styles.label}>{label}</span>

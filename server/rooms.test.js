@@ -374,6 +374,28 @@ describe('updatePlayerStateByUuid', () => {
     const room = updatePlayerStateByUuid(code, 'p1', { job: 'a' })
     expect(room.players[0].gameState.isCompleted).toBe(true)
   })
+
+  it('job 키가 포함되면 jobVisited도 true로 설정한다 (직업 선택)', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = updatePlayerStateByUuid(code, 'p1', { job: 'a' })
+    expect(room.players[0].gameState.jobVisited).toBe(true)
+  })
+
+  it('job을 null로 수정해도 jobVisited는 true로 설정한다 (무직)', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = updatePlayerStateByUuid(code, 'p1', { job: null })
+    expect(room.players[0].gameState.job).toBeNull()
+    expect(room.players[0].gameState.jobVisited).toBe(true)
+  })
+
+  it('job 키가 없는 수정은 jobVisited를 그대로 둔다', () => {
+    const { code } = createRoom()
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
+    const room = updatePlayerStateByUuid(code, 'p1', { cash: 5000 })
+    expect(room.players[0].gameState.jobVisited).toBe(false)
+  })
 })
 
 describe('updatedAt 갱신', () => {

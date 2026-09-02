@@ -35,6 +35,12 @@ describe('AdminPlayerCard', () => {
     expect(screen.getByText('직업 미입력')).toBeInTheDocument()
   })
 
+  it('무직(job:null, jobVisited:true)이면 "무직"을 보여준다', () => {
+    const player = { ...PLAYER, gameState: { ...PLAYER.gameState, job: null, jobVisited: true } }
+    render(<AdminPlayerCard player={player} prices={PRICES} onEdit={vi.fn()} />)
+    expect(screen.getByText('무직')).toBeInTheDocument()
+  })
+
   it('수정 버튼 클릭 시 onEdit을 호출한다', async () => {
     const onEdit = vi.fn()
     render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={onEdit} />)

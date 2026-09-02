@@ -1,6 +1,13 @@
 .page {
   min-height: 100%;
   height: 100%;
+  /* 데스크톱/태블릿 폭에서 #root가 넓어져도 본문은 Figma 시안처럼
+     ~770px 컬럼으로 묶어 가운데 정렬한다 (헤더·그리드·CTA가 같은
+     좌우 여백을 공유하도록). 모바일에선 #root 자체가 이 폭보다
+     좁으므로 영향 없음. */
+  width: 100%;
+  max-width: 818px;
+  margin-inline: auto;
   background: var(--white);
   display: flex;
   flex-direction: column;
@@ -40,8 +47,11 @@
   min-height: 0;
   container-type: size;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* "safe" keeps it centered while it fits, but top-aligns once the grid
+     is taller than the wrapper so a scroll box can still reach row 1. */
+  justify-content: safe center;
   padding: 44px 0;
   overflow-y: auto;
   scrollbar-width: none;
@@ -51,6 +61,8 @@
   display: none;
 }
 
+/* 좁은 폭(모바일)에서는 세로 길이에 맞춰 한 화면에 담기도록 정사각형으로
+   축소한다. */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -58,6 +70,17 @@
   gap: var(--space-sm);
   width: min(100cqw, 100cqh);
   aspect-ratio: 1;
+}
+
+/* 넓은 폭(태블릿·데스크톱)에서는 Figma 시안처럼 본문 컬럼 전체 너비를
+   채우고(헤더와 좌우 정렬을 맞춤), 넘치면 세로 스크롤한다. */
+@container (min-width: 620px) {
+  .grid {
+    width: 100%;
+    aspect-ratio: auto;
+    grid-template-rows: none;
+    gap: var(--space-2xl);
+  }
 }
 
 .bottomBar {

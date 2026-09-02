@@ -24,7 +24,9 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
               <span className={styles.disconnectedBadge}>연결 끊김</span>
             )}
           </div>
-          <span className={styles.job}>{gameState.job ? JOB_LABELS[gameState.job] : '직업 미입력'}</span>
+          <span className={styles.job}>
+            {gameState.job ? JOB_LABELS[gameState.job] : gameState.jobVisited ? '무직' : '직업 미입력'}
+          </span>
         </div>
         <button type="button" className={styles.editBtn} onClick={onEdit}>수정</button>
         {onKick && (

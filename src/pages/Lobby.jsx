@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import CodeModal from '../components/CodeModal'
 import RoomCard from '../components/RoomCard'
 import { useSocketContext } from '../contexts/SocketContext'
+import { toast } from '../utils/toast'
 import { resetPlayerUuid } from '../utils/playerUuid'
 import styles from './Lobby.module.css'
 import joinStyles from './NameInput.module.css'
@@ -72,7 +73,7 @@ export default function Lobby() {
         navigate(`/team/${code}`)
       } else {
         setIsJoining(false)
-        alert(error)
+        toast(error || '팀에 참여하지 못했어요')
       }
     })
   }

@@ -78,6 +78,19 @@ describe('AdminTableView', () => {
     expect(screen.getByText('미등록')).toBeInTheDocument()
   })
 
+  it('무직(jobVisited만 true)이어도 진행중으로 표시한다', () => {
+    const rooms2 = [{
+      code: 'AA0000', prices,
+      players: [{
+        playerUuid: 'x', name: '무직이', affiliation: '미래고',
+        gameState: { ...blankGameState, job: null, jobVisited: true },
+      }],
+    }]
+    render(<AdminTableView rooms={rooms2} />)
+    expect(screen.getByText('진행중')).toBeInTheDocument()
+    expect(screen.queryByText('미등록')).not.toBeInTheDocument()
+  })
+
   it('참가자 아바타와 소속을 함께 보여준다', () => {
     render(<AdminTableView rooms={rooms} />)
     const avatar = screen.getAllByAltText('')[0]

@@ -37,8 +37,10 @@ beforeEach(() => {
         teamCode: 'AB1234',
         classId: 'class-1',
         className: '1반',
+        // 서버는 항상 total_assets 내림차순으로만 정렬해 내려준다.
         players: [
           { rank: 1, name: '홍길동', className: '1반', teamCode: 'AB1234', character: 'fox', totalAssets: 50000, stockValue: 12000, realEstateValue: 8000, playerUuid: 'p3' },
+          { rank: 2, name: '김철수', className: '1반', teamCode: 'AB1234', character: 'wolf', totalAssets: 30000, stockValue: 99000, realEstateValue: 1000, playerUuid: 'p9' },
         ],
       }) })
     }
@@ -72,6 +74,17 @@ describe('RankingPage', () => {
     expect(screen.getByText('부동산')).toBeInTheDocument()
     expect(screen.getByText('수업')).toBeInTheDocument()
     expect(screen.getByText('팀')).toBeInTheDocument()
+  })
+
+  it('결과등록 후 진입(sessionId 있음)에서는 기본으로 팀 순위를 보여준다', async () => {
+    renderAt('/result/session-1')
+    expect(await screen.findByText('홍길동')).toBeInTheDocument()
+    expect(screen.queryByText('김민준')).toBeNull()
+  })
+
+  it('홈 진입(sessionId 없음)에서는 기본으로 전체 순위를 보여준다', async () => {
+    renderAt('/ranking')
+    expect(await screen.findByText('김민준')).toBeInTheDocument()
   })
 
   it('주식 탭 선택 시 /api/rankings?category=stock을 호출한다', async () => {
@@ -110,6 +123,25 @@ describe('RankingPage', () => {
       expect(global.fetch).toHaveBeenCalledWith('/api/rankings?classId=class-1&category=stock')
     })
     expect(await screen.findByText('유아인')).toBeInTheDocument()
+  })
+
+  it('팀 탭에서 주식을 선택하면 주식 가치 기준으로 행이 재정렬되고 등수도 다시 매겨진다', async () => {
+    renderAt('/result/session-1')
+    await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('팀'))
+    await userEvent.click(screen.getByText('주식'))
+
+    await waitFor(() => expect(screen.getByText('99,000원')).toBeInTheDocument())
+    const rows = [...document.querySelectorAll('[class*="row"]')]
+      .map(el => el.textContent)
+      .filter(t => t.includes('위'))
+    // 김철수(주식 99,000) 1위, 홍길동(주식 12,000) 2위 — 총자산 순서(홍길동 먼저)와 반대
+    const kimIdx = rows.findIndex(t => t.includes('김철수'))
+    const hongIdx = rows.findIndex(t => t.includes('홍길동'))
+    expect(kimIdx).toBeGreaterThanOrEqual(0)
+    expect(kimIdx).toBeLessThan(hongIdx)
+    expect(rows[kimIdx]).toContain('1위')
+    expect(rows[hongIdx]).toContain('2위')
   })
 
   it('팀 탭에서는 카테고리와 무관하게 /api/results/:sessionId를 호출하고 선택된 카테고리 값을 보여준다', async () => {

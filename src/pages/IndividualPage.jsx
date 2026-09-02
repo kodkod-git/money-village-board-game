@@ -6,6 +6,7 @@ import JobPicker from '../components/JobPicker'
 import BadgePicker from '../components/BadgePicker'
 import AssetListEditor from '../components/AssetListEditor'
 import NumberInputModal from '../components/NumberInputModal'
+import AlertModal from '../components/AlertModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import {
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
@@ -15,7 +16,7 @@ import styles from './IndividualPage.module.css'
 
 const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
 const STOCK_PRICE_LABELS = Object.fromEntries(Object.keys(STOCK_LABELS).map(key => [key, '가격 설정']))
-const VISITED_KEY_BY_STEP = { 1: 'badgesVisited', 2: 'realEstateVisited', 3: 'stocksVisited' }
+const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'realEstateVisited', 3: 'stocksVisited' }
 
 function defaultGameState() {
   return {
@@ -23,13 +24,13 @@ function defaultGameState() {
     stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
-    badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
+    jobVisited: false, badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
   }
 }
 
 function computeCompletedUpTo(gameState) {
   let upTo = -1
-  if (gameState.job !== null) upTo = 0
+  if (gameState.job !== null || gameState.jobVisited) upTo = 0
   if (gameState.badgesVisited) upTo = 1
   if (gameState.realEstateVisited) upTo = 2
   if (gameState.stocksVisited) upTo = 3
@@ -49,6 +50,8 @@ export default function IndividualPage() {
   const [cashDisplay, setCashDisplay] = useState('0')
   const [showCashModal, setShowCashModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  // 강퇴 시 안내 모달을 먼저 띄우고, "확인"을 눌러야 로비로 이동한다.
+  const [exitNotice, setExitNotice] = useState(null)
 
   useEffect(() => {
     if (!socket) return
@@ -98,23 +101,27 @@ export default function IndividualPage() {
 
   useEffect(() => {
     if (!socket) return
-    function handler() {
-      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
-      const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
-      if (stored?.affiliation) params.set('affiliation', stored.affiliation)
-      if (stored?.classId) params.set('classId', stored.classId)
-      navigate(`/lobby?${params}`)
-    }
+    const handler = () => setExitNotice({
+      title: '팀에서 나가게 되었어요',
+      message: '방장이 팀에서 내보냈어요.',
+    })
     socket.on('you-were-kicked', handler)
     return () => socket.off('you-were-kicked', handler)
-  }, [socket, navigate])
+  }, [socket])
+
+  function goToLobby() {
+    const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+    const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
+    if (stored?.affiliation) params.set('affiliation', stored.affiliation)
+    if (stored?.classId) params.set('classId', stored.classId)
+    navigate(`/lobby?${params}`)
+  }
 
   function emitState(newState) {
     socket?.emit('update-player-state', { code, gameState: newState })
   }
 
   function handleNext() {
-    if (step === 0 && !gameState.job) return
     if (step === 4) { handleComplete(); return }
 
     const visitedKey = VISITED_KEY_BY_STEP[step]
@@ -276,7 +283,6 @@ export default function IndividualPage() {
         <button
           className={styles.nextBtn}
           onClick={handleNext}
-          disabled={step === 0 && !gameState.job}
         >
           {step === 4 ? '완료' : '다음'}
         </button>
@@ -286,6 +292,13 @@ export default function IndividualPage() {
         <LeaveConfirmModal
           onConfirm={() => { setShowLeaveConfirm(false); navigate(-1) }}
           onClose={() => setShowLeaveConfirm(false)}
+        />
+      )}
+      {exitNotice && (
+        <AlertModal
+          title={exitNotice.title}
+          message={exitNotice.message}
+          onConfirm={() => { setExitNotice(null); goToLobby() }}
         />
       )}
     </div>

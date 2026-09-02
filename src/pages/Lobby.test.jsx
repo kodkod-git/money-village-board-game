@@ -17,6 +17,8 @@ vi.mock('socket.io-client', () => {
 
 import { io } from 'socket.io-client'
 import { SocketProvider } from '../contexts/SocketContext'
+import Toaster from '../components/Toaster'
+import { _resetToasts } from '../utils/toast'
 import Lobby from './Lobby'
 
 function renderLobby(path = '/lobby?classId=class-1&name=철수&character=c1') {
@@ -24,6 +26,7 @@ function renderLobby(path = '/lobby?classId=class-1&name=철수&character=c1') {
     <SocketProvider>
       <MemoryRouter initialEntries={[path]}>
         <Lobby />
+        <Toaster />
       </MemoryRouter>
     </SocketProvider>
   )
@@ -33,6 +36,7 @@ describe('Lobby (team grid)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    _resetToasts()
     fetch.mockResolvedValue({ ok: true, json: async () => [] })
   })
 
@@ -103,6 +107,22 @@ describe('Lobby (team grid)', () => {
     renderLobby()
     fireEvent.click(await screen.findByText('영희님의 방'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/A3F9C1'))
+  })
+
+  it('참여에 실패하면 alert 없이 토스트로 서버 메시지를 안내한다', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: '이미 시작된 팀이에요' }))
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    renderLobby()
+    fireEvent.click(await screen.findByText('영희님의 방'))
+
+    expect(await screen.findByText('이미 시작된 팀이에요')).toBeInTheDocument()
+    expect(alertSpy).not.toHaveBeenCalled()
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('방 만들기 클릭 시 방장으로 새 팀을 만들어 팀 화면으로 이동한다', async () => {
@@ -190,6 +210,7 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    _resetToasts()
     fetch.mockResolvedValue({ ok: true, json: async () => [] })
   })
 

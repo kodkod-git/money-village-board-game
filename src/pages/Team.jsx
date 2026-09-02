@@ -5,6 +5,7 @@ import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
 import QRCodeImage from '../components/QRCodeImage'
 import PriceSettingModal, { DEFAULT_PRICES } from '../components/PriceSettingModal'
+import AlertModal from '../components/AlertModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import styles from './Team.module.css'
 
@@ -19,6 +20,9 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  // 방에서 강제로 나가게 된 사유(강퇴 / 방 삭제). 안내 모달을 먼저 띄우고
+  // 학생이 "확인"을 눌러야 로비로 이동한다.
+  const [exitNotice, setExitNotice] = useState(null)
 
   useEffect(() => {
     if (readOnly) return
@@ -96,39 +100,36 @@ export default function Team({ readOnly = false, mockRoom = null }) {
 
   useEffect(() => {
     if (readOnly || !socket) return
-    function handler() {
-      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
-      const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
-      if (stored?.affiliation) params.set('affiliation', stored.affiliation)
-      if (stored?.classId) params.set('classId', stored.classId)
-      navigate(`/lobby?${params}`)
-    }
+    const handler = () => setExitNotice({
+      title: '팀에서 나가게 되었어요',
+      message: '방장이 팀에서 내보냈어요.',
+    })
     socket.on('you-were-kicked', handler)
     return () => socket.off('you-were-kicked', handler)
-  }, [socket, navigate, readOnly])
+  }, [socket, readOnly])
 
   useEffect(() => {
     if (readOnly || !socket) return
-    function handler() {
-      alert('방장이 나가서 방이 삭제되었습니다.')
-      const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
-      const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
-      if (stored?.affiliation) params.set('affiliation', stored.affiliation)
-      if (stored?.classId) params.set('classId', stored.classId)
-      navigate(`/lobby?${params}`)
-    }
+    const handler = () => setExitNotice({
+      title: '방이 사라졌어요',
+      message: '방장이 나가서 방이 삭제되었어요.',
+    })
     socket.on('room-closed', handler)
     return () => socket.off('room-closed', handler)
-  }, [socket, navigate, readOnly])
+  }, [socket, readOnly])
 
-  function handleConfirmLeave() {
-    socket?.emit('leave-room')
-    setShowLeaveConfirm(false)
+  function goToLobby() {
     const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
     const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
     if (stored?.affiliation) params.set('affiliation', stored.affiliation)
     if (stored?.classId) params.set('classId', stored.classId)
     navigate(`/lobby?${params}`)
+  }
+
+  function handleConfirmLeave() {
+    socket?.emit('leave-room')
+    setShowLeaveConfirm(false)
+    goToLobby()
   }
 
   function handlePriceConfirm(newPrices) {
@@ -154,7 +155,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       </button>
 
       <div className={styles.header}>
-        <h1 className={styles.title}>팀 만들기</h1>
+        <h1 className={styles.title}>팀 화면</h1>
         <p className={styles.subtitle}>
           {readOnly ? '관전 모드입니다' : '코드를 팀원에게 공유하세요'}
         </p>
@@ -229,6 +230,13 @@ export default function Team({ readOnly = false, mockRoom = null }) {
           prices={prices}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}
+        />
+      )}
+      {exitNotice && (
+        <AlertModal
+          title={exitNotice.title}
+          message={exitNotice.message}
+          onConfirm={() => { setExitNotice(null); goToLobby() }}
         />
       )}
     </div>

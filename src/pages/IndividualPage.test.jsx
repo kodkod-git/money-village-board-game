@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -61,6 +61,28 @@ describe('IndividualPage', () => {
     expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
   })
 
+  it('직업을 선택하지 않아도 "다음"이 활성화되어 있고, 눌러서 진행할 수 있다 (무직)', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    const next = screen.getByText('다음')
+    expect(next).not.toBeDisabled()
+    await userEvent.click(next)
+    expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
+  })
+
+  it('직업 미선택으로 "다음"을 누르면 jobVisited: true, job: null을 emit한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await screen.findByRole('heading', { name: '성공카드' })
+
+    const socket = io()
+    const emitted = socket.emit.mock.calls
+      .filter(([event]) => event === 'update-player-state')
+      .map(([, payload]) => payload.gameState)
+    expect(emitted.some(gs => gs.jobVisited === true && gs.job === null)).toBe(true)
+  })
+
   it('소켓이 재연결되면 참가자 정보를 다시 불러온다', async () => {
     renderPage()
     await screen.findByText('직업 선택')
@@ -74,7 +96,7 @@ describe('IndividualPage', () => {
     expect(fetch).toHaveBeenCalledWith('/api/rooms/AB1234')
   })
 
-  it('추방당하면 저장된 프로필 정보를 담아 로비로 이동한다', async () => {
+  it('추방당하면 안내 모달을 띄우고, 확인을 눌러야 저장된 프로필로 로비로 이동한다', async () => {
     sessionStorage.setItem('player_profile', JSON.stringify({
       code: 'AB1234', name: '김민준', character: 'Innovator-사자', affiliation: '', classId: 'class-1',
     }))
@@ -83,7 +105,12 @@ describe('IndividualPage', () => {
 
     const socket = io()
     const [, kickedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'you-were-kicked')
-    kickedHandler()
+    act(() => kickedHandler())
+
+    expect(screen.getByText(/내보냈어요|강퇴/)).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringMatching(/^\/lobby\?/))
+
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
 
     const [calledWith] = mockNavigate.mock.calls.find(([url]) => url.startsWith('/lobby?'))
     expect(calledWith).toContain('classId=class-1')
@@ -99,6 +126,19 @@ describe('IndividualPage', () => {
     renderPage()
     await screen.findByText('직업 선택')
     expect(screen.getByText('현금').closest('button')).toBeDisabled()
+    expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
+  })
+
+  it('무직(job:null, jobVisited:true)으로 재입장하면 직업 단계가 완료로 표시된다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({
+        players: [{ ...PLAYER, gameState: { ...PLAYER.gameState, job: null, jobVisited: true } }],
+        prices: {},
+      }),
+    })
+    renderPage()
+    await screen.findByText('직업 선택')
+    expect(screen.getByText('직업').closest('button')).not.toBeDisabled()
     expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
   })
 
