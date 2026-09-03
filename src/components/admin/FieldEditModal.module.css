@@ -10,7 +10,7 @@
 }
 
 .sheet {
-  background: var(--admin-bg);
+  background: var(--admin-surface);
   border-radius: 24px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.28);
   width: min(760px, 96vw);
@@ -22,7 +22,6 @@
 
 .header {
   flex-shrink: 0;
-  background: var(--admin-surface);
   border-bottom: 1px solid var(--admin-blue-faint);
   display: flex;
   align-items: flex-start;
@@ -76,7 +75,6 @@
 
 .footer {
   flex-shrink: 0;
-  background: var(--admin-surface);
   border-top: 1px solid var(--admin-blue-faint);
   padding: 12px 24px;
 }
@@ -260,7 +258,7 @@
 .cashLabel { font-size: 13px; font-weight: 700; color: var(--admin-text-2); }
 
 .cashInputBox {
-  background: #f9fbff;
+  background: var(--admin-input-bg);
   border: 1px solid var(--admin-blue-faint);
   border-radius: 14px;
   padding: 14px 16px;

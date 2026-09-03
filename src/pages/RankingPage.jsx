@@ -108,7 +108,6 @@ export default function RankingPage() {
           <h1 className={styles.title}>랭킹</h1>
           <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
         </div>
-        <hr className={styles.divider} />
         <div className={styles.topTabs}>
           {CATEGORY_TABS.map(tab => (
             <button
@@ -142,6 +141,8 @@ export default function RankingPage() {
             ))}
           </div>
         )}
+
+        <hr className={styles.divider} />
 
         {loading && <p className={styles.message}>불러오는 중...</p>}
         {error && <p className={styles.message}>{error}</p>}

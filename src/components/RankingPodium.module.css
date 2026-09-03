@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: var(--space-md);
+  gap: var(--space-lg);
   margin-bottom: var(--space-md);
   flex-shrink: 0;
   overflow-x: auto;
@@ -18,18 +18,18 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
-  flex: 0 0 120px;
-  max-width: 120px;
+  flex: 0 0 144px;
+  max-width: 144px;
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
 .name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   color: var(--ink);
   white-space: nowrap;
@@ -42,7 +42,7 @@
   width: 100%;
   background: rgba(112, 166, 254, 0.15);
   border: 1px solid var(--blue-10);
-  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  border-radius: var(--r-md) var(--r-md) 0 0;
   box-shadow: 0 2px 20px rgba(45, 123, 239, 0.07);
   padding: var(--space-lg) var(--space-sm);
   display: flex;
@@ -52,7 +52,7 @@
 }
 
 .rank {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   color: var(--ink-2);
 }

@@ -26,12 +26,12 @@
 .adminBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 36px;
+  gap: 8px;
+  height: 40px;
   padding: 0 14px;
   border-radius: var(--r-pill);
   background: var(--white);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -51,8 +51,8 @@
 }
 
 .topActionIcon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .center {
@@ -64,9 +64,9 @@
 }
 
 .iconBox {
-  width: 112px;
-  height: 112px;
-  border-radius: 35px;
+  width: clamp(90px, 18.7vw, 156px);
+  height: clamp(90px, 18.7vw, 156px);
+  border-radius: 31%;
   background: var(--blue-100);
   box-shadow: 0 8px 12px -4px rgba(142, 197, 255, 0.4);
   display: flex;
@@ -75,19 +75,19 @@
 }
 
 .logoIcon {
-  width: 64px;
-  height: 70px;
+  width: 64%;
+  height: 70%;
 }
 
 .title {
-  font-size: 44px;
+  font-size: clamp(36px, 8.6vw, 72px);
   font-weight: 900;
   color: var(--ink);
-  letter-spacing: -1.2px;
+  letter-spacing: -1.8px;
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: clamp(15px, 2.4vw, 20px);
   font-weight: 700;
   color: var(--ink-2);
 }
@@ -97,15 +97,15 @@
   flex-direction: column;
   gap: var(--space-lg);
   width: 100%;
-  max-width: 360px;
+  max-width: clamp(300px, 46vw, 384px);
 }
 
 .primaryBtn {
   background: var(--blue-100);
   color: var(--white);
   border-radius: var(--r-sm);
-  height: 64px;
-  font-size: 20px;
+  height: clamp(56px, 8.2vw, 68px);
+  font-size: clamp(19px, 3.1vw, 26px);
   font-weight: 800;
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
 }
@@ -115,8 +115,8 @@
   color: var(--blue-100);
   border: 2px solid var(--blue-75);
   border-radius: var(--r-sm);
-  height: 64px;
-  font-size: 20px;
+  height: clamp(56px, 8.2vw, 68px);
+  font-size: clamp(19px, 3.1vw, 26px);
   font-weight: 800;
 }
 

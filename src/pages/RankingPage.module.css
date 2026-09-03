@@ -1,7 +1,7 @@
 .page {
   min-height: 100%;
   height: 100%;
-  background: var(--white);
+  background: var(--gray-10);
   padding: 0 var(--space-2xl) var(--space-2xl);
   color: var(--ink);
   display: flex;
@@ -29,13 +29,13 @@
 }
 
 .title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--ink-2);
   margin-top: 2px;
@@ -44,7 +44,7 @@
 .divider {
   border: none;
   border-top: 1px solid var(--blue-10);
-  margin: 10px 0 var(--space-xl);
+  margin: 0 0 var(--space-xl);
   flex-shrink: 0;
 }
 
@@ -53,6 +53,7 @@
   border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
   overflow: hidden;
+  margin-top: var(--space-xl);
   margin-bottom: var(--space-md);
   flex-shrink: 0;
 }
