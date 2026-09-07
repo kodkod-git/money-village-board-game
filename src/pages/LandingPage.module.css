@@ -1,4 +1,14 @@
 .page {
+  /* Figma 프레임(834×1194) 대비 #root의 가로/세로 비율을 각각 독립적으로 잰다.
+     #root는 더 이상 aspect-ratio로 고정돼 있지 않아 가로세로가 서로 다른
+     비율로 줄어들 수 있으므로("통짜 스케일 금지"), 값의 방향에 따라 다른
+     스케일을 쓴다:
+       --sx: 가로 방향 값(좌우 여백, 버튼/카드 너비, 가로 gap, letter-spacing)
+       --sy: 세로 방향 값(버튼/블록 높이, 위아래 패딩·margin, 세로 gap)
+       폰트 크기·정사각형 요소(아이콘)는 min(--sx, --sy) — 어느 한쪽이 더
+       좁아도 그 방향으로 넘치거나 잘리지 않게 더 작은 쪽을 따른다. */
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
   min-height: 100%;
   height: 100%;
   background: var(--white);
@@ -8,17 +18,17 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 0 clamp(28px, 10vw, 49px);
+  padding: 0 calc(49px * var(--sx));
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .topActions {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: calc(24px * var(--sy));
+  right: calc(32px * var(--sx));
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: calc(8px * var(--sx));
   z-index: 1;
 }
 
@@ -26,18 +36,19 @@
 .adminBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 14px;
+  gap: calc(8px * var(--sx));
+  height: calc(40px * var(--sy));
+  padding: 0 calc(14px * var(--sx));
   border-radius: var(--r-pill);
   background: var(--white);
-  font-size: 14px;
+  font-size: calc(14px * min(var(--sx), var(--sy)));
   font-weight: 700;
+  line-height: 1.27;
   white-space: nowrap;
 }
 
 .ghostBtn {
-  border: 1.5px solid var(--ink-2);
+  border: calc(1.5px * var(--sy)) solid var(--ink-2);
   color: var(--ink-2);
 }
 
@@ -46,29 +57,29 @@
 }
 
 .adminBtn {
-  border: 1.5px solid var(--blue-75);
+  border: calc(1.5px * var(--sy)) solid var(--blue-75);
   color: var(--blue-100);
 }
 
 .topActionIcon {
-  width: 20px;
-  height: 20px;
+  width: calc(20px * min(var(--sx), var(--sy)));
+  height: calc(20px * min(var(--sx), var(--sy)));
 }
 
 .center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 40px;
+  margin-bottom: calc(48px * var(--sy));
 }
 
 .iconBox {
-  width: clamp(90px, 18.7vw, 156px);
-  height: clamp(90px, 18.7vw, 156px);
+  width: calc(156px * min(var(--sx), var(--sy)));
+  height: calc(156px * min(var(--sx), var(--sy)));
+  margin-bottom: calc(28px * var(--sy));
   border-radius: 31%;
   background: var(--blue-100);
-  box-shadow: 0 8px 12px -4px rgba(142, 197, 255, 0.4);
+  box-shadow: var(--shadow-blue);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,44 +91,53 @@
 }
 
 .title {
-  font-size: clamp(36px, 8.6vw, 72px);
+  font-size: calc(72px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink);
-  letter-spacing: -1.8px;
+  letter-spacing: calc(-1.8px * var(--sx));
+  line-height: 1;
+  margin-bottom: calc(12px * var(--sy));
 }
 
 .subtitle {
-  font-size: clamp(15px, 2.4vw, 20px);
+  font-size: calc(20px * min(var(--sx), var(--sy)));
   font-weight: 700;
   color: var(--ink-2);
+  line-height: 1.4;
 }
 
 .buttons {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: calc(16px * var(--sy));
   width: 100%;
-  max-width: clamp(300px, 46vw, 384px);
+  /* 버튼 묶음의 최대 가로폭은 min(sx,sy) — 가로 공간이 남아도 세로가 눌린
+     화면(예: 높이가 낮은 브라우저 창)에서는 세로 축을 따라 같이 좁아진다.
+     --sx만 따르면 세로는 압축됐는데 버튼만 Figma 풀사이즈로 넓게 남아
+     비율이 어색해진다. */
+  max-width: calc(384px * min(var(--sx), var(--sy)));
 }
 
 .primaryBtn {
   background: var(--blue-100);
   color: var(--white);
-  border-radius: var(--r-sm);
-  height: clamp(56px, 8.2vw, 68px);
-  font-size: clamp(19px, 3.1vw, 26px);
+  border-radius: calc(20px * var(--sy));
+  height: calc(76px * var(--sy));
+  font-size: calc(26px * min(var(--sx), var(--sy)));
   font-weight: 800;
-  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
+  line-height: 1.08;
+  box-shadow: var(--shadow-blue);
 }
 
 .secondaryBtn {
   background: var(--white);
   color: var(--blue-100);
-  border: 2px solid var(--blue-75);
-  border-radius: var(--r-sm);
-  height: clamp(56px, 8.2vw, 68px);
-  font-size: clamp(19px, 3.1vw, 26px);
+  border: calc(2px * var(--sy)) solid var(--blue-75);
+  border-radius: calc(20px * var(--sy));
+  height: calc(80px * var(--sy));
+  font-size: calc(26px * min(var(--sx), var(--sy)));
   font-weight: 800;
+  line-height: 1.08;
 }
 
 .quizBtn {
@@ -131,9 +151,9 @@
 }
 
 .footer {
-  position: absolute;
-  bottom: 24px;
-  font-size: 12px;
+  margin-top: calc(46px * var(--sy));
+  font-size: calc(12px * min(var(--sx), var(--sy)));
   font-weight: 400;
+  line-height: 1.33;
   color: var(--disabled);
 }

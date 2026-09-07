@@ -3,12 +3,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import CharacterCard from '../components/CharacterCard'
 import { CHARACTERS } from '../constants/characters'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './CharacterSelect.module.css'
 
 export default function CharacterSelect() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selected, setSelected] = useState(null)
+  useBodyClass('onboarding-mode')
 
   const name = searchParams.get('name') ?? ''
   const affiliation = searchParams.get('affiliation') ?? ''

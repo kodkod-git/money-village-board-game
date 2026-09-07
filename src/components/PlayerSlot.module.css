@@ -1,16 +1,26 @@
 .slot {
+  /* 슬롯 내부 아이콘/배지/텍스트는 슬롯 자신의 실제 렌더링 크기(cqw)를
+     기준으로 잡는다. CharacterCard와 같은 이유: 슬롯 크기는 이제 페이지
+     전체 --sx/--sy가 아니라 .slots 그리드의 열 분할(주로 가로 폭)로
+     정해지기 때문에, --sx/--sy에 매달린 계산은 슬롯의 실제 크기와 따로
+     놀아서(특히 세로가 눌린 화면에서) 아이콘/배지가 슬롯에 비해 작아 보였다.
+     주의: 컨테이너는 "자기 자신"의 cqw는 쿼리할 수 없으므로(순환 참조),
+     .slot 자신의 border-radius는 %로, border-width/gap은 %를 지원하지
+     않거나 슬롯 크기와 무관해도 눈에 띄지 않는 값(얇은 선, 아주 작은 gap)이라
+     예전처럼 페이지 스케일(--sx/--sy)을 그대로 쓴다. */
+  container-type: inline-size;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
   min-height: 0;
   background: var(--white);
-  border-radius: var(--r-sm);
-  border: 2px dashed var(--blue-10);
+  border-radius: 11.4%;
+  border: calc(2px * min(var(--sx, 1), var(--sy, 1))) dashed var(--blue-10);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: calc(6px * min(var(--sx, 1), var(--sy, 1)));
   padding: 0;
 }
 
@@ -30,7 +40,7 @@
 }
 
 .name {
-  font-size: 14px;
+  font-size: 8cqw;
   font-weight: 700;
   color: var(--ink);
 }
@@ -38,41 +48,41 @@
 .completedIcon,
 .editIcon {
   position: absolute;
-  top: 8px;
+  top: 4.5cqw;
   z-index: 1;
-  height: 24px;
-  min-width: 24px;
+  height: 13.7cqw;
+  min-width: 13.7cqw;
   border-radius: var(--r-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 7cqw;
   font-weight: 900;
 }
 
 .completedIcon {
-  left: 8px;
+  left: 4.5cqw;
   background: #e8f8ee;
   color: #2e7d32;
 }
 
 .editIcon {
-  right: 8px;
-  width: 24px;
+  right: 4.5cqw;
+  width: 13.7cqw;
   padding: 0;
   background: #f9f9f9;
   color: var(--blue-100);
   border: 1px solid var(--blue-10);
-  font-size: 14px;
+  font-size: 8cqw;
 }
 
 .emptyAvatar {
-  font-size: 20px;
+  font-size: 11.4cqw;
   font-weight: 400;
   color: var(--blue-10);
-  width: 40px;
-  height: 40px;
-  border: 2px dashed var(--blue-10);
+  width: 22.9cqw;
+  height: 22.9cqw;
+  border: calc(2px * min(var(--sx, 1), var(--sy, 1))) dashed var(--blue-10);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -80,21 +90,21 @@
 }
 
 .emptyLabel {
-  font-size: 12px;
+  font-size: 7cqw;
   font-weight: 700;
   color: var(--blue-10);
 }
 
 .kickBtn {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
+  bottom: 4.5cqw;
+  right: 4.5cqw;
+  width: 13.7cqw;
+  height: 13.7cqw;
   border-radius: 50%;
   background: #e53935;
   color: white;
-  font-size: 12px;
+  font-size: 7cqw;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -105,13 +115,13 @@
 
 .disconnectedBadge {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  bottom: 4.5cqw;
+  left: 4.5cqw;
   z-index: 1;
-  padding: var(--space-2xs) var(--space-sm);
+  padding: 1cqw 4.5cqw;
   border-radius: var(--r-pill);
   background: #fff3e0;
   color: #e65100;
-  font-size: 10px;
+  font-size: 6cqw;
   font-weight: 700;
 }

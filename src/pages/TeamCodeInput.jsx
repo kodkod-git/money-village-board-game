@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './NameInput.module.css'
 
 export default function TeamCodeInput() {
   const navigate = useNavigate()
   const [code, setCode] = useState('')
+  useBodyClass('onboarding-mode')
 
   function handleNext() {
     if (!code.trim()) return

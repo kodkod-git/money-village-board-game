@@ -1,8 +1,13 @@
 .page {
+  /* Figma 프레임(834×1194) 대비 #root의 가로/세로 비율을 각각 독립적으로 잰다.
+     --sx: 가로 방향 값(좌우 여백, 가로 gap, 박스 너비) / --sy: 세로 방향 값
+     (높이, 위아래 패딩·margin, 세로 gap) / 폰트 크기는 min(--sx, --sy). */
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
   min-height: 100%;
   height: 100%;
   background: var(--gray-10);
-  padding: 0 var(--space-2xl) var(--space-2xl);
+  padding: 0 calc(32px * var(--sx)) calc(32px * var(--sy));
   color: var(--ink);
   display: flex;
   flex-direction: column;
@@ -14,7 +19,9 @@
 
 .inner {
   width: 100%;
-  max-width: 720px;
+  /* 박스(콘텐츠 컬럼)의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서
+     이 컬럼만 Figma 풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
+  max-width: calc(770px * min(var(--sx), var(--sy)));
   margin: 0 auto;
   flex: 1;
   min-height: 0;
@@ -22,29 +29,32 @@
   flex-direction: column;
 }
 
+/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트라 --sx/--sy를 타지 않고
+   항상 top:32px + height:28px(하단 60px)로 고정 렌더링된다. 다른 화면과 같은
+   이유로(CharacterSelect.module.css 참고) 헤더 top도 고정값 91px을 쓴다. */
 .header {
-  padding-top: 96px;
+  padding-top: 91px;
   flex-shrink: 0;
   text-align: center;
 }
 
 .title {
-  font-size: 30px;
+  font-size: calc(30px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: calc(16px * min(var(--sx), var(--sy)));
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: 2px;
+  margin-top: calc(2px * var(--sy));
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--blue-10);
-  margin: 0 0 var(--space-xl);
+  margin: 0 0 calc(24px * var(--sy));
   flex-shrink: 0;
 }
 
@@ -53,16 +63,16 @@
   border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
   overflow: hidden;
-  margin-top: var(--space-xl);
-  margin-bottom: var(--space-md);
+  margin-top: calc(24px * var(--sy));
+  margin-bottom: calc(24px * var(--sy));
   flex-shrink: 0;
 }
 
 .topTab {
   flex: 1;
-  height: 44px;
+  height: calc(46px * var(--sy));
   background: var(--white);
-  font-size: 14px;
+  font-size: calc(14px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink-2);
   border-right: 1px solid var(--blue-10);
@@ -82,15 +92,15 @@
   border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
   overflow: hidden;
-  margin-bottom: var(--space-2xl);
+  margin-bottom: calc(24px * var(--sy));
   flex-shrink: 0;
 }
 
 .tab {
   flex: 1;
   background: var(--white);
-  height: 40px;
-  font-size: 13px;
+  height: calc(42px * var(--sy));
+  font-size: calc(13px * min(var(--sx), var(--sy)));
   font-weight: 700;
   color: var(--ink-2);
   border-right: 1px solid var(--blue-10);

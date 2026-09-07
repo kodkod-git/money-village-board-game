@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './NameInput.module.css'
 
 export default function NameInput() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [name, setName] = useState('')
+  useBodyClass('onboarding-mode')
 
   const code = searchParams.get('code') ?? ''
   const classId = searchParams.get('classId') ?? ''

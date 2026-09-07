@@ -6,6 +6,7 @@ import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './RankingPage.module.css'
 
 const CATEGORY_TABS = [
@@ -23,6 +24,7 @@ const SCOPE_TABS = [
 const VALUE_KEYS = { totalAssets: 'totalAssets', stock: 'stockValue', realEstate: 'realEstateValue' }
 
 export default function RankingPage() {
+  useBodyClass('onboarding-mode')
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const isV2 = Boolean(sessionId)

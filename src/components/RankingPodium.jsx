@@ -16,7 +16,9 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets', onRowCli
       {podiumRows.map(row => (
         <div
           key={row.playerUuid}
-          className={`${styles.slot} ${row.rank === 1 ? styles.first : ''}`}
+          className={`${styles.slot} ${
+            row.rank === 1 ? styles.first : row.rank === 2 ? styles.second : styles.third
+          }`}
           onClick={onRowClick ? () => onRowClick(row) : undefined}
           style={onRowClick ? { cursor: 'pointer' } : undefined}
         >

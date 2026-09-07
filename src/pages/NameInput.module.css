@@ -1,4 +1,14 @@
 .page {
+  /* Figma 프레임(834×1194) 대비 #root의 가로/세로 비율을 각각 독립적으로 잰다.
+     #root는 더 이상 aspect-ratio로 고정돼 있지 않아 가로세로가 서로 다른
+     비율로 줄어들 수 있으므로("통짜 스케일 금지"), 값의 방향에 따라 다른
+     스케일을 쓴다:
+       --sx: 가로 방향 값(좌우 여백, 카드 너비, letter-spacing)
+       --sy: 세로 방향 값(버튼/입력창 높이, 위아래 패딩·margin, 세로 gap)
+       폰트 크기는 min(--sx, --sy) — 어느 한쪽이 더 좁아도 그 방향으로
+       넘치거나 잘리지 않게 더 작은 쪽을 따른다. */
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
   min-height: 100%;
   height: 100%;
   background: var(--white);
@@ -7,62 +17,64 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 0 clamp(24px, 9vw, 49px);
+  padding: 0 calc(49px * var(--sx));
   overflow: hidden;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: calc(32px * var(--sy));
 }
 
 .title {
-  font-size: 36px;
+  font-size: calc(36px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: calc(8px * var(--sy));
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: calc(16px * min(var(--sx), var(--sy)));
   font-weight: 700;
   color: var(--ink-2);
 }
 
 .card {
   width: 100%;
-  max-width: 420px;
+  /* 카드의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서 카드만 Figma
+     풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
+  max-width: calc(426px * min(var(--sx), var(--sy)));
   background: var(--white);
-  border: 2px solid var(--blue-75);
-  border-radius: var(--r-lg);
-  padding: var(--space-2xl);
+  border: calc(2px * var(--sy)) solid var(--blue-75);
+  border-radius: calc(24px * var(--sy));
+  padding: calc(26px * var(--sy)) calc(26px * var(--sx));
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: calc(20px * var(--sy));
 }
 
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: calc(8px * var(--sy));
 }
 
 .label {
-  font-size: 12px;
+  font-size: calc(12px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink-2);
-  letter-spacing: 1.2px;
+  letter-spacing: calc(1.2px * var(--sx));
   text-transform: uppercase;
 }
 
 .input {
-  height: 56px;
-  border-radius: var(--r-sm);
-  border: 2px solid rgba(190, 219, 255, 0.5);
+  height: calc(56px * var(--sy));
+  border-radius: calc(20px * var(--sy));
+  border: calc(2px * var(--sy)) solid rgba(190, 219, 255, 0.5);
   background: rgba(112, 166, 254, 0.15);
-  padding: 0 var(--space-xl);
-  font-size: 16px;
+  padding: 0 calc(20px * var(--sx));
+  font-size: calc(16px * min(var(--sx), var(--sy)));
   color: var(--ink);
   outline: none;
 }
@@ -71,13 +83,13 @@
 .input:focus { border-color: var(--blue-75); }
 
 .gradBtn {
-  height: 56px;
+  height: calc(56px * var(--sy));
   background: var(--blue-100);
   color: var(--white);
-  font-size: 20px;
+  font-size: calc(20px * min(var(--sx), var(--sy)));
   font-weight: 700;
-  border-radius: var(--r-sm);
-  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
+  border-radius: calc(20px * var(--sy));
+  box-shadow: var(--shadow-blue);
 }
 
 .gradBtn:disabled { opacity: 0.5; cursor: not-allowed; }

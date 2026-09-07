@@ -1,3 +1,5 @@
+/* --sx/--sy는 RankingPage.module.css의 .page에서 정의되며, DOM을 통해
+   그대로 상속된다. */
 .container {
   width: 100%;
   flex: 1;
@@ -9,10 +11,15 @@
 .list {
   flex: 1;
   min-height: 140px;
-  container-type: size;
+  /* container-type:size를 여기 두면 안 된다: 아무 @container 쿼리도 이걸
+     참조하지 않지만, --sx/--sy(정의는 RankingPage.module.css의 .page, 즉
+     #root 기준) 안의 cqw/cqh가 "쓰이는 시점"에 가장 가까운 컨테이너를 다시
+     찾기 때문에, 여기 컨테이너를 선언해두면 그 안에서 var(--sy)를 쓰는 모든
+     자식(행 등)이 #root가 아니라 이 .list 자신의 높이를 기준으로 다시
+     계산돼버린다. 결과적으로 행 높이가 의도보다 훨씬 작게 나온다. */
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: calc(8px * var(--sy, 1));
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -21,15 +28,27 @@
   display: none;
 }
 
+/* 행 높이를 Figma 실측(72px)의 약 1.46배인 105px로 키운다 — "목록에 7~8줄
+   정도 보이는 정도"로 요청받아, 이 페이지의 목록 뷰포트 높이 기준으로
+   역산한 값이다(고정 px가 아니라 지금처럼 계속 --sy로 스케일됨). 캐릭터
+   이미지·글자 크기도 같은 비율로 키워 행이 커진 만큼 내용도 맞춰 커지게
+   했다 — 높이만 키우고 내용은 그대로면 빈 여백만 늘어나 어색하다. */
 .row {
+  /* flex-shrink:0 필수: .row에 명시적 height를 주고 나면, 행이 많아서
+     (스크롤될 때는 정상) .list의 보이는 영역보다 총합이 커지는 순간 기본
+     flex-shrink:1 때문에 행들이 다 욱여넣어지려고 계속 줄어든다 —
+     overflow-y:auto로 스크롤시키려는 의도와 반대로 행 높이 자체가
+     찌그러지는 원인이었다. */
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: calc(8px * var(--sx, 1));
   background: var(--white);
   border: 2px solid #f7f7f7;
-  border-radius: var(--r-md);
+  border-radius: calc(20px * min(var(--sx, 1), var(--sy, 1)));
   box-shadow: 0 2px 10px rgba(45, 123, 239, 0.07);
-  padding: 14px var(--space-lg);
+  height: calc(105px * var(--sy, 1));
+  padding: 0 calc(22px * var(--sx, 1));
 }
 
 .rowTop3 {
@@ -38,15 +57,15 @@
 }
 
 .rank {
-  font-size: 16px;
+  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 900;
   color: var(--ink-2);
-  min-width: 32px;
+  min-width: calc(32px * var(--sx, 1));
 }
 
 .characterImg {
-  width: 40px;
-  height: 40px;
+  width: calc(58px * min(var(--sx, 1), var(--sy, 1)));
+  height: calc(58px * min(var(--sx, 1), var(--sy, 1)));
   object-fit: contain;
 }
 
@@ -58,19 +77,19 @@
 }
 
 .name {
-  font-size: 14px;
+  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 700;
   color: var(--ink);
 }
 
 .sub {
-  font-size: 12px;
+  font-size: calc(17px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 400;
   color: var(--disabled);
 }
 
 .value {
-  font-size: 14px;
+  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 900;
   color: var(--ink-2);
   white-space: nowrap;
@@ -80,22 +99,27 @@
   color: var(--ink);
 }
 
+/* 하단 고정 바 안의 행도 목록의 일반 행과 같은 높이/패딩/글자 크기를 쓴다. */
 .pinnedRow {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: 14px var(--space-lg);
-  margin: var(--space-md) 0 var(--space-2xl);
+  gap: calc(8px * var(--sx, 1));
+  height: calc(105px * var(--sy, 1));
+  padding: 0 calc(22px * var(--sx, 1));
+  margin: calc(24px * var(--sy, 1)) 0 calc(24px * var(--sy, 1));
   background: var(--blue-100);
   border: 2px solid var(--blue-100);
-  border-radius: var(--r-md);
+  border-radius: calc(20px * min(var(--sx, 1), var(--sy, 1)));
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
   font-weight: 900;
   color: var(--white);
 }
 
-.pinnedRank { font-size: 16px; min-width: 32px; }
+.pinnedRank {
+  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
+  min-width: calc(32px * var(--sx, 1));
+}
 
 .pinnedInfo {
   display: flex;
@@ -107,20 +131,20 @@
 .pinnedNameRow {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: calc(8px * var(--sx, 1));
 }
 
 .meBadge {
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
-  padding: 1px var(--space-sm);
-  font-size: 12px;
+  border-radius: calc(4px * min(var(--sx, 1), var(--sy, 1)));
+  padding: calc(1px * var(--sy, 1)) calc(8px * var(--sx, 1));
+  font-size: calc(17px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 700;
 }
 
-.pinnedName { font-size: 15px; }
-.pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: 12px; font-weight: 400; }
-.pinnedAssets { font-size: 14px; }
+.pinnedName { font-size: calc(22px * min(var(--sx, 1), var(--sy, 1))); }
+.pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: calc(17px * min(var(--sx, 1), var(--sy, 1))); font-weight: 400; }
+.pinnedAssets { font-size: calc(20px * min(var(--sx, 1), var(--sy, 1))); }
 
 .pinnedRowEmpty {
   opacity: 0.85;
@@ -128,7 +152,7 @@
 }
 
 .pinnedRowEmptyLabel {
-  font-size: 14px;
+  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 700;
   text-align: center;
   color: var(--white);

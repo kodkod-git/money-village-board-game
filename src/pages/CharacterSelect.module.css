@@ -1,44 +1,55 @@
 .page {
+  /* Figma 프레임(834×1194) 대비 #root의 가로/세로 비율을 각각 독립적으로 잰다.
+     #root는 더 이상 aspect-ratio로 고정돼 있지 않아 가로세로가 서로 다른
+     비율로 줄어들 수 있으므로("통짜 스케일 금지"), 값의 방향에 따라 다른
+     스케일을 쓴다:
+       --sx: 가로 방향 값(좌우 여백, 그리드 가로 gap, 카드 너비)
+       --sy: 세로 방향 값(헤더/버튼 높이, 위아래 패딩·margin, 세로 gap)
+       폰트 크기는 min(--sx, --sy).
+     (예전에 여기 있던 max-width:818px + margin-inline:auto는 #root가 데스크톱에서
+     최대 1100px까지 넓어지던 시절의 임시 방편이었다. 이제 onboarding-mode의 #root
+     자체가 834px에서 성장을 멈추므로 더 이상 필요 없고, 대신 Figma 그대로
+     좌우 32px 여백만 준다.) */
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
   min-height: 100%;
   height: 100%;
-  /* 데스크톱/태블릿 폭에서 #root가 넓어져도 본문은 Figma 시안처럼
-     ~770px 컬럼으로 묶어 가운데 정렬한다 (헤더·그리드·CTA가 같은
-     좌우 여백을 공유하도록). 모바일에선 #root 자체가 이 폭보다
-     좁으므로 영향 없음. */
-  width: 100%;
-  max-width: 818px;
-  margin-inline: auto;
   background: var(--gray-10);
   display: flex;
   flex-direction: column;
-  padding: 0 24px;
+  padding: 0 calc(32px * var(--sx));
   overflow: hidden;
   position: relative;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
+/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트라 --sx/--sy를 타지 않고
+   항상 top:32px + height:28px(하단 60px)로 고정 렌더링된다. Figma 실측으로는
+   BackBtn 하단(y=81)과 헤더 상단(y=112)의 간격이 31px이므로, 그 간격을 실제
+   BackButton 하단(60px)에 그대로 더한 91px을 고정값(비스케일)으로 쓴다 —
+   스케일하면 화면이 작아질 때 고정 크기인 BackButton과 겹치게 된다. */
 .header {
-  padding-top: 96px;
+  padding-top: 91px;
   flex-shrink: 0;
 }
 
 .title {
-  font-size: 30px;
+  font-size: calc(30px * min(var(--sx), var(--sy)));
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: calc(15px * min(var(--sx), var(--sy)));
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: 2px;
+  margin-top: calc(4px * var(--sy));
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--divider);
-  margin: 10px 0 0;
+  margin: calc(24px * var(--sy)) 0 0;
   flex-shrink: 0;
 }
 
@@ -52,7 +63,10 @@
   /* "safe" keeps it centered while it fits, but top-aligns once the grid
      is taller than the wrapper so a scroll box can still reach row 1. */
   justify-content: safe center;
-  padding: 44px 0;
+  /* 하단 padding을 두지 않는다: 그리드→버튼 간격은 .bottomBar의 margin-top
+     (Figma 실측 24px) 하나로만 준다. 여기도 24px를 또 주면 간격이 두 배(48px)로
+     겹쳐 더해져 버튼과 그리드 사이가 불필요하게 벌어진다. */
+  padding: calc(24px * var(--sy)) 0 0;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -61,8 +75,13 @@
   display: none;
 }
 
-/* 좁은 폭(모바일)에서는 세로 길이에 맞춰 한 화면에 담기도록 정사각형으로
-   축소한다. */
+/* 화면 크기와 무관하게 항상 정사각형(4×4)으로, 가로(cqw)/세로(cqh) 중 더 작은
+   쪽에 맞춰 축소한다 — 그래서 16개 캐릭터가 스크롤 없이 한 화면에 항상 다
+   보인다. 이 grid는 처음부터 이 패턴(aspect-ratio:1 + min(cqw,cqh))을 쓰고
+   있었는데, 예전엔 넓은 화면(≥620px)에서만 그랬고 그 이상에서는 Figma
+   시안처럼 본문 컬럼 전체 너비로 펼치면서 카드가 Figma 실측 174.5px까지
+   커지도록 했었다. 그런데 그 Figma 크기 자체가 "카드가 너무 크다"는 피드백을
+   받아, 화면 크기에 관계없이 항상 이 좁은-화면용 압축 규칙 하나로 통일했다. */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -72,32 +91,23 @@
   aspect-ratio: 1;
 }
 
-/* 넓은 폭(태블릿·데스크톱)에서는 Figma 시안처럼 본문 컬럼 전체 너비를
-   채우고(헤더와 좌우 정렬을 맞춤), 넘치면 세로 스크롤한다. */
-@container (min-width: 620px) {
-  .grid {
-    width: 100%;
-    aspect-ratio: auto;
-    grid-template-rows: none;
-    gap: var(--space-2xl);
-  }
-}
-
 .bottomBar {
   flex-shrink: 0;
-  width: min(374px, calc(100% - 24px));
-  margin: var(--space-lg) auto var(--space-2xl);
+  /* 버튼의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서 버튼만 Figma
+     풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
+  width: min(calc(374px * min(var(--sx), var(--sy))), calc(100% - 24px));
+  margin: calc(24px * var(--sy)) auto calc(24px * var(--sy));
 }
 
 .ctaBtn {
   background: var(--blue-100);
   color: #ffffff;
-  font-size: 22px;
+  font-size: calc(22px * min(var(--sx), var(--sy)));
   font-weight: 700;
-  border-radius: var(--r-sm);
-  height: 68px;
+  border-radius: calc(20px * var(--sy));
+  height: calc(68px * var(--sy));
   width: 100%;
-  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
+  box-shadow: var(--shadow-blue);
 }
 
 .ctaBtn:disabled { opacity: 0.4; cursor: not-allowed; }

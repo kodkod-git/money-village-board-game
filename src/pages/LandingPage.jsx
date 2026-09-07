@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './LandingPage.module.css'
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  useBodyClass('onboarding-mode')
 
   return (
     <div className={styles.page}>

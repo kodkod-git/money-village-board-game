@@ -7,9 +7,11 @@ import QRCodeImage from '../components/QRCodeImage'
 import PriceSettingModal, { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import AlertModal from '../components/AlertModal'
 import { useSocketContext } from '../contexts/SocketContext'
+import useBodyClass from '../hooks/useBodyClass'
 import styles from './Team.module.css'
 
 export default function Team({ readOnly = false, mockRoom = null }) {
+  useBodyClass('onboarding-mode')
   const { code: routeCode } = useParams()
   const code = readOnly ? mockRoom.code : routeCode
   const navigate = useNavigate()

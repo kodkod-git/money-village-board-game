@@ -1,9 +1,22 @@
 .card {
+  /* 배지(.badge)는 카드 자신의 실제 렌더링 크기를 기준(cqw)으로 잡는다.
+     카드 크기는 이제 페이지 전체 --sx/--sy가 아니라 그리드 래퍼의
+     min(cqw,cqh)로 결정되기 때문에(자세한 이유는 CharacterSelect.module.css의
+     .grid 주석 참고), --sx/--sy에 매달린 계산은 카드의 실제 크기와 따로
+     놀아서 화면 크기에 따라 배지가 카드에 비해 너무 작거나 커 보였다.
+     container-type로 카드 스스로를 기준(컨테이너) 삼으면, 카드의 "자식"인
+     배지는 카드가 어떤 크기가 되든 항상 같은 비율을 유지한다.
+     주의: 컨테이너는 "자기 자신"의 cqw는 쿼리할 수 없다(순환 참조가 되므로) —
+     그래서 .card 자신의 border-radius는 cqw 대신 %(자기 박스 기준으로 바로
+     계산되는 단위)를 쓴다. border-width는 %를 지원하지 않아 예전처럼 페이지
+     스케일(--sx/--sy)을 그대로 쓴다 — 1~2px 굵기라 카드 실제 크기와 살짝
+     어긋나도 눈에 띄지 않는다. */
+  container-type: inline-size;
   width: 100%;
   aspect-ratio: 1;
   background: var(--white);
-  border: 2px solid var(--blue-10);
-  border-radius: var(--r-sm);
+  border: calc(2px * min(var(--sx, 1), var(--sy, 1))) solid var(--blue-10);
+  border-radius: 11%;
   cursor: pointer;
   position: relative;
   transition: border-color 0.15s;
@@ -21,11 +34,11 @@
 }
 .card.locked { opacity: 0.35; cursor: not-allowed; }
 .badge {
-  position: absolute; top: 4px; right: 4px;
+  position: absolute; top: 6cqw; right: 6cqw;
   z-index: 1;
   background: var(--blue-100); color: white;
-  border-radius: 50%; width: 18px; height: 18px;
-  font-size: 10px;
+  border-radius: 50%; width: 24cqw; height: 24cqw;
+  font-size: 13cqw;
   display: flex; align-items: center; justify-content: center;
 }
 .card.locked .badge { background: transparent; }

@@ -1,9 +1,19 @@
+/* --sx/--sy는 RankingPage.module.css의 .page에서 정의되며, DOM을 통해
+   그대로 상속된다(CSS 커스텀 프로퍼티는 모듈 경계와 무관하게 상속됨).
+
+   아래 치수는 Figma 실측값에 1.15배를 곱한 값이다: 시상대가 "헤더+탭이
+   차지하는 만큼"의 크기가 되도록 요청받아, 실측 그대로는 헤더+탭 블록
+   (176.8px)보다 작았던 시상대(153.8px)를 174.8/153.8·176.8/153.8 비율로
+   키운 것 — 모든 치수(아바타·폭·글자·패딩·gap)에 동일한 배율을 적용해
+   비율 자체는 그대로 유지한다. */
 .podium {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: var(--space-lg);
-  margin-bottom: var(--space-md);
+  gap: calc(18px * var(--sx, 1));
+  /* .list(RankingTable)의 자체 gap(세로)과 합쳐 podium→목록 첫 줄 간격을
+     만든다. */
+  margin-bottom: calc(16px * var(--sy, 1));
   flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -17,19 +27,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
-  flex: 0 0 144px;
-  max-width: 144px;
+  gap: calc(9px * min(var(--sx, 1), var(--sy, 1)));
+  flex: 0 0 calc(166px * min(var(--sx, 1), var(--sy, 1)));
+  max-width: calc(166px * min(var(--sx, 1), var(--sy, 1)));
 }
 
 .avatar {
-  width: 64px;
-  height: 64px;
+  width: calc(74px * min(var(--sx, 1), var(--sy, 1)));
+  height: calc(74px * min(var(--sx, 1), var(--sy, 1)));
   object-fit: contain;
 }
 
 .name {
-  font-size: 16px;
+  font-size: calc(18px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 900;
   color: var(--ink);
   white-space: nowrap;
@@ -42,78 +52,50 @@
   width: 100%;
   background: rgba(112, 166, 254, 0.15);
   border: 1px solid var(--blue-10);
-  border-radius: var(--r-md) var(--r-md) 0 0;
+  border-radius: calc(23px * min(var(--sx, 1), var(--sy, 1))) calc(23px * min(var(--sx, 1), var(--sy, 1))) 0 0;
   box-shadow: 0 2px 20px rgba(45, 123, 239, 0.07);
-  padding: var(--space-lg) var(--space-sm);
+  padding: calc(17px * var(--sy, 1)) calc(9px * var(--sx, 1));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: calc(7px * var(--sy, 1));
 }
 
 .rank {
-  font-size: 20px;
+  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 900;
   color: var(--ink-2);
 }
 
 .value {
-  font-size: 12px;
+  font-size: calc(14px * min(var(--sx, 1), var(--sy, 1)));
   font-weight: 700;
   color: var(--ink-2);
   white-space: nowrap;
+}
+
+/* 세 자리(1·2·3위) 박스는 Figma 실측 상하 padding 비율이 서로 다르다(1위 49px,
+   2위 26px, 3위 17px, 1.15배 적용 후) — 그냥 "1위만 크게"가 아니라 세 값이
+   전부 다르므로 순위별로 각각 지정한다. */
+.second .box {
+  padding-top: calc(26px * var(--sy, 1));
+  padding-bottom: calc(26px * var(--sy, 1));
+}
+
+.third .box {
+  padding-top: calc(17px * var(--sy, 1));
+  padding-bottom: calc(17px * var(--sy, 1));
 }
 
 .first .box {
   background: var(--blue-100);
   border-color: var(--blue-100);
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
-  padding-top: var(--space-2xl);
-  padding-bottom: var(--space-2xl);
+  padding-top: calc(49px * var(--sy, 1));
+  padding-bottom: calc(49px * var(--sy, 1));
 }
 
 .first .rank,
 .first .value {
   color: var(--white);
-}
-
-/* 실제 사용 가능한 폭(스마트폰 비율의 앱 프레임)이 좁을 때, 세 자리 슬롯을 억지로
-   구겨 넣는 대신 시상대 자체와 글씨 크기를 함께 줄여 한 화면에 들어오게 한다. */
-@container (max-width: 400px) {
-  .podium {
-    gap: 10px;
-  }
-
-  .slot {
-    flex: 0 0 100px;
-    max-width: 100px;
-    gap: 6px;
-  }
-
-  .avatar {
-    width: 40px;
-    height: 40px;
-  }
-
-  .name {
-    font-size: 13px;
-  }
-
-  .box {
-    padding: 12px 6px;
-    gap: 3px;
-  }
-
-  .rank {
-    font-size: 16px;
-  }
-
-  .value {
-    font-size: 10px;
-  }
-
-  .first .box {
-    padding-top: 18px;
-    padding-bottom: 18px;
-  }
 }

@@ -57,6 +57,9 @@
   --r-lg:        24px;
   --r-pill:      999px;
   --shadow-card: 0 4px 6px -4px rgba(0,0,0,.10), 0 10px 15px -3px rgba(0,0,0,.10);
+  /* Figma 변수 컬렉션의 shadow 값을 그대로 옮긴 토큰. 온보딩 화면(홈·이름 입력·
+     팀 참여·캐릭터 선택)의 로고 박스·주요 버튼에서 재사용한다. */
+  --shadow-blue: 0 2px 4px -2px rgba(190,219,255,.502), 0 4px 6px -1px rgba(190,219,255,.502);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -197,6 +200,41 @@ body.quiz-mode #root {
   box-shadow: none;
   overflow: visible;
   contain: none;
+}
+
+/* 온보딩 화면(홈 · 이름 입력 · 팀 참여 · 캐릭터 선택 · 팀 화면) 전용 모드.
+   처음엔 저 4개 화면만 대상이었지만, 이후 팀 화면(Team.jsx)도 같은 방식으로
+   Figma에 맞춰 동기화하면서 이 클래스를 그대로 재사용하게 됐다. 앞으로 같은
+   Figma 프레임(834×1194) 기준으로 동기화하는 화면이 늘어나면 여기 계속
+   추가하면 된다.
+   Figma 시안 그대로인 834×1194(아이패드 세로)를 절대 상한으로 삼는다: 가로는
+   834px, 세로는 1194px에서 각각 독립적으로 성장을 멈춘다.
+   중요: width와 height를 서로 묶는 aspect-ratio를 일부러 걸지 않는다. 예전엔
+   `aspect-ratio:834/1194`로 강제해서, 세로 공간이 좁은 창(예: 브라우저 높이가
+   낮은 데스크톱)에서는 가로 공간이 충분히 남아도 세로에 맞춰 가로까지 억지로
+   줄어드는 문제가 있었다. 지금은 가로/세로가 각자 자기 축의 여유만큼 독립적으로
+   834px, 1194px까지 자란다 — 그래서 #root의 실제 가로세로 비율이 Figma의
+   834:1194와 달라질 수 있다(태블릿처럼 가로가 남는 화면에서는 가로가 더 크게,
+   세로가 좁은 창에서는 세로가 더 작게). 이 비대칭을 각 화면 CSS의 --sx(가로
+   스케일)/--sy(세로 스케일) 분리로 흡수한다 — 아래 페이지별 .page 참고.
+   768px/1024px 구간의 근사 오버라이드와 480px 이하의 풀블리드 오버라이드는
+   width/height/aspect-ratio/border-radius/box-shadow를 다시 선언해 여기서 무효화한다
+   (선택자 특이도 body.onboarding-mode #root > #root 이므로 항상 우선 적용됨).
+   #root에 container-type: size를 둬서, 각 화면의 CSS가 cqw(가로 834 기준)와
+   cqh(세로 1194 기준)로 독립적으로 값을 계산할 수 있게 한다.
+   height는 percentage가 아니라 dvh 기반으로 직접 계산한다 — body는
+   min-height만 갖고 있어서(display:flex) 자식의 percentage height가 안정적으로
+   해석된다는 보장이 없고, body 자신의 위아래 padding(--app-block-padding)을
+   두 번 빼줘야 실제로 쓸 수 있는 세로 공간이 나온다. */
+body.onboarding-mode #root {
+  width: min(100%, 834px);
+  height: min(calc(100dvh - 2 * var(--app-block-padding)), 1194px);
+  min-height: var(--app-min-height);
+  border-radius: 28px;
+  box-shadow:
+    0 30px 90px rgba(70, 79, 144, 0.26),
+    0 10px 28px rgba(17, 24, 39, 0.10);
+  container-type: size;
 }
 
 /* --admin-* 변수는 admin-mode 전체 화면뿐 아니라, 플레이어 화면(예: 랭킹
