@@ -16,12 +16,13 @@ const EMPTY_ICON = (
 
 const CATEGORY_TABS = [
   { key: 'totalAssets', label: '총자산' },
+  { key: 'netWorth', label: '순자산' },
   { key: 'cash', label: '현금' },
   { key: 'realEstate', label: '부동산' },
   { key: 'stock', label: '주식' },
 ]
 
-const VALUE_KEYS = { totalAssets: 'totalAssets', cash: 'cash', stock: 'stockValue', realEstate: 'realEstateValue' }
+const VALUE_KEYS = { totalAssets: 'totalAssets', netWorth: 'netWorth', cash: 'cash', stock: 'stockValue', realEstate: 'realEstateValue' }
 const PODIUM_ORDER = [1, 0, 2]
 const BADGE_SIZES = { 1: 46, 2: 38, 3: 28 }
 
