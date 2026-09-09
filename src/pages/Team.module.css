@@ -5,7 +5,12 @@
      스케일을 쓴다:
        --sx: 가로 방향 값(좌우 여백, 카드/그리드 너비, 가로 gap, letter-spacing)
        --sy: 세로 방향 값(버튼/카드 높이, 위아래 패딩·margin, 세로 gap)
-       폰트 크기·정사각형 요소는 min(--sx, --sy). */
+       폰트 크기·정사각형 요소는 min(--sx, --sy).
+
+     2026-09-09: Home과 동일한 이유로 모든 값에 clamp(최소, 비례값, Figma원본)을
+     적용했다 — 폰 폭에서 834분의 실제폭(~0.43~0.5배)으로 항상 눌려 화면 크기와
+     무관하게 늘 작아 보이던 문제. 팀 화면 안의 팝업(방 나가기 확인)도 같은
+     방식으로 통일했다. */
   --sx: calc(100cqw / 834px);
   --sy: calc(100cqh / 1194px);
   /* .slots의 4열 전환 기준(@container, 아래)이 이 .page 자신의 실제 폭을 보고
@@ -19,7 +24,7 @@
   min-height: 100%;
   height: 100%;
   background: var(--white);
-  padding: 0 calc(32px * var(--sx)) calc(40px * var(--sy));
+  padding: 0 clamp(16px, calc(32px * var(--sx)), 32px) clamp(24px, calc(40px * var(--sy)), 40px);
   position: relative;
   overflow-y: auto;
   scrollbar-width: none;
@@ -32,95 +37,97 @@
 
 /* 가격 설정 버튼은 뒤로가기(BackBtn)와 같은 줄이 아니라 헤더(제목) 행과
    같은 높이(Figma y=112)에 오른쪽 정렬로 나란히 배치된다. 헤더의 top과
-   같은 이유로(아래 .header 주석 참고) top을 고정값 91px로 맞춘다. */
+   같은 이유로(아래 .header 주석 참고) BackButton의 top+height+간격 총합
+   (91px)을 --sy에 비례시킨다. */
 .priceSettingBtn {
   position: absolute;
-  top: 91px;
-  right: calc(32px * var(--sx));
+  top: clamp(55px, calc(91px * var(--sy)), 91px);
+  right: clamp(16px, calc(32px * var(--sx)), 32px);
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx));
+  gap: clamp(6px, calc(8px * var(--sx)), 8px);
   background: var(--white);
-  border: calc(1.5px * var(--sy)) solid var(--blue-100);
+  border: clamp(1px, calc(1.5px * var(--sy)), 1.5px) solid var(--blue-100);
   border-radius: var(--r-pill);
-  height: calc(40px * var(--sy));
-  padding: 0 calc(14px * var(--sx));
-  font-size: calc(14px * min(var(--sx), var(--sy)));
+  height: clamp(32px, calc(40px * var(--sy)), 40px);
+  padding: 0 clamp(10px, calc(14px * var(--sx)), 14px);
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
   font-weight: 700;
   line-height: 1.27;
   color: var(--blue-100);
 }
 
 .priceSettingIcon {
-  width: calc(20px * min(var(--sx), var(--sy)));
-  height: calc(20px * min(var(--sx), var(--sy)));
+  width: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
+  height: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
 }
 
-/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트라 --sx/--sy를 타지 않고
-   항상 top:32px + height:28px(하단 60px)로 고정 렌더링된다. Figma 실측으로는
-   BackBtn 하단(y=81)과 헤더 상단(y=112)의 간격이 31px이므로, 그 간격을 실제
-   BackButton 하단(60px)에 그대로 더한 91px을 고정값(비스케일)으로 쓴다 —
-   스케일하면 화면이 작아질 때 고정 크기인 BackButton과 겹치게 된다. */
+/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트로, 이제 BackButton
+   자신도 --sy에 비례해 top/height가 줄어든다(clamp 적용, BackButton.module.css
+   참고). Figma 실측으로는 BackBtn 하단(y=81)과 헤더 상단(y=112)의 간격이
+   31px이므로, BackButton의 top(32)+height(28)+간격(31)=91px을 그대로
+   --sy에 비례시키되, BackButton 쪽 하한(20+24=44px)보다 넉넉한 하한(55px)을
+   둬서 화면이 아무리 작아져도 헤더가 BackButton과 겹치지 않게 한다. */
 .header {
-  padding-top: 91px;
+  padding-top: clamp(55px, calc(91px * var(--sy)), 91px);
   flex-shrink: 0;
 }
 
 .title {
-  font-size: calc(30px * min(var(--sx), var(--sy)));
+  font-size: clamp(20px, calc(30px * min(var(--sx), var(--sy))), 30px);
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: calc(15px * min(var(--sx), var(--sy)));
+  font-size: clamp(12px, calc(15px * min(var(--sx), var(--sy))), 15px);
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: calc(4px * var(--sy));
+  margin-top: clamp(3px, calc(4px * var(--sy)), 4px);
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--blue-10);
-  margin: calc(24px * var(--sy)) 0 calc(24px * var(--sy));
+  margin: clamp(14px, calc(24px * var(--sy)), 24px) 0 clamp(14px, calc(24px * var(--sy)), 24px);
 }
 
 .inviteGrid {
   display: grid;
   grid-template-columns: 320fr 106fr;
-  gap: calc(24px * var(--sx));
-  margin: 0 auto calc(24px * var(--sy));
+  gap: clamp(12px, calc(24px * var(--sx)), 24px);
+  margin: 0 auto clamp(14px, calc(24px * var(--sy)), 24px);
   /* 초대코드/QR 카드 묶음의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서
      이 박스만 Figma 풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
-  max-width: calc(450px * min(var(--sx), var(--sy)));
+  max-width: clamp(300px, calc(450px * min(var(--sx), var(--sy))), 450px);
 }
 
 .codeCard,
 .qrCard {
   background: var(--white);
-  border-radius: calc(16px * var(--sy));
+  border-radius: clamp(12px, calc(16px * var(--sy)), 16px);
   box-shadow: 0 2px 10px rgba(45, 123, 239, 0.07);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(108px * var(--sy));
+  min-height: clamp(80px, calc(108px * var(--sy)), 108px);
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .codeCard {
-  padding: calc(21px * var(--sy)) calc(21px * var(--sx));
+  padding: clamp(14px, calc(21px * var(--sy)), 21px) clamp(14px, calc(21px * var(--sx)), 21px);
   gap: 0;
 }
 
 .qrCard {
   cursor: pointer;
-  padding: calc(8px * var(--sy)) calc(17px * var(--sx));
-  gap: calc(4px * var(--sy));
+  padding: clamp(6px, calc(8px * var(--sy)), 8px) clamp(12px, calc(17px * var(--sx)), 17px);
+  gap: clamp(3px, calc(4px * var(--sy)), 4px);
 }
 
 .codeLabel {
-  font-size: calc(12px * min(var(--sx), var(--sy)));
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 900;
   color: var(--ink-2);
   letter-spacing: calc(1.2px * var(--sx));
@@ -130,11 +137,11 @@
 .codeRow {
   display: flex;
   align-items: center;
-  gap: calc(12px * var(--sx));
+  gap: clamp(8px, calc(12px * var(--sx)), 12px);
 }
 
 .code {
-  font-size: calc(28px * min(var(--sx), var(--sy)));
+  font-size: clamp(20px, calc(28px * min(var(--sx), var(--sy))), 28px);
   font-weight: 900;
   color: var(--ink);
   letter-spacing: calc(4px * var(--sx));
@@ -144,9 +151,9 @@
   background: transparent;
   border: 1px solid var(--blue-10);
   border-radius: var(--r-pill);
-  width: calc(32px * min(var(--sx), var(--sy)));
-  height: calc(32px * min(var(--sx), var(--sy)));
-  padding: calc(6px * min(var(--sx), var(--sy)));
+  width: clamp(26px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  height: clamp(26px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  padding: clamp(4px, calc(6px * min(var(--sx), var(--sy))), 6px);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -161,9 +168,9 @@
 }
 
 .qrImg {
-  width: calc(72px * min(var(--sx), var(--sy)));
-  height: calc(72px * min(var(--sx), var(--sy)));
-  border-radius: calc(8px * min(var(--sx), var(--sy)));
+  width: clamp(52px, calc(72px * min(var(--sx), var(--sy))), 72px);
+  height: clamp(52px, calc(72px * min(var(--sx), var(--sy))), 72px);
+  border-radius: clamp(6px, calc(8px * min(var(--sx), var(--sy))), 8px);
   background: var(--white);
   object-fit: contain;
 }
@@ -177,42 +184,42 @@
 .section { margin: 0; }
 
 .sectionLabel {
-  font-size: calc(12px * min(var(--sx), var(--sy)));
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 900;
   color: var(--ink-2);
   letter-spacing: calc(1.2px * var(--sx));
   text-transform: uppercase;
   display: block;
-  margin-bottom: calc(12px * var(--sy));
+  margin-bottom: clamp(8px, calc(12px * var(--sy)), 12px);
 }
 
 .slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: calc(16px * var(--sy)) calc(16px * var(--sx));
+  gap: clamp(10px, calc(16px * var(--sy)), 16px) clamp(10px, calc(16px * var(--sx)), 16px);
 }
 
 @container (min-width: 620px) {
   .slots {
     grid-template-columns: repeat(4, minmax(140px, 190px));
     justify-content: center;
-    gap: calc(24px * var(--sy)) calc(24px * var(--sx));
+    gap: clamp(14px, calc(24px * var(--sy)), 24px) clamp(14px, calc(24px * var(--sx)), 24px);
   }
 }
 
 .bottomBar {
-  max-width: 360px;
-  margin: calc(24px * var(--sy)) auto 0;
+  max-width: clamp(260px, calc(360px * min(var(--sx), var(--sy))), 360px);
+  margin: clamp(14px, calc(24px * var(--sy)), 24px) auto 0;
 }
 
 .assetEntryBtn {
   width: 100%;
-  height: calc(68px * var(--sy));
+  height: clamp(52px, calc(68px * var(--sy)), 68px);
   background: var(--blue-100);
   color: var(--white);
-  font-size: calc(20px * min(var(--sx), var(--sy)));
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 700;
-  border-radius: calc(20px * var(--sy));
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
   box-shadow: var(--shadow-blue);
 }
 
@@ -228,17 +235,17 @@
 
 .popup {
   background: var(--white);
-  border-radius: var(--r-lg);
-  padding: var(--space-3xl);
-  width: min(320px, calc(100% - 28px));
+  border-radius: clamp(16px, calc(24px * min(var(--sx), var(--sy))), 24px);
+  padding: clamp(20px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  width: min(clamp(260px, calc(320px * min(var(--sx), var(--sy))), 320px), calc(100% - 28px));
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: clamp(14px, calc(20px * min(var(--sx), var(--sy))), 20px);
   box-shadow: var(--shadow-card);
 }
 
 .popupTitle {
-  font-size: 20px;
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 900;
   color: var(--ink);
   text-align: center;
@@ -246,32 +253,32 @@
 
 .popupActions {
   display: flex;
-  gap: var(--space-md);
+  gap: clamp(8px, calc(12px * min(var(--sx), var(--sy))), 12px);
 }
 
 .cancelBtn {
   flex: 1;
-  height: 48px;
-  border-radius: var(--r-sm);
+  height: clamp(40px, calc(48px * min(var(--sx), var(--sy))), 48px);
+  border-radius: clamp(12px, calc(16px * min(var(--sx), var(--sy))), 16px);
   background: var(--slot-empty);
   color: var(--ink-2);
-  font-size: 16px;
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
   border: 1px solid var(--line);
 }
 
 .confirmBtn {
   flex: 1;
-  height: 48px;
-  border-radius: var(--r-sm);
+  height: clamp(40px, calc(48px * min(var(--sx), var(--sy))), 48px);
+  border-radius: clamp(12px, calc(16px * min(var(--sx), var(--sy))), 16px);
   background: var(--blue-100);
   color: #ffffff;
-  font-size: 16px;
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
 }
 
 .confirmText {
-  font-size: 15px;
+  font-size: clamp(13px, calc(15px * min(var(--sx), var(--sy))), 15px);
   color: var(--ink-2);
   text-align: center;
   line-height: 1.6;

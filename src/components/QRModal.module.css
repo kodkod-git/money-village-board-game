@@ -1,3 +1,8 @@
+/* Team 화면(온보딩 모드) 안에서 열리는 팝업이라 조상 .page가 정의한
+   --sx/--sy를 상속받아 쓴다. var(--sx, 1) 형태로 기본값 1을 둬서 다른
+   맥락에 재사용되더라도 Figma 원본 크기로 안전하게 렌더링된다.
+   2026-09-09: 완전 고정이던 값들을 clamp(최소, 비례값, 원래값)으로 바꿔
+   화면 비율에 따라 유연하게 스케일되게 했다. */
 .overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.6);
@@ -5,19 +10,37 @@
   z-index: 100;
 }
 .modal {
-  background: #1e88e5; border-radius: 14px;
-  padding: 28px clamp(20px, 8vw, 32px);
+  background: #1e88e5;
+  border-radius: clamp(10px, calc(14px * min(var(--sx, 1), var(--sy, 1))), 14px);
+  padding: clamp(18px, calc(28px * min(var(--sx, 1), var(--sy, 1))), 28px) clamp(20px, 8vw, 32px);
   width: min(330px, calc(100% - 28px));
   text-align: center; position: relative;
 }
 .close {
-  position: absolute; top: 12px; right: 12px;
+  position: absolute;
+  top: clamp(8px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px);
+  right: clamp(8px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px);
   background: #e53935; color: white;
-  border-radius: 50%; width: 28px; height: 28px; font-size: 14px;
+  border-radius: 50%;
+  width: clamp(24px, calc(28px * min(var(--sx, 1), var(--sy, 1))), 28px);
+  height: clamp(24px, calc(28px * min(var(--sx, 1), var(--sy, 1))), 28px);
+  font-size: clamp(12px, calc(14px * min(var(--sx, 1), var(--sy, 1))), 14px);
 }
-.modal h2 { color: white; font-size: 16px; margin-bottom: 8px; }
-.divider { height: 2px; background: rgba(255,255,255,0.3); margin: 12px 0 16px; }
-.subtitle { color: white; font-size: 13px; margin-bottom: 16px; }
+.modal h2 {
+  color: white;
+  font-size: clamp(14px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+  margin-bottom: clamp(6px, calc(8px * min(var(--sx, 1), var(--sy, 1))), 8px);
+}
+.divider {
+  height: 2px;
+  background: rgba(255,255,255,0.3);
+  margin: clamp(9px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px) 0 clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+}
+.subtitle {
+  color: white;
+  font-size: clamp(11px, calc(13px * min(var(--sx, 1), var(--sy, 1))), 13px);
+  margin-bottom: clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+}
 .qr {
   width: min(220px, 70vw);
   height: min(220px, 70vw);

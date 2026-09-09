@@ -1,3 +1,9 @@
+/* PriceSettingModal(Team 화면, 온보딩 모드) 안에서 열리는 하단 시트라
+   조상 .page가 정의한 --sx/--sy를 상속받아 쓴다. var(--sx, 1) 형태로
+   기본값 1을 둬서 다른 맥락에 재사용되더라도 원래 크기로 안전하게
+   렌더링된다.
+   2026-09-09: 완전 고정이던 값들을 clamp(최소, 비례값, 원래값)으로 바꿔
+   화면 비율에 따라 유연하게 스케일되게 했다. */
 .overlay {
   position: absolute;
   inset: 0;
@@ -5,7 +11,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 var(--space-lg) var(--space-lg);
+  padding: 0 clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px) clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
   z-index: 700;
 }
 
@@ -13,8 +19,8 @@
   width: 100%;
   max-width: 420px;
   background: var(--white);
-  border-radius: 24px;
-  padding: var(--space-md) var(--space-2xl) var(--space-2xl);
+  border-radius: clamp(16px, calc(24px * min(var(--sx, 1), var(--sy, 1))), 24px);
+  padding: clamp(9px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px) clamp(14px, calc(24px * min(var(--sx, 1), var(--sy, 1))), 24px) clamp(14px, calc(24px * min(var(--sx, 1), var(--sy, 1))), 24px);
   box-shadow: var(--shadow-card);
   max-height: calc(100% - var(--space-3xl));
   overflow-y: auto;
@@ -25,33 +31,33 @@
   height: 4px;
   background: var(--disabled);
   border-radius: var(--r-pill);
-  margin: 0 auto var(--space-lg);
+  margin: 0 auto clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
 }
 
 .title {
-  font-size: 16px;
+  font-size: clamp(13px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
   font-weight: 700;
   color: var(--ink-2);
-  margin-bottom: var(--space-sm);
+  margin-bottom: clamp(6px, calc(8px * min(var(--sx, 1), var(--sy, 1))), 8px);
 }
 
 .display {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-bottom: var(--space-lg);
-  margin-bottom: var(--space-lg);
+  padding-bottom: clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+  margin-bottom: clamp(12px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
   border-bottom: 1px solid var(--gray-10);
 }
 
 .value {
-  font-size: 40px;
+  font-size: clamp(28px, calc(40px * min(var(--sx, 1), var(--sy, 1))), 40px);
   font-weight: 900;
   color: var(--ink);
 }
 
 .unit {
-  font-size: 16px;
+  font-size: clamp(13px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
   font-weight: 700;
   color: var(--ink-2);
 }
@@ -59,16 +65,16 @@
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
+  gap: clamp(9px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px);
+  margin-bottom: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
 }
 
 .key {
   background: var(--gray-10);
   border-radius: var(--r-sm);
   border: 1px solid var(--blue-15);
-  height: 64px;
-  font-size: 20px;
+  height: clamp(50px, calc(64px * min(var(--sx, 1), var(--sy, 1))), 64px);
+  font-size: clamp(16px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   font-weight: 900;
   color: var(--ink);
 }
@@ -84,11 +90,11 @@
 
 .confirmBtn {
   width: 100%;
-  height: 56px;
+  height: clamp(44px, calc(56px * min(var(--sx, 1), var(--sy, 1))), 56px);
   border-radius: var(--r-sm);
   background: var(--blue-100);
   color: var(--white);
-  font-size: 20px;
+  font-size: clamp(16px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   font-weight: 700;
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
 }

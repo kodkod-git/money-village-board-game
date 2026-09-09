@@ -1,28 +1,36 @@
+/* 온보딩 화면(홈 제외 — 홈에는 뒤로가기가 없음) 여러 곳에서 공유하는
+   컴포넌트라, 자신을 감싸는 .page가 정의한 --sx/--sy를 상속받아 쓰되
+   (var(--sx, 1) 형태로 기본값 1을 둬서) 혹시 --sx/--sy가 없는 화면에
+   쓰이더라도 Figma 원본 크기로 안전하게 렌더링되게 했다.
+   2026-09-09: 완전 고정이던 값들을 전부 clamp(최소, 비례값, Figma원본)으로
+   바꿨다 — 폰 폭에서 너무 작아지는 걸 막으면서도 화면 비율에 따라 유연하게
+   커지고 작아진다. 이 값에 맞춰 CharacterSelect/Team의 헤더 padding-top,
+   priceSettingBtn의 top도 같은 비율(--sy)로 함께 스케일된다. */
 .btn {
   position: absolute;
-  top: 32px;
-  left: 24px;
+  top: clamp(20px, calc(32px * var(--sy, 1)), 32px);
+  left: clamp(16px, calc(24px * var(--sx, 1)), 24px);
   z-index: 100;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(12px, calc(14px * min(var(--sx, 1), var(--sy, 1))), 14px);
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 32px;
-  height: 28px;
-  padding: 3px 0;
+  gap: clamp(3px, calc(4px * min(var(--sx, 1), var(--sy, 1))), 4px);
+  min-width: clamp(28px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
+  height: clamp(24px, calc(28px * var(--sy, 1)), 28px);
+  padding: clamp(2px, calc(3px * min(var(--sx, 1), var(--sy, 1))), 3px) 0;
 }
 
 .body { color: #888888; }
 .intro { color: #ffffff; }
 
 .icon {
-  width: 18px;
-  height: 18px;
+  width: clamp(15px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
+  height: clamp(15px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
   object-fit: contain;
   display: block;
 }

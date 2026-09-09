@@ -6,7 +6,12 @@
        --sx: 가로 방향 값(좌우 여백, 카드 너비, letter-spacing)
        --sy: 세로 방향 값(버튼/입력창 높이, 위아래 패딩·margin, 세로 gap)
        폰트 크기는 min(--sx, --sy) — 어느 한쪽이 더 좁아도 그 방향으로
-       넘치거나 잘리지 않게 더 작은 쪽을 따른다. */
+       넘치거나 잘리지 않게 더 작은 쪽을 따른다.
+
+     2026-09-09: Home과 동일한 이유로 모든 값에 clamp(최소, 비례값, Figma원본)을
+     적용했다 — 폰 폭(360~430px)에서는 항상 834분의 실제폭(~0.43~0.5배) 근처로
+     눌려서 화면 크기와 무관하게 늘 작게 보이던 문제. 위쪽 한도는 Figma 원본이라
+     834×1194 근처에서는 그대로, 아래쪽 한도는 가독성 최소값. */
   --sx: calc(100cqw / 834px);
   --sy: calc(100cqh / 1194px);
   min-height: 100%;
@@ -17,25 +22,25 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 0 calc(49px * var(--sx));
+  padding: 0 clamp(20px, calc(49px * var(--sx)), 49px);
   overflow: hidden;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .header {
   text-align: center;
-  margin-bottom: calc(32px * var(--sy));
+  margin-bottom: clamp(20px, calc(32px * var(--sy)), 32px);
 }
 
 .title {
-  font-size: calc(36px * min(var(--sx), var(--sy)));
+  font-size: clamp(22px, calc(36px * min(var(--sx), var(--sy))), 36px);
   font-weight: 900;
   color: var(--ink);
-  margin-bottom: calc(8px * var(--sy));
+  margin-bottom: clamp(5px, calc(8px * var(--sy)), 8px);
 }
 
 .subtitle {
-  font-size: calc(16px * min(var(--sx), var(--sy)));
+  font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
   color: var(--ink-2);
 }
@@ -43,25 +48,26 @@
 .card {
   width: 100%;
   /* 카드의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서 카드만 Figma
-     풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
-  max-width: calc(426px * min(var(--sx), var(--sy)));
+     풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. 하한선(300px)은
+     폰 폭에서 카드가 너무 좁아 입력창·버튼이 답답해 보이지 않게 한다. */
+  max-width: clamp(300px, calc(426px * min(var(--sx), var(--sy))), 426px);
   background: var(--white);
-  border: calc(2px * var(--sy)) solid var(--blue-75);
-  border-radius: calc(24px * var(--sy));
-  padding: calc(26px * var(--sy)) calc(26px * var(--sx));
+  border: clamp(1.5px, calc(2px * var(--sy)), 2px) solid var(--blue-75);
+  border-radius: clamp(16px, calc(24px * var(--sy)), 24px);
+  padding: clamp(18px, calc(26px * var(--sy)), 26px) clamp(18px, calc(26px * var(--sx)), 26px);
   display: flex;
   flex-direction: column;
-  gap: calc(20px * var(--sy));
+  gap: clamp(14px, calc(20px * var(--sy)), 20px);
 }
 
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: calc(8px * var(--sy));
+  gap: clamp(6px, calc(8px * var(--sy)), 8px);
 }
 
 .label {
-  font-size: calc(12px * min(var(--sx), var(--sy)));
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 900;
   color: var(--ink-2);
   letter-spacing: calc(1.2px * var(--sx));
@@ -69,12 +75,12 @@
 }
 
 .input {
-  height: calc(56px * var(--sy));
-  border-radius: calc(20px * var(--sy));
-  border: calc(2px * var(--sy)) solid rgba(190, 219, 255, 0.5);
+  height: clamp(46px, calc(56px * var(--sy)), 56px);
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  border: clamp(1.5px, calc(2px * var(--sy)), 2px) solid rgba(190, 219, 255, 0.5);
   background: rgba(112, 166, 254, 0.15);
-  padding: 0 calc(20px * var(--sx));
-  font-size: calc(16px * min(var(--sx), var(--sy)));
+  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   color: var(--ink);
   outline: none;
 }
@@ -83,12 +89,12 @@
 .input:focus { border-color: var(--blue-75); }
 
 .gradBtn {
-  height: calc(56px * var(--sy));
+  height: clamp(46px, calc(56px * var(--sy)), 56px);
   background: var(--blue-100);
   color: var(--white);
-  font-size: calc(20px * min(var(--sx), var(--sy)));
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 700;
-  border-radius: calc(20px * var(--sy));
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
   box-shadow: var(--shadow-blue);
 }
 

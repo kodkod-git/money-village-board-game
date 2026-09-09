@@ -6,7 +6,22 @@
        --sx: 가로 방향 값(좌우 여백, 버튼/카드 너비, 가로 gap, letter-spacing)
        --sy: 세로 방향 값(버튼/블록 높이, 위아래 패딩·margin, 세로 gap)
        폰트 크기·정사각형 요소(아이콘)는 min(--sx, --sy) — 어느 한쪽이 더
-       좁아도 그 방향으로 넘치거나 잘리지 않게 더 작은 쪽을 따른다. */
+       좁아도 그 방향으로 넘치거나 잘리지 않게 더 작은 쪽을 따른다.
+
+     2026-09-09 수정: 실제 기기는 폰(폭 ~360~430px)부터 태블릿(834px, Figma
+     원본)까지 다양한데, sx/sy를 클램핑 없이 그대로 곱하면 폰 폭에서는 항상
+     834분의 실제폭(~0.43~0.5배) 근처로 눌려서 "화면이 커지든 작아지든 늘
+     고만고만하게 작게" 보이는 문제가 있었다(예: 부제 20px→8.6px, 카피라이트
+     12px→5px까지 눌림 — 사실상 화면 크기와 무관하게 항상 너무 작음).
+     그래서 폰트·아이콘·간격·버튼 크기처럼 가독성/터치 영역에 직접 영향을
+     주는 값은 전부 clamp(최소값, 비례값, Figma 원본값) 형태로 바꿨다:
+       - 위쪽 한도(=Figma 원본 px)는 그대로 두어 834×1194 근처(태블릿)에서는
+         Figma와 100% 동일하게 보이고,
+       - 아래쪽 한도(가독성 최소값)를 깔아 폰 폭에서도 절대 그 밑으로는
+         줄어들지 않게 하고,
+       - 그 사이는 min(--sx, --sy) 비율에 따라 유연하게 스케일된다.
+     즉 "완전 고정"도 "화면 비율 무시한 무한 축소"도 아니라, 화면 비율을
+     따라가되 최소 가독성은 보장하는 방식. */
   --sx: calc(100cqw / 834px);
   --sy: calc(100cqh / 1194px);
   min-height: 100%;
@@ -18,17 +33,17 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 0 calc(49px * var(--sx));
+  padding: 0 clamp(20px, calc(49px * var(--sx)), 49px);
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
 .topActions {
   position: absolute;
-  top: calc(24px * var(--sy));
-  right: calc(32px * var(--sx));
+  top: clamp(12px, calc(24px * var(--sy)), 24px);
+  right: clamp(16px, calc(32px * var(--sx)), 32px);
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx));
+  gap: clamp(6px, calc(8px * var(--sx)), 8px);
   z-index: 1;
 }
 
@@ -36,19 +51,19 @@
 .adminBtn {
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx));
-  height: calc(40px * var(--sy));
-  padding: 0 calc(14px * var(--sx));
+  gap: clamp(6px, calc(8px * var(--sx)), 8px);
+  height: clamp(34px, calc(40px * var(--sy)), 40px);
+  padding: 0 clamp(10px, calc(14px * var(--sx)), 14px);
   border-radius: var(--r-pill);
   background: var(--white);
-  font-size: calc(14px * min(var(--sx), var(--sy)));
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
   font-weight: 700;
   line-height: 1.27;
   white-space: nowrap;
 }
 
 .ghostBtn {
-  border: calc(1.5px * var(--sy)) solid var(--ink-2);
+  border: clamp(1px, calc(1.5px * var(--sy)), 1.5px) solid var(--ink-2);
   color: var(--ink-2);
 }
 
@@ -57,26 +72,26 @@
 }
 
 .adminBtn {
-  border: calc(1.5px * var(--sy)) solid var(--blue-75);
+  border: clamp(1px, calc(1.5px * var(--sy)), 1.5px) solid var(--blue-75);
   color: var(--blue-100);
 }
 
 .topActionIcon {
-  width: calc(20px * min(var(--sx), var(--sy)));
-  height: calc(20px * min(var(--sx), var(--sy)));
+  width: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
+  height: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
 }
 
 .center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: calc(48px * var(--sy));
+  margin-bottom: clamp(28px, calc(48px * var(--sy)), 48px);
 }
 
 .iconBox {
-  width: calc(156px * min(var(--sx), var(--sy)));
-  height: calc(156px * min(var(--sx), var(--sy)));
-  margin-bottom: calc(28px * var(--sy));
+  width: clamp(96px, calc(156px * min(var(--sx), var(--sy))), 156px);
+  height: clamp(96px, calc(156px * min(var(--sx), var(--sy))), 156px);
+  margin-bottom: clamp(16px, calc(28px * var(--sy)), 28px);
   border-radius: 31%;
   background: var(--blue-100);
   box-shadow: var(--shadow-blue);
@@ -91,16 +106,16 @@
 }
 
 .title {
-  font-size: calc(72px * min(var(--sx), var(--sy)));
+  font-size: clamp(34px, calc(72px * min(var(--sx), var(--sy))), 72px);
   font-weight: 900;
   color: var(--ink);
   letter-spacing: calc(-1.8px * var(--sx));
   line-height: 1;
-  margin-bottom: calc(12px * var(--sy));
+  margin-bottom: clamp(8px, calc(12px * var(--sy)), 12px);
 }
 
 .subtitle {
-  font-size: calc(20px * min(var(--sx), var(--sy)));
+  font-size: clamp(14px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 700;
   color: var(--ink-2);
   line-height: 1.4;
@@ -109,21 +124,21 @@
 .buttons {
   display: flex;
   flex-direction: column;
-  gap: calc(16px * var(--sy));
+  gap: clamp(10px, calc(16px * var(--sy)), 16px);
   width: 100%;
-  /* 버튼 묶음의 최대 가로폭은 min(sx,sy) — 가로 공간이 남아도 세로가 눌린
-     화면(예: 높이가 낮은 브라우저 창)에서는 세로 축을 따라 같이 좁아진다.
-     --sx만 따르면 세로는 압축됐는데 버튼만 Figma 풀사이즈로 넓게 남아
-     비율이 어색해진다. */
-  max-width: calc(384px * min(var(--sx), var(--sy)));
+  /* 버튼 묶음의 최대 가로폭은 min(sx,sy) 비례값을 따르되, 300px 밑으로는
+     내려가지 않게 한다 — 클램프 없이 그대로 두면 폰 폭에서 max-width 자체가
+     165px 근처까지 줄어들어(384px × ~0.43), width:100%인 버튼이 화면 폭을
+     다 못 쓰고 불필요하게 좁아 보이는 문제가 있었다. */
+  max-width: clamp(300px, calc(384px * min(var(--sx), var(--sy))), 384px);
 }
 
 .primaryBtn {
   background: var(--blue-100);
   color: var(--white);
-  border-radius: calc(20px * var(--sy));
-  height: calc(76px * var(--sy));
-  font-size: calc(26px * min(var(--sx), var(--sy)));
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  height: clamp(52px, calc(76px * var(--sy)), 76px);
+  font-size: clamp(16px, calc(26px * min(var(--sx), var(--sy))), 26px);
   font-weight: 800;
   line-height: 1.08;
   box-shadow: var(--shadow-blue);
@@ -132,10 +147,10 @@
 .secondaryBtn {
   background: var(--white);
   color: var(--blue-100);
-  border: calc(2px * var(--sy)) solid var(--blue-75);
-  border-radius: calc(20px * var(--sy));
-  height: calc(80px * var(--sy));
-  font-size: calc(26px * min(var(--sx), var(--sy)));
+  border: clamp(1.5px, calc(2px * var(--sy)), 2px) solid var(--blue-75);
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  height: clamp(54px, calc(80px * var(--sy)), 80px);
+  font-size: clamp(16px, calc(26px * min(var(--sx), var(--sy))), 26px);
   font-weight: 800;
   line-height: 1.08;
 }
@@ -144,15 +159,15 @@
   background: transparent;
   color: var(--ink-2);
   border: none;
-  height: 40px;
-  font-size: 14px;
+  height: clamp(32px, calc(40px * var(--sy)), 40px);
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
   font-weight: 700;
   text-decoration: underline;
 }
 
 .footer {
-  margin-top: calc(46px * var(--sy));
-  font-size: calc(12px * min(var(--sx), var(--sy)));
+  margin-top: clamp(20px, calc(46px * var(--sy)), 46px);
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 400;
   line-height: 1.33;
   color: var(--disabled);

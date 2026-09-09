@@ -1,5 +1,8 @@
 /* --sx/--sy는 RankingPage.module.css의 .page에서 정의되며, DOM을 통해
-   그대로 상속된다. */
+   그대로 상속된다.
+   2026-09-09: 다른 온보딩 화면들과 동일한 이유로 모든 값에
+   clamp(최소, 비례값, 원본값)을 적용했다 — 폰 폭에서 항상 절반 가까이
+   눌려 화면 크기와 무관하게 늘 작아 보이던 문제. */
 .container {
   width: 100%;
   flex: 1;
@@ -19,7 +22,7 @@
      계산돼버린다. 결과적으로 행 높이가 의도보다 훨씬 작게 나온다. */
   display: flex;
   flex-direction: column;
-  gap: calc(8px * var(--sy, 1));
+  gap: clamp(6px, calc(8px * var(--sy, 1)), 8px);
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -30,9 +33,10 @@
 
 /* 행 높이를 Figma 실측(72px)의 약 1.46배인 105px로 키운다 — "목록에 7~8줄
    정도 보이는 정도"로 요청받아, 이 페이지의 목록 뷰포트 높이 기준으로
-   역산한 값이다(고정 px가 아니라 지금처럼 계속 --sy로 스케일됨). 캐릭터
-   이미지·글자 크기도 같은 비율로 키워 행이 커진 만큼 내용도 맞춰 커지게
-   했다 — 높이만 키우고 내용은 그대로면 빈 여백만 늘어나 어색하다. */
+   역산한 값이다(고정 px가 아니라 지금처럼 계속 --sy로 스케일됨, 폰 폭에서도
+   너무 눌리지 않게 하한도 뒀다). 캐릭터 이미지·글자 크기도 같은 비율로
+   키워 행이 커진 만큼 내용도 맞춰 커지게 했다 — 높이만 키우고 내용은
+   그대로면 빈 여백만 늘어나 어색하다. */
 .row {
   /* flex-shrink:0 필수: .row에 명시적 height를 주고 나면, 행이 많아서
      (스크롤될 때는 정상) .list의 보이는 영역보다 총합이 커지는 순간 기본
@@ -42,13 +46,13 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx, 1));
+  gap: clamp(6px, calc(8px * var(--sx, 1)), 8px);
   background: var(--white);
   border: 2px solid #f7f7f7;
-  border-radius: calc(20px * min(var(--sx, 1), var(--sy, 1)));
+  border-radius: clamp(14px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   box-shadow: 0 2px 10px rgba(45, 123, 239, 0.07);
-  height: calc(105px * var(--sy, 1));
-  padding: 0 calc(22px * var(--sx, 1));
+  height: clamp(76px, calc(105px * var(--sy, 1)), 105px);
+  padding: 0 clamp(14px, calc(22px * var(--sx, 1)), 22px);
 }
 
 .rowTop3 {
@@ -57,15 +61,15 @@
 }
 
 .rank {
-  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(17px, calc(23px * min(var(--sx, 1), var(--sy, 1))), 23px);
   font-weight: 900;
   color: var(--ink-2);
-  min-width: calc(32px * var(--sx, 1));
+  min-width: clamp(24px, calc(32px * var(--sx, 1)), 32px);
 }
 
 .characterImg {
-  width: calc(58px * min(var(--sx, 1), var(--sy, 1)));
-  height: calc(58px * min(var(--sx, 1), var(--sy, 1)));
+  width: clamp(42px, calc(58px * min(var(--sx, 1), var(--sy, 1))), 58px);
+  height: clamp(42px, calc(58px * min(var(--sx, 1), var(--sy, 1))), 58px);
   object-fit: contain;
 }
 
@@ -77,19 +81,19 @@
 }
 
 .name {
-  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   font-weight: 700;
   color: var(--ink);
 }
 
 .sub {
-  font-size: calc(17px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(13px, calc(17px * min(var(--sx, 1), var(--sy, 1))), 17px);
   font-weight: 400;
   color: var(--disabled);
 }
 
 .value {
-  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   font-weight: 900;
   color: var(--ink-2);
   white-space: nowrap;
@@ -104,21 +108,21 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx, 1));
-  height: calc(105px * var(--sy, 1));
-  padding: 0 calc(22px * var(--sx, 1));
-  margin: calc(24px * var(--sy, 1)) 0 calc(24px * var(--sy, 1));
+  gap: clamp(6px, calc(8px * var(--sx, 1)), 8px);
+  height: clamp(76px, calc(105px * var(--sy, 1)), 105px);
+  padding: 0 clamp(14px, calc(22px * var(--sx, 1)), 22px);
+  margin: clamp(14px, calc(24px * var(--sy, 1)), 24px) 0 clamp(14px, calc(24px * var(--sy, 1)), 24px);
   background: var(--blue-100);
   border: 2px solid var(--blue-100);
-  border-radius: calc(20px * min(var(--sx, 1), var(--sy, 1)));
+  border-radius: clamp(14px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
   font-weight: 900;
   color: var(--white);
 }
 
 .pinnedRank {
-  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
-  min-width: calc(32px * var(--sx, 1));
+  font-size: clamp(17px, calc(23px * min(var(--sx, 1), var(--sy, 1))), 23px);
+  min-width: clamp(24px, calc(32px * var(--sx, 1)), 32px);
 }
 
 .pinnedInfo {
@@ -131,20 +135,20 @@
 .pinnedNameRow {
   display: flex;
   align-items: center;
-  gap: calc(8px * var(--sx, 1));
+  gap: clamp(6px, calc(8px * var(--sx, 1)), 8px);
 }
 
 .meBadge {
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: calc(4px * min(var(--sx, 1), var(--sy, 1)));
-  padding: calc(1px * var(--sy, 1)) calc(8px * var(--sx, 1));
-  font-size: calc(17px * min(var(--sx, 1), var(--sy, 1)));
+  border-radius: clamp(3px, calc(4px * min(var(--sx, 1), var(--sy, 1))), 4px);
+  padding: calc(1px * var(--sy, 1)) clamp(6px, calc(8px * var(--sx, 1)), 8px);
+  font-size: clamp(13px, calc(17px * min(var(--sx, 1), var(--sy, 1))), 17px);
   font-weight: 700;
 }
 
-.pinnedName { font-size: calc(22px * min(var(--sx, 1), var(--sy, 1))); }
-.pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: calc(17px * min(var(--sx, 1), var(--sy, 1))); font-weight: 400; }
-.pinnedAssets { font-size: calc(20px * min(var(--sx, 1), var(--sy, 1))); }
+.pinnedName { font-size: clamp(16px, calc(22px * min(var(--sx, 1), var(--sy, 1))), 22px); }
+.pinnedAffiliation { color: rgba(255, 255, 255, 0.7); font-size: clamp(13px, calc(17px * min(var(--sx, 1), var(--sy, 1))), 17px); font-weight: 400; }
+.pinnedAssets { font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px); }
 
 .pinnedRowEmpty {
   opacity: 0.85;
@@ -152,7 +156,7 @@
 }
 
 .pinnedRowEmptyLabel {
-  font-size: calc(20px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
   font-weight: 700;
   text-align: center;
   color: var(--white);

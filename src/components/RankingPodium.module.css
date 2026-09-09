@@ -5,15 +5,19 @@
    차지하는 만큼"의 크기가 되도록 요청받아, 실측 그대로는 헤더+탭 블록
    (176.8px)보다 작았던 시상대(153.8px)를 174.8/153.8·176.8/153.8 비율로
    키운 것 — 모든 치수(아바타·폭·글자·패딩·gap)에 동일한 배율을 적용해
-   비율 자체는 그대로 유지한다. */
+   비율 자체는 그대로 유지한다.
+
+   2026-09-09: 다른 온보딩 화면들과 동일한 이유로 모든 값에
+   clamp(최소, 비례값, 원본값)을 적용했다 — 폰 폭에서 항상 절반 가까이
+   눌려 화면 크기와 무관하게 늘 작아 보이던 문제. */
 .podium {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: calc(18px * var(--sx, 1));
+  gap: clamp(10px, calc(18px * var(--sx, 1)), 18px);
   /* .list(RankingTable)의 자체 gap(세로)과 합쳐 podium→목록 첫 줄 간격을
      만든다. */
-  margin-bottom: calc(16px * var(--sy, 1));
+  margin-bottom: clamp(10px, calc(16px * var(--sy, 1)), 16px);
   flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -27,19 +31,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(9px * min(var(--sx, 1), var(--sy, 1)));
-  flex: 0 0 calc(166px * min(var(--sx, 1), var(--sy, 1)));
-  max-width: calc(166px * min(var(--sx, 1), var(--sy, 1)));
+  gap: clamp(6px, calc(9px * min(var(--sx, 1), var(--sy, 1))), 9px);
+  flex: 0 0 clamp(120px, calc(166px * min(var(--sx, 1), var(--sy, 1))), 166px);
+  max-width: clamp(120px, calc(166px * min(var(--sx, 1), var(--sy, 1))), 166px);
 }
 
 .avatar {
-  width: calc(74px * min(var(--sx, 1), var(--sy, 1)));
-  height: calc(74px * min(var(--sx, 1), var(--sy, 1)));
+  width: clamp(52px, calc(74px * min(var(--sx, 1), var(--sy, 1))), 74px);
+  height: clamp(52px, calc(74px * min(var(--sx, 1), var(--sy, 1))), 74px);
   object-fit: contain;
 }
 
 .name {
-  font-size: calc(18px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(14px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
   font-weight: 900;
   color: var(--ink);
   white-space: nowrap;
@@ -52,23 +56,23 @@
   width: 100%;
   background: rgba(112, 166, 254, 0.15);
   border: 1px solid var(--blue-10);
-  border-radius: calc(23px * min(var(--sx, 1), var(--sy, 1))) calc(23px * min(var(--sx, 1), var(--sy, 1))) 0 0;
+  border-radius: clamp(16px, calc(23px * min(var(--sx, 1), var(--sy, 1))), 23px) clamp(16px, calc(23px * min(var(--sx, 1), var(--sy, 1))), 23px) 0 0;
   box-shadow: 0 2px 20px rgba(45, 123, 239, 0.07);
-  padding: calc(17px * var(--sy, 1)) calc(9px * var(--sx, 1));
+  padding: clamp(12px, calc(17px * var(--sy, 1)), 17px) clamp(6px, calc(9px * var(--sx, 1)), 9px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(7px * var(--sy, 1));
+  gap: clamp(5px, calc(7px * var(--sy, 1)), 7px);
 }
 
 .rank {
-  font-size: calc(23px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(17px, calc(23px * min(var(--sx, 1), var(--sy, 1))), 23px);
   font-weight: 900;
   color: var(--ink-2);
 }
 
 .value {
-  font-size: calc(14px * min(var(--sx, 1), var(--sy, 1)));
+  font-size: clamp(11px, calc(14px * min(var(--sx, 1), var(--sy, 1))), 14px);
   font-weight: 700;
   color: var(--ink-2);
   white-space: nowrap;
@@ -78,21 +82,21 @@
    2위 26px, 3위 17px, 1.15배 적용 후) — 그냥 "1위만 크게"가 아니라 세 값이
    전부 다르므로 순위별로 각각 지정한다. */
 .second .box {
-  padding-top: calc(26px * var(--sy, 1));
-  padding-bottom: calc(26px * var(--sy, 1));
+  padding-top: clamp(17px, calc(26px * var(--sy, 1)), 26px);
+  padding-bottom: clamp(17px, calc(26px * var(--sy, 1)), 26px);
 }
 
 .third .box {
-  padding-top: calc(17px * var(--sy, 1));
-  padding-bottom: calc(17px * var(--sy, 1));
+  padding-top: clamp(12px, calc(17px * var(--sy, 1)), 17px);
+  padding-bottom: clamp(12px, calc(17px * var(--sy, 1)), 17px);
 }
 
 .first .box {
   background: var(--blue-100);
   border-color: var(--blue-100);
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
-  padding-top: calc(49px * var(--sy, 1));
-  padding-bottom: calc(49px * var(--sy, 1));
+  padding-top: clamp(32px, calc(49px * var(--sy, 1)), 49px);
+  padding-bottom: clamp(32px, calc(49px * var(--sy, 1)), 49px);
 }
 
 .first .rank,

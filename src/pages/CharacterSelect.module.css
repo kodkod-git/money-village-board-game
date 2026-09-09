@@ -9,7 +9,11 @@
      (예전에 여기 있던 max-width:818px + margin-inline:auto는 #root가 데스크톱에서
      최대 1100px까지 넓어지던 시절의 임시 방편이었다. 이제 onboarding-mode의 #root
      자체가 834px에서 성장을 멈추므로 더 이상 필요 없고, 대신 Figma 그대로
-     좌우 32px 여백만 준다.) */
+     좌우 32px 여백만 준다.)
+
+     2026-09-09: Home과 동일한 이유로 모든 값에 clamp(최소, 비례값, Figma원본)을
+     적용했다 — 폰 폭에서 834분의 실제폭(~0.43~0.5배)으로 항상 눌려 화면 크기와
+     무관하게 늘 작아 보이던 문제. */
   --sx: calc(100cqw / 834px);
   --sy: calc(100cqh / 1194px);
   min-height: 100%;
@@ -17,39 +21,40 @@
   background: var(--gray-10);
   display: flex;
   flex-direction: column;
-  padding: 0 calc(32px * var(--sx));
+  padding: 0 clamp(16px, calc(32px * var(--sx)), 32px);
   overflow: hidden;
   position: relative;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
-/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트라 --sx/--sy를 타지 않고
-   항상 top:32px + height:28px(하단 60px)로 고정 렌더링된다. Figma 실측으로는
-   BackBtn 하단(y=81)과 헤더 상단(y=112)의 간격이 31px이므로, 그 간격을 실제
-   BackButton 하단(60px)에 그대로 더한 91px을 고정값(비스케일)으로 쓴다 —
-   스케일하면 화면이 작아질 때 고정 크기인 BackButton과 겹치게 된다. */
+/* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트로, 이제 BackButton
+   자신도 --sy에 비례해 top/height가 줄어든다(clamp 적용, BackButton.module.css
+   참고). Figma 실측으로는 BackBtn 하단(y=81)과 헤더 상단(y=112)의 간격이
+   31px이므로, BackButton의 top(32)+height(28)+간격(31)=91px을 그대로
+   --sy에 비례시키되, BackButton 쪽 하한(20+24=44px)보다 넉넉한 하한(55px)을
+   둬서 화면이 아무리 작아져도 헤더가 BackButton과 겹치지 않게 한다. */
 .header {
-  padding-top: 91px;
+  padding-top: clamp(55px, calc(91px * var(--sy)), 91px);
   flex-shrink: 0;
 }
 
 .title {
-  font-size: calc(30px * min(var(--sx), var(--sy)));
+  font-size: clamp(20px, calc(30px * min(var(--sx), var(--sy))), 30px);
   font-weight: 900;
   color: var(--ink);
 }
 
 .subtitle {
-  font-size: calc(15px * min(var(--sx), var(--sy)));
+  font-size: clamp(12px, calc(15px * min(var(--sx), var(--sy))), 15px);
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: calc(4px * var(--sy));
+  margin-top: clamp(3px, calc(4px * var(--sy)), 4px);
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--divider);
-  margin: calc(24px * var(--sy)) 0 0;
+  margin: clamp(14px, calc(24px * var(--sy)), 24px) 0 0;
   flex-shrink: 0;
 }
 
@@ -66,7 +71,7 @@
   /* 하단 padding을 두지 않는다: 그리드→버튼 간격은 .bottomBar의 margin-top
      (Figma 실측 24px) 하나로만 준다. 여기도 24px를 또 주면 간격이 두 배(48px)로
      겹쳐 더해져 버튼과 그리드 사이가 불필요하게 벌어진다. */
-  padding: calc(24px * var(--sy)) 0 0;
+  padding: clamp(14px, calc(24px * var(--sy)), 24px) 0 0;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -81,12 +86,15 @@
    있었는데, 예전엔 넓은 화면(≥620px)에서만 그랬고 그 이상에서는 Figma
    시안처럼 본문 컬럼 전체 너비로 펼치면서 카드가 Figma 실측 174.5px까지
    커지도록 했었다. 그런데 그 Figma 크기 자체가 "카드가 너무 크다"는 피드백을
-   받아, 화면 크기에 관계없이 항상 이 좁은-화면용 압축 규칙 하나로 통일했다. */
+   받아, 화면 크기에 관계없이 항상 이 좁은-화면용 압축 규칙 하나로 통일했다.
+   gap도 --space-sm(8px) 고정값 대신, 그리드 자신의 렌더링 크기(gridWrapper의
+   cqw/cqh)에 비례하게 바꿨다 — 카드가 작아지는데 칸 사이 간격만 그대로면
+   상대적으로 간격이 넓어 보인다. */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: var(--space-sm);
+  gap: clamp(4px, min(2cqw, 2cqh), 8px);
   width: min(100cqw, 100cqh);
   aspect-ratio: 1;
 }
@@ -95,17 +103,17 @@
   flex-shrink: 0;
   /* 버튼의 최대 가로폭은 min(sx,sy) — 세로가 눌린 화면에서 버튼만 Figma
      풀사이즈로 넓게 남아 비율이 어색해지는 걸 막는다. */
-  width: min(calc(374px * min(var(--sx), var(--sy))), calc(100% - 24px));
-  margin: calc(24px * var(--sy)) auto calc(24px * var(--sy));
+  width: min(clamp(260px, calc(374px * min(var(--sx), var(--sy))), 374px), calc(100% - 24px));
+  margin: clamp(14px, calc(24px * var(--sy)), 24px) auto clamp(14px, calc(24px * var(--sy)), 24px);
 }
 
 .ctaBtn {
   background: var(--blue-100);
   color: #ffffff;
-  font-size: calc(22px * min(var(--sx), var(--sy)));
+  font-size: clamp(17px, calc(22px * min(var(--sx), var(--sy))), 22px);
   font-weight: 700;
-  border-radius: calc(20px * var(--sy));
-  height: calc(68px * var(--sy));
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  height: clamp(52px, calc(68px * var(--sy)), 68px);
   width: 100%;
   box-shadow: var(--shadow-blue);
 }
