@@ -13,6 +13,7 @@ const CATEGORY_TABS = [
   { key: 'totalAssets', label: '총자산' },
   { key: 'stock', label: '주식' },
   { key: 'realEstate', label: '부동산' },
+  { key: 'netWorth', label: '순자산' },
 ]
 
 const SCOPE_TABS = [
@@ -21,7 +22,7 @@ const SCOPE_TABS = [
   { key: 'team', label: '팀' },
 ]
 
-const VALUE_KEYS = { totalAssets: 'totalAssets', stock: 'stockValue', realEstate: 'realEstateValue' }
+const VALUE_KEYS = { totalAssets: 'totalAssets', stock: 'stockValue', realEstate: 'realEstateValue', netWorth: 'netWorth' }
 
 export default function RankingPage() {
   useBodyClass('onboarding-mode')
@@ -68,6 +69,9 @@ export default function RankingPage() {
           const players = (data.players ?? [])
             .map(p => ({
               ...p,
+              // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
+              // 팀 스코프 응답엔 netWorth가 없으므로 여기서 계산한다.
+              netWorth: (p.cash ?? 0) + (p.stockValue ?? 0) + (p.realEstateValue ?? 0),
               stockPrices: data.stockPrices,
               realEstatePrices: data.realEstatePrices,
             }))

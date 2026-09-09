@@ -27,6 +27,11 @@ beforeEach(() => {
         { rank: 1, name: '한소희', className: '4반', teamCode: 'GH3456', character: 'toucan', realEstateValue: 90000, totalAssets: 250000, playerUuid: 'p2' },
       ]) })
     }
+    if (url === '/api/rankings?category=netWorth') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve([
+        { rank: 1, name: '순자산王', className: '2반', teamCode: 'NW0001', character: 'bear', netWorth: 123000, totalAssets: 90000, playerUuid: 'pnw' },
+      ]) })
+    }
     if (url === '/api/rankings?classId=class-1&category=stock') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
         { rank: 1, name: '유아인', className: '1반', teamCode: 'IJ3456', character: 'wolf', stockValue: 88000, totalAssets: 150000, playerUuid: 'p5' },
@@ -39,8 +44,8 @@ beforeEach(() => {
         className: '1반',
         // 서버는 항상 total_assets 내림차순으로만 정렬해 내려준다.
         players: [
-          { rank: 1, name: '홍길동', className: '1반', teamCode: 'AB1234', character: 'fox', totalAssets: 50000, stockValue: 12000, realEstateValue: 8000, playerUuid: 'p3' },
-          { rank: 2, name: '김철수', className: '1반', teamCode: 'AB1234', character: 'wolf', totalAssets: 30000, stockValue: 99000, realEstateValue: 1000, playerUuid: 'p9' },
+          { rank: 1, name: '홍길동', className: '1반', teamCode: 'AB1234', character: 'fox', cash: 0, totalAssets: 50000, stockValue: 12000, realEstateValue: 8000, playerUuid: 'p3' },
+          { rank: 2, name: '김철수', className: '1반', teamCode: 'AB1234', character: 'wolf', cash: 40000, totalAssets: 30000, stockValue: 99000, realEstateValue: 1000, playerUuid: 'p9' },
         ],
       }) })
     }
@@ -61,6 +66,7 @@ describe('RankingPage', () => {
     expect(screen.getByText('총자산')).toBeInTheDocument()
     expect(screen.getByText('주식')).toBeInTheDocument()
     expect(screen.getByText('부동산')).toBeInTheDocument()
+    expect(screen.getByText('순자산')).toBeInTheDocument()
     expect(screen.queryByText('전체')).toBeNull()
     expect(screen.queryByText('수업')).toBeNull()
     expect(screen.queryByText('팀')).toBeNull()
@@ -103,6 +109,35 @@ describe('RankingPage', () => {
       expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=realEstate')
     })
     expect(await screen.findByText('한소희')).toBeInTheDocument()
+  })
+
+  it('홈 진입에서 순자산 탭이 보이고 선택 시 /api/rankings?category=netWorth를 호출한다', async () => {
+    renderAt('/ranking')
+    await screen.findByText('김민준')
+    await userEvent.click(screen.getByText('순자산'))
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=netWorth')
+    })
+    expect(await screen.findByText('순자산王')).toBeInTheDocument()
+  })
+
+  it('팀 탭에서 순자산을 선택하면 현금+주식+부동산 합 기준으로 재정렬되고 등수도 다시 매겨진다', async () => {
+    renderAt('/result/session-1')
+    await waitFor(() => expect(screen.getByText('전체')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('팀'))
+    await userEvent.click(screen.getByText('순자산'))
+
+    // 홍길동 순자산 20,000 / 김철수 순자산 140,000 → 김철수 1위 (총자산 순서와 반대)
+    await waitFor(() => expect(screen.getByText('140,000원')).toBeInTheDocument())
+    const rows = [...document.querySelectorAll('[class*="row"]')]
+      .map(el => el.textContent)
+      .filter(t => t.includes('위'))
+    const kimIdx = rows.findIndex(t => t.includes('김철수'))
+    const hongIdx = rows.findIndex(t => t.includes('홍길동'))
+    expect(kimIdx).toBeGreaterThanOrEqual(0)
+    expect(kimIdx).toBeLessThan(hongIdx)
+    expect(rows[kimIdx]).toContain('1위')
+    expect(rows[hongIdx]).toContain('2위')
   })
 
   it('수업 탭을 선택하면 내 세션의 classId로 /api/rankings를 호출한다', async () => {
