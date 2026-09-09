@@ -230,6 +230,12 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
 
 const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
 
+// 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
+// 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
+function netWorthOf(r) {
+  return (Number(r.cash) || 0) + (Number(r.stock_value) || 0) + (Number(r.real_estate_value) || 0)
+}
+
 function mapRankingRow(r, i) {
   return {
     rank: i + 1,
@@ -244,6 +250,7 @@ function mapRankingRow(r, i) {
     totalAssets: Number(r.total_assets),
     stockValue: r.stock_value != null ? Number(r.stock_value) : null,
     realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
+    netWorth: netWorthOf(r),
     sessionId: r.session_id,
     playerUuid: r.player_uuid,
     teamCode: r.game_sessions?.team_code ?? '',
@@ -257,7 +264,10 @@ function mapRankingRow(r, i) {
 const RANKING_ORDER_COLUMN = { cash: 'cash', stock: 'stock_value', realEstate: 'real_estate_value' }
 
 export async function getRankings({ classId = null, category = null } = {}) {
-  const column = category ? RANKING_ORDER_COLUMN[category] : 'total_assets'
+  const isNetWorth = category === 'netWorth'
+  const column = isNetWorth
+    ? 'total_assets'
+    : category ? RANKING_ORDER_COLUMN[category] : 'total_assets'
   if (!column) throw new Error(`Unknown ranking category: ${category}`)
 
   let query = supabase
@@ -274,7 +284,13 @@ export async function getRankings({ classId = null, category = null } = {}) {
   const { data, error } = await query
   if (error) throw error
 
-  return data.map(mapRankingRow)
+  // 순자산(현금+주식+부동산, 성공카드 배수 미적용)에 해당하는 DB 컬럼이 없어
+  // total_assets 순으로 받은 뒤 JS에서 재정렬한다. 동점은 안정 정렬로 총자산 순.
+  const sorted = isNetWorth
+    ? [...data].sort((a, b) => netWorthOf(b) - netWorthOf(a))
+    : data
+
+  return sorted.map(mapRankingRow)
 }
 
 export async function updateSessionTitle(teamCode, title) {

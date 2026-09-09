@@ -230,6 +230,69 @@ describe('getRankings', () => {
     expect(builder.order).toHaveBeenCalledWith('real_estate_value', { ascending: false })
   })
 
+  it('category가 netWorth이면 현금+주식+부동산 값의 합으로 내림차순 정렬해 반환한다', async () => {
+    const rows = [
+      {
+        player_uuid: 'p1', name: 'A', affiliation: '', character: 'lion', job: 'a',
+        cash: 10000, stock_holdings: {}, real_estate_holdings: {},
+        badges: [true, true, true, true, true, true],
+        total_assets: 300000, stock_value: 5000, real_estate_value: 5000,
+        session_id: 's1',
+        game_sessions: { team_code: 'AB', title: null, stock_prices: {}, real_estate_prices: {}, class_id: null, classes: null },
+      },
+      {
+        player_uuid: 'p2', name: 'B', affiliation: '', character: 'fox', job: 'b',
+        cash: 90000, stock_holdings: {}, real_estate_holdings: {},
+        badges: [true, true, false, false, false, false],
+        total_assets: 100000, stock_value: 10000, real_estate_value: 20000,
+        session_id: 's2',
+        game_sessions: { team_code: 'CD', title: null, stock_prices: {}, real_estate_prices: {}, class_id: null, classes: null },
+      },
+    ]
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
+
+    const { getRankings } = await import('./db.js')
+    const result = await getRankings({ category: 'netWorth' })
+
+    // A 순자산 20,000 / B 순자산 120,000 → B가 1위 (총자산 순서와 반대)
+    expect(result.map(r => r.name)).toEqual(['B', 'A'])
+    expect(result.map(r => r.rank)).toEqual([1, 2])
+    expect(result[0].netWorth).toBe(120000)
+    expect(result[1].netWorth).toBe(20000)
+  })
+
+  it('category가 netWorth일 때 stock_value/real_estate_value가 null인 행은 0으로 취급한다', async () => {
+    const rows = [
+      {
+        player_uuid: 'p1', name: 'A', affiliation: '', character: 'lion', job: 'a',
+        cash: 5000, stock_holdings: {}, real_estate_holdings: {},
+        badges: [false, false, false, false, false, false],
+        total_assets: 0, stock_value: null, real_estate_value: null,
+        session_id: 's1',
+        game_sessions: { team_code: 'AB', title: null, stock_prices: {}, real_estate_prices: {}, class_id: null, classes: null },
+      },
+      {
+        player_uuid: 'p2', name: 'B', affiliation: '', character: 'fox', job: 'b',
+        cash: 1000, stock_holdings: {}, real_estate_holdings: {},
+        badges: [false, false, false, false, false, false],
+        total_assets: 0, stock_value: 2000, real_estate_value: 500,
+        session_id: 's2',
+        game_sessions: { team_code: 'CD', title: null, stock_prices: {}, real_estate_prices: {}, class_id: null, classes: null },
+      },
+    ]
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: rows, error: null }))
+
+    const { getRankings } = await import('./db.js')
+    const result = await getRankings({ category: 'netWorth' })
+
+    // A 순자산 5,000 / B 순자산 3,500 → A가 1위
+    expect(result.map(r => r.name)).toEqual(['A', 'B'])
+    expect(result[0].netWorth).toBe(5000)
+    expect(result[1].netWorth).toBe(3500)
+  })
+
   it('알 수 없는 category는 에러를 던진다', async () => {
     const { getRankings } = await import('./db.js')
     await expect(getRankings({ category: 'unknown' })).rejects.toThrow('Unknown ranking category: unknown')
@@ -296,6 +359,7 @@ describe('getRankings', () => {
       realEstateHoldings: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
       badges: [true, true, false, false, false, false],
       totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
+      netWorth: 24000,
       sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234', teamName: 'TEAM 1', className: '1반',
       stockPrices: PRICES.stocks, realEstatePrices: PRICES.realEstate,
     }])
