@@ -1,5 +1,10 @@
 .receipt {
-  flex: 0 0 clamp(240px, 24vw, 300px);
+  /* 패널 폭을 팀원 수(최대 4명)로 나눠 채우되, 좁으면 240px에서 멈추고
+     스트립이 가로 스크롤된다(넓으면 300px로 상한). 뷰포트 기준(vw)이 아니라
+     남는 공간 기준이라 넓은 화면에서도 4장이 패널 안에 들어온다. */
+  flex: 1 1 0;
+  min-width: 240px;
+  max-width: 300px;
   align-self: flex-start;
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
