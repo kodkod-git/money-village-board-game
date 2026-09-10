@@ -1,19 +1,24 @@
+/* IndividualPage(부동산/주식 화면)에서만 쓰이는 컴포넌트지만, 다른 재사용
+   컴포넌트와 동일하게 var(--sx, 1)/var(--sy, 1) 기본값을 둬서 onboarding-mode
+   조상 없이 쓰이더라도 Figma 원본 크기로 안전하게 표시되게 한다. */
 .stepper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--blue-10);
-  border-radius: var(--r-md);
-  height: 52px;
-  padding: 9px 13px;
+  border: clamp(0.7px, calc(1px * min(var(--sx, 1), var(--sy, 1))), 1px) solid var(--blue-10);
+  border-radius: clamp(14px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
+  height: clamp(38px, calc(52px * var(--sy, 1)), 52px);
+  padding: clamp(6px, calc(9px * var(--sy, 1)), 9px) clamp(9px, calc(13px * var(--sx, 1)), 13px);
 }
 
 .minusBtn,
 .plusBtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  font-size: 18px;
+  width: clamp(24px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
+  height: clamp(24px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
+  /* 고정 16px 대신 50%로 바꿔, 버튼 크기가 반응형으로 줄어들어도 항상
+     정확한 원형을 유지한다(두 숫자를 따로 맞춰줄 필요가 없어짐). */
+  border-radius: 50%;
+  font-size: clamp(13px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
   font-weight: 700;
   line-height: 1;
   flex-shrink: 0;
@@ -21,7 +26,7 @@
 
 .minusBtn {
   background: var(--white);
-  border: 1px solid var(--blue-10);
+  border: clamp(0.7px, calc(1px * min(var(--sx, 1), var(--sy, 1))), 1px) solid var(--blue-10);
   color: var(--ink-2);
 }
 
@@ -45,13 +50,13 @@
 }
 
 .countValue {
-  font-size: 26px;
+  font-size: clamp(18px, calc(26px * min(var(--sx, 1), var(--sy, 1))), 26px);
   font-weight: 800;
   color: var(--ink);
 }
 
 .countEmpty {
-  font-size: 26px;
+  font-size: clamp(18px, calc(26px * min(var(--sx, 1), var(--sy, 1))), 26px);
   font-weight: 800;
   color: var(--disabled);
 }

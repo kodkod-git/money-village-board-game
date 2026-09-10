@@ -8,6 +8,7 @@ import AssetListEditor from '../components/AssetListEditor'
 import NumberInputModal from '../components/NumberInputModal'
 import AlertModal from '../components/AlertModal'
 import { useSocketContext } from '../contexts/SocketContext'
+import useBodyClass from '../hooks/useBodyClass'
 import {
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
   STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
@@ -39,6 +40,7 @@ function computeCompletedUpTo(gameState) {
 }
 
 export default function IndividualPage() {
+  useBodyClass('onboarding-mode')
   const { code } = useParams()
   const navigate = useNavigate()
   const { socket } = useSocketContext()

@@ -1,7 +1,12 @@
+/* IndividualPage(직업 선택 화면)에서만 쓰이는 컴포넌트지만, 다른 재사용
+   컴포넌트와 동일하게 var(--sx, 1)/var(--sy, 1) 기본값을 둬서 onboarding-mode
+   조상 없이 쓰이더라도 Figma 원본 크기로 안전하게 표시되게 한다.
+   --cell 계산식(gridFill)은 이미 컨테이너 자신의 cqw/cqh에 맞춰 스스로
+   축소되는 자체-반응형 수식이라 손대지 않는다. */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-lg);
+  gap: clamp(10px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
 }
 
 @media (min-width: 768px) {
@@ -28,7 +33,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: none;
     width: 100%;
-    gap: var(--space-2xl);
+    gap: clamp(14px, calc(24px * min(var(--sx, 1), var(--sy, 1))), 24px);
   }
 
   .gridFill .tile {
@@ -38,16 +43,16 @@
 
 .tile {
   background: var(--white);
-  border-radius: var(--r-sm);
-  border: 2px solid var(--blue-10);
-  padding: var(--space-xl) var(--space-md);
+  border-radius: clamp(10px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+  border: clamp(1.5px, calc(2px * min(var(--sx, 1), var(--sy, 1))), 2px) solid var(--blue-10);
+  padding: clamp(12px, calc(20px * var(--sy, 1)), 20px) clamp(8px, calc(12px * var(--sx, 1)), 12px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-md);
+  gap: clamp(8px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px);
   cursor: pointer;
-  min-height: 100px;
+  min-height: clamp(64px, calc(100px * var(--sy, 1)), 100px);
   min-width: 0;
   position: relative;
 }
@@ -58,14 +63,14 @@
 }
 
 .icon {
-  width: 56px;
-  height: 56px;
+  width: clamp(38px, calc(56px * min(var(--sx, 1), var(--sy, 1))), 56px);
+  height: clamp(38px, calc(56px * min(var(--sx, 1), var(--sy, 1))), 56px);
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .label {
-  font-size: 18px;
+  font-size: clamp(13px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
   font-weight: 700;
   color: var(--ink);
   line-height: 1.3;

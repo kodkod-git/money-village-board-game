@@ -1,23 +1,26 @@
+/* IndividualPage(부동산/주식 화면)에서만 쓰이는 컴포넌트지만, 다른 재사용
+   컴포넌트와 동일하게 var(--sx, 1)/var(--sy, 1) 기본값을 둬서 onboarding-mode
+   조상 없이 쓰이더라도 Figma 원본 크기로 안전하게 표시되게 한다. */
 .card {
   background: var(--white);
-  border: 2px solid var(--blue-10);
-  border-radius: var(--r-sm);
-  padding: var(--space-lg);
+  border: clamp(1.5px, calc(2px * min(var(--sx, 1), var(--sy, 1))), 2px) solid var(--blue-10);
+  border-radius: clamp(10px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
+  padding: clamp(10px, calc(16px * min(var(--sx, 1), var(--sy, 1))), 16px);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: clamp(8px, calc(12px * var(--sy, 1)), 12px);
   min-width: 0;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: clamp(6px, calc(8px * var(--sx, 1)), 8px);
 }
 
 .img {
-  width: 32px;
-  height: 32px;
+  width: clamp(24px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
+  height: clamp(24px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -29,7 +32,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: clamp(11px, calc(13px * min(var(--sx, 1), var(--sy, 1))), 13px);
   font-weight: 700;
   line-height: 1.3;
   min-height: 2.6em;
@@ -38,7 +41,7 @@
 }
 
 .price {
-  font-size: 12px;
+  font-size: clamp(10px, calc(12px * min(var(--sx, 1), var(--sy, 1))), 12px);
   font-weight: 400;
   color: var(--ink-2);
 }

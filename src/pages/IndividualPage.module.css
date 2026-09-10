@@ -1,13 +1,22 @@
 .page {
+  /* Figma 프레임(834×1194) 대비 #root의 가로/세로 비율을 각각 독립적으로 잰다.
+     --sx: 가로 방향 값(좌우 여백, 카드 너비, 가로 gap) / --sy: 세로 방향 값
+     (헤더/버튼 높이, 위아래 패딩·margin, 세로 gap) / 폰트 크기는 min(--sx, --sy).
+     (예전에 여기 있던 max-width:818px + margin-inline:auto는 #root가 데스크톱에서
+     최대 1100px까지 넓어지던 시절의 임시 방편이었다. 이제 onboarding-mode의 #root
+     자체가 834px에서 성장을 멈추므로 더 이상 필요 없다.)
+
+     2026-09-09: 다른 온보딩 화면들과 동일한 이유로 모든 값에
+     clamp(최소, 비례값, Figma원본)을 적용했다 — 폰 폭에서 834분의
+     실제폭(~0.43~0.5배)으로 항상 눌려 화면 크기와 무관하게 늘 작아 보이던
+     문제. 좌우 여백도 Figma 실측(StepBar 프레임 x=32, width=770/834)에 맞춰
+     기존 24px(--space-2xl)에서 32px(--space-3xl)로 보정했다. */
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
   min-height: 100%;
   height: 100%;
-  /* 넓은 폭에서 본문을 Figma 시안의 ~770px 컬럼으로 묶어 가운데 정렬한다.
-     모바일에선 #root가 이보다 좁아 영향 없음. CharacterSelect와 동일. */
-  width: 100%;
-  max-width: 818px;
-  margin-inline: auto;
   background: var(--gray-10);
-  padding: var(--space-3xl) 0;
+  padding: 0 0 clamp(20px, calc(32px * var(--sy)), 32px);
   position: relative;
   overflow-y: auto;
   scrollbar-width: none;
@@ -27,12 +36,14 @@
 .divider {
   border: none;
   border-top: 1px solid var(--blue-10);
-  margin: var(--space-lg) var(--space-2xl) 0;
+  /* Figma 실측: StepBar 하단(y=135) → Divider 상단(y=159) 간격 24px. */
+  margin: clamp(16px, calc(24px * var(--sy)), 24px) clamp(16px, calc(32px * var(--sx)), 32px) 0;
   flex-shrink: 0;
 }
 
 .stepContent {
-  padding: 28px var(--space-2xl) 0;
+  /* Figma 실측: Divider 하단(y=160) → header Container 상단(y=184) 간격 24px. */
+  padding: clamp(16px, calc(24px * var(--sy)), 24px) clamp(16px, calc(32px * var(--sx)), 32px) 0;
   flex: 1 0 auto;
 }
 
@@ -44,18 +55,20 @@
 }
 
 .stepTitle {
-  font-size: 28px;
+  /* Figma "Heading 2" 컨벤션(다른 온보딩 화면과 동일) — header Container h62 중
+     title 영역 h36과 정확히 일치(30px * line-height 1.2 = 36px). */
+  font-size: clamp(20px, calc(30px * min(var(--sx), var(--sy))), 30px);
   font-weight: 900;
   color: var(--ink);
   flex-shrink: 0;
 }
 
 .stepSubtitle {
-  font-size: 15px;
+  font-size: clamp(12px, calc(15px * min(var(--sx), var(--sy))), 15px);
   font-weight: 700;
   color: var(--ink-2);
-  margin-top: var(--space-2xs);
-  margin-bottom: var(--space-2xl);
+  margin-top: clamp(1px, calc(2px * var(--sy)), 2px);
+  margin-bottom: clamp(16px, calc(24px * var(--sy)), 24px);
   flex-shrink: 0;
 }
 
@@ -75,7 +88,7 @@
   justify-content: safe center;
   overflow-y: auto;
   scrollbar-width: none;
-  padding-bottom: var(--space-2xl);
+  padding-bottom: clamp(16px, calc(24px * var(--sy)), 24px);
 }
 
 .fillWrapper::-webkit-scrollbar {
@@ -86,7 +99,7 @@
   position: static;
   display: flex;
   justify-content: flex-end;
-  padding: var(--space-2xl) var(--space-2xl) 0;
+  padding: clamp(16px, calc(24px * var(--sy)), 24px) clamp(16px, calc(32px * var(--sx)), 32px) 0;
   margin-top: auto;
   flex-shrink: 0;
 }
@@ -94,11 +107,12 @@
 .nextBtn {
   background: var(--blue-100);
   color: #ffffff;
-  font-size: 18px;
+  /* Figma "Btn next" 인스턴스 실측: 174×68 (기존 167×58에서 보정). */
+  font-size: clamp(15px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 700;
-  border-radius: var(--r-sm);
-  height: 58px;
-  width: 167px;
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  height: clamp(48px, calc(68px * var(--sy)), 68px);
+  width: clamp(130px, calc(174px * var(--sx)), 174px);
   box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
 }
 
@@ -107,8 +121,8 @@
 .assetList {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-md);
-  padding-bottom: var(--space-2xl);
+  gap: clamp(8px, calc(12px * min(var(--sx), var(--sy))), 12px);
+  padding-bottom: clamp(16px, calc(24px * var(--sy)), 24px);
 }
 
 @media (min-width: 768px) {
@@ -139,26 +153,27 @@
 @container (min-width: 540px) {
   .assetListFill {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-2xl);
+    gap: clamp(14px, calc(24px * min(var(--sx), var(--sy))), 24px);
   }
 }
 
 .cashCard {
   background: var(--white);
-  border: 2px solid var(--blue-75);
-  border-radius: var(--r-lg);
-  padding: var(--space-2xl);
+  border: clamp(1.5px, calc(2px * min(var(--sx), var(--sy))), 2px) solid var(--blue-75);
+  /* Figma "GlassCard" 실측: 373×208, padding 26px 균등. */
+  border-radius: clamp(16px, calc(24px * min(var(--sx), var(--sy))), 24px);
+  padding: clamp(18px, calc(26px * min(var(--sx), var(--sy))), 26px);
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: clamp(6px, calc(8px * var(--sy)), 8px);
   width: 100%;
   min-width: 280px;
-  max-width: 420px;
+  max-width: clamp(280px, calc(373px * var(--sx)), 373px);
   margin: 0 auto;
 }
 
 .cashLabel {
-  font-size: 12px;
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 900;
   color: var(--ink-2);
   letter-spacing: 1.2px;
@@ -166,22 +181,22 @@
 }
 
 .cashInputBtn {
-  height: 56px;
-  border-radius: var(--r-sm);
-  border: 2px solid var(--blue-50);
-  padding: 0 var(--space-xl);
+  height: clamp(44px, calc(56px * var(--sy)), 56px);
+  border-radius: clamp(12px, calc(16px * min(var(--sx), var(--sy))), 16px);
+  border: clamp(1.5px, calc(2px * min(var(--sx), var(--sy))), 2px) solid var(--blue-50);
+  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
   text-align: left;
   background: var(--blue-15);
 }
 
 .cashPlaceholder {
-  font-size: 16px;
+  font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 400;
   color: var(--disabled);
 }
 
 .cashValue {
-  font-size: 20px;
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 900;
   color: var(--ink);
 }
@@ -198,17 +213,17 @@
 
 .popup {
   background: var(--white);
-  border-radius: var(--r-lg);
-  padding: var(--space-3xl);
-  width: min(320px, calc(100% - 28px));
+  border-radius: clamp(16px, calc(24px * min(var(--sx), var(--sy))), 24px);
+  padding: clamp(20px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  width: min(clamp(260px, calc(320px * min(var(--sx), var(--sy))), 320px), calc(100% - 28px));
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: clamp(14px, calc(20px * min(var(--sx), var(--sy))), 20px);
   box-shadow: var(--shadow-card);
 }
 
 .popupTitle {
-  font-size: 20px;
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 900;
   color: var(--ink);
   text-align: center;
@@ -216,32 +231,32 @@
 
 .popupActions {
   display: flex;
-  gap: var(--space-md);
+  gap: clamp(8px, calc(12px * min(var(--sx), var(--sy))), 12px);
 }
 
 .cancelBtn {
   flex: 1;
-  height: 48px;
-  border-radius: var(--r-sm);
+  height: clamp(40px, calc(48px * min(var(--sx), var(--sy))), 48px);
+  border-radius: clamp(12px, calc(16px * min(var(--sx), var(--sy))), 16px);
   background: var(--slot-empty);
   color: var(--ink-2);
-  font-size: 16px;
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
   border: 1px solid var(--line);
 }
 
 .confirmBtn {
   flex: 1;
-  height: 48px;
-  border-radius: var(--r-sm);
+  height: clamp(40px, calc(48px * min(var(--sx), var(--sy))), 48px);
+  border-radius: clamp(12px, calc(16px * min(var(--sx), var(--sy))), 16px);
   background: var(--blue-100);
   color: #ffffff;
-  font-size: 16px;
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
 }
 
 .confirmText {
-  font-size: 15px;
+  font-size: clamp(13px, calc(15px * min(var(--sx), var(--sy))), 15px);
   color: var(--ink-2);
   text-align: center;
   line-height: 1.6;
