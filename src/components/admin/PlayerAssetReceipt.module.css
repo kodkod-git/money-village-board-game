@@ -1,0 +1,66 @@
+.receipt {
+  flex: 0 0 clamp(240px, 24vw, 300px);
+  align-self: flex-start;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header { display: flex; align-items: center; gap: 10px; }
+
+.avatar { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+
+.identity { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.name { font-size: 15px; font-weight: 700; color: var(--admin-text); }
+
+.jobSub { font-size: 12px; font-weight: 400; color: var(--admin-text-2); }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--admin-icon-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-md);
+  padding: 10px 12px;
+}
+
+.fieldLabel { font-size: 11px; font-weight: 400; color: var(--admin-disabled); }
+
+.fieldValue { font-size: 15px; font-weight: 700; color: var(--admin-text); }
+
+.cashValue { font-size: 18px; font-weight: 800; color: var(--admin-text); }
+
+.jobValueRow { display: inline-flex; align-items: center; gap: 8px; }
+
+.jobIcon { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+
+.chipRow { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  background: var(--admin-blue-tint);
+  border: 1px solid var(--admin-blue-faint);
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2d7bef;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  border-top: 2px solid var(--admin-blue-faint);
+  padding-top: 10px;
+}
+
+.footerLabel { font-size: 12px; font-weight: 700; color: var(--admin-disabled); }
+
+.footerValue { font-size: 18px; font-weight: 900; color: var(--admin-text); }
