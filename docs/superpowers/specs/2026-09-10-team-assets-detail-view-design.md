@@ -47,8 +47,10 @@
 **신규**
 
 - `src/components/admin/AdminTeamAssetsModal.jsx` + `.module.css`
-  - 전체 화면 오버레이. `createPortal(document.body)`로 렌더 — 부모 `.popup`(AdminDashboard.module.css)의
-    `width: min(820px, 94vw)` + `overflow: hidden` 제약을 벗어나기 위함.
+  - 전체 화면 오버레이. `ConfirmDialog`와 동일하게 `position: fixed; inset: 0` 오버레이를 인라인으로
+    렌더한다(포털 불필요). `position: fixed`는 조상의 `overflow: hidden`(부모 `.popup`)에 클리핑되지
+    않으므로 820px 제약을 벗어난다 — `ConfirmDialog`가 이미 같은 위치에서 이 방식으로 전체 화면에
+    표시된다. `--admin-*` 토큰은 조상 `body.admin-mode`에서 상속되므로 별도 `.admin-theme` 래핑 불필요.
   - 구조: 오버레이 배경 → 패널(`width: min(1200px, 96vw); max-height: 92vh`) →
     헤더(`{room.title ?? `${index+1}팀`} · 팀원 자산 상세`, 닫기 ✕) →
     가로 스트립(`display:flex; gap; align-items:flex-start`, 카드 적으면 `justify-content:center`,
