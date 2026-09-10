@@ -1,0 +1,30 @@
+.assetList { display: flex; flex-direction: column; }
+
+.assetRow {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.assetRow:last-child { border-bottom: none; }
+
+.assetIcon { width: 20px; height: 20px; object-fit: contain; }
+
+.assetName {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.assetAmount {
+  font-size: 14px;
+  font-weight: 800;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.emptyAsset { font-size: 14px; font-weight: 700; color: var(--admin-disabled); }

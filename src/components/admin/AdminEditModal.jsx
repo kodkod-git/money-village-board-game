@@ -11,33 +11,7 @@ import CashEditModal from './CashEditModal'
 import RealEstateEditModal from './RealEstateEditModal'
 import StockEditModal from './StockEditModal'
 import styles from './AdminEditModal.module.css'
-
-function AssetSummaryList({ labels, images, values, folder, unit, testIdPrefix }) {
-  const holdings = Object.keys(labels).filter(key => Number(values?.[key] ?? 0) > 0)
-
-  if (holdings.length === 0) {
-    return <span className={styles.emptyAsset}>미보유</span>
-  }
-
-  return (
-    <div className={styles.assetList}>
-      {holdings.map(key => {
-        const amount = Number(values[key] ?? 0)
-        return (
-          <div key={key} className={styles.assetRow} data-testid={`${testIdPrefix}-${key}`}>
-            <img
-              src={`/badges/${folder}/${images[key]}.png`}
-              alt={labels[key]}
-              className={styles.assetIcon}
-            />
-            <span className={styles.assetName}>{labels[key]}</span>
-            <span className={styles.assetAmount}>{amount}{unit}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
+import AdminAssetSummary from './AdminAssetSummary'
 
 export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false }) {
   const [editingField, setEditingField] = useState(null)
@@ -123,7 +97,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                   <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
                 )}
               </div>
-              <AssetSummaryList
+              <AdminAssetSummary
                 labels={REAL_ESTATE_LABELS}
                 images={ESTATE_IMAGES}
                 values={gameState.realEstate}
@@ -142,7 +116,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                   <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
                 )}
               </div>
-              <AssetSummaryList
+              <AdminAssetSummary
                 labels={STOCK_LABELS}
                 images={STOCK_IMAGES}
                 values={gameState.stocks}
