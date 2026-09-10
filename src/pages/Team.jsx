@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import PlayerSlot from '../components/PlayerSlot'
 import QRModal from '../components/QRModal'
@@ -15,6 +15,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const { code: routeCode } = useParams()
   const code = readOnly ? mockRoom.code : routeCode
   const navigate = useNavigate()
+  const location = useLocation()
   const { socket } = useSocketContext()
   const [players, setPlayers] = useState(readOnly ? mockRoom.players : [])
   const [roomFetched, setRoomFetched] = useState(readOnly)
@@ -128,10 +129,28 @@ export default function Team({ readOnly = false, mockRoom = null }) {
     navigate(`/lobby?${params}`)
   }
 
+  // 뒤로가기(방 나가기)는 온보딩 순서(홈 → 팀 코드 입력 → 이름 입력 → 캐릭터
+  // 선택 → 팀 화면)에서 한 단계 앞인 캐릭터 선택으로 돌아간다. 예전엔 로비로
+  // 보냈는데, 로비의 "팀 참여" 화면 뒤로가기가 다시 팀 화면으로 오면서 무한
+  // 루프가 생겼다. 히스토리가 남아 있으면 그대로 pop 해서 이후 뒤로가기가
+  // 이름 입력 → 팀 코드 입력 → 홈으로 이어지게 하고, 새로고침 등으로 히스토리가
+  // 없으면(첫 진입 key === 'default') 저장된 프로필로 캐릭터 선택을 새로 연다.
+  function goBackToCharacterSelect() {
+    if (location.key !== 'default') {
+      navigate(-1)
+      return
+    }
+    const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
+    const params = new URLSearchParams({ name: stored?.name ?? '' })
+    if (stored?.affiliation) params.set('affiliation', stored.affiliation)
+    if (stored?.classId) params.set('classId', stored.classId)
+    navigate(`/select?${params}`, { replace: true })
+  }
+
   function handleConfirmLeave() {
     socket?.emit('leave-room')
     setShowLeaveConfirm(false)
-    goToLobby()
+    goBackToCharacterSelect()
   }
 
   function handlePriceConfirm(newPrices) {

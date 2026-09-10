@@ -31,10 +31,10 @@ import { io } from 'socket.io-client'
 import { SocketProvider } from '../contexts/SocketContext'
 import Team from './Team'
 
-function renderTeam() {
+function renderTeam({ initialEntries = ['/team/ABC123'], initialIndex } = {}) {
   return render(
     <SocketProvider>
-      <MemoryRouter initialEntries={['/team/ABC123']}>
+      <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
         <Routes><Route path="/team/:code" element={<Team />} /></Routes>
       </MemoryRouter>
     </SocketProvider>
@@ -163,7 +163,7 @@ describe('Team', () => {
     expect(socket.emit).not.toHaveBeenCalledWith('leave-room')
   })
 
-  it('확인 팝업에서 나가기를 누르면 leave-room을 emit하고 저장된 프로필로 로비로 이동한다', () => {
+  it('확인 팝업에서 나가기를 누르면 leave-room을 emit하고 캐릭터 선택 화면으로 돌아간다', () => {
     sessionStorage.setItem('player_profile', JSON.stringify({
       code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: true, classId: 'class-1',
     }))
@@ -173,9 +173,25 @@ describe('Team', () => {
 
     const socket = io()
     expect(socket.emit).toHaveBeenCalledWith('leave-room')
-    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
+    // 히스토리가 없는(단독 마운트) 경우 저장된 프로필로 캐릭터 선택을 새로 연다.
+    expect(mockNavigate).toHaveBeenCalledWith(
+      expect.stringContaining('/select?'),
+      { replace: true },
+    )
     const [calledWith] = mockNavigate.mock.calls.at(-1)
+    expect(calledWith).toContain('name=%EC%B2%A0%EC%88%98')
     expect(calledWith).toContain('classId=class-1')
+    // 팀 화면으로도, 로비로도 돌아가지 않는다(무한 루프 방지).
+    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/lobby'))
+    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/team/'))
+  })
+
+  it('브라우저 히스토리가 있으면 나가기 시 뒤로가기(pop)로 캐릭터 선택으로 돌아간다', () => {
+    renderTeam({ initialEntries: ['/select?name=철수', '/team/ABC123'], initialIndex: 1 })
+    fireEvent.click(screen.getByRole('button', { name: '뒤로 가기' }))
+    fireEvent.click(screen.getByText('나가기'))
+
+    expect(mockNavigate).toHaveBeenCalledWith(-1)
   })
 
   it('방장이 나가서 방이 삭제되면 alert 없이 안내 모달을 띄우고, 확인 시 로비로 이동한다', async () => {

@@ -106,7 +106,7 @@ describe('Lobby (team grid)', () => {
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
     fireEvent.click(await screen.findByText('영희님의 방'))
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/A3F9C1'))
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/A3F9C1', { replace: true }))
   })
 
   it('참여에 실패하면 alert 없이 토스트로 서버 메시지를 안내한다', async () => {
@@ -134,7 +134,7 @@ describe('Lobby (team grid)', () => {
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
     fireEvent.click(screen.getByText('방 만들기'))
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/NEW001'))
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/NEW001', { replace: true }))
   })
 
   it('이미 참여했던 방을 다시 클릭하면 기존 playerUuid를 재사용한다(중복 참가 방지)', async () => {
@@ -220,6 +220,13 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
     expect(screen.queryByText('방 만들기')).toBeNull()
   })
 
+  it('코드 입력(팀 참여) 화면은 다른 온보딩 화면과 같은 onboarding-mode 프레임을 쓴다', () => {
+    const { unmount } = renderLobby('/lobby?name=철수&character=c1')
+    expect(document.body.classList.contains('onboarding-mode')).toBe(true)
+    unmount()
+    expect(document.body.classList.contains('onboarding-mode')).toBe(false)
+  })
+
   it('classId가 없으면 팀 목록을 조회하지 않는다', () => {
     renderLobby('/lobby?name=철수&character=c1')
     expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/rooms?classId'))
@@ -240,7 +247,7 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
       expect.objectContaining({ code: 'ABC123', name: '철수', character: 'c1', isHost: false }),
       expect.any(Function)
     )
-    expect(mockNavigate).toHaveBeenCalledWith('/team/ABC123')
+    expect(mockNavigate).toHaveBeenCalledWith('/team/ABC123', { replace: true })
   })
 
   it('코드를 입력하고 팀 참여하기를 누르면 join-room을 emit하고 팀 화면으로 이동한다', () => {
@@ -256,7 +263,7 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
       expect.objectContaining({ code: 'ZZ9999', name: '철수', character: 'c1', isHost: false }),
       expect.any(Function)
     )
-    expect(mockNavigate).toHaveBeenCalledWith('/team/ZZ9999')
+    expect(mockNavigate).toHaveBeenCalledWith('/team/ZZ9999', { replace: true })
   })
 
   it('코드를 입력하지 않으면 팀 참여하기 버튼이 비활성화된다', () => {

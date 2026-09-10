@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import CodeModal from '../components/CodeModal'
 import RoomCard from '../components/RoomCard'
 import { useSocketContext } from '../contexts/SocketContext'
+import useBodyClass from '../hooks/useBodyClass'
 import { toast } from '../utils/toast'
 import { resetPlayerUuid } from '../utils/playerUuid'
 import styles from './Lobby.module.css'
@@ -23,6 +24,12 @@ export default function Lobby() {
   const character = searchParams.get('character') ?? ''
   const initialCode = searchParams.get('code') ?? ''
   const [codeInput, setCodeInput] = useState(initialCode.toUpperCase())
+
+  // 코드로만 참여하는 "팀 참여" 화면은 다른 온보딩 화면(홈·이름 입력·캐릭터
+  // 선택·팀 화면)과 같은 #root 프레임(container-type: size)을 써야 NameInput
+  // 스타일의 cqw/cqh 스케일(--sx/--sy)이 정상 계산된다. classId 그리드(로비)
+  // 뷰는 기존 레이아웃을 그대로 둔다.
+  useBodyClass(classId ? null : 'onboarding-mode')
 
   const loadRooms = useCallback(() => {
     if (!classId) return
@@ -70,7 +77,11 @@ export default function Lobby() {
     socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
       if (ok) {
         sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost, classId }))
-        navigate(`/team/${code}`)
+        // 로비는 참여 과정의 임시 단계다 — 히스토리에 남겨두면 팀 화면에서
+        // 뒤로가기 시 로비로 돌아와 자동 재참여되며 루프가 생긴다. replace로
+        // 치워서 뒤로가기가 캐릭터 선택 → 이름 입력 → 팀 코드 입력 → 홈으로
+        // 곧장 이어지게 한다.
+        navigate(`/team/${code}`, { replace: true })
       } else {
         setIsJoining(false)
         toast(error || '팀에 참여하지 못했어요')
