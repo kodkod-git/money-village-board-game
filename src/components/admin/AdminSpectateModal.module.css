@@ -94,7 +94,8 @@
 
 .registerBtn,
 .deleteBtn,
-.priceBtn {
+.priceBtn,
+.detailBtn {
   height: 45px;
   padding: 0 24px;
   border-radius: 14px;
@@ -114,4 +115,6 @@
 .deleteBtn { background: var(--admin-surface); color: #ef4444; border: 1px solid #fca5a5; }
 
 .priceBtn { background: var(--admin-surface); color: var(--admin-text); border: 1px solid var(--admin-border); }
+
+.detailBtn { background: var(--admin-blue-soft); color: var(--admin-blue); border: 1px solid var(--admin-blue-faint); }
 

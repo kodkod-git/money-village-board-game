@@ -3,6 +3,7 @@ import AdminPlayerCard from './AdminPlayerCard'
 import AdminEditModal from './AdminEditModal'
 import AdminPriceSettingModal from './AdminPriceSettingModal'
 import ConfirmDialog from './ConfirmDialog'
+import AdminTeamAssetsModal from './AdminTeamAssetsModal'
 import { adminFetch } from '../../utils/adminAuth'
 import styles from './AdminSpectateModal.module.css'
 
@@ -18,6 +19,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [kickTarget, setKickTarget] = useState(null)
   const [confirmRegister, setConfirmRegister] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
@@ -192,6 +194,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             )}
           </div>
         )}
+        <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
         <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
       </div>
 
@@ -231,6 +234,15 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           prices={room.prices}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}
+        />
+      )}
+
+      {showDetail && (
+        <AdminTeamAssetsModal
+          room={room}
+          prices={room.prices}
+          teamLabel={room.title ?? `${index + 1}팀`}
+          onClose={() => setShowDetail(false)}
         />
       )}
     </div>

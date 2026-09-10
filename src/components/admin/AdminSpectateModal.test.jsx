@@ -365,3 +365,27 @@ describe('팀원 퇴장', () => {
     expect(screen.queryByText('퇴장')).toBeNull()
   })
 })
+
+describe('자세히 보기', () => {
+  it('라이브 룸(미등록)에 자세히 보기 버튼을 보여준다', () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    expect(screen.getByText('자세히 보기')).toBeInTheDocument()
+  })
+
+  it('등록 완료된 팀에도 자세히 보기 버튼을 보여준다', () => {
+    const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    expect(screen.getByText('자세히 보기')).toBeInTheDocument()
+  })
+
+  it('자세히 보기 클릭 시 팀원 자산 상세 모달을 열고, 닫으면 팀 현황으로 돌아온다', async () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    await userEvent.click(screen.getByText('자세히 보기'))
+    expect(screen.getByText('1팀 · 팀원 자산 상세')).toBeInTheDocument()
+    expect(screen.getByTestId('asset-receipt-AB1234-p1')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: '자세히 보기 닫기' }))
+    expect(screen.queryByText('1팀 · 팀원 자산 상세')).not.toBeInTheDocument()
+    expect(screen.getByText('1팀')).toBeInTheDocument()
+  })
+})
