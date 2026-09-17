@@ -2,6 +2,9 @@ import { supabase } from './supabase.js'
 import { UNASSIGNED_CLASS } from './classes.js'
 import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../src/constants/gameData.js'
 
+// src/utils/calculateAssets.js는 이 공식의 브라우저 번들용 사본이다(이 파일은 Supabase
+// 서버 클라이언트를 로드하므로 클라이언트에서 직접 import할 수 없다). 아래 공식을 바꾸면
+// 그 파일의 calculateAssetBreakdown도 반드시 함께 수정할 것.
 function badgeMultiplier(badgeCount) {
   if (badgeCount >= 6) return 2
   if (badgeCount === 5) return 1.5
