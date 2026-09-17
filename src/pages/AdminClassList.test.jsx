@@ -109,4 +109,18 @@ describe('AdminClassList', () => {
     expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
     expect(global.fetch).not.toHaveBeenCalled()
   })
+
+  it('빈 이름으로 수업 생성하기를 누르면 경고 팝업을 보여주고 API를 호출하지 않는다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('3학년 2반')
+    global.fetch.mockClear()
+
+    await userEvent.click(screen.getByText('수업 생성하기'))
+
+    expect(screen.getByText('수업 이름을 입력해주세요')).toBeInTheDocument()
+    expect(global.fetch).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByText('확인'))
+    expect(screen.queryByText('수업 이름을 입력해주세요')).not.toBeInTheDocument()
+  })
 })

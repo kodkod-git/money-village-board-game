@@ -14,6 +14,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [error, setError] = useState('')
   const [qrClass, setQrClass] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [showEmptyNameWarning, setShowEmptyNameWarning] = useState(false)
 
   const loadClasses = useCallback(() => {
     adminFetch('/api/admin/classes')
@@ -28,7 +29,10 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
 
   async function handleCreateClass(e) {
     e.preventDefault()
-    if (!newClassName.trim()) return
+    if (!newClassName.trim()) {
+      setShowEmptyNameWarning(true)
+      return
+    }
     setError('')
     const res = await adminFetch('/api/admin/classes', {
       method: 'POST',
@@ -98,6 +102,18 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
           description={<>'{deleteTarget.name}' 수업을 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleConfirmDelete}
+        />
+      )}
+
+      {showEmptyNameWarning && (
+        <ConfirmDialog
+          tone="primary"
+          title="알림"
+          description="수업 이름을 입력해주세요"
+          confirmLabel="확인"
+          hideCancel
+          onCancel={() => setShowEmptyNameWarning(false)}
+          onConfirm={() => setShowEmptyNameWarning(false)}
         />
       )}
     </div>
