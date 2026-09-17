@@ -21,7 +21,10 @@ export async function createClass(name, adminId) {
 
 export async function listClassesForAdmin(admin) {
   if (admin.isSuper) {
-    const { data, error } = await supabase.from('classes').select('id, name, created_at').order('name')
+    const { data, error } = await supabase
+      .from('classes')
+      .select('id, name, created_at')
+      .order('created_at', { ascending: false })
     if (error) throw error
     return [
       ...data.map(cls => ({ id: cls.id, name: cls.name, createdAt: cls.created_at })),
@@ -34,7 +37,9 @@ export async function listClassesForAdmin(admin) {
     .select('classes(id, name, created_at)')
     .eq('admin_id', admin.adminId)
   if (error) throw error
-  return data.map(row => ({ id: row.classes.id, name: row.classes.name, createdAt: row.classes.created_at }))
+  return data
+    .map(row => ({ id: row.classes.id, name: row.classes.name, createdAt: row.classes.created_at }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 }
 
 export async function hasClassAccess(admin, classId) {
