@@ -1,18 +1,27 @@
 import { supabase } from './supabase.js'
 import { UNASSIGNED_CLASS } from './classes.js'
+import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../src/constants/gameData.js'
+
+function badgeMultiplier(badgeCount) {
+  if (badgeCount >= 6) return 2
+  if (badgeCount === 5) return 1.5
+  if (badgeCount === 4) return 1.2
+  if (badgeCount === 3) return 1.1
+  return 1
+}
 
 export function calculateAssetBreakdown(gameState, prices) {
   const { cash, stocks, realEstate, badges } = gameState
   const badgeCount = badges.filter(Boolean).length
 
-  const stockValue = Object.keys(stocks).reduce(
-    (sum, key) => sum + stocks[key] * (prices.stocks[key] ?? 0), 0
+  const stockValue = Object.keys(STOCK_LABELS).reduce(
+    (sum, key) => sum + (stocks[key] ?? 0) * (prices.stocks[key] ?? 0), 0
   )
-  const realEstateValue = Object.keys(realEstate).reduce(
-    (sum, key) => sum + realEstate[key] * (prices.realEstate[key] ?? 0), 0
+  const realEstateValue = Object.keys(REAL_ESTATE_LABELS).reduce(
+    (sum, key) => sum + (realEstate[key] ?? 0) * (prices.realEstate[key] ?? 0), 0
   )
   const baseAssets = (cash ?? 0) + stockValue + realEstateValue
-  const totalAssets = baseAssets * (badgeCount * 0.5)
+  const totalAssets = Math.round(baseAssets * badgeMultiplier(badgeCount))
 
   return { cash: cash ?? 0, stockValue, realEstateValue, totalAssets }
 }

@@ -37,24 +37,29 @@ function makeState(overrides = {}) {
 }
 
 describe('calculateAssetBreakdown', () => {
-  it('뱃지 0개이면 총자산은 0원이다', () => {
+  it('뱃지 0~2개면 base × 1.0을 총자산으로 반환한다', () => {
     const state = makeState({ cash: 100000 })
-    expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(0)
-  })
-
-  it('뱃지 2개이면 base × 1.0을 총자산으로 반환한다', () => {
-    const state = makeState({ cash: 100000, badges: [true, true, false, false, false, false] })
     expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(100000)
   })
 
-  it('뱃지 3개이면 base × 1.5를 총자산으로 반환한다', () => {
+  it('뱃지 3개면 base × 1.1을 총자산으로 반환한다', () => {
     const state = makeState({ cash: 100000, badges: [true, true, true, false, false, false] })
+    expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(110000)
+  })
+
+  it('뱃지 4개면 base × 1.2를 총자산으로 반환한다', () => {
+    const state = makeState({ cash: 100000, badges: [true, true, true, true, false, false] })
+    expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(120000)
+  })
+
+  it('뱃지 5개면 base × 1.5를 총자산으로 반환한다', () => {
+    const state = makeState({ cash: 100000, badges: [true, true, true, true, true, false] })
     expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(150000)
   })
 
-  it('뱃지 6개이면 base × 3.0을 총자산으로 반환한다', () => {
+  it('뱃지 6개면 base × 2.0을 총자산으로 반환한다', () => {
     const state = makeState({ cash: 100000, badges: [true, true, true, true, true, true] })
-    expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(300000)
+    expect(calculateAssetBreakdown(state, PRICES).totalAssets).toBe(200000)
   })
 
   it('주식 보유량 × 가격을 stockValue로 반환하고 총자산에도 포함한다', () => {
@@ -91,14 +96,34 @@ describe('calculateAssetBreakdown', () => {
     expect(result.totalAssets).toBe(70000)
   })
 
-  it('stockValue와 realEstateValue에는 뱃지 배수가 적용되지 않는다', () => {
+  it('삭제된 주식 종목(industrial/auto/content) 보유량은 stockValue/총자산에서 제외한다', () => {
+    const state = makeState({
+      stocks: { semiconductor: 0, finance: 0, industrial: 10, auto: 10, bio: 0, content: 10 },
+      badges: [true, true, false, false, false, false],
+    })
+    const result = calculateAssetBreakdown(state, PRICES)
+    expect(result.stockValue).toBe(0)
+    expect(result.totalAssets).toBe(0)
+  })
+
+  it('삭제된 부동산 종목(nuri/maru/hani) 보유량은 realEstateValue/총자산에서 제외한다', () => {
+    const state = makeState({
+      realEstate: { gaon: 0, nuri: 5, dami: 0, maru: 5, chorong: 0, hani: 5 },
+      badges: [true, true, false, false, false, false],
+    })
+    const result = calculateAssetBreakdown(state, PRICES)
+    expect(result.realEstateValue).toBe(0)
+    expect(result.totalAssets).toBe(0)
+  })
+
+  it('stockValue와 realEstateValue에는 뱃지 배수가 적용되지 않는다(배수는 base 전체에 적용)', () => {
     const state = makeState({
       stocks: { semiconductor: 10, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
       badges: [false, false, false, false, false, false],
     })
     const result = calculateAssetBreakdown(state, PRICES)
     expect(result.stockValue).toBe(20000)
-    expect(result.totalAssets).toBe(0)
+    expect(result.totalAssets).toBe(20000)
   })
 })
 
