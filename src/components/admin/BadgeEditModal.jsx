@@ -39,7 +39,7 @@ export default function BadgeEditModal({ badges, onChange, onClose }) {
                   className={`${styles.pickerTile} ${selected[i] ? styles.pickerTileSelected : ''}`}
                   onClick={() => toggle(i)}
                 >
-                  <img src={`/badges/${name}.png`} alt={BADGE_LABELS[name]} className={styles.pickerIcon} />
+                  <img src={`/badges/success/Property 1=${BADGE_LABELS[name]}.png`} alt={BADGE_LABELS[name]} className={styles.pickerIcon} />
                   <span className={styles.pickerLabel}>{BADGE_LABELS[name]}</span>
                 </button>
               )

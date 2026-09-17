@@ -1,6 +1,6 @@
 import { calculateAssetBreakdown } from '../../utils/calculateAssets'
 import {
-  JOB_LABELS, BADGE_NAMES,
+  JOB_LABELS, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
   STOCK_LABELS, STOCK_IMAGES,
 } from '../../constants/gameData'
@@ -44,7 +44,7 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
         <div className={styles.iconRow}>
           {earnedBadges.map(name => (
             <span key={name} className={styles.badgeCircle}>
-              <img src={`/badges/${name}.png`} alt={name} className={styles.badgeIcon} />
+              <img src={`/badges/success/Property 1=${BADGE_LABELS[name]}.png`} alt={BADGE_LABELS[name]} className={styles.badgeIcon} />
             </span>
           ))}
         </div>
