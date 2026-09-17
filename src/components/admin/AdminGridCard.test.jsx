@@ -117,14 +117,14 @@ describe('AdminGridCard', () => {
     it('주식 탭을 누르면 주식 가격 목록으로 바뀐다', async () => {
       render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
       await userEvent.click(screen.getByText('주식'))
-      expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+      expect(screen.getByText('반도체')).toBeInTheDocument()
       expect(screen.getAllByText('2,000원').length).toBeGreaterThan(0)
     })
 
     it('부동산 탭을 누르면 부동산 가격 목록으로 바뀐다', async () => {
       render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
       await userEvent.click(screen.getByText('부동산'))
-      expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+      expect(screen.getByText('단독주택')).toBeInTheDocument()
       expect(screen.getAllByText('10,000원').length).toBeGreaterThan(0)
     })
 
@@ -132,7 +132,7 @@ describe('AdminGridCard', () => {
       const onSpectate = vi.fn()
       render(<AdminGridCard room={makeRoom()} onSpectate={onSpectate} />)
       await userEvent.click(screen.getByText('주식'))
-      await userEvent.click(screen.getByText('반도체 IT'))
+      await userEvent.click(screen.getByText('반도체'))
       expect(onSpectate).not.toHaveBeenCalled()
       expect(screen.getByText('가격 설정')).toBeInTheDocument()
     })
@@ -140,10 +140,10 @@ describe('AdminGridCard', () => {
     it('부동산 탭에서 카드를 클릭하면 부동산 카테고리가 선택된 가격 설정 팝업이 열린다', async () => {
       render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
       await userEvent.click(screen.getByText('부동산'))
-      await userEvent.click(screen.getAllByText('공동 가온개미')[0])
+      await userEvent.click(screen.getAllByText('단독주택')[0])
       expect(screen.getByText('가격 설정')).toBeInTheDocument()
-      expect(screen.getAllByRole('button', { name: /10,000 원/ }).length).toBe(6)
-      expect(screen.queryByText('반도체 IT')).not.toBeInTheDocument()
+      expect(screen.getAllByRole('button', { name: /10,000 원/ }).length).toBe(3)
+      expect(screen.queryByText('반도체')).not.toBeInTheDocument()
     })
 
     it('가격 설정 팝업에서 확인하면 PATCH 요청을 보내고 onRoomChanged를 호출한다', async () => {
@@ -152,7 +152,7 @@ describe('AdminGridCard', () => {
       render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} onRoomChanged={onRoomChanged} />)
 
       await userEvent.click(screen.getByText('주식'))
-      await userEvent.click(screen.getByText('반도체 IT'))
+      await userEvent.click(screen.getByText('반도체'))
       await userEvent.click(screen.getByText('확인하기'))
 
       expect(global.fetch).toHaveBeenCalledWith(

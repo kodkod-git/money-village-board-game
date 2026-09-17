@@ -308,7 +308,7 @@ it('가격 설정 버튼 클릭 시 모달이 열리고, 확인하면 PATCH 요�
 
   render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
   await userEvent.click(screen.getByText('가격 설정'))
-  expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+  expect(screen.getByText('반도체')).toBeInTheDocument()
   await userEvent.click(screen.getByText('확인하기'))
 
   expect(global.fetch).toHaveBeenCalledWith(

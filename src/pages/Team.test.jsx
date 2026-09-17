@@ -237,14 +237,14 @@ describe('Team price setting modal', () => {
   it('가격 설정 버튼을 누르면 팝업이 열리고 기본으로 주식 목록이 보인다', async () => {
     renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
-    expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+    expect(screen.getByText('반도체')).toBeInTheDocument()
   })
 
   it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
     renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
     await userEvent.click(screen.getByText('부동산'))
-    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+    expect(screen.getByText('단독주택')).toBeInTheDocument()
   })
 
   it('방장이 아닌 팀원이 가격을 바꿔도 update-room-prices를 emit한다', async () => {
@@ -255,7 +255,7 @@ describe('Team price setting modal', () => {
     renderTeam()
     await userEvent.click(screen.getByText('가격 설정'))
     await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
-    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '반도체' })).toBeInTheDocument()
 
     for (let i = 0; i < 4; i++) {
       await userEvent.click(screen.getByRole('button', { name: '←' }))

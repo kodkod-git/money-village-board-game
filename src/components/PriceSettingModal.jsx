@@ -1,39 +1,17 @@
 import { useState } from 'react'
 import NumberInputModal from './NumberInputModal'
-import { MAX_ASSET_PRICE } from '../constants/gameData'
+import {
+  MAX_ASSET_PRICE,
+  STOCK_LABELS, STOCK_IMAGES,
+  REAL_ESTATE_LABELS, ESTATE_IMAGES as REAL_ESTATE_IMAGES,
+} from '../constants/gameData'
 import styles from './PriceSettingModal.module.css'
 
-export const STOCK_LABELS = {
-  semiconductor: '반도체 IT',
-  finance: '금융',
-  industrial: '산업재·기계',
-  auto: '소재·화학',
-  bio: '바이오·헬스케어',
-  content: '콘텐츠·소비재',
-}
-
-export const REAL_ESTATE_LABELS = {
-  gaon: '공동 가온개미',
-  nuri: '공동 누리고양이',
-  dami: '다세대 다미원숭이',
-  maru: '다세대 마루수리',
-  chorong: '아파트 초롱부엉이',
-  hani: '아파트 하니여우',
-}
+export { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES }
 
 export const DEFAULT_PRICES = {
-  stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
-  realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
-}
-
-export const STOCK_IMAGES = {
-  semiconductor: '반도체IT', finance: '금융산업', industrial: '산업재기계',
-  auto: '소재화학', bio: '바이오헬스케어', content: '콘텐츠소비재',
-}
-
-export const REAL_ESTATE_IMAGES = {
-  gaon: '가온개미', nuri: '누리고양이', dami: '다미원숭이',
-  maru: '마루수리', chorong: '초롱부엉이', hani: '하니여우',
+  stocks: { semiconductor: 2000, finance: 2000, bio: 2000 },
+  realEstate: { gaon: 10000, dami: 10000, chorong: 10000 },
 }
 
 export default function PriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks' }) {

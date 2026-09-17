@@ -11,20 +11,20 @@ const PRICES = {
 describe('AdminPriceSettingModal', () => {
   it('기본으로 주식 목록이 보인다', () => {
     render(<AdminPriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={vi.fn()} />)
-    expect(screen.getByText('반도체 IT')).toBeInTheDocument()
+    expect(screen.getByText('반도체')).toBeInTheDocument()
   })
 
   it('부동산 탭을 누르면 부동산 목록으로 바뀐다', async () => {
     render(<AdminPriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={vi.fn()} />)
     await userEvent.click(screen.getByText('부동산'))
-    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+    expect(screen.getByText('단독주택')).toBeInTheDocument()
   })
 
   it('가격 pill을 누르면 숫자 입력 팝업이 열리고, 확인하면 onConfirm에 갱신된 가격이 전달된다', async () => {
     const onConfirm = vi.fn()
     render(<AdminPriceSettingModal prices={PRICES} onConfirm={onConfirm} onClose={vi.fn()} />)
     await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
-    expect(screen.getByRole('heading', { name: '반도체 IT' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '반도체' })).toBeInTheDocument()
 
     for (let i = 0; i < 4; i++) {
       await userEvent.click(screen.getByRole('button', { name: '←' }))
@@ -50,7 +50,7 @@ describe('AdminPriceSettingModal', () => {
 
   it('initialCategory가 realEstate이면 부동산 목록을 먼저 보여준다', () => {
     render(<AdminPriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={vi.fn()} initialCategory="realEstate" />)
-    expect(screen.getByText('공동 가온개미')).toBeInTheDocument()
+    expect(screen.getByText('단독주택')).toBeInTheDocument()
   })
 
   it('뒤로 버튼을 누르면 onClose가 호출된다', async () => {
