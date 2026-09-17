@@ -38,4 +38,19 @@ describe('ConfirmDialog', () => {
     await userEvent.click(container.firstChild)
     expect(onCancel).toHaveBeenCalled()
   })
+
+  it('hideCancel이 true이면 취소 버튼을 숨긴다', () => {
+    render(
+      <ConfirmDialog
+        title="알림"
+        description="수업 이름을 입력해주세요"
+        confirmLabel="확인"
+        hideCancel
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+      />
+    )
+    expect(screen.queryByText('아니요')).not.toBeInTheDocument()
+    expect(screen.getByText('확인')).toBeInTheDocument()
+  })
 })

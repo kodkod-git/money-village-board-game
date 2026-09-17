@@ -19,6 +19,7 @@ export default function ConfirmDialog({
   description,
   cancelLabel = '아니요',
   confirmLabel = '예',
+  hideCancel = false,
   onCancel,
   onConfirm,
 }) {
@@ -33,7 +34,9 @@ export default function ConfirmDialog({
           <p className={styles.description}>{description}</p>
         </div>
         <div className={styles.actions}>
-          <button type="button" className={styles.cancelBtn} onClick={onCancel}>{cancelLabel}</button>
+          {!hideCancel && (
+            <button type="button" className={styles.cancelBtn} onClick={onCancel}>{cancelLabel}</button>
+          )}
           <button
             type="button"
             className={`${styles.confirmBtn} ${tone === 'danger' ? styles.confirmBtnDanger : styles.confirmBtnPrimary}`}
