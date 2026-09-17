@@ -6,7 +6,7 @@ import BadgePicker from './BadgePicker'
 const NONE = [false, false, false, false, false, false]
 
 describe('BadgePicker', () => {
-  it('6개의 성공카드 타일을 렌더링한다', () => {
+  it('6개의 성공열쇠 타일을 렌더링한다', () => {
     render(<BadgePicker badges={NONE} onToggle={vi.fn()} />)
     expect(screen.getByText('행운')).toBeInTheDocument()
     expect(screen.getByText('은행')).toBeInTheDocument()

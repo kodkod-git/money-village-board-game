@@ -69,7 +69,7 @@ export default function RankingPage() {
           const players = (data.players ?? [])
             .map(p => ({
               ...p,
-              // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
+              // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공열쇠 배수 미적용).
               // 팀 스코프 응답엔 netWorth가 없으므로 여기서 계산한다.
               netWorth: (p.cash ?? 0) + (p.stockValue ?? 0) + (p.realEstateValue ?? 0),
               stockPrices: data.stockPrices,

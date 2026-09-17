@@ -63,7 +63,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           <div className={styles.card}>
             <div className={styles.field}>
               <div className={styles.fieldHeader}>
-                <span className={styles.fieldLabel}>성공카드</span>
+                <span className={styles.fieldLabel}>성공열쇠</span>
                 {!readOnly && (
                   <button type="button" data-testid="edit-badges" className={styles.editBtn} onClick={() => setEditingField('badges')}>수정</button>
                 )}

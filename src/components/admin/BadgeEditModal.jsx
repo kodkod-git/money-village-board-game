@@ -23,8 +23,8 @@ export default function BadgeEditModal({ badges, onChange, onClose }) {
       <div className={styles.sheet} onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.headerText}>
-            <span className={styles.title}>성공카드 수정</span>
-            <span className={styles.subtitle}>획득한 성공카드를 수정해 주세요</span>
+            <span className={styles.title}>성공열쇠 수정</span>
+            <span className={styles.subtitle}>획득한 성공열쇠를 수정해 주세요</span>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
         </div>

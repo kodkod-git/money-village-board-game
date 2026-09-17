@@ -130,7 +130,7 @@ describe('IndividualPage', () => {
     await screen.findByText('직업 선택')
     await userEvent.click(screen.getByText('경영·금융'))
     await userEvent.click(screen.getByText('다음'))
-    expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '성공열쇠' })).toBeInTheDocument()
   })
 
   it('직업을 선택하지 않아도 "다음"이 활성화되어 있고, 눌러서 진행할 수 있다 (무직)', async () => {
@@ -139,14 +139,14 @@ describe('IndividualPage', () => {
     const next = screen.getByText('다음')
     expect(next).not.toBeDisabled()
     await userEvent.click(next)
-    expect(await screen.findByRole('heading', { name: '성공카드' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '성공열쇠' })).toBeInTheDocument()
   })
 
   it('직업 미선택으로 "다음"을 누르면 jobVisited: true, job: null을 emit한다', async () => {
     renderPage()
     await screen.findByText('직업 선택')
     await userEvent.click(screen.getByText('다음'))
-    await screen.findByRole('heading', { name: '성공카드' })
+    await screen.findByRole('heading', { name: '성공열쇠' })
 
     const socket = io()
     const emitted = socket.emit.mock.calls
@@ -198,7 +198,7 @@ describe('IndividualPage', () => {
     renderPage()
     await screen.findByText('직업 선택')
     expect(screen.getByText('현금').closest('button')).toBeDisabled()
-    expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
+    expect(screen.getByText('성공열쇠').closest('button')).toBeDisabled()
   })
 
   it('무직(job:null, jobVisited:true)으로 재입장하면 직업 단계가 완료로 표시된다', async () => {
@@ -211,15 +211,15 @@ describe('IndividualPage', () => {
     renderPage()
     await screen.findByText('직업 선택')
     expect(screen.getByText('직업').closest('button')).not.toBeDisabled()
-    expect(screen.getByText('성공카드').closest('button')).toBeDisabled()
+    expect(screen.getByText('성공열쇠').closest('button')).toBeDisabled()
   })
 
-  it('값 변경 없이 "다음"만 눌러 성공카드 단계를 지나가도 badgesVisited가 저장된다', async () => {
+  it('값 변경 없이 "다음"만 눌러 성공열쇠 단계를 지나가도 badgesVisited가 저장된다', async () => {
     renderPage()
     await screen.findByText('직업 선택')
     await userEvent.click(screen.getByText('경영·금융'))
     await userEvent.click(screen.getByText('다음'))
-    await screen.findByRole('heading', { name: '성공카드' })
+    await screen.findByRole('heading', { name: '성공열쇠' })
     await userEvent.click(screen.getByText('다음'))
     await screen.findByRole('heading', { name: '주식' })
 

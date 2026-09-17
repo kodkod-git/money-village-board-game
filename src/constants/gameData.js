@@ -17,14 +17,14 @@ export const BADGE_LABELS = {
   idea: '직업', money: '노동',
   thinking: '주식', trust: '은행',
 }
-// Figma 디자인(성공카드 수정 화면)과 동일한 표시 순서.
-export const BADGE_DISPLAY_ORDER = ['money', 'communication', 'global', 'idea', 'thinking', 'trust']
+// 성공열쇠 선택/수정 화면: 노동·직업·은행 / 주식·부동산·행운.
+export const BADGE_DISPLAY_ORDER = ['money', 'idea', 'trust', 'thinking', 'global', 'communication']
 
 export const REAL_ESTATE_LABELS = {
   gaon: '단독주택', dami: '빌라', chorong: '아파트',
 }
 export const ESTATE_IMAGES = {
-  gaon: '가온개미', dami: '다미원숭이', chorong: '초롱부엉이',
+  gaon: 'Property 1=주택', dami: 'Property 1=빌라', chorong: 'Property 1=아파트',
 }
 export const ESTATE_PRICES = {
   gaon: '2만원', dami: '7만원', chorong: '10만원',

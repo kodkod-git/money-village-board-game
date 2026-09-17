@@ -14,7 +14,7 @@ describe('gameData constants', () => {
     expect(Object.keys(JOB_IMAGES)).toEqual(keys)
   })
 
-  it('성공카드는 6개이며 이름과 라벨 키가 일치한다', () => {
+  it('성공열쇠는 6개이며 이름과 라벨 키가 일치한다', () => {
     expect(BADGE_NAMES).toHaveLength(6)
     expect(Object.keys(BADGE_LABELS)).toEqual(BADGE_NAMES)
   })

@@ -40,7 +40,7 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
       </div>
 
       <div className={styles.section}>
-        <span className={styles.sectionLabel}>성공카드</span>
+        <span className={styles.sectionLabel}>성공열쇠</span>
         <div className={styles.iconRow}>
           {earnedBadges.map(name => (
             <span key={name} className={styles.badgeCircle}>

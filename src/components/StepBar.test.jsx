@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import StepBar from './StepBar'
 
-const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
+const STEPS = ['직업', '성공열쇠', '부동산', '주식', '현금']
 
 describe('StepBar', () => {
   it('5개 스텝 라벨을 모두 렌더링한다', () => {

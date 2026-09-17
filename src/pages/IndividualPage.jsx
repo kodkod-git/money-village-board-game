@@ -16,7 +16,7 @@ import {
 } from '../constants/gameData'
 import styles from './IndividualPage.module.css'
 
-const STEPS = ['직업', '성공카드', '주식', '부동산', '현금']
+const STEPS = ['직업', '성공열쇠', '주식', '부동산', '현금']
 const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'stocksVisited', 3: 'realEstateVisited' }
 
 function priceLabels(prices, category) {
@@ -196,8 +196,8 @@ export default function IndividualPage() {
 
       {step === 1 && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>성공카드</h1>
-          <p className={styles.stepSubtitle}>획득한 성공카드를 모두 선택해주세요</p>
+          <h1 className={styles.stepTitle}>성공열쇠</h1>
+          <p className={styles.stepSubtitle}>획득한 성공열쇠를 모두 선택해주세요</p>
           <div className={styles.fillWrapper}>
             <BadgePicker
               fill

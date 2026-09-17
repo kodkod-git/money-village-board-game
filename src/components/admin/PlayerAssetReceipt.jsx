@@ -36,7 +36,7 @@ export default function PlayerAssetReceipt({ player, prices }) {
       </div>
 
       <div className={styles.field}>
-        <span className={styles.fieldLabel}>성공카드</span>
+        <span className={styles.fieldLabel}>성공열쇠</span>
         <div className={styles.chipRow}>
           {earnedBadges.length === 0 && <span className={styles.fieldValue}>미입력</span>}
           {earnedBadges.map(name => <span key={name} className={styles.chip}>{BADGE_LABELS[name]}</span>)}
