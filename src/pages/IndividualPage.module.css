@@ -137,12 +137,12 @@
 /* Width fills the available space (and switches to 3 columns once there's
    room); height stays at the card's natural content size and only grows
    when a label actually wraps to another line. Below that breakpoint the
-   single column is capped at the same ~200px a card gets in the 3-column
-   layout (rather than stretching to the full row) and centered, so a
-   narrow screen doesn't blow the card up wider/taller than its 3-column
-   size. */
+   single column is capped (rather than stretching to the full row) and
+   centered, at roughly 1.3x the ~200px a card gets in the 3-column layout —
+   big enough to read comfortably on a narrow screen without stretching as
+   wide as the old full-row layout. */
 .assetListFill {
-  grid-template-columns: repeat(1, minmax(0, 200px));
+  grid-template-columns: repeat(1, minmax(0, 260px));
   /* 위 @media 규칙의 max-width/margin/justify-content를 되돌려, 채움 모드에서는
      본문 컬럼 전체 너비를 쓰고 헤더와 좌우 정렬을 맞춘다. */
   width: 100%;
