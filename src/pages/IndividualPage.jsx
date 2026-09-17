@@ -16,8 +16,8 @@ import {
 } from '../constants/gameData'
 import styles from './IndividualPage.module.css'
 
-const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
-const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'realEstateVisited', 3: 'stocksVisited' }
+const STEPS = ['직업', '성공카드', '주식', '부동산', '현금']
+const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'stocksVisited', 3: 'realEstateVisited' }
 
 function priceLabels(prices, category) {
   return Object.fromEntries(Object.entries(DEFAULT_PRICES[category]).map(([key, defaultPrice]) => [
@@ -39,8 +39,8 @@ function computeCompletedUpTo(gameState) {
   let upTo = -1
   if (gameState.job !== null || gameState.jobVisited) upTo = 0
   if (gameState.badgesVisited) upTo = 1
-  if (gameState.realEstateVisited) upTo = 2
-  if (gameState.stocksVisited) upTo = 3
+  if (gameState.stocksVisited) upTo = 2
+  if (gameState.realEstateVisited) upTo = 3
   if (gameState.isCompleted) upTo = 4
   return upTo
 }
@@ -214,7 +214,7 @@ export default function IndividualPage() {
         </div>
       )}
 
-      {step === 2 && (
+      {step === 3 && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>부동산</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
@@ -237,7 +237,7 @@ export default function IndividualPage() {
         </div>
       )}
 
-      {step === 3 && (
+      {step === 2 && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>주식</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>

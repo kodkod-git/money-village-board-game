@@ -48,15 +48,45 @@ function renderPage() {
 }
 
 describe('IndividualPage', () => {
+  it('주식 다음 부동산, 현금 순으로 진행하며 방문 상태를 저장한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByRole('heading', { name: '주식' })).toBeInTheDocument()
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByRole('heading', { name: '부동산' })).toBeInTheDocument()
+    expect(io().emit).toHaveBeenLastCalledWith('update-player-state', expect.objectContaining({
+      gameState: expect.objectContaining({ stocksVisited: true, realEstateVisited: false }),
+    }))
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByRole('heading', { name: '현금' })).toBeInTheDocument()
+    expect(io().emit).toHaveBeenLastCalledWith('update-player-state', expect.objectContaining({
+      gameState: expect.objectContaining({ stocksVisited: true, realEstateVisited: true }),
+    }))
+  })
+
+  it('주식까지만 입력하고 재입장하면 부동산은 완료 표시하지 않는다', async () => {
+    fetch.mockResolvedValue({ json: async () => ({ players: [{
+      ...PLAYER, gameState: { ...PLAYER.gameState, jobVisited: true, badgesVisited: true, stocksVisited: true },
+    }] }) })
+    renderPage()
+    await screen.findByText('직업 선택')
+    expect(screen.getByText('주식').closest('button')).not.toBeDisabled()
+    expect(screen.getByText('부동산').closest('button')).toBeDisabled()
+    await userEvent.click(screen.getByText('주식'))
+    expect(screen.getByRole('heading', { name: '주식' })).toBeInTheDocument()
+  })
+
   it.each([undefined, null, {}, { stocks: {}, realEstate: {} }])('가격 설정이 없으면 기본 가격을 표시한다 (%j)', async prices => {
     fetch.mockResolvedValue({ json: async () => ({ players: [PLAYER], prices }) })
     renderPage()
     await screen.findByText('직업 선택')
     await userEvent.click(screen.getByText('다음'))
     await userEvent.click(screen.getByText('다음'))
-    expect(screen.getAllByText('10,000원')).toHaveLength(3)
-    await userEvent.click(screen.getByText('다음'))
     expect(screen.getAllByText('2,000원')).toHaveLength(3)
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getAllByText('10,000원')).toHaveLength(3)
   })
 
   it('설정 가격과 0원을 표시하고 누락된 항목만 기본 가격을 사용한다', async () => {
@@ -68,13 +98,13 @@ describe('IndividualPage', () => {
     await screen.findByText('직업 선택')
     await userEvent.click(screen.getByText('다음'))
     await userEvent.click(screen.getByText('다음'))
-    expect(screen.getByText('35,000원')).toBeInTheDocument()
-    expect(screen.getByText('0원')).toBeInTheDocument()
-    expect(screen.getByText('10,000원')).toBeInTheDocument()
-    await userEvent.click(screen.getByText('다음'))
     expect(screen.getByText('7,500원')).toBeInTheDocument()
     expect(screen.getByText('0원')).toBeInTheDocument()
     expect(screen.getByText('2,000원')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByText('35,000원')).toBeInTheDocument()
+    expect(screen.getByText('0원')).toBeInTheDocument()
+    expect(screen.getByText('10,000원')).toBeInTheDocument()
   })
 
   it('입력 중 가격이 변경되면 표시 가격도 갱신한다', async () => {
@@ -85,9 +115,9 @@ describe('IndividualPage', () => {
     const handler = io().on.mock.calls.findLast(([event]) => event === 'room-prices-updated')?.[1]
     expect(handler).toBeTypeOf('function')
     act(() => handler({ prices: { realEstate: { gaon: 42000 }, stocks: { bio: 6500 } } }))
-    expect(screen.getByText('42,000원')).toBeInTheDocument()
-    await userEvent.click(screen.getByText('다음'))
     expect(screen.getByText('6,500원')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByText('42,000원')).toBeInTheDocument()
   })
 
   it('직업 선택 단계를 먼저 보여준다', async () => {
@@ -191,7 +221,7 @@ describe('IndividualPage', () => {
     await userEvent.click(screen.getByText('다음'))
     await screen.findByRole('heading', { name: '성공카드' })
     await userEvent.click(screen.getByText('다음'))
-    await screen.findByRole('heading', { name: '부동산' })
+    await screen.findByRole('heading', { name: '주식' })
 
     const socket = io()
     const emittedStates = socket.emit.mock.calls
