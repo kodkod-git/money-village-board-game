@@ -37,8 +37,8 @@ describe('AdminEditModal', () => {
     expect(screen.getAllByText('경영·금융')).toHaveLength(2)
     expect(container.querySelector('img[src="/badges/job/경영금융.png"]')).toBeInTheDocument()
     expect(screen.getByText('125,000원')).toBeInTheDocument()
-    // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → ×0.5 = 69,500원
-    expect(screen.getByText('69,500원')).toBeInTheDocument()
+    // cash 125000 + stockValue(4000) + realEstateValue(10000) = 139000; badgeCount 1 → 0-2 bracket → ×1 = 139,000원
+    expect(screen.getByText('139,000원')).toBeInTheDocument()
   })
 
   it('직업 수정 버튼 클릭 후 직업 선택 및 확인 시 onSave("job", key)를 호출한다', async () => {

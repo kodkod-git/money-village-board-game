@@ -21,13 +21,36 @@ describe('calculateAssetBreakdown', () => {
     expect(result.totalAssets).toBe(24000)
   })
 
-  it('뱃지가 하나도 없으면 총자산은 0이다', () => {
+  it('뱃지가 0~2개면 배수는 ×1.0이다', () => {
     const gameState = {
       cash: 5000,
       stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
       realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
       badges: [false, false, false, false, false, false],
     }
-    expect(calculateAssetBreakdown(gameState, prices).totalAssets).toBe(0)
+    expect(calculateAssetBreakdown(gameState, prices).totalAssets).toBe(5000)
+  })
+
+  it('뱃지가 6개면 배수는 ×2.0이다', () => {
+    const gameState = {
+      cash: 5000,
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, true, true, true, true],
+    }
+    expect(calculateAssetBreakdown(gameState, prices).totalAssets).toBe(10000)
+  })
+
+  it('삭제된 종목(industrial/nuri 등) 보유량은 자산가치에서 제외한다', () => {
+    const gameState = {
+      cash: 0,
+      stocks: { semiconductor: 0, finance: 0, industrial: 10, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 5, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
+    }
+    const result = calculateAssetBreakdown(gameState, prices)
+    expect(result.stockValue).toBe(0)
+    expect(result.realEstateValue).toBe(0)
+    expect(result.totalAssets).toBe(0)
   })
 })

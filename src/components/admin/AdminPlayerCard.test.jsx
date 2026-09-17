@@ -25,8 +25,8 @@ describe('AdminPlayerCard', () => {
     expect(screen.getByText('김민준')).toBeInTheDocument()
     expect(screen.getByText('경영·금융')).toBeInTheDocument()
     // cash 125000 + stockValue(2*2000=4000) + realEstateValue(1*10000=10000) = 139000
-    // totalAssets = 139000 * (badgeCount(1) * 0.5) = 69500 per calculateAssetBreakdown's real formula
-    expect(screen.getByText('69,500원')).toBeInTheDocument()
+    // totalAssets = 139000 * badgeMultiplier(badgeCount(1)); 1 badge falls in the 0-2 bracket → ×1 = 139000
+    expect(screen.getByText('139,000원')).toBeInTheDocument()
   })
 
   it('직업 미입력 시 안내 문구를 보여준다', () => {

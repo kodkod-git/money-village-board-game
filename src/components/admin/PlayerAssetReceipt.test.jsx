@@ -28,8 +28,8 @@ describe('PlayerAssetReceipt', () => {
     expect(screen.getByText('125,000원')).toBeInTheDocument()
     expect(screen.getByTestId('receipt-p1-real-estate-gaon')).toHaveTextContent('1개')
     expect(screen.getByTestId('receipt-p1-stock-semiconductor')).toHaveTextContent('2주')
-    // cash 125000 + stock 4000 + realEstate 10000 = 139000; badgeCount 1 → ×0.5 = 69,500원
-    expect(screen.getByText('69,500원')).toBeInTheDocument()
+    // cash 125000 + stock 4000 + realEstate 10000 = 139000; badgeCount 1 → 0-2 bracket → ×1 = 139,000원
+    expect(screen.getByText('139,000원')).toBeInTheDocument()
   })
 
   it('보유·입력이 없으면 미보유/미입력/무직으로 표시한다', () => {
