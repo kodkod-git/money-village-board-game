@@ -49,18 +49,6 @@ export default function PlayerAssetReceipt({ player, prices }) {
       </div>
 
       <div className={styles.field}>
-        <span className={styles.fieldLabel}>부동산</span>
-        <AdminAssetSummary
-          labels={REAL_ESTATE_LABELS}
-          images={ESTATE_IMAGES}
-          values={gameState.realEstate}
-          folder="estate"
-          unit="개"
-          testIdPrefix={`receipt-${player.playerUuid}-real-estate`}
-        />
-      </div>
-
-      <div className={styles.field}>
         <span className={styles.fieldLabel}>주식</span>
         <AdminAssetSummary
           labels={STOCK_LABELS}
@@ -69,6 +57,18 @@ export default function PlayerAssetReceipt({ player, prices }) {
           folder="stock"
           unit="주"
           testIdPrefix={`receipt-${player.playerUuid}-stock`}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.fieldLabel}>부동산</span>
+        <AdminAssetSummary
+          labels={REAL_ESTATE_LABELS}
+          images={ESTATE_IMAGES}
+          values={gameState.realEstate}
+          folder="estate"
+          unit="개"
+          testIdPrefix={`receipt-${player.playerUuid}-real-estate`}
         />
       </div>
 

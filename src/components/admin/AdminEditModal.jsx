@@ -92,25 +92,6 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           <div className={styles.card}>
             <div className={styles.field}>
               <div className={styles.fieldHeader}>
-                <span className={styles.fieldLabel}>부동산</span>
-                {!readOnly && (
-                  <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
-                )}
-              </div>
-              <AdminAssetSummary
-                labels={REAL_ESTATE_LABELS}
-                images={ESTATE_IMAGES}
-                values={gameState.realEstate}
-                folder="estate"
-                unit="개"
-                testIdPrefix="admin-real-estate-holding"
-              />
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.field}>
-              <div className={styles.fieldHeader}>
                 <span className={styles.fieldLabel}>주식</span>
                 {!readOnly && (
                   <button type="button" data-testid="edit-stocks" className={styles.editBtn} onClick={() => setEditingField('stocks')}>수정</button>
@@ -123,6 +104,25 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
                 folder="stock"
                 unit="주"
                 testIdPrefix="admin-stock-holding"
+              />
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.field}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>부동산</span>
+                {!readOnly && (
+                  <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
+                )}
+              </div>
+              <AdminAssetSummary
+                labels={REAL_ESTATE_LABELS}
+                images={ESTATE_IMAGES}
+                values={gameState.realEstate}
+                folder="estate"
+                unit="개"
+                testIdPrefix="admin-real-estate-holding"
               />
             </div>
           </div>

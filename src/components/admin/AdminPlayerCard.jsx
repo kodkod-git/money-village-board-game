@@ -51,22 +51,6 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
       </div>
 
       <div className={styles.section}>
-        <span className={styles.sectionLabel}>부동산</span>
-        <div className={styles.iconRow}>
-          {ownedRealEstate.map(key => (
-            <span key={key} className={styles.iconCount}>
-              <img
-                src={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
-                alt={REAL_ESTATE_LABELS[key]}
-                className={styles.assetIcon}
-              />
-              {gameState.realEstate[key]}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.section}>
         <span className={styles.sectionLabel}>주식</span>
         <div className={styles.iconRow}>
           {ownedStocks.map(key => (
@@ -77,6 +61,22 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
                 className={styles.assetIcon}
               />
               {gameState.stocks[key]}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>부동산</span>
+        <div className={styles.iconRow}>
+          {ownedRealEstate.map(key => (
+            <span key={key} className={styles.iconCount}>
+              <img
+                src={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
+                alt={REAL_ESTATE_LABELS[key]}
+                className={styles.assetIcon}
+              />
+              {gameState.realEstate[key]}
             </span>
           ))}
         </div>
