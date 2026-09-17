@@ -10,7 +10,7 @@ describe('BadgeEditModal', () => {
     const onChange = vi.fn()
     const onClose = vi.fn()
     render(<BadgeEditModal badges={NONE} onChange={onChange} onClose={onClose} />)
-    await userEvent.click(screen.getByText('문제해결능력'))
+    await userEvent.click(screen.getByText('직업'))
     expect(onChange).not.toHaveBeenCalled()
     await userEvent.click(screen.getByText('확인'))
     expect(onChange).toHaveBeenCalledWith([false, false, true, false, false, false])

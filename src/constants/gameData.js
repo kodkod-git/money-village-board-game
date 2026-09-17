@@ -13,9 +13,9 @@ export const JOB_IMAGES = {
 // BADGE_DISPLAY_ORDER를 따로 둔다.
 export const BADGE_NAMES = ['communication', 'global', 'idea', 'money', 'thinking', 'trust']
 export const BADGE_LABELS = {
-  communication: '의사소통 및 협상능력', global: '글로벌경제이해력',
-  idea: '문제해결능력', money: '재정관리능력',
-  thinking: '기업가정신', trust: '신용과 신뢰',
+  communication: '행운', global: '부동산',
+  idea: '직업', money: '노동',
+  thinking: '주식', trust: '은행',
 }
 // Figma 디자인(성공카드 수정 화면)과 동일한 표시 순서.
 export const BADGE_DISPLAY_ORDER = ['money', 'communication', 'global', 'idea', 'thinking', 'trust']
