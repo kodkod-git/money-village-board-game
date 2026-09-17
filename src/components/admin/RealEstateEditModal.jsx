@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import { REAL_ESTATE_LABELS, ESTATE_IMAGES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import { DEFAULT_PRICES } from '../PriceSettingModal'
 import AssetQtyStepper from './AssetQtyStepper'
 import styles from './FieldEditModal.module.css'
 
-export default function RealEstateEditModal({ values, onChange, onClose }) {
+export default function RealEstateEditModal({ values, prices, onChange, onClose }) {
   const [draft, setDraft] = useState(values)
 
   function setQty(key, raw) {
@@ -39,7 +40,7 @@ export default function RealEstateEditModal({ values, onChange, onClose }) {
                   />
                   <div className={styles.assetTileInfo}>
                     <span className={styles.assetTileName}>{REAL_ESTATE_LABELS[key]}</span>
-                    <span className={styles.assetTilePrice}>{ESTATE_PRICES[key]}</span>
+                    <span className={styles.assetTilePrice}>{(prices?.[key] ?? DEFAULT_PRICES.realEstate[key]).toLocaleString('ko-KR')}원</span>
                   </div>
                 </div>
                 <AssetQtyStepper

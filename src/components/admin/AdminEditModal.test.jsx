@@ -20,6 +20,18 @@ const PLAYER = {
 }
 
 describe('AdminEditModal', () => {
+  it.each([
+    ['stocks', 'semiconductor', 7500, '7,500원'],
+    ['realEstate', 'gaon', 35000, '35,000원'],
+  ])('%s 수정창에 방의 가격을 전달하고 변경된 가격도 반영한다', async (category, key, price, label) => {
+    const prices = { ...PRICES, [category]: { ...PRICES[category], [key]: price } }
+    const { rerender } = render(<AdminEditModal player={PLAYER} prices={prices} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByTestId(`edit-${category}`))
+    expect(screen.getByText(label)).toBeInTheDocument()
+    rerender(<AdminEditModal player={PLAYER} prices={{ ...prices, [category]: { ...prices[category], [key]: 48000 } }} onClose={vi.fn()} />)
+    expect(screen.getByText('48,000원')).toBeInTheDocument()
+  })
+
   it('places the player name below the back button area', () => {
     const { container } = render(<AdminEditModal player={PLAYER} prices={PRICES} onSave={vi.fn()} onClose={vi.fn()} />)
     expect(container.querySelector('[class*="profileHeader"]')).toHaveTextContent('김민준')

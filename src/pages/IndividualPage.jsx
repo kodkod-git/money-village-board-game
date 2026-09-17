@@ -7,17 +7,23 @@ import BadgePicker from '../components/BadgePicker'
 import AssetListEditor from '../components/AssetListEditor'
 import NumberInputModal from '../components/NumberInputModal'
 import AlertModal from '../components/AlertModal'
+import { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import useBodyClass from '../hooks/useBodyClass'
 import {
-  REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
+  REAL_ESTATE_LABELS, ESTATE_IMAGES,
   STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
 } from '../constants/gameData'
 import styles from './IndividualPage.module.css'
 
 const STEPS = ['직업', '성공카드', '부동산', '주식', '현금']
-const STOCK_PRICE_LABELS = Object.fromEntries(Object.keys(STOCK_LABELS).map(key => [key, '가격 설정']))
 const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'realEstateVisited', 3: 'stocksVisited' }
+
+function priceLabels(prices, category) {
+  return Object.fromEntries(Object.entries(DEFAULT_PRICES[category]).map(([key, defaultPrice]) => [
+    key, `${(prices?.[category]?.[key] ?? defaultPrice).toLocaleString('ko-KR')}원`,
+  ]))
+}
 
 function defaultGameState() {
   return {
@@ -46,6 +52,7 @@ export default function IndividualPage() {
   const { socket } = useSocketContext()
 
   const [player, setPlayer] = useState(null)
+  const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [gameState, setGameState] = useState(defaultGameState)
   const [step, setStep] = useState(0)
   const [completedUpTo, setCompletedUpTo] = useState(-1)
@@ -62,6 +69,7 @@ export default function IndividualPage() {
       fetch(`/api/rooms/${code}`)
         .then(r => r.json())
         .then(data => {
+          setPrices(data.prices)
           const me = data.players?.find(p => p.socketId === socket.id)
           if (me) {
             setPlayer(me)
@@ -82,6 +90,7 @@ export default function IndividualPage() {
             fetch(`/api/rooms/${code}`)
               .then(r => r.json())
               .then(data2 => {
+                setPrices(data2.prices)
                 const me2 = data2.players?.find(p => p.socketId === socket.id)
                 if (!me2) { navigate(`/team/${code}`); return }
                 setPlayer(me2)
@@ -100,6 +109,13 @@ export default function IndividualPage() {
     socket.on('connect', syncPlayer)
     return () => socket.off('connect', syncPlayer)
   }, [code, socket, navigate])
+
+  useEffect(() => {
+    if (!socket) return
+    const handler = ({ prices }) => setPrices(prices)
+    socket.on('room-prices-updated', handler)
+    return () => socket.off('room-prices-updated', handler)
+  }, [socket])
 
   useEffect(() => {
     if (!socket) return
@@ -207,7 +223,7 @@ export default function IndividualPage() {
               fill
               labels={REAL_ESTATE_LABELS}
               images={ESTATE_IMAGES}
-              priceLabels={ESTATE_PRICES}
+              priceLabels={priceLabels(prices, 'realEstate')}
               imageFolder="estate"
               values={gameState.realEstate}
               onChange={(key, val) => {
@@ -230,7 +246,7 @@ export default function IndividualPage() {
               fill
               labels={STOCK_LABELS}
               images={STOCK_IMAGES}
-              priceLabels={STOCK_PRICE_LABELS}
+              priceLabels={priceLabels(prices, 'stocks')}
               imageFolder="stock"
               values={gameState.stocks}
               onChange={(key, val) => {

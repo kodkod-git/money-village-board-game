@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1788936596184,
+  "lastScanned": 1789631298392,
   "projectRoot": "C:\\Users\\USER\\OneDrive\\Desktop\\Project\\money-village-board-game",
   "techStack": {
     "languages": [
@@ -77,11 +77,21 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "Claude outputs": {
+      "path": "Claude outputs",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1789631298356,
+      "keyFiles": [
+        "경력기술서_담당업무성과_초안.md",
+        "자소서_협업경험_초안.md"
+      ]
+    },
     "design": {
       "path": "design",
       "purpose": null,
       "fileCount": 21,
-      "lastAccessed": 1788936596151,
+      "lastAccessed": 1789631298356,
       "keyFiles": [
         "exit_to_app.png",
         "image.png",
@@ -94,7 +104,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1788936596151,
+      "lastAccessed": 1789631298356,
       "keyFiles": [
         "index.html"
       ]
@@ -103,14 +113,14 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1788936596159,
+      "lastAccessed": 1789631298357,
       "keyFiles": []
     },
     "proposal": {
       "path": "proposal",
       "purpose": null,
-      "fileCount": 28,
-      "lastAccessed": 1788936596159,
+      "fileCount": 30,
+      "lastAccessed": 1789631298357,
       "keyFiles": [
         "20260615_individual_page.md",
         "20260618_db_design.md",
@@ -123,14 +133,14 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1788936596159,
+      "lastAccessed": 1789631298357,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 2,
-      "lastAccessed": 1788936596160,
+      "lastAccessed": 1789631298358,
       "keyFiles": [
         "backfill-booth-values.js",
         "backfill-holdings-cap.js"
@@ -140,7 +150,7 @@
       "path": "server",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1788936596160,
+      "lastAccessed": 1789631298358,
       "keyFiles": [
         "adminAuth.js",
         "adminAuth.test.js",
@@ -153,7 +163,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 5,
-      "lastAccessed": 1788936596160,
+      "lastAccessed": 1789631298358,
       "keyFiles": [
         "App.jsx",
         "App.test.jsx",
@@ -166,7 +176,7 @@
       "path": "supabase",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1788936596161,
+      "lastAccessed": 1789631298359,
       "keyFiles": [
         "schema.sql"
       ]
@@ -175,7 +185,7 @@
       "path": "test-reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1788936596161,
+      "lastAccessed": 1789631298359,
       "keyFiles": [
         "20260831_qa_result.md"
       ]
@@ -184,17 +194,17 @@
       "path": "dist\\assets",
       "purpose": "Static assets",
       "fileCount": 2,
-      "lastAccessed": 1788936596162,
+      "lastAccessed": 1789631298360,
       "keyFiles": [
-        "index-CqExy8eX.js",
-        "index-Cz7Rv8xe.css"
+        "index-BR9ZGtqG.css",
+        "index-DG4cXJOz.js"
       ]
     },
     "src\\components": {
       "path": "src\\components",
       "purpose": "UI components",
       "fileCount": 54,
-      "lastAccessed": 1788936596163,
+      "lastAccessed": 1789631298360,
       "keyFiles": [
         "AlertModal.jsx",
         "AlertModal.module.css",
@@ -205,7 +215,7 @@
       "path": "src\\pages",
       "purpose": "Page components",
       "fileCount": 47,
-      "lastAccessed": 1788936596164,
+      "lastAccessed": 1789631298361,
       "keyFiles": [
         "AdminClassDashboard.jsx",
         "AdminClassDashboard.test.jsx",
@@ -216,7 +226,7 @@
       "path": "supabase\\migrations",
       "purpose": "Database migrations",
       "fileCount": 7,
-      "lastAccessed": 1788936596164,
+      "lastAccessed": 1789631298361,
       "keyFiles": [
         "2026-07-15-add-booth-values.sql",
         "2026-07-27-add-admin-org-tables.sql",
@@ -227,9 +237,15 @@
   "hotPaths": [
     {
       "path": "src\\pages\\CharacterSelect.module.css",
-      "accessCount": 25,
-      "lastAccessed": 1788779609913,
+      "accessCount": 26,
+      "lastAccessed": 1789029968528,
       "type": "file"
+    },
+    {
+      "path": "src\\pages\\IndividualPage.jsx",
+      "accessCount": 25,
+      "lastAccessed": 1789640967165,
+      "type": "directory"
     },
     {
       "path": "src\\pages\\Team.module.css",
@@ -238,27 +254,39 @@
       "type": "directory"
     },
     {
-      "path": "src\\pages\\IndividualPage.jsx",
-      "accessCount": 20,
-      "lastAccessed": 1788340825368,
-      "type": "directory"
-    },
-    {
       "path": "src\\pages\\RankingPage.jsx",
-      "accessCount": 16,
-      "lastAccessed": 1788938120668,
+      "accessCount": 23,
+      "lastAccessed": 1789632167295,
       "type": "directory"
     },
     {
       "path": "src",
-      "accessCount": 14,
-      "lastAccessed": 1788779408381,
+      "accessCount": 21,
+      "lastAccessed": 1789639774573,
       "type": "directory"
+    },
+    {
+      "path": "src\\pages\\Team.jsx",
+      "accessCount": 15,
+      "lastAccessed": 1789030056750,
+      "type": "file"
     },
     {
       "path": "test-reports\\20260831_qa_result.md",
       "accessCount": 13,
       "lastAccessed": 1788341081667,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Team.test.jsx",
+      "accessCount": 13,
+      "lastAccessed": 1789633088762,
+      "type": "file"
+    },
+    {
+      "path": "src\\index.css",
+      "accessCount": 13,
+      "lastAccessed": 1789639818398,
       "type": "file"
     },
     {
@@ -268,39 +296,51 @@
       "type": "file"
     },
     {
-      "path": "src\\pages\\Team.jsx",
-      "accessCount": 11,
-      "lastAccessed": 1788772619270,
+      "path": "src\\pages\\Lobby.test.jsx",
+      "accessCount": 10,
+      "lastAccessed": 1789030038678,
       "type": "file"
     },
     {
-      "path": "src\\index.css",
+      "path": "server\\index.js",
       "accessCount": 10,
-      "lastAccessed": 1788775511096,
+      "lastAccessed": 1789632076888,
       "type": "file"
     },
     {
       "path": "src\\pages\\IndividualPage.test.jsx",
-      "accessCount": 9,
-      "lastAccessed": 1788340785749,
+      "accessCount": 10,
+      "lastAccessed": 1789632866335,
       "type": "directory"
     },
     {
-      "path": "server\\index.js",
+      "path": "src\\components\\admin\\AdminSpectateModal.jsx",
       "accessCount": 9,
-      "lastAccessed": 1788937141701,
+      "lastAccessed": 1789021891359,
       "type": "file"
     },
     {
-      "path": "src\\pages\\Team.test.jsx",
-      "accessCount": 7,
-      "lastAccessed": 1788338843844,
+      "path": "src\\pages\\AdminClassDashboard.jsx",
+      "accessCount": 8,
+      "lastAccessed": 1789017325461,
+      "type": "directory"
+    },
+    {
+      "path": "src\\pages\\Lobby.jsx",
+      "accessCount": 8,
+      "lastAccessed": 1789030074303,
       "type": "file"
     },
     {
       "path": "src\\App.jsx",
-      "accessCount": 6,
-      "lastAccessed": 1788334974519,
+      "accessCount": 7,
+      "lastAccessed": 1789029546074,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\TeamCodeInput.jsx",
+      "accessCount": 7,
+      "lastAccessed": 1789639733348,
       "type": "file"
     },
     {
@@ -316,63 +356,51 @@
       "type": "directory"
     },
     {
+      "path": "src\\pages\\LandingPage.jsx",
+      "accessCount": 6,
+      "lastAccessed": 1789029588565,
+      "type": "file"
+    },
+    {
+      "path": "server",
+      "accessCount": 6,
+      "lastAccessed": 1789632131278,
+      "type": "directory"
+    },
+    {
       "path": "src\\pages\\AdminClassDashboard.test.jsx",
       "accessCount": 5,
       "lastAccessed": 1788335179892,
       "type": "file"
     },
     {
-      "path": "src\\pages\\AdminClassDashboard.jsx",
-      "accessCount": 5,
-      "lastAccessed": 1788335207485,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\LandingPage.jsx",
-      "accessCount": 5,
-      "lastAccessed": 1788770536705,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\TeamCodeInput.jsx",
-      "accessCount": 5,
-      "lastAccessed": 1788770541294,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\Lobby.test.jsx",
-      "accessCount": 4,
-      "lastAccessed": 1788334995601,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\Lobby.jsx",
-      "accessCount": 4,
-      "lastAccessed": 1788335009444,
-      "type": "file"
-    },
-    {
       "path": "src\\pages\\CharacterSelect.jsx",
-      "accessCount": 4,
-      "lastAccessed": 1788770544857,
-      "type": "file"
-    },
-    {
-      "path": "server",
-      "accessCount": 3,
-      "lastAccessed": 1788338817235,
-      "type": "directory"
-    },
-    {
-      "path": "src\\components\\admin\\AdminSpectateModal.jsx",
-      "accessCount": 3,
-      "lastAccessed": 1788340387693,
+      "accessCount": 5,
+      "lastAccessed": 1789029557622,
       "type": "file"
     },
     {
       "path": "src\\pages\\NameInput.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1789029558255,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\admin\\ConfirmDialog.jsx",
+      "accessCount": 4,
+      "lastAccessed": 1789632644753,
+      "type": "file"
+    },
+    {
+      "path": "",
       "accessCount": 3,
-      "lastAccessed": 1788770539075,
+      "lastAccessed": 1789639746773,
+      "type": "directory"
+    },
+    {
+      "path": "src\\main.jsx",
+      "accessCount": 3,
+      "lastAccessed": 1789639788445,
       "type": "file"
     },
     {
@@ -388,12 +416,6 @@
       "type": "file"
     },
     {
-      "path": "src\\main.jsx",
-      "accessCount": 2,
-      "lastAccessed": 1788334754338,
-      "type": "file"
-    },
-    {
       "path": "src\\pages\\AdminLogin.jsx",
       "accessCount": 2,
       "lastAccessed": 1788338824535,
@@ -406,21 +428,9 @@
       "type": "file"
     },
     {
-      "path": "",
-      "accessCount": 2,
-      "lastAccessed": 1788770242113,
-      "type": "directory"
-    },
-    {
       "path": "src\\components\\admin\\ClassQRModal.jsx",
       "accessCount": 1,
       "lastAccessed": 1788163868982,
-      "type": "file"
-    },
-    {
-      "path": "src\\components\\admin\\ConfirmDialog.jsx",
-      "accessCount": 1,
-      "lastAccessed": 1788334291441,
       "type": "file"
     },
     {

@@ -158,6 +158,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
       {editingField === 'realEstate' && (
         <RealEstateEditModal
           values={gameState.realEstate}
+          prices={prices?.realEstate}
           onChange={val => onSave('realEstate', val)}
           onClose={() => setEditingField(null)}
         />
@@ -165,6 +166,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
       {editingField === 'stocks' && (
         <StockEditModal
           values={gameState.stocks}
+          prices={prices?.stocks}
           onChange={val => onSave('stocks', val)}
           onClose={() => setEditingField(null)}
         />

@@ -48,6 +48,48 @@ function renderPage() {
 }
 
 describe('IndividualPage', () => {
+  it.each([undefined, null, {}, { stocks: {}, realEstate: {} }])('가격 설정이 없으면 기본 가격을 표시한다 (%j)', async prices => {
+    fetch.mockResolvedValue({ json: async () => ({ players: [PLAYER], prices }) })
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getAllByText('10,000원')).toHaveLength(3)
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getAllByText('2,000원')).toHaveLength(3)
+  })
+
+  it('설정 가격과 0원을 표시하고 누락된 항목만 기본 가격을 사용한다', async () => {
+    fetch.mockResolvedValue({ json: async () => ({
+      players: [PLAYER],
+      prices: { realEstate: { gaon: 35000, dami: 0, chorong: null }, stocks: { semiconductor: 7500, finance: 0 } },
+    }) })
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByText('35,000원')).toBeInTheDocument()
+    expect(screen.getByText('0원')).toBeInTheDocument()
+    expect(screen.getByText('10,000원')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByText('7,500원')).toBeInTheDocument()
+    expect(screen.getByText('0원')).toBeInTheDocument()
+    expect(screen.getByText('2,000원')).toBeInTheDocument()
+  })
+
+  it('입력 중 가격이 변경되면 표시 가격도 갱신한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음'))
+    const handler = io().on.mock.calls.findLast(([event]) => event === 'room-prices-updated')?.[1]
+    expect(handler).toBeTypeOf('function')
+    act(() => handler({ prices: { realEstate: { gaon: 42000 }, stocks: { bio: 6500 } } }))
+    expect(screen.getByText('42,000원')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByText('6,500원')).toBeInTheDocument()
+  })
+
   it('직업 선택 단계를 먼저 보여준다', async () => {
     renderPage()
     expect(await screen.findByText('직업 선택')).toBeInTheDocument()

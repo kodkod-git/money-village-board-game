@@ -6,6 +6,18 @@ import StockEditModal from './StockEditModal'
 const VALUES = { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 }
 
 describe('StockEditModal', () => {
+  it.each([undefined, null, {}])('가격 미설정 시 기본 가격을 표시한다 (%j)', prices => {
+    render(<StockEditModal values={VALUES} prices={prices} onChange={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getAllByText('2,000원')).toHaveLength(3)
+  })
+
+  it('설정 가격과 0원을 유지하고 누락된 가격은 기본값으로 표시한다', () => {
+    render(<StockEditModal values={VALUES} prices={{ semiconductor: 7500, finance: 0, bio: null }} onChange={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('7,500원')).toBeInTheDocument()
+    expect(screen.getByText('0원')).toBeInTheDocument()
+    expect(screen.getByText('2,000원')).toBeInTheDocument()
+  })
+
   it('수량 입력 후 확인 클릭 시 onChange를 병합된 주식 객체로 호출하고 닫는다', async () => {
     const onChange = vi.fn()
     const onClose = vi.fn()

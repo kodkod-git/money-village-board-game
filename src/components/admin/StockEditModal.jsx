@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { STOCK_LABELS, STOCK_IMAGES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import { DEFAULT_PRICES } from '../PriceSettingModal'
 import AssetQtyStepper from './AssetQtyStepper'
 import styles from './FieldEditModal.module.css'
 
-export default function StockEditModal({ values, onChange, onClose }) {
+export default function StockEditModal({ values, prices, onChange, onClose }) {
   const [draft, setDraft] = useState(values)
 
   function setQty(key, raw) {
@@ -39,6 +40,7 @@ export default function StockEditModal({ values, onChange, onClose }) {
                   />
                   <div className={styles.assetTileInfo}>
                     <span className={styles.assetTileName}>{STOCK_LABELS[key]}</span>
+                    <span className={styles.assetTilePrice}>{(prices?.[key] ?? DEFAULT_PRICES.stocks[key]).toLocaleString('ko-KR')}원</span>
                   </div>
                 </div>
                 <AssetQtyStepper

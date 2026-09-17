@@ -6,6 +6,18 @@ import RealEstateEditModal from './RealEstateEditModal'
 const VALUES = { gaon: 1, dami: 0, chorong: 0 }
 
 describe('RealEstateEditModal', () => {
+  it.each([undefined, null, {}])('가격 미설정 시 기본 가격을 표시한다 (%j)', prices => {
+    render(<RealEstateEditModal values={VALUES} prices={prices} onChange={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getAllByText('10,000원')).toHaveLength(3)
+  })
+
+  it('설정 가격과 0원을 유지하고 누락된 가격은 기본값으로 표시한다', () => {
+    render(<RealEstateEditModal values={VALUES} prices={{ gaon: 35000, dami: 0, chorong: null }} onChange={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('35,000원')).toBeInTheDocument()
+    expect(screen.getByText('0원')).toBeInTheDocument()
+    expect(screen.getByText('10,000원')).toBeInTheDocument()
+  })
+
   it('수량 입력 후 확인 클릭 시 onChange를 병합된 부동산 객체로 호출하고 닫는다', async () => {
     const onChange = vi.fn()
     const onClose = vi.fn()
