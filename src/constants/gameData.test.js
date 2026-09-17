@@ -19,16 +19,16 @@ describe('gameData constants', () => {
     expect(Object.keys(BADGE_LABELS)).toEqual(BADGE_NAMES)
   })
 
-  it('부동산은 6개이며 라벨/이미지/가격 키가 일치한다', () => {
+  it('부동산은 3개이며 라벨/이미지/가격 키가 일치한다', () => {
     const keys = Object.keys(REAL_ESTATE_LABELS)
-    expect(keys).toHaveLength(6)
+    expect(keys).toHaveLength(3)
     expect(Object.keys(ESTATE_IMAGES)).toEqual(keys)
     expect(Object.keys(ESTATE_PRICES)).toEqual(keys)
   })
 
-  it('주식은 6개이며 라벨/이미지 키가 일치한다', () => {
+  it('주식은 3개이며 라벨/이미지 키가 일치한다', () => {
     const keys = Object.keys(STOCK_LABELS)
-    expect(keys).toHaveLength(6)
+    expect(keys).toHaveLength(3)
     expect(Object.keys(STOCK_IMAGES)).toEqual(keys)
   })
 

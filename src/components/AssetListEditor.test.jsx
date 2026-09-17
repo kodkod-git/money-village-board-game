@@ -18,7 +18,7 @@ describe('AssetListEditor', () => {
         onChange={vi.fn()}
       />
     )
-    expect(screen.getByText('단독 가온개미')).toBeInTheDocument()
+    expect(screen.getByText('단독주택')).toBeInTheDocument()
     expect(screen.getAllByText('2만원').length).toBeGreaterThan(0)
   })
 

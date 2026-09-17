@@ -17,7 +17,7 @@ describe('AdminAssetSummary', () => {
         testIdPrefix="t-estate"
       />
     )
-    expect(screen.getByTestId('t-estate-gaon')).toHaveTextContent('단독 가온개미2개')
+    expect(screen.getByTestId('t-estate-gaon')).toHaveTextContent('단독주택2개')
     expect(screen.queryByTestId('t-estate-nuri')).not.toBeInTheDocument()
   })
 

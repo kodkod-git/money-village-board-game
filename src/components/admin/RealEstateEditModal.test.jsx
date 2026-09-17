@@ -3,19 +3,19 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import RealEstateEditModal from './RealEstateEditModal'
 
-const VALUES = { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 }
+const VALUES = { gaon: 1, dami: 0, chorong: 0 }
 
 describe('RealEstateEditModal', () => {
   it('수량 입력 후 확인 클릭 시 onChange를 병합된 부동산 객체로 호출하고 닫는다', async () => {
     const onChange = vi.fn()
     const onClose = vi.fn()
     render(<RealEstateEditModal values={VALUES} onChange={onChange} onClose={onClose} />)
-    const input = screen.getByLabelText('단독 누리고양이 수량')
+    const input = screen.getByLabelText('빌라 수량')
     await userEvent.clear(input)
     await userEvent.type(input, '3')
     expect(onChange).not.toHaveBeenCalled()
     await userEvent.click(screen.getByText('확인'))
-    expect(onChange).toHaveBeenCalledWith({ ...VALUES, nuri: 3 })
+    expect(onChange).toHaveBeenCalledWith({ ...VALUES, dami: 3 })
     expect(onClose).toHaveBeenCalled()
   })
 
