@@ -138,7 +138,7 @@
    room); height stays at the card's natural content size and only grows
    when a label actually wraps to another line. */
 .assetListFill {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   /* 위 @media 규칙의 max-width/margin/justify-content를 되돌려, 채움 모드에서는
      본문 컬럼 전체 너비를 쓰고 헤더와 좌우 정렬을 맞춘다. */
   width: 100%;
