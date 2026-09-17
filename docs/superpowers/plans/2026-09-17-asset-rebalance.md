@@ -636,6 +636,166 @@ EOF
 
 ---
 
+### Task 4.5: src/utils/calculateAssets.js 중복 로직 동기화
+
+**Files:**
+- Modify: `src/utils/calculateAssets.js`
+- Modify: `src/utils/calculateAssets.test.js`
+
+**발견 경위**: Task 4의 코드품질 리뷰에서 `server/db.js`의 `calculateAssetBreakdown`과 별개로
+`src/utils/calculateAssets.js`에 동일한 이름·시그니처의 함수가 이미 존재하며(2026-07-01 도입,
+이번 계획에서 처음 발견됨) 여전히 옛 공식(`badgeCount * 0.5`, 전체 키 합산)을 쓰고 있음이
+드러났다. 이 클라이언트 전용 사본은 `AdminPlayerCard.jsx`, `PlayerAssetReceipt.jsx`,
+`AdminEditModal.jsx`, `AdminTableView.jsx` 4곳에서 **진행 중인(아직 저장되지 않은) 게임**의
+"총 자산" 표시에 쓰인다. Task 4를 그대로 두면, 진행 중인 게임의 관리자 화면에는 옛 공식(성공열쇠
+배수 최대 x3.0, 삭제 종목 포함)으로 계산된 총자산이 보이다가, 게임이 저장되는 순간
+`server/db.js`의 새 공식(최대 x2.0, 활성 3종만)으로 바뀌어 버려 사용자가 체감할 수 있는
+불일치가 생긴다. `server/db.js`는 Supabase 클라이언트를 로드하므로 브라우저 번들에 넣을 수
+없어 클라이언트가 그쪽을 직접 import할 수는 없다 — 따라서 로직을 이 파일에도 동일하게
+반영해 두 사본을 다시 일치시킨다(기존에도 두 파일이 독립적으로 존재하던 구조를 그대로 따름).
+
+- [ ] **Step 1: calculateAssets.test.js를 새 공식 기준으로 먼저 수정한다**
+
+`src/utils/calculateAssets.test.js` 전체를 다음으로 교체:
+
+```js
+import { describe, it, expect } from 'vitest'
+import { calculateAssetBreakdown } from './calculateAssets'
+
+const prices = {
+  stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+  realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
+}
+
+describe('calculateAssetBreakdown', () => {
+  it('현금, 주식, 부동산 평가액과 총자산을 계산한다', () => {
+    const gameState = {
+      cash: 10000,
+      stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
+    }
+    const result = calculateAssetBreakdown(gameState, prices)
+    expect(result.cash).toBe(10000)
+    expect(result.stockValue).toBe(4000)
+    expect(result.realEstateValue).toBe(10000)
+    expect(result.totalAssets).toBe(24000)
+  })
+
+  it('뱃지가 0~2개면 배수는 ×1.0이다', () => {
+    const gameState = {
+      cash: 5000,
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+    }
+    expect(calculateAssetBreakdown(gameState, prices).totalAssets).toBe(5000)
+  })
+
+  it('뱃지가 6개면 배수는 ×2.0이다', () => {
+    const gameState = {
+      cash: 5000,
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, true, true, true, true],
+    }
+    expect(calculateAssetBreakdown(gameState, prices).totalAssets).toBe(10000)
+  })
+
+  it('삭제된 종목(industrial/nuri 등) 보유량은 자산가치에서 제외한다', () => {
+    const gameState = {
+      cash: 0,
+      stocks: { semiconductor: 0, finance: 0, industrial: 10, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 5, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, true, false, false, false, false],
+    }
+    const result = calculateAssetBreakdown(gameState, prices)
+    expect(result.stockValue).toBe(0)
+    expect(result.realEstateValue).toBe(0)
+    expect(result.totalAssets).toBe(0)
+  })
+})
+```
+
+- [ ] **Step 2: 테스트가 실패하는지 확인한다**
+
+Run: `npx vitest run src/utils/calculateAssets.test.js`
+Expected: FAIL (옛 공식이 아직 남아 있어 6개 뱃지 배수가 ×3.0으로 나오고, 삭제 종목도 합산됨)
+
+- [ ] **Step 3: calculateAssets.js를 server/db.js와 동일한 공식으로 맞춘다**
+
+`src/utils/calculateAssets.js` 전체를 다음으로 교체:
+
+```js
+import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
+
+// server/db.js의 calculateAssetBreakdown과 동일한 공식을 의도적으로 중복 구현한다.
+// server/db.js는 Supabase 서버 클라이언트를 로드하므로 브라우저 번들에 직접 import할 수
+// 없다 — 진행 중인(미저장) 게임의 총자산을 보여주는 관리자 화면(AdminPlayerCard,
+// PlayerAssetReceipt, AdminEditModal, AdminTableView)은 이 클라이언트 전용 사본을 쓴다.
+// 공식을 바꿀 때는 반드시 server/db.js의 calculateAssetBreakdown도 함께 수정할 것.
+function badgeMultiplier(badgeCount) {
+  if (badgeCount >= 6) return 2
+  if (badgeCount === 5) return 1.5
+  if (badgeCount === 4) return 1.2
+  if (badgeCount === 3) return 1.1
+  return 1
+}
+
+export function calculateAssetBreakdown(gameState, prices) {
+  const { cash, stocks, realEstate, badges } = gameState
+  const badgeCount = badges.filter(Boolean).length
+
+  const stockValue = Object.keys(STOCK_LABELS).reduce(
+    (sum, key) => sum + (stocks[key] ?? 0) * (prices.stocks[key] ?? 0), 0
+  )
+  const realEstateValue = Object.keys(REAL_ESTATE_LABELS).reduce(
+    (sum, key) => sum + (realEstate[key] ?? 0) * (prices.realEstate[key] ?? 0), 0
+  )
+  const totalAssets = Math.round(((cash ?? 0) + stockValue + realEstateValue) * badgeMultiplier(badgeCount))
+
+  return { cash: cash ?? 0, stockValue, realEstateValue, totalAssets }
+}
+```
+
+- [ ] **Step 4: 테스트가 통과하는지 확인한다**
+
+Run: `npx vitest run src/utils/calculateAssets.test.js`
+Expected: PASS
+
+- [ ] **Step 5: 이 파일을 쓰는 4개 소비 컴포넌트의 테스트로 회귀를 확인한다**
+
+Run: `npx vitest run src/components/admin/AdminPlayerCard.test.jsx src/components/admin/PlayerAssetReceipt.test.jsx src/components/admin/AdminEditModal.test.jsx src/components/admin/AdminTableView.test.jsx`
+Expected: PASS (이 파일들은 수정하지 않는다 — `calculateAssetBreakdown`의 반환 형태
+`{cash, stockValue, realEstateValue, totalAssets}`가 그대로이므로 소비 측 코드/테스트는
+영향받지 않아야 한다)
+
+- [ ] **Step 6: 전체 스위트로 최종 회귀를 확인한다**
+
+Run: `npx vitest run`
+Expected: PASS
+
+- [ ] **Step 7: 커밋**
+
+```bash
+git add src/utils/calculateAssets.js src/utils/calculateAssets.test.js
+git commit -m "$(cat <<'EOF'
+fix: sync client-side calculateAssetBreakdown with server formula
+
+src/utils/calculateAssets.js is a separate, browser-bundlable copy of
+server/db.js's calculateAssetBreakdown used by admin screens that show
+totals for in-progress (unsaved) games. It still had the old badgeCount*0.5
+formula and summed every stored asset key. Without this fix, live admin
+totals would disagree with saved/ranked totals as soon as Task 4 ships.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_019EMwRy1CDPUwoDpXyACXtM
+EOF
+)"
+```
+
+---
+
 ### Task 5: 기존 게임 결과 백필 스크립트
 
 **Files:**
