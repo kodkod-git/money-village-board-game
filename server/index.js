@@ -385,6 +385,7 @@ app.delete('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (re
   if (!result) return res.status(404).json({ error: 'Player not found' })
 
   const { room, targetSocketId } = result
+  io.sockets.sockets.get(targetSocketId)?.leave(room.code)
   io.to(targetSocketId).emit('you-were-kicked')
   io.to(room.code).emit('room-updated', { players: room.players })
   broadcastClassRooms(room.classId)
@@ -507,6 +508,7 @@ io.on('connection', (socket) => {
     const result = kickPlayer(socket.id, tid)
     if (!result) return
     const { room, targetSocketId } = result
+    io.sockets.sockets.get(targetSocketId)?.leave(room.code)
     io.to(targetSocketId).emit('you-were-kicked')
     io.to(room.code).emit('room-updated', { players: room.players })
     broadcastClassRooms(room.classId)
@@ -528,6 +530,11 @@ io.on('connection', (socket) => {
     // (title이 null이 아님)은 참가자가 없어져도 관리자가 직접 삭제할 때까지 유지한다.
     const shouldCloseRoom = !!roomBefore && roomBefore.title === null &&
       (leavingPlayer?.isHost || roomBefore.players.length === 1)
+
+    // 나간 소켓을 Socket.IO room 채널에서도 내보내지 않으면, 방금 나간 클라이언트가
+    // 계속 room-updated를 수신해 "연결 끊김 후 재접속" 로직이 오작동, 스스로를
+    // 즉시 재참가시켜 버린다 (leave-room이 실질적으로 무효화되는 버그).
+    if (roomBefore) socket.leave(roomBefore.code)
 
     const room = removePlayer(socket.id)
     if (room) io.to(room.code).emit('room-updated', { players: room.players })
