@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1789631298392,
+  "lastScanned": 1789961210302,
   "projectRoot": "C:\\Users\\USER\\OneDrive\\Desktop\\Project\\money-village-board-game",
   "techStack": {
     "languages": [
@@ -81,7 +81,7 @@
       "path": "Claude outputs",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1789631298356,
+      "lastAccessed": 1789961209787,
       "keyFiles": [
         "경력기술서_담당업무성과_초안.md",
         "자소서_협업경험_초안.md"
@@ -91,7 +91,7 @@
       "path": "design",
       "purpose": null,
       "fileCount": 21,
-      "lastAccessed": 1789631298356,
+      "lastAccessed": 1789961209902,
       "keyFiles": [
         "exit_to_app.png",
         "image.png",
@@ -104,7 +104,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1789631298356,
+      "lastAccessed": 1789961209922,
       "keyFiles": [
         "index.html"
       ]
@@ -113,14 +113,14 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1789631298357,
+      "lastAccessed": 1789961209947,
       "keyFiles": []
     },
     "proposal": {
       "path": "proposal",
       "purpose": null,
-      "fileCount": 30,
-      "lastAccessed": 1789631298357,
+      "fileCount": 31,
+      "lastAccessed": 1789961209967,
       "keyFiles": [
         "20260615_individual_page.md",
         "20260618_db_design.md",
@@ -133,15 +133,16 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1789631298357,
+      "lastAccessed": 1789961209989,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 2,
-      "lastAccessed": 1789631298358,
+      "fileCount": 3,
+      "lastAccessed": 1789961210009,
       "keyFiles": [
+        "backfill-asset-rebalance.js",
         "backfill-booth-values.js",
         "backfill-holdings-cap.js"
       ]
@@ -150,7 +151,7 @@
       "path": "server",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1789631298358,
+      "lastAccessed": 1789961210028,
       "keyFiles": [
         "adminAuth.js",
         "adminAuth.test.js",
@@ -163,7 +164,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 5,
-      "lastAccessed": 1789631298358,
+      "lastAccessed": 1789961210046,
       "keyFiles": [
         "App.jsx",
         "App.test.jsx",
@@ -176,7 +177,7 @@
       "path": "supabase",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1789631298359,
+      "lastAccessed": 1789961210062,
       "keyFiles": [
         "schema.sql"
       ]
@@ -184,27 +185,28 @@
     "test-reports": {
       "path": "test-reports",
       "purpose": null,
-      "fileCount": 1,
-      "lastAccessed": 1789631298359,
+      "fileCount": 2,
+      "lastAccessed": 1789961210079,
       "keyFiles": [
-        "20260831_qa_result.md"
+        "20260831_qa_result.md",
+        "20260918_qa_result.md"
       ]
     },
     "dist\\assets": {
       "path": "dist\\assets",
       "purpose": "Static assets",
       "fileCount": 2,
-      "lastAccessed": 1789631298360,
+      "lastAccessed": 1789961210130,
       "keyFiles": [
-        "index-BR9ZGtqG.css",
-        "index-DG4cXJOz.js"
+        "index-Ds1mAjor.js",
+        "index-ZUU9Ra1C.css"
       ]
     },
     "src\\components": {
       "path": "src\\components",
       "purpose": "UI components",
       "fileCount": 54,
-      "lastAccessed": 1789631298360,
+      "lastAccessed": 1789961210212,
       "keyFiles": [
         "AlertModal.jsx",
         "AlertModal.module.css",
@@ -215,7 +217,7 @@
       "path": "src\\pages",
       "purpose": "Page components",
       "fileCount": 47,
-      "lastAccessed": 1789631298361,
+      "lastAccessed": 1789961210232,
       "keyFiles": [
         "AdminClassDashboard.jsx",
         "AdminClassDashboard.test.jsx",
@@ -226,7 +228,7 @@
       "path": "supabase\\migrations",
       "purpose": "Database migrations",
       "fileCount": 7,
-      "lastAccessed": 1789631298361,
+      "lastAccessed": 1789961210263,
       "keyFiles": [
         "2026-07-15-add-booth-values.sql",
         "2026-07-27-add-admin-org-tables.sql",
@@ -236,303 +238,159 @@
   },
   "hotPaths": [
     {
-      "path": "src\\pages\\CharacterSelect.module.css",
-      "accessCount": 26,
-      "lastAccessed": 1789029968528,
+      "path": "src\\pages\\QuizResult.module.css",
+      "accessCount": 37,
+      "lastAccessed": 1789990606784,
       "type": "file"
     },
     {
-      "path": "src\\pages\\IndividualPage.jsx",
-      "accessCount": 25,
-      "lastAccessed": 1789640967165,
+      "path": "src\\constants\\quizData.js",
+      "accessCount": 16,
+      "lastAccessed": 1789981603279,
       "type": "directory"
     },
     {
-      "path": "src\\pages\\Team.module.css",
-      "accessCount": 23,
-      "lastAccessed": 1788779575752,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\RankingPage.jsx",
-      "accessCount": 23,
-      "lastAccessed": 1789632167295,
-      "type": "directory"
-    },
-    {
-      "path": "src",
-      "accessCount": 21,
-      "lastAccessed": 1789639774573,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\Team.jsx",
-      "accessCount": 15,
-      "lastAccessed": 1789030056750,
+      "path": "src\\pages\\QuizResult.jsx",
+      "accessCount": 14,
+      "lastAccessed": 1789990001693,
       "type": "file"
     },
     {
-      "path": "test-reports\\20260831_qa_result.md",
-      "accessCount": 13,
-      "lastAccessed": 1788341081667,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\Team.test.jsx",
-      "accessCount": 13,
-      "lastAccessed": 1789633088762,
+      "path": "docs\\superpowers\\plans\\2026-09-21-quiz-figma-sync.md",
+      "accessCount": 9,
+      "lastAccessed": 1789965470068,
       "type": "file"
     },
     {
       "path": "src\\index.css",
-      "accessCount": 13,
-      "lastAccessed": 1789639818398,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\RankingPage.test.jsx",
-      "accessCount": 12,
-      "lastAccessed": 1788938086618,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\Lobby.test.jsx",
-      "accessCount": 10,
-      "lastAccessed": 1789030038678,
-      "type": "file"
-    },
-    {
-      "path": "server\\index.js",
-      "accessCount": 10,
-      "lastAccessed": 1789632076888,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\IndividualPage.test.jsx",
-      "accessCount": 10,
-      "lastAccessed": 1789632866335,
-      "type": "directory"
-    },
-    {
-      "path": "src\\components\\admin\\AdminSpectateModal.jsx",
-      "accessCount": 9,
-      "lastAccessed": 1789021891359,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\AdminClassDashboard.jsx",
       "accessCount": 8,
-      "lastAccessed": 1789017325461,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\Lobby.jsx",
-      "accessCount": 8,
-      "lastAccessed": 1789030074303,
+      "lastAccessed": 1789988029518,
       "type": "file"
     },
     {
-      "path": "src\\App.jsx",
+      "path": "src\\pages\\QuizIntro.module.css",
       "accessCount": 7,
-      "lastAccessed": 1789029546074,
+      "lastAccessed": 1789980794215,
       "type": "file"
     },
     {
-      "path": "src\\pages\\TeamCodeInput.jsx",
-      "accessCount": 7,
-      "lastAccessed": 1789639733348,
-      "type": "file"
-    },
-    {
-      "path": "proposal\\20260831_qa_simulation_proposal.md",
+      "path": "src\\pages\\QuizPlay.jsx",
       "accessCount": 6,
-      "lastAccessed": 1788335669132,
+      "lastAccessed": 1789981607306,
       "type": "file"
     },
     {
-      "path": "server\\rooms.js",
+      "path": "src\\pages\\QuizPlay.module.css",
       "accessCount": 6,
-      "lastAccessed": 1788340724658,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\LandingPage.jsx",
-      "accessCount": 6,
-      "lastAccessed": 1789029588565,
+      "lastAccessed": 1789981943965,
       "type": "file"
     },
     {
-      "path": "server",
-      "accessCount": 6,
-      "lastAccessed": 1789632131278,
-      "type": "directory"
-    },
-    {
-      "path": "src\\pages\\AdminClassDashboard.test.jsx",
-      "accessCount": 5,
-      "lastAccessed": 1788335179892,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\CharacterSelect.jsx",
-      "accessCount": 5,
-      "lastAccessed": 1789029557622,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\NameInput.jsx",
+      "path": "src\\pages\\QuizIntro.jsx",
       "accessCount": 4,
-      "lastAccessed": 1789029558255,
+      "lastAccessed": 1789980765608,
       "type": "file"
     },
     {
-      "path": "src\\components\\admin\\ConfirmDialog.jsx",
+      "path": "src\\pages\\QuizPlay.test.jsx",
       "accessCount": 4,
-      "lastAccessed": 1789632644753,
+      "lastAccessed": 1789981614461,
       "type": "file"
     },
     {
-      "path": "",
-      "accessCount": 3,
-      "lastAccessed": 1789639746773,
+      "path": "src",
+      "accessCount": 2,
+      "lastAccessed": 1789981131437,
       "type": "directory"
     },
     {
-      "path": "src\\main.jsx",
-      "accessCount": 3,
-      "lastAccessed": 1789639788445,
-      "type": "file"
-    },
-    {
-      "path": "src\\pages\\QuizResult.jsx",
+      "path": "src\\pages\\QuizResult.test.jsx",
       "accessCount": 2,
-      "lastAccessed": 1788334284980,
-      "type": "directory"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 2,
-      "lastAccessed": 1788334748815,
+      "lastAccessed": 1789989117814,
       "type": "file"
     },
     {
-      "path": "src\\pages\\AdminLogin.jsx",
-      "accessCount": 2,
-      "lastAccessed": 1788338824535,
-      "type": "file"
-    },
-    {
-      "path": "src\\components\\StepBar.jsx",
-      "accessCount": 2,
-      "lastAccessed": 1788340798629,
-      "type": "file"
-    },
-    {
-      "path": "src\\components\\admin\\ClassQRModal.jsx",
+      "path": "proposal\\20260918_test_figma_sync.md",
       "accessCount": 1,
-      "lastAccessed": 1788163868982,
+      "lastAccessed": 1789962364988,
       "type": "file"
     },
     {
-      "path": "src\\components\\CodeModal.jsx",
+      "path": "proposal\\20260921_test_figma_sync.md",
       "accessCount": 1,
-      "lastAccessed": 1788334749570,
+      "lastAccessed": 1789962416380,
       "type": "file"
     },
     {
-      "path": "src\\components\\CodeModal.test.jsx",
+      "path": "proposal\\20260907_figma_responsive_sync_proposal.md",
       "accessCount": 1,
-      "lastAccessed": 1788334750179,
+      "lastAccessed": 1789962435660,
       "type": "file"
     },
     {
-      "path": "src\\components\\admin\\ConfirmDialog.module.css",
+      "path": "proposal\\20260903_figma_sync.md",
       "accessCount": 1,
-      "lastAccessed": 1788334750266,
+      "lastAccessed": 1789962435981,
       "type": "file"
     },
     {
-      "path": "vite.config.js",
+      "path": "src\\pages\\NameInput.module.css",
       "accessCount": 1,
-      "lastAccessed": 1788334755028,
+      "lastAccessed": 1789962462927,
       "type": "file"
     },
     {
-      "path": "src\\contexts\\SocketContext.jsx",
+      "path": "docs\\superpowers\\specs\\2026-08-26-quiz-result-page-enhancements-design.md",
       "accessCount": 1,
-      "lastAccessed": 1788334755487,
+      "lastAccessed": 1789964374929,
       "type": "file"
     },
     {
-      "path": "src\\setupTests.js",
+      "path": "docs\\superpowers\\specs\\2026-09-21-quiz-figma-sync-design.md",
       "accessCount": 1,
-      "lastAccessed": 1788334759966,
+      "lastAccessed": 1789964458891,
       "type": "file"
     },
     {
-      "path": "src\\pages\\QuizResult.module.css",
+      "path": "src\\pages\\QuizIntro.test.jsx",
       "accessCount": 1,
-      "lastAccessed": 1788334761295,
-      "type": "directory"
-    },
-    {
-      "path": "src\\utils\\toast.test.js",
-      "accessCount": 1,
-      "lastAccessed": 1788334848716,
+      "lastAccessed": 1789964666278,
       "type": "file"
     },
     {
-      "path": "src\\utils\\toast.js",
+      "path": "src\\constants\\quizData.test.js",
       "accessCount": 1,
-      "lastAccessed": 1788334888372,
+      "lastAccessed": 1789964667730,
       "type": "file"
     },
     {
-      "path": "src\\components\\Toaster.test.jsx",
+      "path": "docs\\superpowers\\plans\\2026-08-26-quiz-result-page-enhancements.md",
       "accessCount": 1,
-      "lastAccessed": 1788334902466,
+      "lastAccessed": 1789964713237,
       "type": "file"
     },
     {
-      "path": "src\\components\\Toaster.jsx",
+      "path": "src\\components\\BackButton.jsx",
       "accessCount": 1,
-      "lastAccessed": 1788334912382,
+      "lastAccessed": 1789964782750,
       "type": "file"
     },
     {
-      "path": "src\\components\\Toaster.module.css",
+      "path": "src\\components\\BackButton.module.css",
       "accessCount": 1,
-      "lastAccessed": 1788334918090,
+      "lastAccessed": 1789964801240,
       "type": "file"
     },
     {
-      "path": "src\\components\\AlertModal.test.jsx",
+      "path": "proposal\\20260921_result_page_figma_sync.md",
       "accessCount": 1,
-      "lastAccessed": 1788334933671,
+      "lastAccessed": 1789982676995,
       "type": "file"
     },
     {
-      "path": "src\\components\\AlertModal.jsx",
+      "path": "src\\hooks\\useBodyClass.js",
       "accessCount": 1,
-      "lastAccessed": 1788334944079,
-      "type": "file"
-    },
-    {
-      "path": "src\\components\\AlertModal.module.css",
-      "accessCount": 1,
-      "lastAccessed": 1788334953217,
-      "type": "file"
-    },
-    {
-      "path": "proposal\\20260804_changed_lobby_system.md",
-      "accessCount": 1,
-      "lastAccessed": 1788335342947,
-      "type": "file"
-    },
-    {
-      "path": "src\\hooks\\useSocket.js",
-      "accessCount": 1,
-      "lastAccessed": 1788335933567,
+      "lastAccessed": 1789984301697,
       "type": "file"
     }
   ],

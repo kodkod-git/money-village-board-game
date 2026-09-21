@@ -209,7 +209,7 @@
   border-radius: var(--r-pill);
   background: var(--white);
   color: var(--blue-100);
-  border: 2px solid var(--blue-75);
+  border: 2px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,8 +217,8 @@
 }
 
 .iconBtnImg {
-  width: clamp(19.2px, calc(25.6px * min(var(--sx), var(--sy))), 25.6px);
-  height: clamp(19.2px, calc(25.6px * min(var(--sx), var(--sy))), 25.6px);
+  width: clamp(15px, calc(20px * min(var(--sx), var(--sy))), 20px);
+  height: clamp(15px, calc(20px * min(var(--sx), var(--sy))), 20px);
   object-fit: contain;
   display: block;
 }
@@ -226,7 +226,7 @@
 .kakaoIconBtn {
   background: #FEE500;
   color: #191919;
-  border-color: #FEE500;
+  border: none;
 }
 
 .notice {

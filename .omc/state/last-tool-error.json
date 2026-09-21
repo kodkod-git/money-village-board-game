@@ -1,7 +1,0 @@
-{
-  "tool_name": "mcp__claude-in-chrome__computer",
-  "tool_input_preview": "{\"action\":\"zoom\",\"tabId\":196180845,\"region\":[661,63,895,135]}",
-  "error": "Error capturing zoomed screenshot: CDP sendCommand \"Page.captureScreenshot\" timed out after 30000ms on tab 196180845. The renderer may be frozen or unresponsive.",
-  "timestamp": "2026-09-17T10:25:29.014Z",
-  "retry_count": 1
-}

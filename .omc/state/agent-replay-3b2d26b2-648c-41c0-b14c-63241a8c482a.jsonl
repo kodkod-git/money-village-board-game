@@ -1,6 +1,0 @@
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"superpowers:brainstorming"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"superpowers:writing-plans"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"superpowers:subagent-driven-development"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"superpowers:using-git-worktrees"}
-{"t":0,"agent":"a896a1e","agent_type":"unknown","event":"agent_stop","success":true}
-{"t":0,"agent":"ad8ca2a","agent_type":"unknown","event":"agent_stop","success":true}
