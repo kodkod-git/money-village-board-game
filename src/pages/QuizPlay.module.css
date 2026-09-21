@@ -1,39 +1,45 @@
 .page {
-  min-height: 100dvh;
+  --sx: calc(100cqw / 834px);
+  --sy: calc(100cqh / 1194px);
+  min-height: 100%;
+  height: 100%;
   background: var(--white);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px clamp(24px, 9vw, 49px);
+  position: relative;
+  padding: 0 clamp(20px, calc(49px * var(--sx)), 49px);
+  overflow: hidden;
   font-family: 'PretendardVariable', 'Pretendard', system-ui, sans-serif;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: var(--space-3xl);
+.progressHeader {
+  position: absolute;
+  top: clamp(70px, calc(112px * var(--sy)), 112px);
+  left: clamp(20px, calc(49px * var(--sx)), 49px);
+  right: clamp(20px, calc(49px * var(--sx)), 49px);
 }
 
-.title {
-  font-size: 28px;
-  font-weight: 900;
-  color: var(--ink);
-  margin-bottom: var(--space-sm);
+.progressMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: clamp(11px, calc(14px * min(var(--sx), var(--sy))), 14px);
+  color: var(--disabled);
+  margin-bottom: clamp(6px, calc(8px * var(--sy)), 8px);
 }
 
-.subtitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink-2);
+.progressPercent {
+  color: var(--blue-100);
 }
 
 .progressTrack {
   width: 100%;
-  height: 8px;
-  background: var(--blue-10);
+  height: clamp(6px, calc(8px * var(--sy)), 8px);
+  background: var(--blue-15);
   border-radius: 999px;
   overflow: hidden;
-  margin: var(--space-md) 0 var(--space-sm);
 }
 
 .progressFill {
@@ -42,21 +48,52 @@
   border-radius: 999px;
 }
 
-.card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--white);
-  border: 2px solid var(--blue-75);
-  border-radius: var(--r-lg);
-  padding: var(--space-2xl);
+.center {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  align-items: center;
+  gap: clamp(20px, calc(32px * var(--sy)), 32px);
+  width: 100%;
+  max-width: clamp(300px, calc(426px * min(var(--sx), var(--sy))), 426px);
+  text-align: center;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stepTitle {
+  font-size: clamp(22px, calc(36px * min(var(--sx), var(--sy))), 36px);
+  line-height: 1.22;
+  font-weight: 900;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+.stepSubtitle {
+  margin-top: clamp(6px, calc(8px * var(--sy)), 8px);
+  font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.card {
+  width: 100%;
+  max-width: clamp(300px, calc(426px * min(var(--sx), var(--sy))), 426px);
+  background: var(--white);
+  border: 2px solid var(--blue-75);
+  border-radius: clamp(16px, calc(24px * var(--sy)), 24px);
+  padding: clamp(18px, calc(26px * var(--sy)), 26px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, calc(20px * var(--sy)), 20px);
 }
 
 .guideText,
 .questionPrompt {
-  font-size: 16px;
+  font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
   color: var(--ink);
   white-space: pre-line;
@@ -66,24 +103,25 @@
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: clamp(6px, calc(8px * var(--sy)), 8px);
+  text-align: left;
 }
 
 .label {
-  font-size: 12px;
+  font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   font-weight: 900;
   color: var(--ink-2);
-  letter-spacing: 1.2px;
+  letter-spacing: calc(1.2px * var(--sx));
   text-transform: uppercase;
 }
 
 .input {
-  height: 56px;
-  border-radius: var(--r-sm);
-  border: 2px solid rgba(190, 219, 255, 0.5);
-  background: rgba(112, 166, 254, 0.15);
-  padding: 0 var(--space-xl);
-  font-size: 16px;
+  height: clamp(46px, calc(56px * var(--sy)), 56px);
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  border: 2px solid var(--blue-50);
+  background: var(--blue-15);
+  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
+  font-size: clamp(14px, calc(16px * min(var(--sx), var(--sy))), 16px);
   color: var(--ink);
   outline: none;
 }
@@ -99,13 +137,13 @@
 .input[type='number'] { -moz-appearance: textfield; }
 
 .gradBtn {
-  height: 56px;
+  height: clamp(46px, calc(56px * var(--sy)), 56px);
   background: var(--blue-100);
   color: var(--white);
-  font-size: 20px;
+  font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
   font-weight: 700;
-  border-radius: var(--r-sm);
-  box-shadow: 0 4px 6px -2px rgba(190, 219, 255, 0.5);
+  border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
+  box-shadow: var(--shadow-blue);
 }
 
 .gradBtn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -113,17 +151,28 @@
 .optionList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: clamp(8px, calc(12px * var(--sy)), 12px);
 }
 
-.optionBtn {
-  height: 56px;
-  border-radius: var(--r-sm);
-  font-size: 16px;
+.choiceCard {
+  height: clamp(50px, calc(68px * var(--sy)), 68px);
+  border-radius: clamp(12px, calc(16px * var(--sy)), 16px);
+  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;
-  background: var(--blue-100);
-  color: var(--white);
-  border: 2px solid var(--blue-100);
+  background: var(--white);
+  color: #374151;
+  border: 2px solid var(--blue-10);
+  text-align: left;
+}
+
+.choiceCardSelected {
+  background: var(--blue-50);
+  border-color: var(--blue-75);
+  color: var(--blue-100);
 }
 
 .statusWrap {

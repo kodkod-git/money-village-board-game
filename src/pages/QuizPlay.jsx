@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
-import { GUIDE_TEXT, NAME_LABEL, NAME_PLACEHOLDER, GENDER_LABEL, GENDER_OPTIONS, AGE_LABEL, AGE_PLACEHOLDER, QUESTIONS } from '../constants/quizData'
+import {
+  GUIDE_TEXT, NAME_TITLE, NAME_SUBTITLE, NAME_LABEL, NAME_PLACEHOLDER,
+  GENDER_TITLE, GENDER_OPTIONS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOLDER,
+  QUESTION_SUBTITLE, QUESTIONS, TOTAL_QUIZ_STEPS,
+} from '../constants/quizData'
 import { calcQuizResult } from '../utils/quizScoring'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizPlay.module.css'
@@ -14,7 +18,6 @@ const STEP_QUESTION = 'question'
 const STEP_ANALYZING = 'analyzing'
 const STEP_DONE = 'done'
 const STEP_ERROR = 'error'
-const TOTAL_STEPS = 4 + QUESTIONS.length // 안내 + 이름 + 성별 + 나이 + 문항 수
 
 export default function QuizPlay() {
   const navigate = useNavigate()
@@ -26,12 +29,10 @@ export default function QuizPlay() {
   const [childAge, setChildAge] = useState('')
   const [answers, setAnswers] = useState({})
   const [polarities, setPolarities] = useState({})
-  const [lastPolarities, setLastPolarities] = useState(null)
 
-  function submitResult(finalPolarities) {
+  function submitResult() {
     setStep(STEP_ANALYZING)
-    setLastPolarities(finalPolarities)
-    const { axisTodayTomorrow, axisSafetyAdventure, resultGroup } = calcQuizResult(finalPolarities)
+    const { axisTodayTomorrow, axisSafetyAdventure, resultGroup } = calcQuizResult(polarities)
 
     fetch('/api/quiz/results', {
       method: 'POST',
@@ -48,21 +49,24 @@ export default function QuizPlay() {
       .catch(() => setStep(STEP_ERROR))
   }
 
-  function handleGender(value) {
+  function selectGender(value) {
     setChildGender(value)
+  }
+
+  function confirmGender() {
     setStep(STEP_AGE)
   }
 
-  function handleAnswer(question, option) {
-    const nextAnswers = { ...answers, [question.key]: option.text }
-    const nextPolarities = { ...polarities, [question.key]: option.polarity }
-    setAnswers(nextAnswers)
-    setPolarities(nextPolarities)
+  function selectAnswer(question, option) {
+    setAnswers(prev => ({ ...prev, [question.key]: option.text }))
+    setPolarities(prev => ({ ...prev, [question.key]: option.polarity }))
+  }
 
+  function confirmAnswer() {
     if (questionIndex + 1 < QUESTIONS.length) {
       setQuestionIndex(questionIndex + 1)
     } else {
-      submitResult(nextPolarities)
+      submitResult()
     }
   }
 
@@ -78,111 +82,150 @@ export default function QuizPlay() {
   }
 
   const currentStepNumber =
-    step === STEP_GUIDE ? 1
-    : step === STEP_NAME ? 2
-    : step === STEP_GENDER ? 3
-    : step === STEP_AGE ? 4
-    : 5 + questionIndex
+    step === STEP_NAME ? 1
+    : step === STEP_GENDER ? 2
+    : step === STEP_AGE ? 3
+    : step === STEP_QUESTION || step === STEP_ERROR ? 4 + questionIndex
+    : 0 // STEP_GUIDE — Figma 진행률에 포함되지 않는 단계
+
+  const currentQuestion = QUESTIONS[questionIndex]
 
   return (
     <div className={styles.page}>
       <BackButton />
-      <div className={styles.header}>
-        <h1 className={styles.title}>우리 아이 경제 잠재력 테스트</h1>
-        <div className={styles.progressTrack}>
-          <div
-            className={styles.progressFill}
-            data-testid="quiz-progress-fill"
-            style={{ width: `${(currentStepNumber / TOTAL_STEPS) * 100}%` }}
-          />
+
+      {currentStepNumber > 0 && (
+        <div className={styles.progressHeader}>
+          <div className={styles.progressMeta}>
+            <span>{currentStepNumber}/{TOTAL_QUIZ_STEPS}</span>
+            <span className={styles.progressPercent}>{Math.round((currentStepNumber / TOTAL_QUIZ_STEPS) * 100)}%</span>
+          </div>
+          <div className={styles.progressTrack}>
+            <div
+              className={styles.progressFill}
+              data-testid="quiz-progress-fill"
+              style={{ width: `${(currentStepNumber / TOTAL_QUIZ_STEPS) * 100}%` }}
+            />
+          </div>
         </div>
-        <p className={styles.subtitle}>{step === STEP_ERROR ? '문제가 발생했어요' : `${currentStepNumber}/${TOTAL_STEPS}`}</p>
+      )}
+
+      <div className={styles.center}>
+        {step === STEP_ERROR && (
+          <div className={styles.card}>
+            <p className={styles.questionPrompt}>결과 저장에 실패했어요.</p>
+            <button className={styles.gradBtn} onClick={submitResult}>다시 시도하기</button>
+          </div>
+        )}
+
+        {step === STEP_GUIDE && (
+          <div className={styles.card}>
+            <p className={styles.guideText}>{GUIDE_TEXT}</p>
+            <button className={styles.gradBtn} onClick={() => setStep(STEP_NAME)}>다음 문제</button>
+          </div>
+        )}
+
+        {step === STEP_NAME && (
+          <>
+            <div className={styles.heading}>
+              <h1 className={styles.stepTitle}>{NAME_TITLE}</h1>
+              <p className={styles.stepSubtitle}>{NAME_SUBTITLE}</p>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>{NAME_LABEL}</label>
+                <input
+                  className={styles.input}
+                  placeholder={NAME_PLACEHOLDER}
+                  value={childName}
+                  onChange={e => setChildName(e.target.value)}
+                />
+              </div>
+              <button className={styles.gradBtn} onClick={() => childName.trim() && setStep(STEP_GENDER)} disabled={!childName.trim()}>
+                다음
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === STEP_GENDER && (
+          <>
+            <div className={styles.heading}>
+              <h1 className={styles.stepTitle}>{GENDER_TITLE}</h1>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.optionList}>
+                {GENDER_OPTIONS.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`${styles.choiceCard} ${option.value === childGender ? styles.choiceCardSelected : ''}`}
+                    onClick={() => selectGender(option.value)}
+                  >
+                    <span>{option.label}</span>
+                    {option.value === childGender && <span aria-hidden="true">✓</span>}
+                  </button>
+                ))}
+              </div>
+              <button className={styles.gradBtn} onClick={confirmGender} disabled={!childGender}>
+                다음
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === STEP_AGE && (
+          <>
+            <div className={styles.heading}>
+              <h1 className={styles.stepTitle}>{childName}는 몇 살인가요?</h1>
+              <p className={styles.stepSubtitle}>{AGE_SUBTITLE}</p>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>{AGE_LABEL}</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  placeholder={AGE_PLACEHOLDER}
+                  value={childAge}
+                  onChange={e => setChildAge(e.target.value)}
+                />
+              </div>
+              <button className={styles.gradBtn} onClick={() => childAge && setStep(STEP_QUESTION)} disabled={!childAge}>
+                다음
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === STEP_QUESTION && (
+          <>
+            <div className={styles.heading}>
+              <h1 className={styles.stepTitle}>{currentQuestion.prompt}</h1>
+              <p className={styles.stepSubtitle}>{QUESTION_SUBTITLE}</p>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.optionList}>
+                {currentQuestion.options.map(option => (
+                  <button
+                    key={option.text}
+                    data-quiz-option="true"
+                    type="button"
+                    className={`${styles.choiceCard} ${answers[currentQuestion.key] === option.text ? styles.choiceCardSelected : ''}`}
+                    onClick={() => selectAnswer(currentQuestion, option)}
+                  >
+                    <span>{option.text}</span>
+                    {answers[currentQuestion.key] === option.text && <span aria-hidden="true">✓</span>}
+                  </button>
+                ))}
+              </div>
+              <button className={styles.gradBtn} onClick={confirmAnswer} disabled={!answers[currentQuestion.key]}>
+                다음
+              </button>
+            </div>
+          </>
+        )}
       </div>
-
-      {step === STEP_ERROR && (
-        <div className={styles.card}>
-          <p className={styles.questionPrompt}>결과 저장에 실패했어요.</p>
-          <button className={styles.gradBtn} onClick={() => submitResult(lastPolarities)}>다시 시도하기</button>
-        </div>
-      )}
-
-      {step === STEP_GUIDE && (
-        <div className={styles.card}>
-          <p className={styles.guideText}>{GUIDE_TEXT}</p>
-          <button className={styles.gradBtn} onClick={() => setStep(STEP_NAME)}>다음 문제</button>
-        </div>
-      )}
-
-      {step === STEP_NAME && (
-        <div className={styles.card}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>{NAME_LABEL}</label>
-            <input
-              className={styles.input}
-              placeholder={NAME_PLACEHOLDER}
-              value={childName}
-              onChange={e => setChildName(e.target.value)}
-            />
-          </div>
-          <button className={styles.gradBtn} onClick={() => childName.trim() && setStep(STEP_GENDER)} disabled={!childName.trim()}>
-            다음 문제
-          </button>
-        </div>
-      )}
-
-      {step === STEP_GENDER && (
-        <div className={styles.card}>
-          <p className={styles.questionPrompt}>{GENDER_LABEL}</p>
-          <div className={styles.optionList}>
-            {GENDER_OPTIONS.map(option => (
-              <button
-                key={option.value}
-                type="button"
-                className={styles.optionBtn}
-                onClick={() => handleGender(option.value)}
-              >
-                <span aria-hidden="true">{option.emoji}</span> {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {step === STEP_AGE && (
-        <div className={styles.card}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>{AGE_LABEL}</label>
-            <input
-              className={styles.input}
-              type="number"
-              placeholder={AGE_PLACEHOLDER}
-              value={childAge}
-              onChange={e => setChildAge(e.target.value)}
-            />
-          </div>
-          <button className={styles.gradBtn} onClick={() => childAge && setStep(STEP_QUESTION)} disabled={!childAge}>
-            다음 문제
-          </button>
-        </div>
-      )}
-
-      {step === STEP_QUESTION && (
-        <div className={styles.card}>
-          <p className={styles.questionPrompt}>{QUESTIONS[questionIndex].prompt}</p>
-          <div className={styles.optionList}>
-            {QUESTIONS[questionIndex].options.map(option => (
-              <button
-                key={option.text}
-                data-quiz-option="true"
-                className={styles.optionBtn}
-                onClick={() => handleAnswer(QUESTIONS[questionIndex], option)}
-              >
-                {option.text}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
