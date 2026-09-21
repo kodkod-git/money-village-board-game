@@ -117,7 +117,9 @@
   background: var(--white);
   border-radius: clamp(20px, calc(32px * var(--sy)), 32px) clamp(20px, calc(32px * var(--sy)), 32px) 0 0;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-  padding: clamp(20px, calc(28px * var(--sy)), 28px) clamp(24px, calc(32px * var(--sx)), 32px) clamp(32px, calc(48px * var(--sy)), 48px);
+  /* 좌우 패딩을 % 값으로 둬서 카드 폭이 얼마든(좁은 폰~600px 상한) 버튼/칩
+     같은 100% 너비 요소가 항상 카드 폭의 약 65%를 차지하도록 유지한다. */
+  padding: clamp(20px, calc(28px * var(--sy)), 28px) 17.5% clamp(32px, calc(48px * var(--sy)), 48px);
   display: flex;
   flex-direction: column;
   align-items: center;
