@@ -217,8 +217,8 @@
 }
 
 .iconBtnImg {
-  width: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
-  height: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  width: clamp(19.2px, calc(25.6px * min(var(--sx), var(--sy))), 25.6px);
+  height: clamp(19.2px, calc(25.6px * min(var(--sx), var(--sy))), 25.6px);
   object-fit: contain;
   display: block;
 }
