@@ -91,7 +91,6 @@
   gap: clamp(14px, calc(20px * var(--sy)), 20px);
 }
 
-.guideText,
 .questionPrompt {
   font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
   font-weight: 700;

@@ -12,8 +12,6 @@ import QuizPlay from './QuizPlay'
 import { QUESTIONS } from '../constants/quizData'
 
 function answerAllQuestions() {
-  // 안내 슬라이드
-  fireEvent.click(screen.getByText('다음 문제'))
   // 이름
   fireEvent.change(screen.getByPlaceholderText('예: 이준서'), { target: { value: '철수' } })
   fireEvent.click(screen.getByText('다음'))
@@ -37,15 +35,16 @@ describe('QuizPlay', () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ id: 'result-1' }) })
   })
 
-  it('안내 슬라이드를 먼저 보여주고 진행바는 표시하지 않는다', () => {
+  it('이름 입력 화면으로 바로 시작하며 진행바가 1단계로 표시된다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
-    expect(screen.getByText(/우리 아이와 가까운 모습을 선택해주세요/)).toBeInTheDocument()
-    expect(screen.queryByTestId('quiz-progress-fill')).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText('예: 이준서')).toBeInTheDocument()
+    const total = QUESTIONS.length + 3
+    const fill = screen.getByTestId('quiz-progress-fill')
+    expect(parseFloat(fill.style.width)).toBeCloseTo((1 / total) * 100, 5)
   })
 
   it('이름을 입력하지 않으면 다음으로 넘어가지 않는다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
-    fireEvent.click(screen.getByText('다음 문제'))
     fireEvent.click(screen.getByText('다음'))
     expect(screen.getByPlaceholderText('예: 이준서')).toBeInTheDocument()
   })
@@ -66,7 +65,6 @@ describe('QuizPlay', () => {
 
   it('성별을 선택하고 다음 버튼을 눌러야 나이 입력 단계로 넘어간다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
-    fireEvent.click(screen.getByText('다음 문제'))
     fireEvent.change(screen.getByPlaceholderText('예: 이준서'), { target: { value: '철수' } })
     fireEvent.click(screen.getByText('다음'))
 
@@ -84,7 +82,6 @@ describe('QuizPlay', () => {
 
   it('질문 단계에서도 선택 후 다음 버튼을 눌러야 다음 문항으로 넘어간다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
-    fireEvent.click(screen.getByText('다음 문제'))
     fireEvent.change(screen.getByPlaceholderText('예: 이준서'), { target: { value: '철수' } })
     fireEvent.click(screen.getByText('다음'))
     fireEvent.click(screen.getByRole('button', { name: /남자아이/ }))
@@ -106,11 +103,9 @@ describe('QuizPlay', () => {
     expect(screen.getByText(QUESTIONS[1].prompt)).toBeInTheDocument()
   })
 
-  it('진행바는 이름 단계부터 표시되며 "안내" 단계는 세지 않는다', () => {
+  it('진행바가 단계 진행에 따라 갱신된다', () => {
     render(<MemoryRouter><QuizPlay /></MemoryRouter>)
     const total = QUESTIONS.length + 3
-
-    fireEvent.click(screen.getByText('다음 문제')) // 이름 단계 = 1/total
     const fill = screen.getByTestId('quiz-progress-fill')
     expect(parseFloat(fill.style.width)).toBeCloseTo((1 / total) * 100, 5)
 

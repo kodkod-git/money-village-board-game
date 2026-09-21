@@ -1,5 +1,3 @@
-export const GUIDE_TEXT = '우리 아이와 가까운 모습을 선택해주세요.\n정답은 없습니다.'
-
 export const INTRO_TITLE_LINE1 = '우리 아이'
 export const INTRO_TITLE_LINE2 = '경제 잠재력 테스트'
 export const INTRO_SUBTITLE = '우리 아이의 경제 컬러는 무엇일까요?\n아이와 가까운 모습을 선택해주세요'

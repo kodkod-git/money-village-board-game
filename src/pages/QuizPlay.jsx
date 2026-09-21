@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import {
-  GUIDE_TEXT, NAME_TITLE, NAME_SUBTITLE, NAME_LABEL, NAME_PLACEHOLDER,
+  NAME_TITLE, NAME_SUBTITLE, NAME_LABEL, NAME_PLACEHOLDER,
   GENDER_TITLE, GENDER_OPTIONS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOLDER,
   QUESTION_SUBTITLE, QUESTIONS, TOTAL_QUIZ_STEPS,
 } from '../constants/quizData'
@@ -10,7 +10,6 @@ import { calcQuizResult } from '../utils/quizScoring'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizPlay.module.css'
 
-const STEP_GUIDE = 'guide'
 const STEP_NAME = 'name'
 const STEP_GENDER = 'gender'
 const STEP_AGE = 'age'
@@ -22,7 +21,7 @@ const STEP_ERROR = 'error'
 export default function QuizPlay() {
   const navigate = useNavigate()
   useBodyClass('onboarding-mode')
-  const [step, setStep] = useState(STEP_GUIDE)
+  const [step, setStep] = useState(STEP_NAME)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [childName, setChildName] = useState('')
   const [childGender, setChildGender] = useState('')
@@ -85,8 +84,7 @@ export default function QuizPlay() {
     step === STEP_NAME ? 1
     : step === STEP_GENDER ? 2
     : step === STEP_AGE ? 3
-    : step === STEP_QUESTION || step === STEP_ERROR ? 4 + questionIndex
-    : 0 // STEP_GUIDE — Figma 진행률에 포함되지 않는 단계
+    : 4 + questionIndex // STEP_QUESTION or STEP_ERROR
 
   const currentQuestion = QUESTIONS[questionIndex]
 
@@ -94,34 +92,25 @@ export default function QuizPlay() {
     <div className={styles.page}>
       <BackButton />
 
-      {currentStepNumber > 0 && (
-        <div className={styles.progressHeader}>
-          <div className={styles.progressMeta}>
-            <span>{currentStepNumber}/{TOTAL_QUIZ_STEPS}</span>
-            <span className={styles.progressPercent}>{Math.round((currentStepNumber / TOTAL_QUIZ_STEPS) * 100)}%</span>
-          </div>
-          <div className={styles.progressTrack}>
-            <div
-              className={styles.progressFill}
-              data-testid="quiz-progress-fill"
-              style={{ width: `${(currentStepNumber / TOTAL_QUIZ_STEPS) * 100}%` }}
-            />
-          </div>
+      <div className={styles.progressHeader}>
+        <div className={styles.progressMeta}>
+          <span>{currentStepNumber}/{TOTAL_QUIZ_STEPS}</span>
+          <span className={styles.progressPercent}>{Math.round((currentStepNumber / TOTAL_QUIZ_STEPS) * 100)}%</span>
         </div>
-      )}
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            data-testid="quiz-progress-fill"
+            style={{ width: `${(currentStepNumber / TOTAL_QUIZ_STEPS) * 100}%` }}
+          />
+        </div>
+      </div>
 
       <div className={styles.center}>
         {step === STEP_ERROR && (
           <div className={styles.card}>
             <p className={styles.questionPrompt}>결과 저장에 실패했어요.</p>
             <button className={styles.gradBtn} onClick={submitResult}>다시 시도하기</button>
-          </div>
-        )}
-
-        {step === STEP_GUIDE && (
-          <div className={styles.card}>
-            <p className={styles.guideText}>{GUIDE_TEXT}</p>
-            <button className={styles.gradBtn} onClick={() => setStep(STEP_NAME)}>다음 문제</button>
           </div>
         )}
 
