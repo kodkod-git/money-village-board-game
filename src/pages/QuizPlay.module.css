@@ -140,7 +140,7 @@
   background: var(--blue-100);
   color: var(--white);
   font-size: clamp(16px, calc(20px * min(var(--sx), var(--sy))), 20px);
-  font-weight: 700;
+  font-weight: 400;
   border-radius: clamp(14px, calc(20px * var(--sy)), 20px);
   box-shadow: var(--shadow-blue);
 }
