@@ -59,8 +59,10 @@ export default function QuizResult() {
   if (error) {
     return (
       <div className={styles.page}>
-        <p className={styles.eyebrow}>결과를 불러오지 못했어요.</p>
-        <button className={styles.retryBtn} onClick={() => navigate('/quiz')}>다시 하기</button>
+        <div className={styles.errorWrap}>
+          <p className={styles.errorText}>결과를 불러오지 못했어요.</p>
+          <button className={styles.retryBtn} onClick={() => navigate('/quiz')}>다시 하기</button>
+        </div>
       </div>
     )
   }
@@ -72,22 +74,34 @@ export default function QuizResult() {
   const isTodayTomorrowLeftActive = result.axis_today_tomorrow === AXIS_LABELS.axisTodayTomorrow.leftValue
   const isSafetyAdventureLeftActive = result.axis_safety_adventure === AXIS_LABELS.axisSafetyAdventure.leftValue
   const navBtnStyle = { background: group.color, borderColor: group.color }
-  const groupColorStyle = { color: group.color }
+  const tintStyle = {
+    backgroundColor: `color-mix(in srgb, ${group.color} 12%, white)`,
+    borderColor: `color-mix(in srgb, ${group.color} 35%, white)`,
+  }
+  const pillStyle = { backgroundColor: `color-mix(in srgb, ${group.color} 14%, white)`, color: group.color }
   const iconBtnStyle = { background: group.color, borderColor: group.color, color: 'var(--white)' }
 
   return (
-    <div className={styles.page} style={{ background: group.bgColor || group.color }}>
-      <div className={styles.hero}>
+    <div className={styles.page}>
+      <div className={styles.hero} style={{ backgroundColor: group.bgColor || group.color }}>
         {group.illustration && (
           <img className={styles.illustration} src={group.illustration} alt={result.result_group} />
         )}
+        <div className={styles.heroFade} />
       </div>
 
       <div className={styles.card}>
-        <p className={styles.eyebrow}>우리 아이의 경제적 잠재력은</p>
-        <h1 className={styles.groupName} style={groupColorStyle}>{result.result_group}</h1>
-        <p className={styles.tagline} style={groupColorStyle}>[{group.tagline}]</p>
-        <p className={styles.description}>✅ {group.description}</p>
+        <span className={styles.eyebrow} style={pillStyle}>우리 아이의 경제적 잠재력은</span>
+        <h1 className={styles.groupName} style={{ color: group.color }}>{result.result_group}</h1>
+        <p className={styles.tagline}>{group.tagline}</p>
+
+        <div className={styles.descriptionBox} style={tintStyle}>
+          <svg className={styles.checkIcon} viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={group.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <path d="M7 12.5l3 3 7-7" />
+          </svg>
+          <p className={styles.description}>{group.description}</p>
+        </div>
 
         {group.animals.length > 0 && (
           <p className={styles.animals}>{group.animals.join(' · ')}</p>
@@ -149,10 +163,10 @@ export default function QuizResult() {
               </svg>
             </a>
           </div>
-          {notice && <p className={styles.notice} style={groupColorStyle}>{notice}</p>}
+          {notice && <p className={styles.notice} style={{ color: group.color }}>{notice}</p>}
         </div>
 
-        <button className={styles.retryBtn} style={navBtnStyle} onClick={() => navigate('/quiz')}>
+        <button className={styles.retryBtn} onClick={() => navigate('/quiz')}>
           다시 하기
         </button>
       </div>

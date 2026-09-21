@@ -38,7 +38,7 @@ describe('QuizResult', () => {
   it('결과 그룹명과 태그라인을 렌더링한다', async () => {
     renderResult()
     await waitFor(() => expect(screen.getByText('Green Group')).toBeInTheDocument())
-    expect(screen.getByText('[오늘을 가꾸며 안정을 추구하는 그룹]')).toBeInTheDocument()
+    expect(screen.getByText('오늘을 가꾸며 안정을 추구하는 그룹')).toBeInTheDocument()
   })
 
   it('링크 공유하기를 누르면 현재 URL을 클립보드에 복사하고 안내 문구를 보여준다', async () => {
@@ -86,5 +86,12 @@ describe('QuizResult', () => {
     await waitFor(() => screen.getByText('Green Group'))
     fireEvent.click(screen.getByLabelText('카카오톡 공유하기'))
     expect(screen.getByText('카카오톡 공유는 준비 중이에요')).toBeInTheDocument()
+  })
+
+  it('다시 하기 버튼은 그룹 색상과 무관하게 항상 파란색이다', async () => {
+    renderResult()
+    await waitFor(() => screen.getByText('Green Group'))
+    const retryBtn = screen.getByText('다시 하기')
+    expect(retryBtn).not.toHaveAttribute('style')
   })
 })
