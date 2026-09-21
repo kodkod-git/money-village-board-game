@@ -287,8 +287,10 @@ body.quiz-mode #root {
 
 - [ ] **Step 3: 기존 스위트 통과 확인**
 
-Run: `npx vitest run src/pages/QuizIntro.test.jsx src/pages/QuizPlay.test.jsx src/pages/QuizResult.test.jsx`
+Run: `npx vitest run src/pages/QuizIntro.test.jsx src/pages/QuizResult.test.jsx`
 Expected: PASS (아직 화면 내용을 바꾸지 않았으므로 기존 테스트 그대로 통과해야 한다)
+
+`src/pages/QuizPlay.test.jsx`는 이 스텝에서 실행하지 않는다 — Task 1에서 `quizData.js`의 `GENDER_LABEL`을 제거하고 `NAME_PLACEHOLDER`/`AGE_PLACEHOLDER` 문구를 바꿨기 때문에, 아직 옛 버전인 `QuizPlay.jsx`/`QuizPlay.test.jsx`는 Task 1 이후 이미 몇 건 실패하는 상태다(예: `GENDER_LABEL`이 더 이상 export되지 않아 성별 안내 문구가 비고, placeholder 텍스트 불일치). 이는 Task 1→Task 4 사이의 의도된 전이 상태이며 Task 2의 변경(바디 클래스명 교체)과는 무관하다. Task 4가 `QuizPlay.jsx`/`QuizPlay.test.jsx`를 전체 교체하면서 해결되므로, 이 태스크에서는 손대지 않는다.
 
 - [ ] **Step 4: 커밋**
 
