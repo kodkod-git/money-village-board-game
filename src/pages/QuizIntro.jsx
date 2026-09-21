@@ -27,28 +27,15 @@ export default function QuizIntro() {
         <div className={styles.card}>
           <div className={styles.metaRow}>
             <span className={styles.metaItem}>
-              <svg className={styles.metaIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="5" y="4" width="14" height="17" rx="2" />
-                <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z" />
-                <path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" />
-              </svg>
+              <img className={styles.metaIcon} src="/icons/assignment.png" alt="" aria-hidden="true" />
               {QUESTIONS.length}가지 질문
             </span>
             <span className={styles.metaItem}>
-              <svg className={styles.metaIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="13" r="8" />
-                <path d="M12 9v4l3 2" />
-                <path d="M9 2h6" />
-              </svg>
+              <img className={styles.metaIcon} src="/icons/alarm.png" alt="" aria-hidden="true" />
               {INTRO_META_TIME}
             </span>
             <span className={styles.metaItem}>
-              <svg className={styles.metaIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="6" cy="5" r="2" />
-                <circle cx="18" cy="10" r="2" />
-                <circle cx="18" cy="19" r="2" />
-                <path d="M6 7v6a2 2 0 0 0 2 2h1M9 15h7M18 12v5" />
-              </svg>
+              <img className={styles.metaIcon} src="/icons/account_tree.png" alt="" aria-hidden="true" />
               {INTRO_META_ANALYSIS}
             </span>
           </div>
