@@ -15,7 +15,7 @@ const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY
 export default function QuizResult() {
   const { resultId } = useParams()
   const navigate = useNavigate()
-  useBodyClass('quiz-mode')
+  useBodyClass('onboarding-mode')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(false)
   const [notice, setNotice] = useState('')

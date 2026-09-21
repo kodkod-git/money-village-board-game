@@ -5,7 +5,7 @@ import styles from './QuizIntro.module.css'
 
 export default function QuizIntro() {
   const navigate = useNavigate()
-  useBodyClass('quiz-mode')
+  useBodyClass('onboarding-mode')
 
   return (
     <div className={styles.page}>

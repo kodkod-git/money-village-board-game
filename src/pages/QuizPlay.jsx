@@ -18,7 +18,7 @@ const TOTAL_STEPS = 4 + QUESTIONS.length // 안내 + 이름 + 성별 + 나이 + 
 
 export default function QuizPlay() {
   const navigate = useNavigate()
-  useBodyClass('quiz-mode')
+  useBodyClass('onboarding-mode')
   const [step, setStep] = useState(STEP_GUIDE)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [childName, setChildName] = useState('')

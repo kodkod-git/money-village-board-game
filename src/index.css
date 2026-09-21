@@ -174,34 +174,6 @@ body::after {
 input, button { font-family: inherit; }
 button { cursor: pointer; border: none; }
 
-/* 퀴즈 화면은 기기·화면 크기와 무관하게 모바일 폭 한 장으로 보여준다.
-   공통 폰 프레임(#root의 둥근 테두리·그림자·고정 비율)을 벗어나고,
-   세로 길이는 제한 없이 내용만큼 늘어난다. */
-body.quiz-mode {
-  padding: 0;
-  align-items: flex-start;
-  justify-content: center;
-  background: var(--bluish-white);
-}
-
-body.quiz-mode::before,
-body.quiz-mode::after {
-  display: none;
-}
-
-body.quiz-mode #root {
-  width: min(100vw, var(--app-max-width));
-  height: auto;
-  min-height: 100dvh;
-  max-height: none;
-  aspect-ratio: unset;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  overflow: visible;
-  contain: none;
-}
-
 /* 온보딩 화면(홈 · 이름 입력 · 팀 참여 · 캐릭터 선택 · 팀 화면) 전용 모드.
    처음엔 저 4개 화면만 대상이었지만, 이후 팀 화면(Team.jsx)도 같은 방식으로
    Figma에 맞춰 동기화하면서 이 클래스를 그대로 재사용하게 됐다. 앞으로 같은
