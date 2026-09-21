@@ -81,6 +81,7 @@ export default function QuizResult() {
   }
   const pillStyle = { backgroundColor: `color-mix(in srgb, ${group.color} 14%, white)`, color: group.color }
   const activeValueStyle = { ...tintStyle, color: group.color }
+  const avatarStyle = { backgroundColor: tintStyle.backgroundColor, borderColor: group.color }
 
   return (
     <div className={styles.page}>
@@ -110,7 +111,7 @@ export default function QuizResult() {
             <div className={styles.animalRow}>
               {group.animals.map(animal => (
                 <div key={animal} className={styles.animalItem}>
-                  <span className={styles.animalAvatar} style={tintStyle} aria-hidden="true">{ANIMAL_EMOJIS[animal] ?? '🐾'}</span>
+                  <span className={styles.animalAvatar} style={avatarStyle} aria-hidden="true">{ANIMAL_EMOJIS[animal] ?? '🐾'}</span>
                   <span className={styles.animalName}>{animal}</span>
                 </div>
               ))}
