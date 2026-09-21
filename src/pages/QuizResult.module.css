@@ -83,11 +83,12 @@
   position: relative;
   width: 100%;
   /* 배경 사진의 실제 픽셀 비율(1774×887 = 2:1)과 정확히 맞춘다 — 높이를
-     너비와 별개로 고정된 값(예전 Figma 360px 기준)에서 구하면, 너비가
-     사진 비율보다 더 넓어질 때마다 object-fit:cover가 사진 위아래를 더
-     잘라내야 해서 "옆으로 늘릴수록 더 잘린다" 문제가 재발한다. 비율을
-     묶어두면 .hero는 어떤 너비에서도 항상 사진과 같은 모양이라 사진이
-     여백 없이 꽉 차고, 가로로 넓어져도 잘리는 비율이 늘지 않는다. */
+     너비와 별개로 고정된 값에서 구하면, 너비가 사진 비율보다 더 넓어질
+     때마다 object-fit:cover가 사진 위아래를 더 잘라내야 해서 "옆으로
+     늘릴수록 더 잘린다" 문제가 생긴다. 비율을 묶어두면 .hero는 어떤
+     너비에서도 항상 사진과 같은 모양이라 사진이 여백 없이 꽉 찬다.
+     너비 자체는 .card와 마찬가지로 #root의 상한(index.css, 600px)을
+     그대로 물려받으므로 둘의 폭이 항상 정확히 일치한다. */
   aspect-ratio: 1774 / 887;
   overflow: hidden;
   flex-shrink: 0;
@@ -112,12 +113,6 @@
 
 .card {
   position: relative;
-  /* 히어로/#root는 배경 사진 폭(1774px)까지 넓어지지만, 카드 본문(텍스트·
-     버튼)은 Figma 기준 콘텐츠 폭(약 600px)에서 멈춘다 — 그 이상은 align-self:
-     center로 가운데 정렬만 하고 좌우에 카드 배경(흰색)이 남는다. */
-  width: 100%;
-  max-width: 600px;
-  align-self: center;
   margin-top: clamp(-32px, calc(-50px * var(--sy)), -50px);
   background: var(--white);
   border-radius: clamp(20px, calc(32px * var(--sy)), 32px) clamp(20px, calc(32px * var(--sy)), 32px) 0 0;
