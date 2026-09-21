@@ -209,7 +209,10 @@ body.onboarding-mode #root {
   container-type: size;
 }
 
-/* 결과 화면 전용 모드. 다른 온보딩 화면들과 같은 834px 가로 상한을 쓰되,
+/* 결과 화면 전용 모드. 가로 상한은 다른 온보딩 화면들의 Figma 프레임(834px)이
+   아니라 결과 화면 배경 사진의 실제 픽셀 폭(1774px, 그룹 4종 모두 동일)에
+   맞춘다 — QuizResult.module.css의 .illustration도 같은 1774px를 상한으로
+   쓰므로, 화면이 그 폭까지 넓어지면 사진이 배경색 여백 없이 정확히 꽉 찬다.
    세로는 1194px로 묶지 않고 뷰포트 전체(100dvh)를 채운다 — 결과 화면은
    버튼 여러 개로 콘텐츠 길이가 유동적이라 세로를 고정 프레임에 맞추기보다
    화면 끝까지 채우는 쪽이 자연스럽다(길면 .page 자체 스크롤로 흘려보낸다).
@@ -222,7 +225,7 @@ body.result-mode {
 }
 
 body.result-mode #root {
-  width: min(100%, 834px);
+  width: min(100%, 1774px);
   height: 100dvh;
   min-height: var(--app-min-height);
   border-radius: 0;
