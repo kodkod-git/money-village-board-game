@@ -136,7 +136,7 @@
 
 .groupName {
   font-size: clamp(24px, calc(36px * min(var(--sx), var(--sy))), 36px);
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .tagline {
