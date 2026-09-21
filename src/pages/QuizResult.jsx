@@ -111,7 +111,7 @@ export default function QuizResult() {
             <div className={styles.animalRow}>
               {group.animals.map(animal => (
                 <div key={animal} className={styles.animalItem}>
-                  <span className={styles.animalAvatar} style={tintStyle}>{ANIMAL_EMOJIS[animal] ?? '🐾'}</span>
+                  <span className={styles.animalAvatar} style={tintStyle} aria-hidden="true">{ANIMAL_EMOJIS[animal] ?? '🐾'}</span>
                   <span className={styles.animalName}>{animal}</span>
                 </div>
               ))}
