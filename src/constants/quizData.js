@@ -106,7 +106,7 @@ export const GROUP_DETAIL_URLS = {
 // 결과 화면 "대표 동물" 아바타에 쓰는 이모지. RESULT_GROUPS[].animals(이름 문자열)과
 // 함께 참조해서 렌더링한다.
 export const ANIMAL_EMOJIS = {
-  판다: '🐼', 캥거루: '🦘', 고양이: '🐱', 펭귀: '🐧',
+  판다: '🐼', 캥거루: '🦘', 고양이: '🐱', 펭귄: '🐧',
   강아지: '🐶', 여우: '🦊', 원숭이: '🐵', 호랑이: '🐯',
   개미: '🐜', 부엉이: '🦉', 다람쥐: '🐿️', 수달: '🦦',
   독수리: '🦅', 돌고래: '🐬', 사자: '🦁', 코끼리: '🐘',
@@ -120,7 +120,7 @@ export const RESULT_GROUPS = {
     bgColor: '#99D8B0',
     tagline: '오늘을 가꾸며 안정을 추구하는 그룹',
     description: '오늘의 일상을 소중히 가꾸고 편안하게 지켜가는 힘이 보여요',
-    animals: ['판다', '캥거루', '고양이', '펭귀'],
+    animals: ['판다', '캥거루', '고양이', '펭귄'],
     illustration: '/groups/green.png',
   },
   'Red Group': {
