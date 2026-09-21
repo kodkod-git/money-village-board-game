@@ -1,17 +1,30 @@
 export const GUIDE_TEXT = '우리 아이와 가까운 모습을 선택해주세요.\n정답은 없습니다.'
 
-export const NAME_LABEL = '우리 아이의 이름을 입력해주세요.'
-export const NAME_PLACEHOLDER = '텍스트를 입력해 주세요.'
+export const INTRO_TITLE_LINE1 = '우리 아이'
+export const INTRO_TITLE_LINE2 = '경제 잠재력 테스트'
+export const INTRO_SUBTITLE = '우리 아이의 경제 컬러는 무엇일까요?\n아이와 가까운 모습을 선택해주세요'
+export const INTRO_SUBTITLE_EMPHASIS = '정답은 없습니다'
+export const INTRO_META_TIME = '약 3분'
+export const INTRO_META_ANALYSIS = '유형 분석'
+export const INTRO_FOOTER = '© 2026 머니빌리지'
 
-export const GENDER_LABEL = '우리 아이의 성별을 선택해주세요.'
+export const NAME_TITLE = '아이의 이름을\n알려주세요'
+export const NAME_SUBTITLE = '결과 화면에 표시됩니다'
+export const NAME_LABEL = '이름'
+export const NAME_PLACEHOLDER = '예: 이준서'
+
+export const GENDER_TITLE = '성별을\n선택해주세요'
 // value는 survey.efti_test_responses.child_gender 컬럼에 저장된다.
 export const GENDER_OPTIONS = [
-  { value: 'male', label: '남자', emoji: '👦' },
-  { value: 'female', label: '여자', emoji: '👧' },
+  { value: 'male', label: '남자아이' },
+  { value: 'female', label: '여자아이' },
 ]
 
-export const AGE_LABEL = '우리 아이의 나이를 입력해주세요.'
-export const AGE_PLACEHOLDER = '숫자를 입력해 주세요.'
+export const AGE_SUBTITLE = '숫자를 입력해주세요'
+export const AGE_LABEL = '숫자'
+export const AGE_PLACEHOLDER = '예: 10'
+
+export const QUESTION_SUBTITLE = '아이와 가까운 모습을 골라주세요'
 
 // key는 survey.efti_test_responses 컬럼명과 1:1 대응한다.
 // axis: 'A'는 오늘(today)/내일(tomorrow), 'B'는 안전(safety)/모험(adventure).
@@ -72,6 +85,9 @@ export const QUESTIONS = [
   },
 ]
 
+// "안내" 슬라이드는 Figma 진행률에 포함되지 않는다 — 이름·성별·나이 3단계 + 질문 개수.
+export const TOTAL_QUIZ_STEPS = QUESTIONS.length + 3
+
 export const AXIS_LABELS = {
   axisTodayTomorrow: { left: '내일 꿈꾸기', leftValue: 'tomorrow', right: '오늘 가꾸기', rightValue: 'today' },
   axisSafetyAdventure: { left: '안전 지키기', leftValue: 'safety', right: '모험 즐기기', rightValue: 'adventure' },
@@ -87,6 +103,15 @@ export const GROUP_DETAIL_URLS = {
   'Red Group': 'https://blog.naver.com/kodkod79/224229254511',
 }
 
+// 결과 화면 "대표 동물" 아바타에 쓰는 이모지. RESULT_GROUPS[].animals(이름 문자열)과
+// 함께 참조해서 렌더링한다.
+export const ANIMAL_EMOJIS = {
+  판다: '🐼', 캥거루: '🦘', 고양이: '🐱', 펭귀: '🐧',
+  강아지: '🐶', 여우: '🦊', 원숭이: '🐵', 호랑이: '🐯',
+  개미: '🐜', 부엉이: '🦉', 다람쥐: '🐿️', 수달: '🦦',
+  독수리: '🦅', 돌고래: '🐬', 사자: '🦁', 코끼리: '🐘',
+}
+
 // bgColor는 각 일러스트(/groups/*.png)의 배경색 평균값이다. 결과 화면 배경을
 // 일러스트 배경과 맞춰 이음새가 보이지 않게 하려고 쓴다.
 export const RESULT_GROUPS = {
@@ -95,7 +120,7 @@ export const RESULT_GROUPS = {
     bgColor: '#99D8B0',
     tagline: '오늘을 가꾸며 안정을 추구하는 그룹',
     description: '오늘의 일상을 소중히 가꾸고 편안하게 지켜가는 힘이 보여요',
-    animals: ['판다', '캥거루', '고양이', '펭귄'],
+    animals: ['판다', '캥거루', '고양이', '펭귀'],
     illustration: '/groups/green.png',
   },
   'Red Group': {
