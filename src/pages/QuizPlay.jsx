@@ -190,7 +190,7 @@ export default function QuizPlay() {
         {step === STEP_QUESTION && (
           <>
             <div className={styles.heading}>
-              <h1 className={styles.stepTitle}>{currentQuestion.prompt}</h1>
+              <h1 className={styles.stepTitle}>{currentQuestion.prompt.replace('{name}', childName)}</h1>
               <p className={styles.stepSubtitle}>{QUESTION_SUBTITLE}</p>
             </div>
             <div className={styles.card}>

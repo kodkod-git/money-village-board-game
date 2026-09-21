@@ -30,7 +30,7 @@ export const QUESTIONS = [
   {
     key: 'q_pocket_money',
     axis: 'A',
-    prompt: '우리 아이는 용돈을 받으면 어떤 편인가요?',
+    prompt: '{name}는 용돈을 받으면\n어떤 편인가요?',
     options: [
       { text: '바로 쓰며 기뻐하는 편이에요.', polarity: 'today' },
       { text: '모았다가 뜻있게 쓰는 편이에요.', polarity: 'tomorrow' },
@@ -39,7 +39,7 @@ export const QUESTIONS = [
   {
     key: 'q_new_activity',
     axis: 'B',
-    prompt: '우리 아이는 새로운 활동을 할 때 어떤 편인가요?',
+    prompt: '{name}는 새로운 활동을 할 때\n어떤 편인가요?',
     options: [
       { text: '익숙한 방법이 편한 편이에요.', polarity: 'safety' },
       { text: '새로운 방법도 즐겁게 해보는 편이에요.', polarity: 'adventure' },
@@ -48,7 +48,7 @@ export const QUESTIONS = [
   {
     key: 'q_want_something',
     axis: 'A',
-    prompt: '우리 아이는 갖고 싶은 것이 생기면 어떤 편인가요?',
+    prompt: '{name}는 갖고 싶은 것이 생기면\n어떤 편인가요?',
     options: [
       { text: '빨리 갖고 싶어 하는 편이에요.', polarity: 'today' },
       { text: '기다렸다가 더 잘 고르는 편이에요.', polarity: 'tomorrow' },
@@ -57,7 +57,7 @@ export const QUESTIONS = [
   {
     key: 'q_hard_task',
     axis: 'B',
-    prompt: '우리 아이는 쉽지 않아 보이는 일 앞에서 어떤 편인가요?',
+    prompt: '{name}는 쉽지 않아 보이는 일 앞에서\n어떤 편인가요?',
     options: [
       { text: '잘할 수 있는 방법을 먼저 고르는 편이에요.', polarity: 'safety' },
       { text: '해보면서 배워보려는 편이에요.', polarity: 'adventure' },
@@ -66,7 +66,7 @@ export const QUESTIONS = [
   {
     key: 'q_choosing_item',
     axis: 'A',
-    prompt: '우리 아이는 물건을 고를 때 어떤 편인가요?',
+    prompt: '{name}는 물건을 고를 때\n어떤 편인가요?',
     options: [
       { text: '지금 마음에 드는 것을 고르는 편이에요.', polarity: 'today' },
       { text: '오래 쓸 수 있는 것을 생각하는 편이에요.', polarity: 'tomorrow' },
@@ -75,7 +75,7 @@ export const QUESTIONS = [
   {
     key: 'q_problem_solving',
     axis: 'B',
-    prompt: '우리 아이는 문제를 해결할 때 어떤 편인가요?',
+    prompt: '{name}는 문제를 해결할 때\n어떤 편인가요?',
     options: [
       { text: '실수 없는 방법을 고르는 편이에요.', polarity: 'safety' },
       { text: '여러 방법을 시도해보는 편이에요.', polarity: 'adventure' },
@@ -83,7 +83,7 @@ export const QUESTIONS = [
   },
 ]
 
-// "안내" 슬라이드는 Figma 진행률에 포함되지 않는다 — 이름·성별·나이 3단계 + 질문 개수.
+// 이름·성별·나이 3단계 + 질문 개수.
 export const TOTAL_QUIZ_STEPS = QUESTIONS.length + 3
 
 export const AXIS_LABELS = {

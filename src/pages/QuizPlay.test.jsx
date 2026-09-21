@@ -89,7 +89,8 @@ describe('QuizPlay', () => {
     fireEvent.change(screen.getByPlaceholderText('예: 10'), { target: { value: '7' } })
     fireEvent.click(screen.getByText('다음'))
 
-    const firstQuestionText = QUESTIONS[0].prompt
+    const resolvePrompt = prompt => prompt.replace('{name}', '철수').replace('\n', ' ')
+    const firstQuestionText = resolvePrompt(QUESTIONS[0].prompt)
     expect(screen.getByText(firstQuestionText)).toBeInTheDocument()
     const nextBtn = screen.getByText('다음')
     expect(nextBtn).toBeDisabled()
@@ -100,7 +101,7 @@ describe('QuizPlay', () => {
     expect(screen.getByText(firstQuestionText)).toBeInTheDocument() // 아직 다음 문항으로 넘어가지 않음
 
     fireEvent.click(nextBtn)
-    expect(screen.getByText(QUESTIONS[1].prompt)).toBeInTheDocument()
+    expect(screen.getByText(resolvePrompt(QUESTIONS[1].prompt))).toBeInTheDocument()
   })
 
   it('진행바가 단계 진행에 따라 갱신된다', () => {
