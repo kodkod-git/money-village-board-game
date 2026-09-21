@@ -80,7 +80,6 @@ export default function QuizResult() {
     borderColor: `color-mix(in srgb, ${group.color} 35%, white)`,
   }
   const pillStyle = { backgroundColor: `color-mix(in srgb, ${group.color} 14%, white)`, color: group.color }
-  const iconBtnStyle = { background: group.color, borderColor: group.color, color: 'var(--white)' }
   const activeValueStyle = { ...tintStyle, color: group.color }
 
   return (
@@ -158,22 +157,13 @@ export default function QuizResult() {
               onClick={() => handleKakaoShare(group, result.result_group)}
               aria-label="카카오톡 공유하기"
             >
-              <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
-                <path d="M12 3C6.48 3 2 6.58 2 11c0 2.79 1.83 5.24 4.6 6.66-.2.75-.73 2.72-.84 3.15-.13.53.2.52.42.38.17-.11 2.7-1.83 3.8-2.58.65.09 1.32.14 2.02.14 5.52 0 10-3.58 10-8s-4.48-8-10-8Z" />
-              </svg>
+              <img className={styles.iconBtnImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
             </button>
-            <button className={styles.iconBtn} style={iconBtnStyle} onClick={handleCopyLink} aria-label="링크 공유하기">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="12" height="12" rx="2.5" />
-                <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
-              </svg>
+            <button className={styles.iconBtn} onClick={handleCopyLink} aria-label="링크 공유하기">
+              <img className={styles.iconBtnImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
             </button>
-            <a className={styles.iconBtn} style={iconBtnStyle} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 3v12" />
-                <path d="M7 10l5 5 5-5" />
-                <path d="M4 19h16" />
-              </svg>
+            <a className={styles.iconBtn} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
+              <img className={styles.iconBtnImg} src="/icons/download.png" alt="" aria-hidden="true" />
             </a>
           </div>
           {notice && <p className={styles.notice} style={{ color: group.color }}>{notice}</p>}

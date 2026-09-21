@@ -217,6 +217,13 @@
   text-decoration: none;
 }
 
+.iconBtnImg {
+  width: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  height: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  object-fit: contain;
+  display: block;
+}
+
 .kakaoIconBtn {
   background: #FEE500;
   color: #191919;
