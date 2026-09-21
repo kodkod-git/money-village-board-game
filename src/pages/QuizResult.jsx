@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   RESULT_GROUPS,
+  ANIMAL_EMOJIS,
   AXIS_LABELS,
   GROUP_DETAIL_URLS,
   NAVER_REVIEW_URL,
@@ -80,6 +81,7 @@ export default function QuizResult() {
   }
   const pillStyle = { backgroundColor: `color-mix(in srgb, ${group.color} 14%, white)`, color: group.color }
   const iconBtnStyle = { background: group.color, borderColor: group.color, color: 'var(--white)' }
+  const activeValueStyle = { ...tintStyle, color: group.color }
 
   return (
     <div className={styles.page}>
@@ -104,24 +106,35 @@ export default function QuizResult() {
         </div>
 
         {group.animals.length > 0 && (
-          <p className={styles.animals}>{group.animals.join(' · ')}</p>
+          <div className={styles.section}>
+            <p className={styles.sectionLabel}>대표 동물</p>
+            <div className={styles.animalRow}>
+              {group.animals.map(animal => (
+                <div key={animal} className={styles.animalItem}>
+                  <span className={styles.animalAvatar} style={tintStyle}>{ANIMAL_EMOJIS[animal] ?? '🐾'}</span>
+                  <span className={styles.animalName}>{animal}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
-        <div className={styles.axisRow}>
-          <span className={isTodayTomorrowLeftActive ? styles.axisActive : ''} style={isTodayTomorrowLeftActive ? { color: group.color } : undefined}>
-            {AXIS_LABELS.axisTodayTomorrow.left}
-          </span>
-          <span className={!isTodayTomorrowLeftActive ? styles.axisActive : ''} style={!isTodayTomorrowLeftActive ? { color: group.color } : undefined}>
-            {AXIS_LABELS.axisTodayTomorrow.right}
-          </span>
-        </div>
-        <div className={styles.axisRow}>
-          <span className={isSafetyAdventureLeftActive ? styles.axisActive : ''} style={isSafetyAdventureLeftActive ? { color: group.color } : undefined}>
-            {AXIS_LABELS.axisSafetyAdventure.left}
-          </span>
-          <span className={!isSafetyAdventureLeftActive ? styles.axisActive : ''} style={!isSafetyAdventureLeftActive ? { color: group.color } : undefined}>
-            {AXIS_LABELS.axisSafetyAdventure.right}
-          </span>
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>핵심 가치</p>
+          <div className={styles.valueGrid}>
+            <span className={styles.valueChip} style={isTodayTomorrowLeftActive ? activeValueStyle : undefined}>
+              {AXIS_LABELS.axisTodayTomorrow.left}
+            </span>
+            <span className={styles.valueChip} style={!isTodayTomorrowLeftActive ? activeValueStyle : undefined}>
+              {AXIS_LABELS.axisTodayTomorrow.right}
+            </span>
+            <span className={styles.valueChip} style={isSafetyAdventureLeftActive ? activeValueStyle : undefined}>
+              {AXIS_LABELS.axisSafetyAdventure.left}
+            </span>
+            <span className={styles.valueChip} style={!isSafetyAdventureLeftActive ? activeValueStyle : undefined}>
+              {AXIS_LABELS.axisSafetyAdventure.right}
+            </span>
+          </div>
         </div>
 
         <div className={styles.section}>

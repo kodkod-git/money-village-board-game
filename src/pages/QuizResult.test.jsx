@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GROUP_DETAIL_URLS, ECONOMIC_TYPES_URL, NAVER_REVIEW_URL, RESULT_GROUPS } from '../constants/quizData'
+import { GROUP_DETAIL_URLS, ECONOMIC_TYPES_URL, NAVER_REVIEW_URL, RESULT_GROUPS, ANIMAL_EMOJIS, AXIS_LABELS } from '../constants/quizData'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -93,5 +93,26 @@ describe('QuizResult', () => {
     await waitFor(() => screen.getByText('Green Group'))
     const retryBtn = screen.getByText('다시 하기')
     expect(retryBtn).not.toHaveAttribute('style')
+  })
+
+  it('"대표 동물" 레이블과 각 동물의 이모지·이름이 개별 항목으로 표시된다', async () => {
+    renderResult()
+    await waitFor(() => screen.getByText('Green Group'))
+    expect(screen.getByText('대표 동물')).toBeInTheDocument()
+    RESULT_GROUPS['Green Group'].animals.forEach(animal => {
+      expect(screen.getByText(animal)).toBeInTheDocument()
+    })
+    expect(screen.getByText(ANIMAL_EMOJIS['판다'])).toBeInTheDocument()
+  })
+
+  it('"핵심 가치" 레이블과 함께 실제 결과와 일치하는 축이 그룹 색상으로 강조된다', async () => {
+    renderResult()
+    await waitFor(() => screen.getByText('Green Group'))
+    expect(screen.getByText('핵심 가치')).toBeInTheDocument()
+    // fixture: axis_today_tomorrow: 'today' → leftValue('tomorrow')가 아니므로 오른쪽('오늘 가꾸기')이 활성
+    const activeChip = screen.getByText(AXIS_LABELS.axisTodayTomorrow.right)
+    const inactiveChip = screen.getByText(AXIS_LABELS.axisTodayTomorrow.left)
+    expect(activeChip).toHaveStyle({ color: RESULT_GROUPS['Green Group'].color })
+    expect(inactiveChip).not.toHaveStyle({ color: RESULT_GROUPS['Green Group'].color })
   })
 })
