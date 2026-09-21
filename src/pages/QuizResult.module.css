@@ -33,7 +33,6 @@
   width: clamp(60px, calc(100px * min(var(--sx), var(--sy))), 100px);
   height: clamp(60px, calc(100px * min(var(--sx), var(--sy))), 100px);
   border-radius: clamp(16px, calc(24px * min(var(--sx), var(--sy))), 24px);
-  border: 2px solid;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,7 +42,7 @@
 .animalName {
   font-size: clamp(10px, calc(12px * min(var(--sx), var(--sy))), 12px);
   color: var(--ink-2);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .valueGrid {
@@ -60,7 +59,7 @@
   align-items: center;
   justify-content: center;
   font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
-  font-weight: 700;
+  font-weight: 400;
   color: var(--ink-2);
 }
 
@@ -132,12 +131,12 @@
   padding: clamp(3px, calc(4px * var(--sy)), 4px) clamp(12px, calc(16px * var(--sx)), 16px);
   border-radius: 999px;
   font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .groupName {
   font-size: clamp(24px, calc(36px * min(var(--sx), var(--sy))), 36px);
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .tagline {
@@ -164,7 +163,7 @@
 
 .description {
   font-size: clamp(13px, calc(16px * min(var(--sx), var(--sy))), 16px);
-  font-weight: 600;
+  font-weight: 400;
   color: #374151;
   text-align: left;
 }

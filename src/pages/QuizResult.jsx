@@ -81,7 +81,7 @@ export default function QuizResult() {
   }
   const pillStyle = { backgroundColor: `color-mix(in srgb, ${group.color} 14%, white)`, color: group.color }
   const activeValueStyle = { ...tintStyle, color: group.color }
-  const avatarStyle = { backgroundColor: tintStyle.backgroundColor, borderColor: group.color }
+  const avatarStyle = { backgroundColor: tintStyle.backgroundColor }
 
   return (
     <div className={styles.page}>
