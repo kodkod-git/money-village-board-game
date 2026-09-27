@@ -334,23 +334,25 @@ describe('AdminClassDashboard', () => {
     expect(alertSpy).not.toHaveBeenCalled()
   })
 
-  it('연결 끊긴 팀원이 있는 팀은 제외되었다고 토스트로 안내한다', async () => {
+  it('연결 끊긴 팀원이 있는 등록 대기 팀이 있으면 전체 등록 확인 문구가 경고로 바뀐다', async () => {
+    const disconnectedRooms = [{
+      ...ROOMS[0],
+      code: 'EF9012',
+      status: 'completed-but-unregistered',
+      players: [{ ...ROOMS[0].players[0], connected: false }],
+    }]
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 0, total: 0 }) })
+      }
+      return Promise.resolve({ json: () => Promise.resolve(disconnectedRooms) })
+    })
+
     renderDashboard()
     await screen.findByText('홍길동')
 
-    global.fetch = vi.fn((url, options) => {
-      if (options?.method === 'POST') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 1, total: 1, skipped: 2 }) })
-      }
-      return Promise.resolve({ json: () => Promise.resolve(ROOMS) })
-    })
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-
     await userEvent.click(screen.getByText('전체 등록'))
-    await userEvent.click(screen.getByText('예'))
-
-    expect(await screen.findByText('2개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다')).toBeInTheDocument()
-    expect(alertSpy).not.toHaveBeenCalled()
+    expect(screen.getByText(/일부 참여자에게는 결과화면이 나오지 않을 수 있습니다/)).toBeInTheDocument()
   })
 
   it('일괄 결과등록이 실패하면 토스트로 안내한다', async () => {

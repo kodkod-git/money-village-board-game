@@ -60,6 +60,10 @@ export default function AdminClassDashboard({ classId, initialName }) {
   }, [socket, classId, loadRooms])
 
   const filteredRooms = useMemo(() => rooms.filter(room => matchesSearch(room, search)), [rooms, search])
+  const hasDisconnectedPendingTeam = rooms.some(room =>
+    room.status === 'completed-but-unregistered' && !room.registered &&
+    room.players.some(p => p?.connected === false)
+  )
 
   async function handleCreateRoom() {
     if (isCreating) return
@@ -114,9 +118,8 @@ export default function AdminClassDashboard({ classId, initialName }) {
         toast(error || '일괄 결과등록에 실패했습니다')
         return
       }
-      const { total, skipped } = await res.json()
-      if (total === 0 && !skipped) toast('등록 대기 중인 팀이 없습니다')
-      else if (skipped > 0) toast(`${skipped}개 팀은 연결이 끊긴 팀원이 있어 등록되지 않았습니다`)
+      const { total } = await res.json()
+      if (total === 0) toast('등록 대기 중인 팀이 없습니다')
       loadRooms()
     } catch {
       toast('일괄 결과등록에 실패했습니다')
@@ -219,7 +222,11 @@ export default function AdminClassDashboard({ classId, initialName }) {
         <ConfirmDialog
           tone="primary"
           title="전체 등록"
-          description="등록 대기 중인 팀을 모두 결과 등록하시겠습니까?"
+          description={
+            hasDisconnectedPendingTeam
+              ? '연결끊김 상태인 참가자가 존재하고, 일부 참여자에게는 결과화면이 나오지 않을 수 있습니다. 그래도 진행하시겠습니까?'
+              : '등록 대기 중인 팀을 모두 결과 등록하시겠습니까?'
+          }
           onCancel={() => setConfirmBulkRegister(false)}
           onConfirm={() => { setConfirmBulkRegister(false); handleBulkRegister() }}
         />
