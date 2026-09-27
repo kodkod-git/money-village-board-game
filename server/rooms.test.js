@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
-  createRoom, getRoom, addPlayer, removePlayer, markDisconnected,
+  createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected,
   isCharacterTaken, clearRooms, updateRoomPricesByCode, listAllRooms,
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
@@ -150,6 +150,45 @@ describe('addPlayer 재접속 (playerUuid upsert)', () => {
     const room = getRoom(code)
     expect(room.players).toHaveLength(1)
     expect(room.players[0].socketId).toBe('s1-new')
+  })
+})
+
+describe('addManualPlayer', () => {
+  it('gameState를 그대로 담은 플레이어를 방에 추가한다', () => {
+    const { code } = createRoom()
+    const gameState = {
+      cash: 5000, job: 'a',
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [true, false, false, false, false, false],
+      jobVisited: true, stocksVisited: true, realEstateVisited: true, isCompleted: true,
+    }
+    const room = addManualPlayer(code, { name: '철수', character: 'ptsc', gameState })
+    expect(room.players).toHaveLength(1)
+    expect(room.players[0]).toMatchObject({
+      name: '철수', character: 'ptsc', connected: true, socketId: null, isHost: false, affiliation: '', gameState,
+    })
+    expect(room.players[0].playerUuid).toBeTruthy()
+  })
+
+  it('여러 번 호출하면 매번 새 플레이어가 추가된다', () => {
+    const { code } = createRoom()
+    addManualPlayer(code, { name: '철수', character: 'ptsc', gameState: {} })
+    const room = addManualPlayer(code, { name: '영희', character: 'edsu', gameState: {} })
+    expect(room.players).toHaveLength(2)
+    expect(room.players[0].playerUuid).not.toBe(room.players[1].playerUuid)
+  })
+
+  it('MAX_PLAYERS(4명)를 초과하면 에러를 던진다', () => {
+    const { code } = createRoom()
+    for (let i = 0; i < 4; i++) {
+      addPlayer(code, { socketId: `s${i}`, name: `p${i}`, character: `c${i}`, isHost: i === 0, playerUuid: `uuid${i}` })
+    }
+    expect(() => addManualPlayer(code, { name: '철수', character: 'ptsc', gameState: {} })).toThrow('Room is full')
+  })
+
+  it('존재하지 않는 방 코드면 에러를 던진다', () => {
+    expect(() => addManualPlayer('NOPE12', { name: '철수', character: 'ptsc', gameState: {} })).toThrow('Room not found')
   })
 })
 

@@ -92,6 +92,19 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
   return room
 }
 
+export function addManualPlayer(code, { name, character, gameState }) {
+  const room = rooms.get(code)
+  if (!room) throw new Error('Room not found')
+  if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
+
+  const playerUuid = crypto.randomUUID()
+  room.players.push({
+    socketId: null, name, character, isHost: false, playerUuid, affiliation: '', connected: true, gameState,
+  })
+  room.updatedAt = new Date()
+  return room
+}
+
 export function getRoomBySocketId(socketId) {
   const code = socketToRoom.get(socketId)
   return code ? rooms.get(code) ?? null : null
