@@ -180,19 +180,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
         )}
         {room.status === 'completed-but-unregistered' && (
-          <div className={styles.registerGroup}>
-            <button
-              type="button"
-              className={styles.registerBtn}
-              onClick={() => setConfirmRegister(true)}
-              disabled={hasDisconnectedPlayer}
-            >
-              결과 등록
-            </button>
-            {hasDisconnectedPlayer && (
-              <span className={styles.registerWarning}>연결이 끊긴 팀원이 있어 등록할 수 없습니다</span>
-            )}
-          </div>
+          <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
         )}
         <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
         <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
@@ -223,7 +211,11 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         <ConfirmDialog
           tone="primary"
           title="결과 등록"
-          description="이 팀의 결과를 등록하시겠습니까?"
+          description={
+            hasDisconnectedPlayer
+              ? '연결끊김 상태인 참가자가 존재하고, 일부 참여자에게는 결과화면이 나오지 않을 수 있습니다. 그래도 진행하시겠습니까?'
+              : '이 팀의 결과를 등록하시겠습니까?'
+          }
           onCancel={() => setConfirmRegister(false)}
           onConfirm={() => { setConfirmRegister(false); handleRegister() }}
         />

@@ -211,12 +211,31 @@ it('결과 등록 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 �
   expect(onClose).toHaveBeenCalled()
 })
 
-it('연결 끊긴 팀원이 있으면 결과 등록 버튼을 비활성화하고 안내 문구를 보여준다', () => {
+it('연결 끊긴 팀원이 있어도 결과 등록 버튼은 활성 상태이고, 클릭 시 경고 문구가 담긴 확인 팝업을 보여준다', async () => {
   const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
   pendingRoom.players[0] = { ...pendingRoom.players[0], connected: false }
   render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
-  expect(screen.getByText('결과 등록')).toBeDisabled()
-  expect(screen.getByText('연결이 끊긴 팀원이 있어 등록할 수 없습니다')).toBeInTheDocument()
+  expect(screen.getByText('결과 등록')).not.toBeDisabled()
+
+  await userEvent.click(screen.getByText('결과 등록'))
+  expect(screen.getByText(/일부 참여자에게는 결과화면이 나오지 않을 수 있습니다/)).toBeInTheDocument()
+})
+
+it('연결 끊긴 팀원이 있어도 확인 팝업에서 예를 누르면 등록 요청을 보낸다', async () => {
+  global.fetch = vi.fn((url, options) => {
+    if (options?.method === 'POST') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ sessionId: 'session-1' }) })
+    }
+    return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+  })
+  const pendingRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed-but-unregistered' }
+  pendingRoom.players[0] = { ...pendingRoom.players[0], connected: false }
+  render(<AdminSpectateModal rooms={[pendingRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+
+  await userEvent.click(screen.getByText('결과 등록'))
+  await userEvent.click(screen.getByText('예'))
+
+  expect(global.fetch).toHaveBeenCalledWith('/api/rooms/AB1234/submit', expect.objectContaining({ method: 'POST' }))
 })
 
 it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 onRoomChanged와 onClose를 호출한다', async () => {
