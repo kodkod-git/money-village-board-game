@@ -70,3 +70,10 @@ describe('SynergyResult', () => {
     expect(screen.getByText('결과를 불러오지 못했어요.')).toBeInTheDocument()
   })
 })
+
+describe('SynergyResult 배경', () => {
+  it('내 그룹을 왼편, 시민권자 그룹을 오른편으로 하는 배경을 보여준다', () => {
+    renderResult('/synergy/PTEN/result?me=PASC&name=a&friend=b')
+    expect(screen.getByAltText('PASC × PTEN 시너지 배경')).toHaveAttribute('src', '/synergy/green_red.png')
+  })
+})

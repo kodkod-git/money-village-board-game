@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { RESULT_GROUPS, ANIMAL_EMOJIS, ECONOMIC_TYPES_URL } from '../constants/quizData'
 import { SYNERGY_TYPES, SYNERGY_AXES, ACADEMY_INQUIRY_URL } from '../constants/synergyData'
-import { calcSynergyScores, normalizeSynergyType, getTypeGroup } from '../utils/synergyScoring'
+import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground } from '../utils/synergyScoring'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizResult.module.css'
 import synergyStyles from './SynergyResult.module.css'
@@ -32,7 +32,7 @@ export default function SynergyResult() {
     setNotice('링크가 복사됐어요')
   }, [])
 
-  const handleKakaoShare = useCallback((type, group) => {
+  const handleKakaoShare = useCallback((type, background) => {
     const kakao = window.Kakao
     if (!KAKAO_JS_KEY || !kakao) {
       setNotice('카카오톡 공유는 준비 중이에요')
@@ -44,7 +44,7 @@ export default function SynergyResult() {
       content: {
         title: `${type} - 경제적 성향 시너지 테스트`,
         description: SYNERGY_TYPES[type].title,
-        imageUrl: `${window.location.origin}${group.illustration}`,
+        imageUrl: `${window.location.origin}${background}`,
         link: { mobileWebUrl: window.location.href, webUrl: window.location.href },
       },
     })
@@ -67,6 +67,7 @@ export default function SynergyResult() {
   const citizenInfo = SYNERGY_TYPES[citizenType]
   const group = RESULT_GROUPS[getTypeGroup(myType)]
   const { strength, complement } = calcSynergyScores(myType, citizenType)
+  const background = getSynergyBackground(myType, citizenType)
 
   const navBtnStyle = { background: group.color, borderColor: group.color }
   const tintStyle = {
@@ -78,9 +79,10 @@ export default function SynergyResult() {
 
   return (
     <div className={styles.page}>
-      {/* 배경 이미지는 추후 추가 예정 — 지금은 그룹 색만 깐다. */}
-      <div className={styles.hero} style={{ backgroundColor: group.bgColor || group.color }}>
-        <div className={styles.heroFade} />
+      {/* 왼편은 나, 오른편은 시민권자의 그룹 배경이다. */}
+      <div className={`${styles.hero} ${synergyStyles.hero}`} style={{ backgroundColor: group.bgColor || group.color }}>
+        <img className={styles.illustration} src={background} alt={`${myType} × ${citizenType} 시너지 배경`} />
+        <div className={`${styles.heroFade} ${synergyStyles.heroFade}`} />
       </div>
 
       <div className={styles.card}>
@@ -145,7 +147,7 @@ export default function SynergyResult() {
           <div className={styles.shareRow}>
             <button
               className={`${styles.iconBtn} ${styles.kakaoIconBtn}`}
-              onClick={() => handleKakaoShare(myType, group)}
+              onClick={() => handleKakaoShare(myType, background)}
               aria-label="카카오톡 공유하기"
             >
               <img className={styles.iconBtnImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />

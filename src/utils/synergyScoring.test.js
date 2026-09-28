@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup } from './synergyScoring'
+import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground } from './synergyScoring'
 import { SYNERGY_TYPES } from '../constants/synergyData'
 
 describe('calcSynergyType', () => {
@@ -48,5 +48,27 @@ describe('getTypeGroup', () => {
     for (const [code, info] of Object.entries(SYNERGY_TYPES)) {
       expect(RESULT_GROUPS[getTypeGroup(code)].animals).toContain(info.animal)
     }
+  })
+})
+
+describe('getSynergyBackground', () => {
+  it('내 그룹을 왼편, 시민권자 그룹을 오른편으로 하는 배경을 고른다', () => {
+    expect(getSynergyBackground('PASC', 'PTEN')).toBe('/synergy/green_red.png')
+    expect(getSynergyBackground('PTEN', 'PASC')).toBe('/synergy/red_green.png')
+    expect(getSynergyBackground('FAEC', 'FTSN')).toBe('/synergy/orange_blue.png')
+  })
+
+  it('256가지 조합 모두 public/synergy에 실제로 있는 파일을 가리킨다', async () => {
+    const fs = await import('node:fs')
+    const types = Object.keys(SYNERGY_TYPES)
+    const used = new Set()
+    for (const me of types) {
+      for (const citizen of types) {
+        const src = getSynergyBackground(me, citizen)
+        expect(fs.existsSync(`public${src}`)).toBe(true)
+        used.add(src)
+      }
+    }
+    expect(used.size).toBe(16)
   })
 })
