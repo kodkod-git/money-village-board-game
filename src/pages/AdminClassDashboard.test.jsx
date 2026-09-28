@@ -343,7 +343,7 @@ describe('AdminClassDashboard', () => {
     }]
     global.fetch = vi.fn((url, options) => {
       if (options?.method === 'POST') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 0, total: 0 }) })
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ registered: 1, total: 1 }) })
       }
       return Promise.resolve({ json: () => Promise.resolve(disconnectedRooms) })
     })
@@ -353,6 +353,16 @@ describe('AdminClassDashboard', () => {
 
     await userEvent.click(screen.getByText('전체 등록'))
     expect(screen.getByText(/일부 참여자에게는 결과화면이 나오지 않을 수 있습니다/)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText('예'))
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/admin/classes/class-1/submit-pending',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ Authorization: 'Bearer test-token' }),
+      })
+    )
   })
 
   it('일괄 결과등록이 실패하면 토스트로 안내한다', async () => {
