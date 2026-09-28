@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
+import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
@@ -384,6 +384,46 @@ app.delete('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (re
   io.to(room.code).emit('room-updated', { players: room.players })
   broadcastClassRooms(room.classId)
   res.json({ ok: true })
+})
+
+app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const { name, character, job, badges, stocks, realEstate, cash } = req.body ?? {}
+  if (!name?.trim() || !character) return res.status(400).json({ error: 'name과 character가 필요합니다' })
+
+  const classId = await findRoomClassId(code)
+  if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
+  if (!(await hasClassAccess(req.admin, classId || 'unassigned'))) {
+    return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+  }
+
+  const gameState = {
+    cash: cash ?? 0,
+    job: job ?? null,
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, ...stocks },
+    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0, ...realEstate },
+    badges: badges ?? [false, false, false, false, false, false],
+    jobVisited: true,
+    stocksVisited: true,
+    realEstateVisited: true,
+    isCompleted: true,
+  }
+
+  try {
+    const room = addManualPlayer(code, { name: name.trim(), character, gameState })
+    io.to(code).emit('room-updated', { players: room.players })
+    broadcastClassRooms(room.classId)
+    const player = room.players[room.players.length - 1]
+    res.json({
+      playerUuid: player.playerUuid,
+      name: player.name,
+      character: player.character,
+      gameState: player.gameState,
+      connected: player.connected,
+    })
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
 })
 
 app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
