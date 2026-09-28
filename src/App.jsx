@@ -12,6 +12,8 @@ import AdminDashboard from './pages/AdminDashboard'
 import QuizIntro from './pages/QuizIntro'
 import QuizPlay from './pages/QuizPlay'
 import QuizResult from './pages/QuizResult'
+import SynergyPlay from './pages/SynergyPlay'
+import SynergyResult from './pages/SynergyResult'
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
         <Route path="/quiz" element={<QuizIntro />} />
         <Route path="/quiz/play" element={<QuizPlay />} />
         <Route path="/quiz/result/:resultId" element={<QuizResult />} />
+        <Route path="/synergy/:citizenType" element={<SynergyPlay />} />
+        <Route path="/synergy/:citizenType/result" element={<SynergyResult />} />
       </Routes>
       <Toaster />
     </>
