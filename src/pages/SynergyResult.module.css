@@ -1,0 +1,47 @@
+/* QuizResult.module.css의 .page 안에서 쓰이므로 --sx/--sy를 그대로 물려받는다. */
+
+.pairBox {
+  width: 100%;
+  border: 2px solid;
+  border-radius: clamp(12px, calc(16px * var(--sy)), 16px);
+  padding: clamp(12px, calc(16px * var(--sy)), 16px) clamp(14px, calc(20px * var(--sx)), 20px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, calc(6px * var(--sy)), 6px);
+}
+
+.pairTypes {
+  font-size: clamp(18px, calc(24px * min(var(--sx), var(--sy))), 24px);
+  font-weight: 700;
+}
+
+.pairCaption {
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
+  color: var(--ink-2);
+}
+
+.scoreRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(8px, calc(12px * var(--sx)), 12px);
+}
+
+.scoreCard {
+  border: 2px solid;
+  border-radius: clamp(12px, calc(16px * var(--sy)), 16px);
+  padding: clamp(10px, calc(14px * var(--sy)), 14px) clamp(8px, calc(12px * var(--sx)), 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, calc(4px * var(--sy)), 4px);
+}
+
+.scoreLabel {
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
+  color: var(--ink-2);
+}
+
+.scoreValue {
+  font-size: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
+  font-weight: 700;
+}
