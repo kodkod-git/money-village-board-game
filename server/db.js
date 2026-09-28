@@ -29,6 +29,12 @@ export function calculateAssetBreakdown(gameState, prices) {
   return { cash: cash ?? 0, stockValue, realEstateValue, totalAssets }
 }
 
+// game_results.job은 NOT NULL이다. 직업을 고르지 않고 넘어갈 수 있으므로(참가자 화면,
+// 관리자 직접 등록) 미선택은 빈 문자열로 저장한다. 화면에서는 null과 똑같이 "직업 없음"으로 보인다.
+function toJobColumn(job) {
+  return job ?? ''
+}
+
 export async function saveGameResult(room) {
   const { code, prices, players, classId = null, title = null } = room
 
@@ -54,7 +60,7 @@ export async function saveGameResult(room) {
       name: player.name,
       affiliation: player.affiliation ?? '',
       character: player.character,
-      job: player.gameState.job,
+      job: toJobColumn(player.gameState.job),
       cash: player.gameState.cash ?? 0,
       stock_holdings: player.gameState.stocks,
       real_estate_holdings: player.gameState.realEstate,
@@ -65,8 +71,15 @@ export async function saveGameResult(room) {
     }
   })
 
+  // Supabase 클라이언트는 트랜잭션이 없어 세션 → 결과를 두 번에 나눠 넣는다. 결과 저장이
+  // 실패했는데 세션만 남으면 "0명 등록완료" 팀이 생기고, 같은 팀코드 재등록이 중복(23505)으로
+  // 막힌다. 그래서 실패하면 방금 만든 세션을 지워 저장 전 상태로 되돌린다.
   const { error: resultsError } = await supabase.from('game_results').insert(rows)
-  if (resultsError) throw resultsError
+  if (resultsError) {
+    const { error: rollbackError } = await supabase.from('game_sessions').delete().eq('id', session.id)
+    if (rollbackError) console.error(`saveGameResult rollback failed for session ${session.id}:`, rollbackError)
+    throw resultsError
+  }
 
   return session.id
 }
@@ -213,6 +226,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   for (const [key, column] of Object.entries(GAME_STATE_TO_COLUMN)) {
     if (key in partialGameState) updateRow[column] = partialGameState[key]
   }
+  if ('job' in updateRow) updateRow.job = toJobColumn(updateRow.job)
   updateRow.total_assets = breakdown.totalAssets
   updateRow.stock_value = breakdown.stockValue
   updateRow.real_estate_value = breakdown.realEstateValue

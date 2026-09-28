@@ -696,3 +696,72 @@ describe('deleteCompletedTeamsByClassId', () => {
     expect(mockResultsDelete).not.toHaveBeenCalled()
   })
 })
+
+// 2026-09-28 버그: 직업 미선택(job=null) 플레이어가 있으면 game_results.job(NOT NULL)
+// 저장이 실패하고, 먼저 만든 game_sessions 행만 남아 "0명 등록완료" 팀 + 같은 팀코드의
+// 등록 대기 팀이 함께 보이며 재등록은 team_code 중복(23505)으로 막혔다.
+describe('saveGameResult — 직업 미선택/부분 실패', () => {
+  function mockTables({ resultsError = null } = {}) {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingle }) })
+    const mockSessionDeleteEq = vi.fn().mockResolvedValue({ error: null })
+    const mockSessionDelete = vi.fn().mockReturnValue({ eq: mockSessionDeleteEq })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: resultsError })
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert, delete: mockSessionDelete }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+    return { mockResultsInsert, mockSessionDelete, mockSessionDeleteEq }
+  }
+
+  const room = {
+    code: 'CA57B2', prices: PRICES, classId: 'class-1', title: '',
+    players: [{
+      playerUuid: 'p1', name: '홍길동', affiliation: '', character: 'fox',
+      gameState: { ...makeState({ cash: 1000 }), job: null },
+    }],
+  }
+
+  it('직업을 고르지 않은 플레이어는 job을 빈 문자열로 저장한다(NOT NULL 컬럼)', async () => {
+    const { mockResultsInsert } = mockTables()
+    const { saveGameResult } = await import('./db.js')
+    await saveGameResult(room)
+    expect(mockResultsInsert).toHaveBeenCalledWith([expect.objectContaining({ player_uuid: 'p1', job: '' })])
+  })
+
+  it('플레이어 결과 저장이 실패하면 먼저 만든 세션을 지우고 에러를 그대로 던진다', async () => {
+    const dbError = { code: '23502', message: 'null value in column "job"' }
+    const { mockSessionDelete, mockSessionDeleteEq } = mockTables({ resultsError: dbError })
+    const { saveGameResult } = await import('./db.js')
+    await expect(saveGameResult(room)).rejects.toBe(dbError)
+    expect(mockSessionDelete).toHaveBeenCalled()
+    expect(mockSessionDeleteEq).toHaveBeenCalledWith('id', 'session-1')
+  })
+})
+
+describe('updateGameResult — 직업 비우기', () => {
+  it('등록된 결과의 직업을 null로 수정하면 빈 문자열로 저장한다', async () => {
+    const current = {
+      cash: 0, job: 'a', stock_holdings: makeState().stocks, real_estate_holdings: makeState().realEstate,
+      badges: makeState().badges, player_uuid: 'p1', name: '홍길동', character: 'fox', affiliation: '',
+    }
+    const updateBuilder = {
+      eq: vi.fn(() => updateBuilder), select: vi.fn(() => updateBuilder),
+      single: vi.fn().mockResolvedValue({ data: { ...current, job: '' }, error: null }),
+    }
+    const mockUpdate = vi.fn(() => updateBuilder)
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') {
+        return makeQueryBuilder({ data: { id: 'session-1', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate }, error: null })
+      }
+      if (table === 'game_results') return { ...makeQueryBuilder({ data: current, error: null }), update: mockUpdate }
+      throw new Error(`unexpected table: ${table}`)
+    })
+    const { updateGameResult } = await import('./db.js')
+    await updateGameResult('CA57B2', 'p1', { job: null })
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ job: '' }))
+  })
+})
