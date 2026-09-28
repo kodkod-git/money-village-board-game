@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { RESULT_GROUPS, ANIMAL_EMOJIS, ECONOMIC_TYPES_URL } from '../constants/quizData'
 import { SYNERGY_TYPES, SYNERGY_AXES, ACADEMY_INQUIRY_URL } from '../constants/synergyData'
-import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground } from '../utils/synergyScoring'
+import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from '../utils/synergyScoring'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './QuizResult.module.css'
 import synergyStyles from './SynergyResult.module.css'
@@ -82,6 +82,17 @@ export default function SynergyResult() {
       {/* 왼편은 나, 오른편은 시민권자의 그룹 배경이다. */}
       <div className={`${styles.hero} ${synergyStyles.hero}`} style={{ backgroundColor: group.bgColor || group.color }}>
         <img className={styles.illustration} src={background} alt={`${myType} × ${citizenType} 시너지 배경`} />
+        <img
+          className={`${synergyStyles.character} ${synergyStyles.characterLeft}`}
+          src={getCharacterImage(myInfo.animal)}
+          alt={`나의 대표 동물 ${myInfo.animal}`}
+        />
+        <img className={synergyStyles.synergyIcon} src="/synergy/synergy.png" alt="" aria-hidden="true" data-testid="synergy-icon" />
+        <img
+          className={`${synergyStyles.character} ${synergyStyles.characterRight}`}
+          src={getCharacterImage(citizenInfo.animal)}
+          alt={`시민권자의 대표 동물 ${citizenInfo.animal}`}
+        />
         <div className={`${styles.heroFade} ${synergyStyles.heroFade}`} />
       </div>
 

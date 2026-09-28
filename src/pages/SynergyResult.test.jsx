@@ -84,3 +84,12 @@ describe('SynergyResult 다시 하기 버튼', () => {
     expect(screen.getByText('다시 하기')).toHaveStyle({ background: '#F26D6D' })
   })
 })
+
+describe('SynergyResult 캐릭터', () => {
+  it('배경 위에 내 대표 동물(왼편), 시너지 아이콘, 시민권자 대표 동물(오른편)을 올린다', () => {
+    renderResult('/synergy/FTSN/result?me=FAEC&name=a&friend=b')
+    expect(screen.getByAltText('나의 대표 동물 수달')).toHaveAttribute('src', '/characters/Planner-수달.png')
+    expect(screen.getByAltText('시민권자의 대표 동물 독수리')).toHaveAttribute('src', '/characters/Innovator-독수리.png')
+    expect(screen.getByTestId('synergy-icon')).toHaveAttribute('src', '/synergy/synergy.png')
+  })
+})
