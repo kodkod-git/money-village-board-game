@@ -34,6 +34,21 @@
   flex-direction: column;
 }
 
+.kakaoShareBtn {
+  position: absolute;
+  top: clamp(20px, calc(32px * var(--sy)), 32px);
+  right: clamp(16px, calc(24px * var(--sx)), 24px);
+  height: clamp(28px, calc(32px * var(--sy)), 32px);
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: #fee500;
+  color: #191919;
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 /* 뒤로가기(BackButton)는 여러 화면이 공유하는 컴포넌트로, 이제 BackButton
    자신도 --sy에 비례해 top/height가 줄어든다(clamp 적용,
    BackButton.module.css 참고). 다른 화면과 같은 이유로(CharacterSelect.
