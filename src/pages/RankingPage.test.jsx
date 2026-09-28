@@ -11,6 +11,7 @@ function renderAt(path) {
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
         <Route path="/join-code" element={<div>팀코드 입력 화면</div>} />
+        <Route path="/" element={<div>메인 화면</div>} />
       </Routes>
     </MemoryRouter>
   )
@@ -92,13 +93,33 @@ describe('RankingPage', () => {
     renderAt('/ranking')
     await screen.findByText('김민준')
     expect(screen.queryByRole('button', { name: '카카오톡 공유하기' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '링크 복사하기' })).not.toBeInTheDocument()
   })
 
-  it('비참가자는 하단 참여 버튼을 누르면 팀코드 입력부터 시작한다', async () => {
+  it('비참가자는 하단 참여 버튼을 누르면 메인 화면으로 이동한다', async () => {
     sessionStorage.setItem('player_uuid', 'visitor')
     renderAt('/result/session-1')
     await userEvent.click(await screen.findByRole('button', { name: '게임에 참여하러 가기' }))
-    expect(screen.getByText('팀코드 입력 화면')).toBeInTheDocument()
+    expect(screen.getByText('메인 화면')).toBeInTheDocument()
+  })
+
+  it('결과 화면 오른쪽 상단에 카카오톡 공유·링크 복사 아이콘 버튼이 나란히 있다', async () => {
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    const kakao = screen.getByRole('button', { name: '카카오톡 공유하기' })
+    const link = screen.getByRole('button', { name: '링크 복사하기' })
+    expect(kakao).not.toHaveTextContent('카카오톡 공유하기')
+    expect(kakao.parentElement).toBe(link.parentElement)
+  })
+
+  it('링크 복사하기를 누르면 결과 페이지 주소를 복사하고 안내 문구를 보여준다', async () => {
+    const writeText = vi.fn().mockResolvedValue()
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByRole('button', { name: '링크 복사하기' }))
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/result/session-1`)
+    expect(await screen.findByRole('status')).toHaveTextContent('링크가 복사됐어요')
   })
 
   it('홈 진입(sessionId 없음)에서는 총자산/주식/부동산 3개 탭만 보이고 전체/수업/팀 서브탭은 없다', async () => {

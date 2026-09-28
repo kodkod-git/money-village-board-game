@@ -154,8 +154,9 @@
   justify-content: center;
 }
 
+/* 버튼 높이(최대 105px)에 비해 20px은 작아 보여서 28px까지 키웠다. */
 .pinnedRowEmptyLabel {
-  font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
+  font-size: clamp(20px, calc(28px * min(var(--sx, 1), var(--sy, 1))), 28px);
   font-weight: 700;
   text-align: center;
   color: var(--white);

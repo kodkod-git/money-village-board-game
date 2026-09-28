@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import BackButton from '../components/BackButton'
-import styles from './AdminLogin.module.css'
+import useBodyClass from '../hooks/useBodyClass'
+import styles from './NameInput.module.css'
+import loginStyles from './AdminLogin.module.css'
 
+// 팀코드 입력·이름 입력 화면과 같은 폰 프레임(onboarding-mode)과 CSS를 쓴다.
+// 로그인/회원가입 탭만 이 화면 전용 스타일이다.
 export default function AdminLogin({ onLogin }) {
+  useBodyClass('onboarding-mode')
   const [mode, setMode] = useState('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -32,43 +37,49 @@ export default function AdminLogin({ onLogin }) {
         <h1 className={styles.title}>관리자</h1>
         <p className={styles.subtitle}>선생님 계정으로 로그인해주세요</p>
       </div>
-      <div className={styles.card}>
-        <div className={styles.tabs}>
+      <form className={styles.card} onSubmit={handleSubmit}>
+        <div className={loginStyles.tabs}>
           <button
             type="button"
-            className={`${styles.tab} ${mode === 'login' ? styles.tabActive : ''}`}
+            className={`${loginStyles.tab} ${mode === 'login' ? loginStyles.tabActive : ''}`}
             onClick={() => setMode('login')}
           >
             로그인
           </button>
           <button
             type="button"
-            className={`${styles.tab} ${mode === 'signup' ? styles.tabActive : ''}`}
+            className={`${loginStyles.tab} ${mode === 'signup' ? loginStyles.tabActive : ''}`}
             onClick={() => setMode('signup')}
           >
             회원가입
           </button>
         </div>
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.inputGroup}>
+          <label className={styles.label} htmlFor="admin-username">아이디</label>
           <input
+            id="admin-username"
             className={styles.input}
             placeholder="아이디"
             value={username}
             onChange={e => setUsername(e.target.value)}
           />
+        </div>
+        <div className={styles.inputGroup}>
+          <label className={styles.label} htmlFor="admin-password">비밀번호</label>
           <input
+            id="admin-password"
             className={styles.input}
             type="password"
             placeholder="비밀번호"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
-          {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.submitBtn}>
-            {mode === 'login' ? '로그인하기' : '회원가입하기'}
-          </button>
-        </form>
-      </div>
+        </div>
+        {error && <p className={loginStyles.error}>{error}</p>}
+        <button type="submit" className={styles.gradBtn}>
+          {mode === 'login' ? '로그인하기' : '회원가입하기'}
+        </button>
+      </form>
     </div>
   )
 }
