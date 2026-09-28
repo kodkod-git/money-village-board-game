@@ -408,3 +408,48 @@ describe('자세히 보기', () => {
     expect(screen.getByText('1팀')).toBeInTheDocument()
   })
 })
+
+describe('직접 등록하기', () => {
+  it('등록 완료되지 않았고 인원이 4명 미만이면 직접 등록하기 버튼을 보여준다', () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('직접 등록하기')).toBeInTheDocument()
+  })
+
+  it('등록 완료된 팀에는 직접 등록하기 버튼을 보여주지 않는다', () => {
+    const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true }
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.queryByText('직접 등록하기')).not.toBeInTheDocument()
+  })
+
+  it('인원이 4명이면 직접 등록하기 버튼을 보여주지 않는다', () => {
+    const fullRoom = makeRoom('AB1234', '김민준')
+    fullRoom.players = [0, 1, 2, 3].map(i => ({ ...fullRoom.players[0], playerUuid: `p${i}`, name: `p${i}` }))
+    render(<AdminSpectateModal rooms={[fullRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.queryByText('직접 등록하기')).not.toBeInTheDocument()
+  })
+
+  it('직접 등록하기 클릭 시 등록 마법사를 연다', async () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByText('직접 등록하기'))
+    expect(screen.getByText('이름 입력')).toBeInTheDocument()
+  })
+
+  it('마법사를 끝까지 진행해 완료하면 onRoomChanged를 호출하고 마법사를 닫는다', async () => {
+    const onRoomChanged = vi.fn()
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({ playerUuid: 'new-1' }) })
+      return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
+    })
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+    await userEvent.click(screen.getByText('직접 등록하기'))
+
+    await userEvent.type(screen.getByPlaceholderText('예) 홍길동'), '영희')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByAltText('Adventurer-강아지'))
+    for (let i = 0; i < 5; i++) await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('완료'))
+
+    expect(onRoomChanged).toHaveBeenCalled()
+    expect(screen.queryByText('이름 입력')).not.toBeInTheDocument()
+  })
+})

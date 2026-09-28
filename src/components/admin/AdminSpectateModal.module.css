@@ -95,7 +95,8 @@
 .registerBtn,
 .deleteBtn,
 .priceBtn,
-.detailBtn {
+.detailBtn,
+.addPlayerBtn {
   height: 45px;
   padding: 0 24px;
   border-radius: 14px;
@@ -113,4 +114,6 @@
 .priceBtn { background: var(--admin-surface); color: var(--admin-text); border: 1px solid var(--admin-border); }
 
 .detailBtn { background: var(--admin-blue-soft); color: var(--admin-blue); border: 1px solid var(--admin-blue-faint); }
+
+.addPlayerBtn { background: var(--admin-purple-tint); color: var(--admin-purple); border: 1px solid var(--admin-purple); }
 
