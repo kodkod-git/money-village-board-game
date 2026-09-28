@@ -7,6 +7,7 @@ import AdminTeamAssetsModal from './AdminTeamAssetsModal'
 import AdminAddPlayerModal from './AdminAddPlayerModal'
 import { adminFetch } from '../../utils/adminAuth'
 import { copyGameResultLink, shareGameResultToKakao } from '../../utils/shareGameResult'
+import { teamDisplayName } from '../../utils/teamDisplayName'
 import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
@@ -28,11 +29,12 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const room = rooms[index]
   const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
   const pollTimer = useRef(null)
-  const [titleDraft, setTitleDraft] = useState(room.title ?? '')
+  const displayName = teamDisplayName(room, index)
+  const [titleDraft, setTitleDraft] = useState(displayName)
 
   useEffect(() => {
-    setTitleDraft(room.title ?? '')
-  }, [room.code, room.title])
+    setTitleDraft(displayName)
+  }, [room.code, displayName])
 
   // 다른 팀으로 넘기면 이전 팀의 공유 안내는 지운다.
   useEffect(() => {
@@ -91,14 +93,18 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
 
   async function handleTitleBlur() {
     const trimmed = titleDraft.trim()
-    if (!trimmed || trimmed === room.title) return
+    // 비워 두거나, 아무 것도 바꾸지 않았으면(기본 "팀 N" 포함) 저장하지 않는다.
+    if (!trimmed || trimmed === displayName) {
+      setTitleDraft(displayName)
+      return
+    }
     const res = await adminFetch(`/api/admin/rooms/${room.code}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: trimmed }),
     })
     if (!res.ok) {
-      setTitleDraft(room.title ?? '')
+      setTitleDraft(displayName)
       return
     }
     onRoomChanged?.()
@@ -155,7 +161,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
               onBlur={handleTitleBlur}
             />
           ) : (
-            <span className={styles.teamName}>{index + 1}팀</span>
+            <span className={styles.teamName}>{displayName}</span>
           )}
           <span className={styles.teamCount}>{index + 1} / {rooms.length}</span>
         </div>
@@ -274,7 +280,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         <AdminTeamAssetsModal
           room={room}
           prices={room.prices}
-          teamLabel={room.title ?? `${index + 1}팀`}
+          teamLabel={displayName}
           onClose={() => setShowDetail(false)}
         />
       )}

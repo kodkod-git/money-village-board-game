@@ -135,14 +135,15 @@ describe('AdminClassDashboard', () => {
   it('팀 카드 클릭 시 관전 팝업을 연다', async () => {
     renderDashboard()
     await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
-    expect(screen.getByText('1팀')).toBeInTheDocument()
+    // 팀 카드 배지와 관전 팝업 제목에 같은 팀 이름이 함께 보인다.
+    expect(screen.getAllByText('팀 1')).toHaveLength(2)
   })
 
   it('배경 클릭 시 팝업을 닫는다', async () => {
     const { container } = renderDashboard()
     await userEvent.click(await screen.findByRole('button', { name: /홍길동/ }))
     await userEvent.click(container.querySelector('[class*="overlay"]'))
-    expect(screen.queryByText('1팀')).toBeNull()
+    expect(screen.getAllByText('팀 1')).toHaveLength(1)
   })
 
   it('전체 삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 모든 방을 삭제한다', async () => {

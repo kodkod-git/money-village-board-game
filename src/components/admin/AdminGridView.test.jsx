@@ -47,3 +47,10 @@ describe('AdminGridView', () => {
     expect(onCreate).toHaveBeenCalled()
   })
 })
+
+describe('AdminGridView 팀 번호', () => {
+  it('검색으로 일부만 보여도 전체 목록 기준 번호(팀 N)를 유지한다', () => {
+    render(<AdminGridView rooms={[rooms[1]]} allRooms={rooms} onSpectate={vi.fn()} />)
+    expect(screen.getByText('팀 2')).toBeInTheDocument()
+  })
+})
