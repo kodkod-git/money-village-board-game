@@ -5,9 +5,11 @@ import styles from './NumberInputModal.module.css'
 const MAX_LENGTH = 10
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '←']
 
-export default function NumberInputModal({ title, initialValue, unit, maxValue, onConfirm, onClose }) {
+// portalTarget: 기본은 #root(참가자 화면 프레임). 관리자 화면처럼 #root가 전체 화면일 때
+// 참가자 프레임을 흉내 낸 요소 안에 시트를 띄우고 싶으면 그 요소를 넘긴다.
+export default function NumberInputModal({ title, initialValue, unit, maxValue, onConfirm, onClose, portalTarget }) {
   const [display, setDisplay] = useState(String(initialValue ?? 0))
-  const portalRoot = document.getElementById('root') ?? document.body
+  const portalRoot = portalTarget ?? document.getElementById('root') ?? document.body
 
   function handleKey(key) {
     if (key === '←') {

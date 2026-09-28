@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import AdminSpectateModal from './AdminSpectateModal'
 import { setAdminSession, clearAdminSession } from '../../utils/adminAuth'
 
@@ -428,10 +429,11 @@ describe('직접 등록하기', () => {
     expect(screen.queryByText('직접 등록하기')).not.toBeInTheDocument()
   })
 
+  // 등록 마법사의 BackButton이 useNavigate를 쓰므로 라우터 안에서 렌더링한다.
   it('직접 등록하기 클릭 시 등록 마법사를 연다', async () => {
-    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    render(<MemoryRouter><AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} /></MemoryRouter>)
     await userEvent.click(screen.getByText('직접 등록하기'))
-    expect(screen.getByText('이름 입력')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '팀원 등록' })).toBeInTheDocument()
   })
 
   it('마법사를 끝까지 진행해 완료하면 onRoomChanged를 호출하고 마법사를 닫는다', async () => {
@@ -440,16 +442,16 @@ describe('직접 등록하기', () => {
       if (options?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({ playerUuid: 'new-1' }) })
       return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
     })
-    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} />)
+    render(<MemoryRouter><AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={onRoomChanged} /></MemoryRouter>)
     await userEvent.click(screen.getByText('직접 등록하기'))
 
     await userEvent.type(screen.getByPlaceholderText('예) 홍길동'), '영희')
-    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음 →'))
     await userEvent.click(screen.getByAltText('Adventurer-강아지'))
     for (let i = 0; i < 5; i++) await userEvent.click(screen.getByText('다음'))
     await userEvent.click(screen.getByText('완료'))
 
     expect(onRoomChanged).toHaveBeenCalled()
-    expect(screen.queryByText('이름 입력')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: '팀원 직접 등록' })).not.toBeInTheDocument()
   })
 })
