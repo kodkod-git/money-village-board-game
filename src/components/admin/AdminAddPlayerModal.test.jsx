@@ -104,4 +104,44 @@ describe('AdminAddPlayerModal', () => {
     expect(global.fetch).not.toHaveBeenCalled()
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('완료 요청이 실패(res.ok=false)하면 onSaved를 호출하지 않고 모달을 닫지 않는다', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    global.fetch = vi.fn().mockResolvedValue({ ok: false })
+
+    render(<AdminAddPlayerModal code="AB1234" prices={PRICES} onSaved={onSaved} onClose={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('예) 홍길동'), '홍길동')
+    await user.click(screen.getByText('다음'))
+    await user.click(screen.getByAltText(CHARACTERS[0]))
+    for (let i = 0; i < 5; i++) await user.click(screen.getByText('다음'))
+    await user.click(screen.getByText('완료'))
+
+    expect(global.fetch).toHaveBeenCalled()
+    expect(onSaved).not.toHaveBeenCalled()
+    expect(screen.getByText('현금')).toBeInTheDocument()
+  })
+
+  it('현금 단계에서 입력한 값이 완료 시 요청 본문에 그대로 반영된다', async () => {
+    const user = userEvent.setup()
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ playerUuid: 'new-1' }) })
+
+    render(<AdminAddPlayerModal code="AB1234" prices={PRICES} onSaved={vi.fn()} onClose={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('예) 홍길동'), '홍길동')
+    await user.click(screen.getByText('다음'))
+    await user.click(screen.getByAltText(CHARACTERS[0]))
+    for (let i = 0; i < 5; i++) await user.click(screen.getByText('다음'))
+
+    await user.click(screen.getByText('예: 5000'))
+    await user.click(screen.getByRole('button', { name: '5' }))
+    await user.click(screen.getByRole('button', { name: '00' }))
+    await user.click(screen.getByRole('button', { name: '0' }))
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    await user.click(screen.getByText('완료'))
+
+    const call = global.fetch.mock.calls[0]
+    const body = JSON.parse(call[1].body)
+    expect(body.cash).toBe(5000)
+  })
 })
