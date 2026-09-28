@@ -22,3 +22,10 @@ export function normalizeSynergyType(value) {
 export function getTypeGroup(type) {
   return TYPE_GROUP[type.slice(0, 2)]
 }
+
+// public/synergy/{왼편}_{오른편}.png — 왼편은 나, 오른편은 시민권자의 그룹 색이다.
+// 256가지 유형 조합이 그룹 4×4 = 16장 중 하나로 모인다.
+export function getSynergyBackground(myType, citizenType) {
+  const colorOf = type => getTypeGroup(type).split(' ')[0].toLowerCase()
+  return `/synergy/${colorOf(myType)}_${colorOf(citizenType)}.png`
+}

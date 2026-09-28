@@ -45,3 +45,13 @@
   font-size: clamp(24px, calc(32px * min(var(--sx), var(--sy))), 32px);
   font-weight: 700;
 }
+
+/* 시너지 배경(public/synergy/*.png)은 3475×1500이라 QuizResult의 2:1 비율을 덮어쓴다. */
+.hero {
+  aspect-ratio: 3475 / 1500;
+}
+
+/* 오른편 그룹 라벨이 이미지 높이의 약 75% 지점에 있어서, 기본 페이드(96px)면 라벨이 흐려진다. */
+.heroFade {
+  height: clamp(24px, calc(40px * var(--sy)), 40px);
+}
