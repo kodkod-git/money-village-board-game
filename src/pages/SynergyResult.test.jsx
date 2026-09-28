@@ -77,3 +77,10 @@ describe('SynergyResult 배경', () => {
     expect(screen.getByAltText('PASC × PTEN 시너지 배경')).toHaveAttribute('src', '/synergy/green_red.png')
   })
 })
+
+describe('SynergyResult 다시 하기 버튼', () => {
+  it('내 결과 그룹 색으로 칠해진다', () => {
+    renderResult('/synergy/FASN/result?me=PTEN&name=a&friend=b')
+    expect(screen.getByText('다시 하기')).toHaveStyle({ background: '#F26D6D' })
+  })
+})

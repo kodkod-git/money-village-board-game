@@ -159,7 +159,7 @@ export default function SynergyResult() {
           {notice && <p className={styles.notice} style={{ color: group.color }}>{notice}</p>}
         </div>
 
-        <button className={styles.retryBtn} onClick={() => navigate(`/synergy/${citizenType}`)}>
+        <button className={styles.retryBtn} style={navBtnStyle} onClick={() => navigate(`/synergy/${citizenType}`)}>
           다시 하기
         </button>
       </div>
