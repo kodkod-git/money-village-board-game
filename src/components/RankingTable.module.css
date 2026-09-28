@@ -151,7 +151,6 @@
 .pinnedAssets { font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px); }
 
 .pinnedRowEmpty {
-  opacity: 0.85;
   justify-content: center;
 }
 

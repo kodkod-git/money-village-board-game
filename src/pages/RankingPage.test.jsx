@@ -10,6 +10,7 @@ function renderAt(path) {
       <Routes>
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
+        <Route path="/join-code" element={<div>팀코드 입력 화면</div>} />
       </Routes>
     </MemoryRouter>
   )
@@ -57,9 +58,49 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 describe('RankingPage', () => {
+  it('카카오톡으로 현재 결과의 고유 링크를 공유한다', async () => {
+    vi.stubEnv('VITE_KAKAO_JS_KEY', 'test-kakao-key')
+    const kakao = { isInitialized: vi.fn(() => false), init: vi.fn(), Share: { sendDefault: vi.fn() } }
+    vi.stubGlobal('Kakao', kakao)
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByRole('button', { name: '카카오톡 공유하기' }))
+    expect(kakao.init).toHaveBeenCalledWith('test-kakao-key')
+    expect(kakao.Share.sendDefault).toHaveBeenCalledWith(expect.objectContaining({
+      objectType: 'text',
+      link: {
+        webUrl: `${window.location.origin}/result/session-1`,
+        mobileWebUrl: `${window.location.origin}/result/session-1`,
+      },
+    }))
+  })
+
+  it('SDK가 없으면 공유 불가 안내를 표시한다', async () => {
+    vi.stubGlobal('Kakao', undefined)
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByRole('button', { name: '카카오톡 공유하기' }))
+    expect(screen.getByRole('status')).toHaveTextContent('카카오톡 공유는 준비 중이에요')
+  })
+
+  it('일반 랭킹에는 결과 공유 버튼이 없다', async () => {
+    renderAt('/ranking')
+    await screen.findByText('김민준')
+    expect(screen.queryByRole('button', { name: '카카오톡 공유하기' })).not.toBeInTheDocument()
+  })
+
+  it('비참가자는 하단 참여 버튼을 누르면 팀코드 입력부터 시작한다', async () => {
+    sessionStorage.setItem('player_uuid', 'visitor')
+    renderAt('/result/session-1')
+    await userEvent.click(await screen.findByRole('button', { name: '게임에 참여하러 가기' }))
+    expect(screen.getByText('팀코드 입력 화면')).toBeInTheDocument()
+  })
+
   it('홈 진입(sessionId 없음)에서는 총자산/주식/부동산 3개 탭만 보이고 전체/수업/팀 서브탭은 없다', async () => {
     renderAt('/ranking')
     await screen.findByText('김민준')

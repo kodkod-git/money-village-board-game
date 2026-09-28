@@ -39,6 +39,7 @@ export default function RankingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [viewingPlayer, setViewingPlayer] = useState(null)
+  const [shareNotice, setShareNotice] = useState('')
 
   const myPlayerUuid = getPlayerUuid()
 
@@ -98,9 +99,31 @@ export default function RankingPage() {
   const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
 
+  function handleKakaoShare() {
+    const kakao = window.Kakao
+    const key = import.meta.env.VITE_KAKAO_JS_KEY
+    if (!key || !kakao) {
+      setShareNotice('카카오톡 공유는 준비 중이에요')
+      return
+    }
+    try {
+      setShareNotice('')
+      if (!kakao.isInitialized()) kakao.init(key)
+      const url = `${window.location.origin}/result/${sessionId}`
+      kakao.Share.sendDefault({
+        objectType: 'text',
+        text: '머니빌리지 게임 결과를 확인해 보세요!',
+        link: { mobileWebUrl: url, webUrl: url },
+        buttonTitle: '결과 보기',
+      })
+    } catch {
+      setShareNotice('카카오톡 공유를 열지 못했어요. 다시 시도해 주세요.')
+    }
+  }
+
   function handleRowClick(row) {
     if (!row || row.isPlaceholder) {
-      navigate('/join')
+      navigate('/join-code')
       return
     }
     setViewingPlayer(row)
@@ -109,10 +132,16 @@ export default function RankingPage() {
   return (
     <div className={styles.page}>
       {isV2 ? <BackButton to="/" label="처음으로" /> : <BackButton />}
+      {isV2 && (
+        <button type="button" className={styles.kakaoShareBtn} onClick={handleKakaoShare}>
+          카카오톡 공유하기
+        </button>
+      )}
       <div className={styles.inner}>
         <div className={styles.header}>
           <h1 className={styles.title}>랭킹</h1>
           <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
+          {shareNotice && <p role="status" className={styles.subtitle}>{shareNotice}</p>}
         </div>
         <div className={styles.topTabs}>
           {CATEGORY_TABS.map(tab => (

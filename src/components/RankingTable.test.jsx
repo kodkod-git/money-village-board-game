@@ -72,8 +72,8 @@ describe('RankingTable', () => {
     const empty = screen.getByTestId('pinned-row-empty')
     expect(empty).toBeInTheDocument()
     expect(empty).toHaveTextContent('게임에 참여하러 가기')
-    expect(empty).toHaveTextContent('-위')
-    expect(empty).toHaveTextContent('-원')
+    expect(empty).not.toHaveTextContent('-위')
+    expect(empty).not.toHaveTextContent('-원')
   })
 
   it('pinned row 클릭 시 onRowClick을 해당 데이터로 호출한다', async () => {
