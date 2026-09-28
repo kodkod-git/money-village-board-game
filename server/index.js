@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid } from './rooms.js'
+import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
@@ -397,12 +397,13 @@ app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
     return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
   }
 
+  const defaults = defaultGameState()
   const gameState = {
     cash: cash ?? 0,
     job: job ?? null,
-    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, ...stocks },
-    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0, ...realEstate },
-    badges: badges ?? [false, false, false, false, false, false],
+    stocks: Object.fromEntries(Object.keys(defaults.stocks).map(key => [key, stocks?.[key] ?? defaults.stocks[key]])),
+    realEstate: Object.fromEntries(Object.keys(defaults.realEstate).map(key => [key, realEstate?.[key] ?? defaults.realEstate[key]])),
+    badges: badges ?? defaults.badges,
     jobVisited: true,
     stocksVisited: true,
     realEstateVisited: true,
