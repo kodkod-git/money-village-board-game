@@ -99,6 +99,19 @@ export default function RankingPage() {
   const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
 
+  function resultUrl() {
+    return `${window.location.origin}/result/${sessionId}`
+  }
+
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(resultUrl())
+      setShareNotice('링크가 복사됐어요')
+    } catch {
+      setShareNotice('링크를 복사하지 못했어요. 다시 시도해 주세요.')
+    }
+  }
+
   function handleKakaoShare() {
     const kakao = window.Kakao
     const key = import.meta.env.VITE_KAKAO_JS_KEY
@@ -109,7 +122,7 @@ export default function RankingPage() {
     try {
       setShareNotice('')
       if (!kakao.isInitialized()) kakao.init(key)
-      const url = `${window.location.origin}/result/${sessionId}`
+      const url = resultUrl()
       kakao.Share.sendDefault({
         objectType: 'text',
         text: '머니빌리지 게임 결과를 확인해 보세요!',
@@ -122,8 +135,9 @@ export default function RankingPage() {
   }
 
   function handleRowClick(row) {
+    // 게임에 참여하지 않은 방문자는 메인 화면에서 시작하게 한다.
     if (!row || row.isPlaceholder) {
-      navigate('/join-code')
+      navigate('/')
       return
     }
     setViewingPlayer(row)
@@ -133,9 +147,19 @@ export default function RankingPage() {
     <div className={styles.page}>
       {isV2 ? <BackButton to="/" label="처음으로" /> : <BackButton />}
       {isV2 && (
-        <button type="button" className={styles.kakaoShareBtn} onClick={handleKakaoShare}>
-          카카오톡 공유하기
-        </button>
+        <div className={styles.shareActions}>
+          <button
+            type="button"
+            className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
+            onClick={handleKakaoShare}
+            aria-label="카카오톡 공유하기"
+          >
+            <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
+          </button>
+          <button type="button" className={styles.shareIconBtn} onClick={handleCopyLink} aria-label="링크 복사하기">
+            <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
+          </button>
+        </div>
       )}
       <div className={styles.inner}>
         <div className={styles.header}>
