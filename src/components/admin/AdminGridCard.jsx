@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ROOM_STATUS_LABELS } from '../../constants/gameData'
 import PriceSettingModal, { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES } from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
+import { teamDisplayName } from '../../utils/teamDisplayName'
 import styles from './AdminGridCard.module.css'
 
 const STATUS_BADGE_CLASS = {
@@ -21,7 +22,7 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
   const [tab, setTab] = useState('lobby')
   const [showPriceModal, setShowPriceModal] = useState(false)
 
-  const displayName = room.title || `팀 ${index + 1}`
+  const displayName = teamDisplayName(room, index)
   const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
   const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
   const priceLabels = tab === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS

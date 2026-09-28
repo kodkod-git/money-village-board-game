@@ -41,16 +41,16 @@ describe('AdminSpectateModal', () => {
     expect(container.querySelector('[class*="emptySlot"]')).not.toBeInTheDocument()
   })
 
-  it('1팀 관전 화면을 보여주고 팀원 카드를 렌더링한다', () => {
+  it('팀 1 관전 화면을 보여주고 팀원 카드를 렌더링한다', () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
-    expect(screen.getByText('1팀')).toBeInTheDocument()
+    expect(screen.getByText('팀 1')).toBeInTheDocument()
     expect(screen.getByText('김민준')).toBeInTheDocument()
   })
 
   it('다음 화살표 클릭 시 다음 팀으로 이동한다', async () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
     await userEvent.click(screen.getByLabelText('다음 팀'))
-    expect(screen.getByText('2팀')).toBeInTheDocument()
+    expect(screen.getByText('팀 2')).toBeInTheDocument()
     expect(screen.getByText('이서연')).toBeInTheDocument()
   })
 
@@ -126,14 +126,14 @@ it('onRoomChanged로 방 목록 순서가 바뀌어도 보고 있던 팀을 코�
   const { rerender } = render(
     <AdminSpectateModal rooms={[roomA, roomB]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />
   )
-  expect(screen.getByText('1팀')).toBeInTheDocument()
+  expect(screen.getByText('팀 1')).toBeInTheDocument()
   expect(screen.getByText('김민준')).toBeInTheDocument()
 
   // 목록이 다시 정렬돼 순서가 바뀌어도(AB1234가 이제 index 1) 같은 방을 계속 보여줘야 한다.
   rerender(
     <AdminSpectateModal rooms={[roomB, roomA]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />
   )
-  expect(screen.getByText('2팀')).toBeInTheDocument()
+  expect(screen.getByText('팀 2')).toBeInTheDocument()
   expect(screen.getByText('김민준')).toBeInTheDocument()
 })
 
@@ -401,12 +401,12 @@ describe('자세히 보기', () => {
   it('자세히 보기 클릭 시 팀원 자산 상세 모달을 열고, 닫으면 팀 현황으로 돌아온다', async () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
     await userEvent.click(screen.getByText('자세히 보기'))
-    expect(screen.getByText('1팀 · 팀원 자산 상세')).toBeInTheDocument()
+    expect(screen.getByText('팀 1 · 팀원 자산 상세')).toBeInTheDocument()
     expect(screen.getByTestId('asset-receipt-AB1234-p1')).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: '자세히 보기 닫기' }))
-    expect(screen.queryByText('1팀 · 팀원 자산 상세')).not.toBeInTheDocument()
-    expect(screen.getByText('1팀')).toBeInTheDocument()
+    expect(screen.queryByText('팀 1 · 팀원 자산 상세')).not.toBeInTheDocument()
+    expect(screen.getByText('팀 1')).toBeInTheDocument()
   })
 })
 
@@ -461,13 +461,13 @@ describe('결과 공유', () => {
 
   afterEach(() => { delete window.Kakao })
 
-  it('결과 등록된 팀은 자세히 보기 옆에 카카오톡·링크 공유 아이콘 버튼을 보여준다', () => {
+  it('결과 등록된 팀은 자세히 보기 왼편에 카카오톡·링크 공유 아이콘 버튼을 보여준다', () => {
     render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
     const detail = screen.getByText('자세히 보기')
     const kakao = screen.getByRole('button', { name: '카카오톡 공유하기' })
     const link = screen.getByRole('button', { name: '링크 복사하기' })
-    expect(detail.nextElementSibling).toBe(kakao)
     expect(kakao.nextElementSibling).toBe(link)
+    expect(link.nextElementSibling).toBe(detail)
   })
 
   it('결과 등록 전인 팀에는 공유 버튼을 보여주지 않는다', () => {
@@ -494,5 +494,28 @@ describe('결과 공유', () => {
     const url = `${window.location.origin}/result/session-1`
     expect(sendDefault).toHaveBeenCalledWith(expect.objectContaining({ link: { mobileWebUrl: url, webUrl: url } }))
     vi.unstubAllEnvs()
+  })
+})
+
+describe('팀 이름 표시', () => {
+  it('관리자가 만든 방의 제목이 아직 비어 있으면 팀 번호(팀 N)를 입력창에 보여준다', () => {
+    const rooms = [makeRoom('AB1234', '김민준'), { ...makeRoom('CD5678', '이서연'), title: '' }]
+    render(<AdminSpectateModal rooms={rooms} initialIndex={1} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByRole('textbox')).toHaveValue('팀 2')
+  })
+
+  it('비어 있던 제목을 건드리지 않고 벗어나면 팀 번호를 제목으로 저장하지 않는다', async () => {
+    const room = { ...makeRoom('AB1234', '김민준'), title: '' }
+    render(<AdminSpectateModal rooms={[room]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    global.fetch.mockClear()
+    await userEvent.click(screen.getByRole('textbox'))
+    await userEvent.tab()
+    expect(global.fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/admin/rooms/AB1234'), expect.objectContaining({ method: 'PATCH' }))
+  })
+
+  it('처음 설정한 방 이름이 있으면 그 이름을 보여준다', () => {
+    const room = { ...makeRoom('AB1234', '김민준'), title: '독수리 팀' }
+    render(<AdminSpectateModal rooms={[room]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByRole('textbox')).toHaveValue('독수리 팀')
   })
 })

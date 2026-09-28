@@ -244,6 +244,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
           {activeTab === 'grid' && (
             <AdminGridView
               rooms={filteredRooms}
+              allRooms={rooms}
               onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}
               onCreate={classId === 'unassigned' ? undefined : handleCreateRoom}
               onRoomChanged={loadRooms}

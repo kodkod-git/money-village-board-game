@@ -112,14 +112,14 @@ describe('RankingPage', () => {
     expect(kakao.parentElement).toBe(link.parentElement)
   })
 
-  it('링크 복사하기를 누르면 결과 페이지 주소를 복사하고 안내 문구를 보여준다', async () => {
+  it('링크 복사하기를 누르면 결과 페이지 주소를 복사하고, 성공 안내 문구는 띄우지 않는다', async () => {
     const writeText = vi.fn().mockResolvedValue()
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
     renderAt('/result/session-1')
     await screen.findByText('홍길동')
     await userEvent.click(screen.getByRole('button', { name: '링크 복사하기' }))
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/result/session-1`)
-    expect(await screen.findByRole('status')).toHaveTextContent('링크가 복사됐어요')
+    expect(screen.queryByText('링크가 복사됐어요')).not.toBeInTheDocument()
   })
 
   it('홈 진입(sessionId 없음)에서는 총자산/주식/부동산 3개 탭만 보이고 전체/수업/팀 서브탭은 없다', async () => {
