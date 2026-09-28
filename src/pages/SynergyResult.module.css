@@ -55,3 +55,31 @@
 .heroFade {
   height: clamp(24px, calc(40px * var(--sy)), 40px);
 }
+
+/* 배경 위 캐릭터·아이콘. 모두 hero 크기에 대한 %로 배치해서 폭이 바뀌어도 배경과 같이 움직인다.
+   배경의 그룹 라벨(왼편 좌상단, 오른편 우하단)을 가리지 않도록 가운데 띠에 둔다. */
+.character {
+  position: absolute;
+  top: 16%;
+  height: 54%;
+  width: 30%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+}
+
+.characterLeft {
+  left: 10%;
+}
+
+.characterRight {
+  right: 10%;
+}
+
+.synergyIcon {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 11%;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}

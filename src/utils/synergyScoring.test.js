@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground } from './synergyScoring'
+import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from './synergyScoring'
 import { SYNERGY_TYPES } from '../constants/synergyData'
 
 describe('calcSynergyType', () => {
@@ -70,5 +70,19 @@ describe('getSynergyBackground', () => {
       }
     }
     expect(used.size).toBe(16)
+  })
+})
+
+describe('getCharacterImage', () => {
+  it('대표 동물 이름으로 캐릭터 이미지를 찾는다', () => {
+    expect(getCharacterImage('수달')).toBe('/characters/Planner-수달.png')
+    expect(getCharacterImage('여우')).toBe('/characters/Adventurer-여우.png')
+  })
+
+  it('16개 유형의 대표 동물 모두 public/characters에 이미지가 있다', async () => {
+    const fs = await import('node:fs')
+    for (const { animal } of Object.values(SYNERGY_TYPES)) {
+      expect(fs.existsSync(`public${getCharacterImage(animal)}`)).toBe(true)
+    }
   })
 })

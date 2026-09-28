@@ -1,4 +1,5 @@
 import { SYNERGY_QUESTIONS, SYNERGY_TYPES, TYPE_GROUP } from '../constants/synergyData'
+import { CHARACTERS } from '../constants/characters'
 
 export function calcSynergyType(letters) {
   return [...SYNERGY_QUESTIONS]
@@ -28,4 +29,9 @@ export function getTypeGroup(type) {
 export function getSynergyBackground(myType, citizenType) {
   const colorOf = type => getTypeGroup(type).split(' ')[0].toLowerCase()
   return `/synergy/${colorOf(myType)}_${colorOf(citizenType)}.png`
+}
+
+// public/characters/{역할}-{동물}.png 중 대표 동물에 해당하는 캐릭터를 찾는다.
+export function getCharacterImage(animal) {
+  return `/characters/${CHARACTERS.find(name => name.endsWith(`-${animal}`))}.png`
 }
