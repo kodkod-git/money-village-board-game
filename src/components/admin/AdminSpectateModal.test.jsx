@@ -455,3 +455,44 @@ describe('직접 등록하기', () => {
     expect(screen.queryByRole('dialog', { name: '팀원 직접 등록' })).not.toBeInTheDocument()
   })
 })
+
+describe('결과 공유', () => {
+  const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true, sessionId: 'session-1' }
+
+  afterEach(() => { delete window.Kakao })
+
+  it('결과 등록된 팀은 자세히 보기 옆에 카카오톡·링크 공유 아이콘 버튼을 보여준다', () => {
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    const detail = screen.getByText('자세히 보기')
+    const kakao = screen.getByRole('button', { name: '카카오톡 공유하기' })
+    const link = screen.getByRole('button', { name: '링크 복사하기' })
+    expect(detail.nextElementSibling).toBe(kakao)
+    expect(kakao.nextElementSibling).toBe(link)
+  })
+
+  it('결과 등록 전인 팀에는 공유 버튼을 보여주지 않는다', () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: '카카오톡 공유하기' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '링크 복사하기' })).not.toBeInTheDocument()
+  })
+
+  it('링크 복사하기를 누르면 참가자가 보는 결과 페이지 주소를 복사한다', async () => {
+    const writeText = vi.fn().mockResolvedValue()
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: '링크 복사하기' }))
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/result/session-1`)
+    expect(await screen.findByRole('status')).toHaveTextContent('링크가 복사됐어요')
+  })
+
+  it('카카오톡 공유하기를 누르면 결과 페이지 링크로 공유 창을 연다', async () => {
+    vi.stubEnv('VITE_KAKAO_JS_KEY', 'test-key')
+    const sendDefault = vi.fn()
+    window.Kakao = { isInitialized: () => true, init: vi.fn(), Share: { sendDefault } }
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: '카카오톡 공유하기' }))
+    const url = `${window.location.origin}/result/session-1`
+    expect(sendDefault).toHaveBeenCalledWith(expect.objectContaining({ link: { mobileWebUrl: url, webUrl: url } }))
+    vi.unstubAllEnvs()
+  })
+})

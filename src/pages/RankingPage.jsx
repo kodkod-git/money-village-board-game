@@ -5,6 +5,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
+import { copyGameResultLink, shareGameResultToKakao } from '../utils/shareGameResult'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './RankingPage.module.css'
@@ -99,39 +100,12 @@ export default function RankingPage() {
   const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
 
-  function resultUrl() {
-    return `${window.location.origin}/result/${sessionId}`
-  }
-
   async function handleCopyLink() {
-    try {
-      await navigator.clipboard.writeText(resultUrl())
-      setShareNotice('링크가 복사됐어요')
-    } catch {
-      setShareNotice('링크를 복사하지 못했어요. 다시 시도해 주세요.')
-    }
+    setShareNotice(await copyGameResultLink(sessionId))
   }
 
   function handleKakaoShare() {
-    const kakao = window.Kakao
-    const key = import.meta.env.VITE_KAKAO_JS_KEY
-    if (!key || !kakao) {
-      setShareNotice('카카오톡 공유는 준비 중이에요')
-      return
-    }
-    try {
-      setShareNotice('')
-      if (!kakao.isInitialized()) kakao.init(key)
-      const url = resultUrl()
-      kakao.Share.sendDefault({
-        objectType: 'text',
-        text: '머니빌리지 게임 결과를 확인해 보세요!',
-        link: { mobileWebUrl: url, webUrl: url },
-        buttonTitle: '결과 보기',
-      })
-    } catch {
-      setShareNotice('카카오톡 공유를 열지 못했어요. 다시 시도해 주세요.')
-    }
+    setShareNotice(shareGameResultToKakao(sessionId))
   }
 
   function handleRowClick(row) {

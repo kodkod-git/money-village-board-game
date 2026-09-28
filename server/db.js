@@ -104,6 +104,8 @@ export async function getAllCompletedTeams() {
 
   return sessions.map(session => ({
     code: session.team_code,
+    // 관리자 화면에서 참가자 결과 페이지(/result/:sessionId)를 공유할 때 쓴다.
+    sessionId: session.id,
     status: 'completed',
     registered: true,
     createdAt: session.created_at,

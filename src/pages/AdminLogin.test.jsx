@@ -51,3 +51,18 @@ describe('AdminLogin', () => {
     expect(await screen.findByText('아이디 또는 비밀번호가 올바르지 않습니다')).toBeInTheDocument()
   })
 })
+
+describe('AdminLogin 레이아웃', () => {
+  it('참가자 온보딩 화면(팀코드·이름 입력)과 같은 폰 프레임 모드를 쓴다', () => {
+    const { unmount } = render(<MemoryRouter><AdminLogin onLogin={vi.fn()} /></MemoryRouter>)
+    expect(document.body).toHaveClass('onboarding-mode')
+    unmount()
+    expect(document.body).not.toHaveClass('onboarding-mode')
+  })
+
+  it('아이디·비밀번호 입력칸에 이름표가 붙어 있다', () => {
+    render(<MemoryRouter><AdminLogin onLogin={vi.fn()} /></MemoryRouter>)
+    expect(screen.getByLabelText('아이디')).toBeInTheDocument()
+    expect(screen.getByLabelText('비밀번호')).toBeInTheDocument()
+  })
+})

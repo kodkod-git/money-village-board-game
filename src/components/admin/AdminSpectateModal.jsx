@@ -6,6 +6,7 @@ import ConfirmDialog from './ConfirmDialog'
 import AdminTeamAssetsModal from './AdminTeamAssetsModal'
 import AdminAddPlayerModal from './AdminAddPlayerModal'
 import { adminFetch } from '../../utils/adminAuth'
+import { copyGameResultLink, shareGameResultToKakao } from '../../utils/shareGameResult'
 import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
@@ -22,6 +23,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
+  const [shareNotice, setShareNotice] = useState('')
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
@@ -31,6 +33,19 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   useEffect(() => {
     setTitleDraft(room.title ?? '')
   }, [room.code, room.title])
+
+  // 다른 팀으로 넘기면 이전 팀의 공유 안내는 지운다.
+  useEffect(() => {
+    setShareNotice('')
+  }, [room.code])
+
+  useEffect(() => {
+    if (!shareNotice) return undefined
+    const timer = setTimeout(() => setShareNotice(''), 2000)
+    return () => clearTimeout(timer)
+  }, [shareNotice])
+
+  const canShare = room.registered && Boolean(room.sessionId)
 
   useEffect(() => {
     if (room.registered) return undefined
@@ -185,11 +200,32 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
         )}
         <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
+        {canShare && (
+          <button
+            type="button"
+            className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
+            onClick={() => setShareNotice(shareGameResultToKakao(room.sessionId))}
+            aria-label="카카오톡 공유하기"
+          >
+            <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
+          </button>
+        )}
+        {canShare && (
+          <button
+            type="button"
+            className={styles.shareIconBtn}
+            onClick={async () => setShareNotice(await copyGameResultLink(room.sessionId))}
+            aria-label="링크 복사하기"
+          >
+            <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
+          </button>
+        )}
         {!room.registered && room.players.length < 4 && (
           <button type="button" className={styles.addPlayerBtn} onClick={() => setShowAddPlayer(true)}>직접 등록하기</button>
         )}
         <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
       </div>
+      {shareNotice && <p role="status" className={styles.shareNotice}>{shareNotice}</p>}
 
       {confirmDelete && (
         <ConfirmDialog

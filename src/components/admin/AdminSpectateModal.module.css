@@ -113,6 +113,41 @@
 
 .priceBtn { background: var(--admin-surface); color: var(--admin-text); border: 1px solid var(--admin-border); }
 
+/* 결과 등록된 팀의 공유 버튼(카카오톡·링크). 아이콘/색은 참가자 결과 화면
+   (RankingPage.module.css의 .shareIconBtn)과 맞추고, 높이는 옆 버튼(45px)과 같다. */
+.shareIconBtn {
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kakaoIconBtn {
+  background: #fee500;
+  border-color: #fee500;
+}
+
+.shareIconImg {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.shareNotice {
+  margin: -8px 0 16px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-blue);
+  flex-shrink: 0;
+}
+
 .detailBtn { background: var(--admin-blue-soft); color: var(--admin-blue); border: 1px solid var(--admin-blue-faint); }
 
 .addPlayerBtn { background: var(--admin-purple-tint); color: var(--admin-purple); border: 1px solid var(--admin-purple); }
