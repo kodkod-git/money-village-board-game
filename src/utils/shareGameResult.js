@@ -1,6 +1,8 @@
 // 게임 결과(랭킹) 페이지 공유. 참가자 결과 화면과 관리자 팀 카드가 함께 쓴다.
 // 각 함수는 화면에 띄울 안내 문구를 돌려준다(빈 문자열이면 안내 없음).
 
+export const LINK_COPIED_NOTICE = '링크가 복사됐어요'
+
 export function gameResultUrl(sessionId) {
   return `${window.location.origin}/result/${sessionId}`
 }
@@ -8,7 +10,7 @@ export function gameResultUrl(sessionId) {
 export async function copyGameResultLink(sessionId) {
   try {
     await navigator.clipboard.writeText(gameResultUrl(sessionId))
-    return '링크가 복사됐어요'
+    return LINK_COPIED_NOTICE
   } catch {
     return '링크를 복사하지 못했어요. 다시 시도해 주세요.'
   }

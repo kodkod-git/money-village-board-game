@@ -205,7 +205,6 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         {room.status === 'completed-but-unregistered' && (
           <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
         )}
-        <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
         {canShare && (
           <button
             type="button"
@@ -226,6 +225,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
             <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
           </button>
         )}
+        <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
         {!room.registered && room.players.length < 4 && (
           <button type="button" className={styles.addPlayerBtn} onClick={() => setShowAddPlayer(true)}>직접 등록하기</button>
         )}

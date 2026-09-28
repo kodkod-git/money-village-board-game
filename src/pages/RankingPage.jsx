@@ -5,7 +5,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
-import { copyGameResultLink, shareGameResultToKakao } from '../utils/shareGameResult'
+import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './RankingPage.module.css'
@@ -100,8 +100,10 @@ export default function RankingPage() {
   const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
 
+  // 결과 화면에서는 복사 성공 안내를 띄우지 않고, 실패했을 때만 알린다.
   async function handleCopyLink() {
-    setShareNotice(await copyGameResultLink(sessionId))
+    const notice = await copyGameResultLink(sessionId)
+    setShareNotice(notice === LINK_COPIED_NOTICE ? '' : notice)
   }
 
   function handleKakaoShare() {

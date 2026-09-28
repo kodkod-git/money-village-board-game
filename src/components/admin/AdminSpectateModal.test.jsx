@@ -461,13 +461,13 @@ describe('결과 공유', () => {
 
   afterEach(() => { delete window.Kakao })
 
-  it('결과 등록된 팀은 자세히 보기 옆에 카카오톡·링크 공유 아이콘 버튼을 보여준다', () => {
+  it('결과 등록된 팀은 자세히 보기 왼편에 카카오톡·링크 공유 아이콘 버튼을 보여준다', () => {
     render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
     const detail = screen.getByText('자세히 보기')
     const kakao = screen.getByRole('button', { name: '카카오톡 공유하기' })
     const link = screen.getByRole('button', { name: '링크 복사하기' })
-    expect(detail.nextElementSibling).toBe(kakao)
     expect(kakao.nextElementSibling).toBe(link)
+    expect(link.nextElementSibling).toBe(detail)
   })
 
   it('결과 등록 전인 팀에는 공유 버튼을 보여주지 않는다', () => {
