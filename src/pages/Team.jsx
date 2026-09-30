@@ -23,25 +23,54 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
-  // 방에서 강제로 나가게 된 사유(강퇴 / 방 삭제). 안내 모달을 먼저 띄우고
-  // 학생이 "확인"을 눌러야 로비로 이동한다.
+  // 방에서 강제로 나가게 된 사유(강퇴 / 방 삭제 / 결과 등록). 안내 모달을 먼저 띄우고
+  // 학생이 버튼을 눌러야 이동한다. to가 없으면 로비로 간다.
   const [exitNotice, setExitNotice] = useState(null)
+  // 방이 이미 사라졌으면 자동 재참가(join-room)를 보내지 않는다.
+  const [roomGone, setRoomGone] = useState(false)
+
+  // 연결이 끊긴 사이 방이 사라진 경우. 관리자가 결과를 등록했다면(서버가 sessionId를
+  // 알려줌) 그 팀의 결과(랭킹) 화면으로, 아니면 로비로 안내한다.
+  function handleRoomGone(sessionId) {
+    setRoomGone(true)
+    setExitNotice(sessionId
+      ? {
+          title: '이미 결과가 등록되었어요',
+          message: '선생님이 팀 결과를 등록했어요. 랭킹에서 결과를 확인해 보세요.',
+          confirmLabel: '랭킹 보기',
+          to: `/result/${sessionId}`,
+        }
+      : { title: '방이 사라졌어요', message: '팀 방이 삭제되었어요.' })
+  }
+
+  function checkRoomGone() {
+    fetch(`/api/rooms/${code}`)
+      .then(r => (r.status === 404 ? r.json().then(data => handleRoomGone(data.sessionId)) : null))
+      .catch(() => {})
+  }
+
+  function handleJoinResult(res) {
+    if (res?.ok === false && res.error === 'Room not found') checkRoomGone()
+  }
 
   useEffect(() => {
     if (readOnly) return
     fetch(`/api/rooms/${code}`)
-      .then(r => r.json())
-      .then(data => {
+      .then(r => r.json().then(data => {
+        if (r.status === 404) {
+          handleRoomGone(data.sessionId)
+          return
+        }
         if (data.players) setPlayers(data.players)
         if (data.prices) setPrices(data.prices)
-      })
+      }))
       .catch(() => {})
       .finally(() => setRoomFetched(true))
   }, [code, readOnly])
 
   useEffect(() => {
     if (readOnly) return
-    if (!socket || !roomFetched) return
+    if (!socket || !roomFetched || roomGone) return
     if (players.find(p => p.socketId === socket.id)) return
 
     const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
@@ -55,8 +84,8 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       character: stored.character,
       isHost: stored.isHost ?? false,
       playerUuid,
-    })
-  }, [socket, roomFetched, players, code, readOnly])
+    }, handleJoinResult)
+  }, [socket, roomFetched, roomGone, players, code, readOnly])
 
   useEffect(() => {
     if (readOnly || !socket) return
@@ -73,7 +102,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         character: stored.character,
         isHost: stored.isHost ?? false,
         playerUuid,
-      })
+      }, handleJoinResult)
     }
 
     socket.on('connect', rejoin)
@@ -257,7 +286,12 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         <AlertModal
           title={exitNotice.title}
           message={exitNotice.message}
-          onConfirm={() => { setExitNotice(null); goToLobby() }}
+          confirmLabel={exitNotice.confirmLabel}
+          onConfirm={() => {
+            setExitNotice(null)
+            if (exitNotice.to) navigate(exitNotice.to)
+            else goToLobby()
+          }}
         />
       )}
     </div>

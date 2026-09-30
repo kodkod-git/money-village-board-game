@@ -765,3 +765,41 @@ describe('updateGameResult — 직업 비우기', () => {
     expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ job: '' }))
   })
 })
+
+describe('getSessionIdByTeamCode', () => {
+  function mockLookup(result) {
+    const mockMaybeSingle = vi.fn().mockResolvedValue(result)
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue({ select: mockSelect })
+    return { mockSelect, mockEq }
+  }
+
+  it('team_code로 등록된 세션 id를 찾는다', async () => {
+    const { mockSelect, mockEq } = mockLookup({ data: { id: 'session-1' }, error: null })
+
+    const { getSessionIdByTeamCode } = await import('./db.js')
+
+    expect(await getSessionIdByTeamCode('AB1234')).toBe('session-1')
+    expect(mockFrom).toHaveBeenCalledWith('game_sessions')
+    expect(mockSelect).toHaveBeenCalledWith('id')
+    expect(mockEq).toHaveBeenCalledWith('team_code', 'AB1234')
+  })
+
+  it('등록된 세션이 없으면 null을 반환한다', async () => {
+    mockLookup({ data: null, error: null })
+
+    const { getSessionIdByTeamCode } = await import('./db.js')
+
+    expect(await getSessionIdByTeamCode('AB1234')).toBeNull()
+  })
+
+  it('조회 에러가 나면 예외를 던진다', async () => {
+    mockLookup({ data: null, error: { message: 'boom' } })
+
+    const { getSessionIdByTeamCode } = await import('./db.js')
+
+    await expect(getSessionIdByTeamCode('AB1234')).rejects.toEqual({ message: 'boom' })
+  })
+})

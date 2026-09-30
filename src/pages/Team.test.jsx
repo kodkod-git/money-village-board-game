@@ -100,7 +100,7 @@ describe('Team', () => {
 
     expect(socket.emit).toHaveBeenCalledWith('join-room', {
       code: 'ABC123', name: '철수', affiliation: '', character: 'Adventurer-강아지', isHost: true, playerUuid: 'p1',
-    })
+    }, expect.any(Function))
   })
 
   it('저장된 프로필의 방 코드가 다르면 재연결 시 join-room을 보내지 않는다', () => {
@@ -215,6 +215,76 @@ describe('Team', () => {
     const [calledWith] = mockNavigate.mock.calls.at(-1)
     expect(calledWith).toContain('classId=class-1')
     alertSpy.mockRestore()
+  })
+
+  describe('결과 등록 등으로 방이 이미 사라진 뒤 재접속한 경우', () => {
+    const PROFILE = { code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: false, classId: 'class-1' }
+    const originalFetch = global.fetch
+
+    function mockRoomGone(sessionId) {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        json: () => Promise.resolve({ error: 'Room not found', sessionId }),
+      })
+    }
+
+    afterEach(() => { global.fetch = originalFetch })
+
+    it('결과가 이미 등록됐으면 안내 후 그 팀의 결과(랭킹) 화면으로 보낸다', async () => {
+      sessionStorage.setItem('player_profile', JSON.stringify(PROFILE))
+      mockRoomGone('session-1')
+      renderTeam()
+
+      expect(await screen.findByText('이미 결과가 등록되었어요')).toBeInTheDocument()
+      expect(mockNavigate).not.toHaveBeenCalled()
+
+      await userEvent.click(screen.getByRole('button', { name: '랭킹 보기' }))
+
+      expect(mockNavigate).toHaveBeenCalledWith('/result/session-1')
+    })
+
+    it('없어진 방에는 join-room을 다시 보내지 않는다', async () => {
+      sessionStorage.setItem('player_profile', JSON.stringify(PROFILE))
+      mockRoomGone('session-1')
+      mockRoomUpdatePlayers = []
+      const socket = io()
+      socket.emit.mockClear()
+      renderTeam()
+
+      await screen.findByText('이미 결과가 등록되었어요')
+      expect(socket.emit).not.toHaveBeenCalledWith('join-room', expect.anything(), expect.anything())
+      mockRoomUpdatePlayers = DEFAULT_PLAYERS
+    })
+
+    it('등록된 결과 없이 방만 사라졌으면 안내 후 로비로 보낸다', async () => {
+      sessionStorage.setItem('player_profile', JSON.stringify(PROFILE))
+      mockRoomGone(null)
+      renderTeam()
+
+      expect(await screen.findByText('방이 사라졌어요')).toBeInTheDocument()
+      await userEvent.click(screen.getByRole('button', { name: '확인' }))
+
+      expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/lobby?'))
+    })
+
+    it('재연결 시 join-room이 방 없음으로 실패하면 방 상태를 다시 확인해 안내한다', async () => {
+      renderTeam()
+      const socket = io()
+      const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
+      sessionStorage.setItem('player_profile', JSON.stringify(PROFILE))
+      sessionStorage.setItem('player_uuid', 'p1')
+      mockRoomGone('session-2')
+      socket.emit.mockClear()
+
+      act(() => connectHandler())
+      const [, , callback] = socket.emit.mock.calls.find(([ev]) => ev === 'join-room')
+      act(() => callback({ ok: false, error: 'Room not found' }))
+
+      expect(await screen.findByText('이미 결과가 등록되었어요')).toBeInTheDocument()
+      await userEvent.click(screen.getByRole('button', { name: '랭킹 보기' }))
+      expect(mockNavigate).toHaveBeenCalledWith('/result/session-2')
+    })
   })
 
   it('방장이 아닌 팀원도 가격 설정 버튼을 볼 수 있다', () => {

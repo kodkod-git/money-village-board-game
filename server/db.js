@@ -331,3 +331,14 @@ export async function updateSessionTitle(teamCode, title) {
   if (error) throw error
   return data
 }
+
+// 결과 등록으로 방이 삭제된 뒤 재접속한 참가자를 그 팀의 결과 화면으로 안내할 때 쓴다.
+export async function getSessionIdByTeamCode(teamCode) {
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .select('id')
+    .eq('team_code', teamCode)
+    .maybeSingle()
+  if (error) throw error
+  return data?.id ?? null
+}
