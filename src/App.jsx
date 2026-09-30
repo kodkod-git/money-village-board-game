@@ -33,7 +33,7 @@ export default function App() {
         <Route path="/quiz/play" element={<QuizPlay />} />
         <Route path="/quiz/result/:resultId" element={<QuizResult />} />
         <Route path="/synergy/:citizenType" element={<SynergyPlay />} />
-        <Route path="/synergy/:citizenType/result" element={<SynergyResult />} />
+        <Route path="/synergy/:citizenType/result/:resultId" element={<SynergyResult />} />
       </Routes>
       <Toaster />
     </>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { RESULT_GROUPS, ANIMAL_EMOJIS, ECONOMIC_TYPES_URL } from '../constants/quizData'
 import { SYNERGY_TYPES, SYNERGY_AXES, ACADEMY_INQUIRY_URL } from '../constants/synergyData'
 import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from '../utils/synergyScoring'
@@ -10,16 +10,19 @@ import synergyStyles from './SynergyResult.module.css'
 const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY
 
 export default function SynergyResult() {
-  const { citizenType: rawCitizenType } = useParams()
-  const [searchParams] = useSearchParams()
+  const { citizenType: rawCitizenType, resultId } = useParams()
   const navigate = useNavigate()
   useBodyClass('result-mode')
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(false)
   const [notice, setNotice] = useState('')
 
-  const citizenType = normalizeSynergyType(rawCitizenType)
-  const myType = normalizeSynergyType(searchParams.get('me'))
-  const myName = searchParams.get('name') || '나'
-  const citizenName = searchParams.get('friend') || '시민권자'
+  useEffect(() => {
+    fetch(`/api/synergy/results/${resultId}`)
+      .then(r => { if (!r.ok) throw new Error('not found'); return r.json() })
+      .then(setResult)
+      .catch(() => setError(true))
+  }, [resultId])
 
   useEffect(() => {
     if (!notice) return
@@ -50,18 +53,27 @@ export default function SynergyResult() {
     })
   }, [])
 
-  if (!citizenType || !myType) {
+  const citizenType = normalizeSynergyType(result?.citizen_type)
+  const myType = normalizeSynergyType(result?.my_type)
+
+  if (error || (result && (!citizenType || !myType))) {
+    const retryType = normalizeSynergyType(rawCitizenType)
     return (
       <div className={styles.page}>
         <div className={styles.errorWrap}>
           <p className={styles.errorText}>결과를 불러오지 못했어요.</p>
-          {citizenType && (
-            <button className={styles.retryBtn} onClick={() => navigate(`/synergy/${citizenType}`)}>다시 하기</button>
+          {retryType && (
+            <button className={styles.retryBtn} onClick={() => navigate(`/synergy/${retryType}`)}>다시 하기</button>
           )}
         </div>
       </div>
     )
   }
+
+  if (!result) return null
+
+  const myName = result.my_name
+  const citizenName = result.citizen_name
 
   const myInfo = SYNERGY_TYPES[myType]
   const citizenInfo = SYNERGY_TYPES[citizenType]
