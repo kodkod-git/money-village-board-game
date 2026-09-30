@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
-import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
@@ -44,9 +44,14 @@ app.get('/api/rooms', (req, res) => {
   res.json(listPublicRoomsByClassId(classId))
 })
 
-app.get('/api/rooms/:code', (req, res) => {
-  const room = getRoom(req.params.code.toUpperCase())
-  if (!room) return res.status(404).json({ error: 'Room not found' })
+app.get('/api/rooms/:code', async (req, res) => {
+  const code = req.params.code.toUpperCase()
+  const room = getRoom(code)
+  if (!room) {
+    // 결과 등록으로 방이 삭제됐다면, 뒤늦게 재접속한 참가자가 결과 화면으로 갈 수 있게 세션 id를 알려준다.
+    const sessionId = await getSessionIdByTeamCode(code).catch(() => null)
+    return res.status(404).json({ error: 'Room not found', sessionId })
+  }
   res.json({ code: room.code, playerCount: room.players.length, players: room.players, prices: room.prices })
 })
 
@@ -617,7 +622,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     const room = markDisconnected(socket.id)
-    if (room) io.to(room.code).emit('room-updated', { players: room.players })
+    if (!room) return
+    io.to(room.code).emit('room-updated', { players: room.players })
+    // 관리자 대시보드의 "연결 끊김" 배지와 "전체 등록" 경고 문구가 새로고침 없이 갱신되게 한다.
+    broadcastClassRooms(room.classId)
   })
 })
 
