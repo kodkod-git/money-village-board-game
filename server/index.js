@@ -8,6 +8,7 @@ import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
+import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
@@ -98,6 +99,38 @@ app.post('/api/quiz/results', async (req, res) => {
 app.get('/api/quiz/results/:id', async (req, res) => {
   try {
     const result = await getQuizResult(req.params.id)
+    res.json(result)
+  } catch (err) {
+    res.status(404).json({ error: 'Result not found' })
+  }
+})
+
+const SYNERGY_TYPE_PATTERN = /^[FP][TA][SE][NC]$/
+const SYNERGY_ANSWER_KEYS = ['q_pocket_money', 'q_investment', 'q_group_buying', 'q_price_compare']
+
+app.post('/api/synergy/results', async (req, res) => {
+  const { myName, citizenName, citizenType, myType, answers } = req.body ?? {}
+  if (
+    !myName?.trim() || !citizenName?.trim()
+    || !SYNERGY_TYPE_PATTERN.test(citizenType ?? '') || !SYNERGY_TYPE_PATTERN.test(myType ?? '')
+    || !SYNERGY_ANSWER_KEYS.every(key => answers?.[key])
+  ) {
+    return res.status(400).json({ error: 'myName, citizenName, citizenType, myType, answers가 필요합니다' })
+  }
+  try {
+    const id = await saveSynergyResult({
+      myName: myName.trim(), citizenName: citizenName.trim(), citizenType, myType, answers,
+    })
+    res.json({ id })
+  } catch (err) {
+    console.error('synergy save error:', err)
+    res.status(500).json({ error: 'Failed to save synergy result' })
+  }
+})
+
+app.get('/api/synergy/results/:id', async (req, res) => {
+  try {
+    const result = await getSynergyResult(req.params.id)
     res.json(result)
   } catch (err) {
     res.status(404).json({ error: 'Result not found' })

@@ -14,6 +14,7 @@ const STEP_MY_NAME = 'myName'
 const STEP_CITIZEN_NAME = 'citizenName'
 const STEP_QUESTION = 'question'
 const STEP_ANALYZING = 'analyzing'
+const STEP_ERROR = 'error'
 
 export default function SynergyPlay() {
   const { citizenType: rawCitizenType } = useParams()
@@ -41,12 +42,23 @@ export default function SynergyPlay() {
 
   function submitResult() {
     setStep(STEP_ANALYZING)
-    const params = new URLSearchParams({
-      me: calcSynergyType(letters),
-      name: myName.trim(),
-      friend: citizenName.trim(),
+
+    fetch('/api/synergy/results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        myName: myName.trim(),
+        citizenName: citizenName.trim(),
+        citizenType,
+        myType: calcSynergyType(letters),
+        answers,
+      }),
     })
-    setTimeout(() => navigate(`/synergy/${citizenType}/result?${params}`), 600)
+      .then(r => { if (!r.ok) throw new Error('save failed'); return r.json() })
+      .then(data => {
+        setTimeout(() => navigate(`/synergy/${citizenType}/result/${data.id}`), 600)
+      })
+      .catch(() => setStep(STEP_ERROR))
   }
 
   function selectAnswer(question, option) {
@@ -76,7 +88,7 @@ export default function SynergyPlay() {
   const currentStepNumber =
     step === STEP_MY_NAME ? 1
     : step === STEP_CITIZEN_NAME ? 2
-    : 3 + questionIndex
+    : 3 + questionIndex // STEP_QUESTION or STEP_ERROR
 
   const currentQuestion = SYNERGY_QUESTIONS[questionIndex]
 
@@ -103,6 +115,13 @@ export default function SynergyPlay() {
       </div>
 
       <div className={styles.center}>
+        {step === STEP_ERROR && (
+          <div className={styles.card}>
+            <p className={styles.questionPrompt}>결과 저장에 실패했어요.</p>
+            <button className={styles.gradBtn} onClick={submitResult}>다시 시도하기</button>
+          </div>
+        )}
+
         {(step === STEP_MY_NAME || step === STEP_CITIZEN_NAME) && (
           <>
             <div className={styles.heading}>
