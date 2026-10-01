@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import RankingPage from './RankingPage'
+import { SURVEY_URL } from '../constants/survey'
 
 function renderAt(path) {
   return render(
@@ -110,6 +111,21 @@ describe('RankingPage', () => {
     const link = screen.getByRole('button', { name: '링크 복사하기' })
     expect(kakao).not.toHaveTextContent('카카오톡 공유하기')
     expect(kakao.parentElement).toBe(link.parentElement)
+  })
+
+  it('결과 화면 공유하기 버튼 오른쪽에 만족도 조사 링크가 새 탭으로 열린다', async () => {
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    const survey = screen.getByRole('link', { name: '만족도 조사' })
+    expect(survey).toHaveAttribute('href', SURVEY_URL)
+    expect(survey).toHaveAttribute('target', '_blank')
+    expect(survey.previousElementSibling).toBe(screen.getByRole('button', { name: '링크 복사하기' }))
+  })
+
+  it('일반 랭킹에는 만족도 조사 버튼이 없다', async () => {
+    renderAt('/ranking')
+    await screen.findByText('김민준')
+    expect(screen.queryByRole('link', { name: '만족도 조사' })).not.toBeInTheDocument()
   })
 
   it('링크 복사하기를 누르면 결과 페이지 주소를 복사하고, 성공 안내 문구는 띄우지 않는다', async () => {

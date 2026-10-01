@@ -89,6 +89,15 @@ describe('AdminClassDashboard', () => {
     expect(screen.getByText('3학년 2반 수업 QR 코드')).toBeInTheDocument()
   })
 
+  it('QR 코드 버튼 왼쪽의 만족도 조사 버튼을 누르면 만족도 조사 QR 팝업을 보여준다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    const surveyBtn = screen.getByRole('button', { name: '만족도 조사' })
+    expect(surveyBtn.nextElementSibling).toBe(screen.getByRole('button', { name: 'QR 코드' }))
+    await userEvent.click(surveyBtn)
+    expect(screen.getByText('만족도 조사 QR 코드')).toBeInTheDocument()
+  })
+
   it('제목을 수정하고 포커스를 벗어나면 PATCH로 저장한다', async () => {
     renderDashboard()
     const titleInput = screen.getByDisplayValue('3학년 2반')

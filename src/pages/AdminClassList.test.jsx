@@ -68,6 +68,16 @@ describe('AdminClassList', () => {
     expect(onLogout).toHaveBeenCalled()
   })
 
+  it('수업마다 QR 버튼 왼쪽에 만족도 조사 버튼이 있고, 누르면 만족도 조사 QR 팝업을 보여준다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('3학년 2반')
+    const surveyBtns = screen.getAllByRole('button', { name: '만족도 조사' })
+    expect(surveyBtns).toHaveLength(1) // 미배정 수업에는 QR 버튼과 마찬가지로 없다
+    expect(surveyBtns[0].nextElementSibling).toBe(screen.getByRole('button', { name: 'QR' }))
+    await userEvent.click(surveyBtns[0])
+    expect(screen.getByText('만족도 조사 QR 코드')).toBeInTheDocument()
+  })
+
   it('미배정 수업에는 삭제 버튼을 보여주지 않는다', async () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
     await screen.findByText('미배정 수업')
