@@ -6,6 +6,7 @@ import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
 import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
+import { SURVEY_URL } from '../constants/survey'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './RankingPage.module.css'
@@ -135,6 +136,9 @@ export default function RankingPage() {
           <button type="button" className={styles.shareIconBtn} onClick={handleCopyLink} aria-label="링크 복사하기">
             <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
           </button>
+          <a className={styles.surveyBtn} href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
+            만족도 조사
+          </a>
         </div>
       )}
       <div className={styles.inner}>

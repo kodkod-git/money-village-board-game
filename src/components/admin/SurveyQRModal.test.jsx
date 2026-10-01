@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
-import SurveyQRModal, { SURVEY_URL } from './SurveyQRModal'
+import SurveyQRModal from './SurveyQRModal'
+import { SURVEY_URL } from '../../constants/survey'
 
 vi.mock('qrcode', () => ({
   default: { toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,fake') },

@@ -1,7 +1,6 @@
 import QRCodeImage from '../QRCodeImage'
+import { SURVEY_URL } from '../../constants/survey'
 import styles from './ClassQRModal.module.css'
-
-export const SURVEY_URL = 'https://forms.gle/i49BrHNQ8UgDucKH8'
 
 // 수업 참여 QR(ClassQRModal)과 같은 모양의 팝업으로 만족도 조사 링크 QR을 보여준다.
 export default function SurveyQRModal({ onClose }) {
