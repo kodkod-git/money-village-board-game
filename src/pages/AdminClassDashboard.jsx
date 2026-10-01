@@ -3,6 +3,7 @@ import AdminGridView from '../components/admin/AdminGridView'
 import AdminTableView from '../components/admin/AdminTableView'
 import AdminSpectateModal from '../components/admin/AdminSpectateModal'
 import ClassQRModal from '../components/admin/ClassQRModal'
+import SurveyQRModal from '../components/admin/SurveyQRModal'
 import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
@@ -32,6 +33,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
   const [spectateIndex, setSpectateIndex] = useState(null)
   const [name, setName] = useState(initialName)
   const [showQr, setShowQr] = useState(false)
+  const [showSurveyQr, setShowSurveyQr] = useState(false)
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
   const [confirmBulkRegister, setConfirmBulkRegister] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
@@ -182,6 +184,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
               </button>
             ))}
           </div>
+          <button className={styles.qrBtn} onClick={() => setShowSurveyQr(true)} type="button">만족도 조사</button>
           <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR 코드</button>
           <button
             className={styles.deleteAllBtn}
@@ -207,6 +210,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
       {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
+      {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
 
       {confirmDeleteAll && (
         <ConfirmDialog

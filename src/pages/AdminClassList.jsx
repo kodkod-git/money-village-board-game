@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { adminFetch } from '../utils/adminAuth'
 import ClassQRModal from '../components/admin/ClassQRModal'
+import SurveyQRModal from '../components/admin/SurveyQRModal'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import styles from './AdminClassList.module.css'
 
@@ -13,6 +14,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [newClassName, setNewClassName] = useState('')
   const [error, setError] = useState('')
   const [qrClass, setQrClass] = useState(null)
+  const [showSurveyQr, setShowSurveyQr] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showEmptyNameWarning, setShowEmptyNameWarning] = useState(false)
 
@@ -85,6 +87,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
             </button>
             {cls.id !== 'unassigned' && (
               <>
+                <button type="button" className={styles.qrBtn} onClick={() => setShowSurveyQr(true)}>만족도 조사</button>
                 <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
                 <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(cls)}>삭제</button>
               </>
@@ -94,6 +97,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
       </ul>
 
       {qrClass && <ClassQRModal classId={qrClass.id} name={qrClass.name} onClose={() => setQrClass(null)} />}
+      {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
 
       {deleteTarget && (
         <ConfirmDialog
