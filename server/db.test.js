@@ -176,6 +176,61 @@ describe('saveGameResult', () => {
     ])
   })
 
+  it('방을 만든 시각(room.createdAt)을 game_sessions.created_at으로 저장한다(등록 후에도 팀 순서 유지)', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { saveGameResult } = await import('./db.js')
+    const createdAt = new Date('2026-10-05T10:52:00.000Z')
+
+    await saveGameResult({
+      code: 'AB1234', prices: PRICES, classId: 'class-1', createdAt,
+      players: [{
+        playerUuid: 'p1', name: '홍길동', affiliation: '', character: 'fox',
+        gameState: makeState({ job: 'a', cash: 1000 }),
+      }],
+    })
+
+    expect(mockSessionInsert).toHaveBeenCalledWith(expect.objectContaining({
+      created_at: '2026-10-05T10:52:00.000Z',
+    }))
+  })
+
+  it('room.createdAt이 없으면 created_at을 보내지 않아 DB 기본값(now())을 쓴다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { saveGameResult } = await import('./db.js')
+
+    await saveGameResult({
+      code: 'AB1234', prices: PRICES, classId: 'class-1',
+      players: [{
+        playerUuid: 'p1', name: '홍길동', affiliation: '', character: 'fox',
+        gameState: makeState({ job: 'a', cash: 1000 }),
+      }],
+    })
+
+    expect(mockSessionInsert.mock.calls[0][0]).not.toHaveProperty('created_at')
+  })
+
   it('room.title이 있으면 game_sessions에 title로 저장한다', async () => {
     const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
     const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
@@ -801,5 +856,40 @@ describe('getSessionIdByTeamCode', () => {
     const { getSessionIdByTeamCode } = await import('./db.js')
 
     await expect(getSessionIdByTeamCode('AB1234')).rejects.toEqual({ message: 'boom' })
+  })
+})
+
+describe('getSessionCreatedAtsByClassId', () => {
+  it('수업에 등록된 팀들의 created_at 목록을 돌려준다', async () => {
+    const builder = makeQueryBuilder({ data: [{ created_at: 't1' }, { created_at: 't2' }], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getSessionCreatedAtsByClassId } = await import('./db.js')
+
+    expect(await getSessionCreatedAtsByClassId('class-1')).toEqual(['t1', 't2'])
+    expect(mockFrom).toHaveBeenCalledWith('game_sessions')
+    expect(builder.select).toHaveBeenCalledWith('created_at')
+    expect(builder.eq).toHaveBeenCalledWith('class_id', 'class-1')
+  })
+
+  it("'unassigned'면 class_id가 null인 세션을 조회한다", async () => {
+    const builder = makeQueryBuilder({ data: [], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getSessionCreatedAtsByClassId } = await import('./db.js')
+
+    expect(await getSessionCreatedAtsByClassId('unassigned')).toEqual([])
+    expect(builder.is).toHaveBeenCalledWith('class_id', null)
+  })
+
+  it('조회 에러가 나면 예외를 던진다', async () => {
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: null, error: { message: 'boom' } }))
+
+    const { getSessionCreatedAtsByClassId } = await import('./db.js')
+
+    await expect(getSessionCreatedAtsByClassId('class-1')).rejects.toEqual({ message: 'boom' })
   })
 })

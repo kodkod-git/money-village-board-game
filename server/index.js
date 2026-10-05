@@ -5,8 +5,8 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
-import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
-import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode } from './db.js'
+import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, teamNumbersForClass, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
@@ -38,10 +38,21 @@ app.post('/api/rooms', (req, res) => {
   res.json({ code: room.code })
 })
 
-app.get('/api/rooms', (req, res) => {
+app.get('/api/rooms', async (req, res) => {
   const { classId } = req.query
   if (!classId) return res.status(400).json({ error: 'classId 쿼리 파라미터가 필요합니다' })
-  res.json(listPublicRoomsByClassId(classId))
+  // 팀장이 없는 방(관리자가 만든 방 등)을 로비에서 관리자 화면과 같은 "팀 N"으로 부르기 위해
+  // 등록된 팀까지 포함한 생성 순서 번호를 붙인다. DB 조회가 실패해도 로비는 계속 보여준다.
+  // DB가 느리면(재시도 등) 로비 목록까지 늦어지지 않도록 2초까지만 기다린다.
+  const registeredCreatedAts = await Promise.race([
+    getSessionCreatedAtsByClassId(classId),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000)),
+  ]).catch(err => {
+    console.error('lobby team number lookup error:', err?.message ?? err)
+    return []
+  })
+  const numbers = teamNumbersForClass(classId, registeredCreatedAts)
+  res.json(listPublicRoomsByClassId(classId).map(room => ({ ...room, teamNumber: numbers.get(room.code) ?? null })))
 })
 
 app.get('/api/rooms/:code', async (req, res) => {

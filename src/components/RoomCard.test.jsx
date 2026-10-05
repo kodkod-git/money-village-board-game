@@ -56,4 +56,20 @@ describe('RoomCard', () => {
     render(<RoomCard {...BASE_PROPS} title="" />)
     expect(screen.getByText('철수님의 방')).toBeInTheDocument()
   })
+
+  it('팀장이 없고 title도 없으면(관리자가 만든 방) "???님의 방" 대신 관리자 화면과 같은 "팀 N"을 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} hostName={null} title="" teamNumber={6} />)
+    expect(screen.getByText('팀 6')).toBeInTheDocument()
+    expect(screen.queryByText(/\?\?\?/)).toBeNull()
+  })
+
+  it('팀장이 있으면 teamNumber가 있어도 "OO님의 방"을 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} teamNumber={2} />)
+    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
+  })
+
+  it('팀장·title·번호가 모두 없으면 "새 팀"으로 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} hostName={null} />)
+    expect(screen.getByText('새 팀')).toBeInTheDocument()
+  })
 })

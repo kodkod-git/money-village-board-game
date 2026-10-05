@@ -36,7 +36,7 @@ function toJobColumn(job) {
 }
 
 export async function saveGameResult(room) {
-  const { code, prices, players, classId = null, title = null } = room
+  const { code, prices, players, classId = null, title = null, createdAt = null } = room
 
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
@@ -46,6 +46,10 @@ export async function saveGameResult(room) {
       real_estate_prices: prices.realEstate,
       class_id: classId,
       title,
+      // 관리자 화면은 진행 중인 방과 등록된 팀을 "만든 순서"로 섞어 정렬하고 그 순서대로
+      // "팀 N"이라고 부른다. created_at이 등록 시각이면 등록하는 순간 팀이 맨 뒤로 갔다가
+      // 전부 등록되면 다시 앞으로 오면서 번호가 바뀌므로, 방을 만든 시각을 그대로 남긴다.
+      ...(createdAt ? { created_at: new Date(createdAt).toISOString() } : {}),
     })
     .select('id')
     .single()
@@ -341,4 +345,13 @@ export async function getSessionIdByTeamCode(teamCode) {
     .maybeSingle()
   if (error) throw error
   return data?.id ?? null
+}
+
+// 수업에 등록된 팀들의 생성 시각. 학생 로비가 관리자 화면과 같은 "팀 N" 번호를 매길 때 쓴다.
+export async function getSessionCreatedAtsByClassId(classId) {
+  let query = supabase.from('game_sessions').select('created_at')
+  query = classId === 'unassigned' ? query.is('class_id', null) : query.eq('class_id', classId)
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []).map(session => session.created_at)
 }

@@ -6,6 +6,7 @@ import {
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
   listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle,
+  teamNumbersForClass,
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -719,5 +720,49 @@ describe('removePlayerByUuid', () => {
     const { code } = createRoom({ classId: 'class-1' })
     addPlayer(code, { socketId: 's1', name: '철수', character: 'ptsc', isHost: true, playerUuid: 'p1' })
     expect(removePlayerByUuid(code, 'unknown')).toBeNull()
+  })
+})
+
+describe('teamNumbersForClass', () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('같은 수업의 방에 만든 순서대로 1부터 번호를 매긴다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-05T10:00:00Z'))
+    const a = createRoom({ classId: 'class-1' })
+    vi.setSystemTime(new Date('2026-10-05T10:01:00Z'))
+    createRoom({ classId: 'class-2' })
+    vi.setSystemTime(new Date('2026-10-05T10:02:00Z'))
+    const b = createRoom({ classId: 'class-1' })
+
+    const numbers = teamNumbersForClass('class-1')
+    expect(numbers.get(a.code)).toBe(1)
+    expect(numbers.get(b.code)).toBe(2)
+    expect(numbers.size).toBe(2)
+  })
+
+  it('이미 등록된 팀의 생성 시각까지 함께 세어 관리자 화면과 같은 번호를 준다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-05T10:05:00Z'))
+    const live = createRoom({ classId: 'class-1', title: '' })
+
+    // 등록된 팀 5개는 모두 이 방보다 먼저 만들어졌다 → 관리자 화면에서 이 방은 "팀 6"
+    const registered = [1, 2, 3, 4, 5].map(m => `2026-10-05T10:0${m - 1}:00Z`)
+    expect(teamNumbersForClass('class-1', registered).get(live.code)).toBe(6)
+  })
+
+  it('등록된 팀이 나중에 만들어졌으면 진행 중인 방의 번호에 영향을 주지 않는다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-05T10:00:00Z'))
+    const live = createRoom({ classId: 'class-1' })
+    expect(teamNumbersForClass('class-1', ['2026-10-05T11:00:00Z']).get(live.code)).toBe(1)
+  })
+
+  it("'unassigned'면 classId가 없는 방에 번호를 매긴다", () => {
+    const room = createRoom()
+    createRoom({ classId: 'class-1' })
+    const numbers = teamNumbersForClass('unassigned')
+    expect(numbers.get(room.code)).toBe(1)
+    expect(numbers.size).toBe(1)
   })
 })
