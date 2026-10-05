@@ -54,6 +54,16 @@ describe('Lobby (team grid)', () => {
     expect(await screen.findByText('영희님의 방')).toBeInTheDocument()
   })
 
+  it('팀장이 없는 방(관리자가 만든 방)은 서버가 준 번호로 "팀 N"이라고 보여준다', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A040AD', status: 'live', playerCount: 1, characters: ['c1'], hostName: null, title: '', teamNumber: 6 }],
+    })
+    renderLobby()
+    expect(await screen.findByText('팀 6')).toBeInTheDocument()
+    expect(screen.queryByText('???님의 방')).toBeNull()
+  })
+
   it('방 만들기 카드를 렌더링하고, 코드로 참가 버튼은 더 이상 없다', () => {
     renderLobby()
     expect(screen.getByText('방 만들기')).toBeInTheDocument()
@@ -123,6 +133,34 @@ describe('Lobby (team grid)', () => {
     expect(await screen.findByText('이미 시작된 팀이에요')).toBeInTheDocument()
     expect(alertSpy).not.toHaveBeenCalled()
     expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('정원이 찬 팀에 참여하면 서버의 영어 에러 대신 한글 안내를 토스트로 보여준다', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 4, characters: ['c1', 'c2', 'c3', 'c4'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: 'Room is full' }))
+    renderLobby()
+    fireEvent.click(await screen.findByText('영희님의 방'))
+
+    expect(await screen.findByText('팀 인원이 가득 찼어요 (최대 4명). 다른 팀을 골라주세요.')).toBeInTheDocument()
+    expect(screen.queryByText('Room is full')).toBeNull()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('없어진 팀에 참여하면 한글 안내를 보여준다', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+    })
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: 'Room not found' }))
+    renderLobby()
+    fireEvent.click(await screen.findByText('영희님의 방'))
+
+    expect(await screen.findByText('팀을 찾을 수 없어요. 코드를 다시 확인해주세요.')).toBeInTheDocument()
   })
 
   it('방 만들기 클릭 시 방장으로 새 팀을 만들어 팀 화면으로 이동한다', async () => {

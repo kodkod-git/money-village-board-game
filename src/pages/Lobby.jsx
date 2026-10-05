@@ -10,6 +10,18 @@ import { resetPlayerUuid } from '../utils/playerUuid'
 import styles from './Lobby.module.css'
 import joinStyles from './NameInput.module.css'
 
+// 서버(join-room)는 영어 에러 코드를 돌려준다. 학생 화면에는 그대로 보이면 안 되므로
+// 알려진 사유는 한글 안내로 바꾸고, 그 밖의 메시지(이미 한글인 안내 등)는 그대로 보여준다.
+const JOIN_ERROR_MESSAGES = {
+  'Room is full': '팀 인원이 가득 찼어요 (최대 4명). 다른 팀을 골라주세요.',
+  'Room not found': '팀을 찾을 수 없어요. 코드를 다시 확인해주세요.',
+}
+
+function joinErrorMessage(error) {
+  if (!error) return '팀에 참여하지 못했어요'
+  return JOIN_ERROR_MESSAGES[error] ?? error
+}
+
 export default function Lobby() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -84,7 +96,7 @@ export default function Lobby() {
         navigate(`/team/${code}`, { replace: true })
       } else {
         setIsJoining(false)
-        toast(error || '팀에 참여하지 못했어요')
+        toast(joinErrorMessage(error))
       }
     })
   }
@@ -162,6 +174,7 @@ export default function Lobby() {
             key={room.code}
             title={room.title}
             hostName={room.hostName}
+            teamNumber={room.teamNumber}
             status={room.status}
             characters={room.characters}
             onClick={() => handleJoinRoomCard(room.code)}

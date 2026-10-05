@@ -238,6 +238,22 @@ export function listPublicRoomsByClassId(classId) {
   }))
 }
 
+// 관리자 화면은 수업의 진행 중인 방과 등록된 팀을 만든 순서로 정렬해 "팀 N"이라고 부른다
+// (src/utils/teamDisplayName.js). 학생 로비에서도 같은 번호를 쓸 수 있도록, 등록된 팀의
+// 생성 시각(game_sessions.created_at)까지 함께 정렬해 진행 중인 방마다 그 번호를 돌려준다.
+export function teamNumbersForClass(classId, registeredCreatedAts = []) {
+  const matches = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
+  const entries = [
+    ...listAllRooms().filter(matches).map(room => ({ code: room.code, createdAt: room.createdAt })),
+    ...registeredCreatedAts.map(createdAt => ({ code: null, createdAt })),
+  ]
+  const numbers = new Map()
+  sortRoomsByCreationOrder(entries).forEach((entry, i) => {
+    if (entry.code) numbers.set(entry.code, i + 1)
+  })
+  return numbers
+}
+
 export function isCharacterTaken(code, character, requestingSocketId) {
   const room = rooms.get(code)
   if (!room) return false
