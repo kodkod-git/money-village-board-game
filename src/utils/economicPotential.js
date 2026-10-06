@@ -1,7 +1,7 @@
 import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
 
 // 보드게임 결과(주식·부동산 보유 현황)로 경제 잠재력 유형을 유추한다.
-// 축 A: 같은 게임 플레이어들의 평균 보유 수보다 많으면 미래형, 아니면 현재형.
+// 축 A: 역대 모든 플레이어의 평균 보유 수보다 많으면 미래형, 아니면 현재형.
 // 축 B: 내 보유 자산 중 빌라·바이오 비중이 절반을 넘으면 위험형, 아니면 안전형.
 // 그룹 이름은 경제 잠재력 테스트(RESULT_GROUPS)와 같은 4개 그룹을 그대로 쓴다.
 const RISKY_STOCKS = ['bio']

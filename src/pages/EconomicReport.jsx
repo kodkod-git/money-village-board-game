@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
-import { RESULT_GROUPS, GROUP_DETAIL_URLS } from '../constants/quizData'
+import { RESULT_GROUPS, GROUP_DETAIL_URLS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOLDER } from '../constants/quizData'
 import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
 import { calcEconomicPotential } from '../utils/economicPotential'
 import { getPlayerUuid } from '../utils/playerUuid'
@@ -14,7 +14,6 @@ export const REPORT_PROGRAM = '머니빌리지 보드게임'
 
 const HORIZON_LABELS = { future: '미래형', present: '현재형' }
 const RISK_LABELS = { risky: '위험형', safe: '안전형' }
-const OLDEST_BIRTH_YEAR = 1940
 
 function formatDate(iso) {
   const d = new Date(iso)
@@ -25,26 +24,39 @@ function formatCount(n) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
 }
 
+function isValidAge(value) {
+  const n = Number(value)
+  return Number.isInteger(n) && n > 0 && n < 150
+}
+
+function fetchJson(url) {
+  return fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json() })
+}
+
 export default function EconomicReport() {
   useBodyClass('onboarding-mode')
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
+  const [allPlayers, setAllPlayers] = useState(null)
   const [error, setError] = useState(false)
-  const [birthYear, setBirthYear] = useState('')
+  const [age, setAge] = useState('')
   const [confirmed, setConfirmed] = useState(false)
 
+  // 미래형/현재형은 역대 모든 플레이어의 평균 보유 수와 비교한다 — 전체 랭킹 API가
+  // 모든 게임 결과(보유 현황 포함)를 내려주므로 그대로 쓴다.
   useEffect(() => {
-    fetch(`/api/results/${sessionId}`)
-      .then(r => { if (!r.ok) throw new Error(); return r.json() })
-      .then(setData)
+    Promise.all([fetchJson(`/api/results/${sessionId}`), fetchJson('/api/rankings')])
+      .then(([result, rankings]) => {
+        setData(result)
+        setAllPlayers(rankings)
+      })
       .catch(() => setError(true))
   }, [sessionId])
 
   const resultPath = `/result/${sessionId}`
   const myPlayerUuid = getPlayerUuid()
-  const players = data?.players ?? []
-  const me = players.find(p => p.playerUuid === myPlayerUuid)
+  const me = data?.players?.find(p => p.playerUuid === myPlayerUuid)
 
   if (error || (data && !me)) {
     return (
@@ -74,34 +86,31 @@ export default function EconomicReport() {
   }
 
   const resultDate = new Date(data.createdAt ?? Date.now())
-  const resultYear = resultDate.getFullYear()
 
   // 나이 입력 화면은 경제 잠재력 테스트(QuizPlay)의 나이 단계 화면을 그대로 재사용한다.
   if (!confirmed) {
-    const years = []
-    for (let y = resultYear; y >= OLDEST_BIRTH_YEAR; y--) years.push(y)
     return (
       <div className={quizStyles.page}>
         <BackButton to={resultPath} label="결과로" />
         <div className={quizStyles.center}>
           <div className={quizStyles.heading}>
-            <h1 className={quizStyles.stepTitle}>{me.name}님은 몇 년생인가요?</h1>
-            <p className={quizStyles.stepSubtitle}>출생년도를 선택해주세요</p>
+            <h1 className={quizStyles.stepTitle}>{me.name}님은 몇 살인가요?</h1>
+            <p className={quizStyles.stepSubtitle}>{AGE_SUBTITLE}</p>
           </div>
           <div className={quizStyles.card}>
             <div className={quizStyles.inputGroup}>
-              <label className={quizStyles.label} htmlFor="birth-year">출생년도</label>
-              <select
-                id="birth-year"
-                className={`${quizStyles.input} ${styles.select}`}
-                value={birthYear}
-                onChange={e => setBirthYear(e.target.value)}
-              >
-                <option value="" disabled>출생년도 선택</option>
-                {years.map(y => <option key={y} value={y}>{y}년생</option>)}
-              </select>
+              <label className={quizStyles.label} htmlFor="report-age">{AGE_LABEL}</label>
+              <input
+                id="report-age"
+                className={quizStyles.input}
+                type="number"
+                inputMode="numeric"
+                placeholder={AGE_PLACEHOLDER}
+                value={age}
+                onChange={e => setAge(e.target.value)}
+              />
             </div>
-            <button className={quizStyles.gradBtn} onClick={() => setConfirmed(true)} disabled={!birthYear}>
+            <button className={quizStyles.gradBtn} onClick={() => setConfirmed(true)} disabled={!isValidAge(age)}>
               보고서 보기
             </button>
           </div>
@@ -110,9 +119,8 @@ export default function EconomicReport() {
     )
   }
 
-  const result = calcEconomicPotential(me, players)
+  const result = calcEconomicPotential(me, allPlayers)
   const group = RESULT_GROUPS[result.group]
-  const age = resultYear - Number(birthYear)
   const { holdings } = result
 
   return (
@@ -134,7 +142,7 @@ export default function EconomicReport() {
           <div><dt>기관명</dt><dd>{REPORT_ORGANIZATION}</dd></div>
           <div><dt>프로그램</dt><dd>{REPORT_PROGRAM}</dd></div>
           <div><dt>이름</dt><dd>{me.name}</dd></div>
-          <div><dt>나이</dt><dd>{age}세 ({birthYear}년생)</dd></div>
+          <div><dt>나이</dt><dd>{Number(age)}세</dd></div>
           <div><dt>날짜</dt><dd>{formatDate(resultDate)}</dd></div>
         </dl>
 
@@ -158,7 +166,7 @@ export default function EconomicReport() {
               <span>미래형 / 현재형</span>
             </p>
             <p className={styles.axisText}>
-              주식·부동산 보유 수 <b>{holdings.total}개</b> (함께 플레이한 친구들 평균 {formatCount(result.average)}개)
+              주식·부동산 보유 수 <b>{holdings.total}개</b> (역대 플레이어 평균 {formatCount(result.average)}개)
             </p>
           </div>
           <div className={styles.axis}>
