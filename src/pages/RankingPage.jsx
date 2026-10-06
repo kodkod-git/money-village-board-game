@@ -47,7 +47,7 @@ export default function RankingPage() {
   const myPlayerUuid = getPlayerUuid()
 
   // V2: 내 수업 파악을 위해 세션 정보에서 classId 조회.
-  // 공유 링크로 들어온 사람처럼 이 게임에 내 결과가 없으면 경제 잠재력 유형 버튼을 숨긴다.
+  // 공유 링크로 들어온 사람처럼 이 게임에 내 결과가 없으면 경제적 잠재력 유형 버튼을 숨긴다.
   useEffect(() => {
     if (!isV2) return
     fetch(`/api/results/${sessionId}`)
@@ -146,7 +146,7 @@ export default function RankingPage() {
           </a>
           {hasMyResult && (
             <button type="button" className={styles.surveyBtn} onClick={() => navigate(`/result/${sessionId}/report`)}>
-              경제 잠재력 유형
+              경제적 잠재력 유형
             </button>
           )}
         </div>
