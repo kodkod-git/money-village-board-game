@@ -44,8 +44,8 @@ export const GROUP_REPORTS = {
     person: {
       name: '앤드류 카네기',
       description: '가난 속에서도 미래를 준비하고\n배움과 노력으로 성장한 기업가',
-      code: 'FTSC',
-      codeDetail: 'Future, Risk-Averse\nEmpathetic-Orientaion,\nNimble',
+      code: 'FAEN',
+      codeDetail: 'Future, Risk-Averse\nEmpathetic-Orientation,\nNimble',
       image: '/groups_report/orange-person.jpg',
     },
     traits: [
@@ -71,7 +71,7 @@ export const GROUP_REPORTS = {
       name: '밀튼 허시',
       description: '사람들의 삶을 세심하게 돌보고\n안정적인 공동체를 만들어간 기업가',
       code: 'PAEN',
-      codeDetail: 'Present, Risk-Averse\nEmpathetic-Orientaion,\nNimble',
+      codeDetail: 'Present, Risk-Averse\nEmpathetic-Orientation,\nNimble',
       image: '/groups_report/green-person.jpg',
     },
     traits: [
