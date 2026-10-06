@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import { RESULT_GROUPS, GROUP_DETAIL_URLS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOLDER } from '../constants/quizData'
-import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
+import {
+  STOCK_LABELS, REAL_ESTATE_LABELS, BADGE_NAMES, BADGE_LABELS, BADGE_DISPLAY_ORDER, JOB_LABELS,
+} from '../constants/gameData'
 import { calcEconomicPotential } from '../utils/economicPotential'
+import { badgeMultiplier } from '../utils/calculateAssets'
 import { getPlayerUuid } from '../utils/playerUuid'
 import useBodyClass from '../hooks/useBodyClass'
 import quizStyles from './QuizPlay.module.css'
@@ -20,8 +23,40 @@ function formatDate(iso) {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-function formatCount(n) {
-  return Number.isInteger(n) ? String(n) : n.toFixed(1)
+function formatWon(n) {
+  return `${Math.round(n).toLocaleString()}원`
+}
+
+function itemList(labels, holdings, unit) {
+  return Object.entries(labels)
+    .map(([key, label]) => `${label} ${Number(holdings?.[key]) || 0}${unit}`)
+    .join(' · ')
+}
+
+// 예전 결과는 stockValue/realEstateValue가 비어 있을 수 있어 보유 수 × 게임 시세로 채운다.
+function valueOf(saved, holdings, prices, labels) {
+  if (saved != null) return saved
+  return Object.keys(labels).reduce((sum, key) => sum + (Number(holdings?.[key]) || 0) * (prices?.[key] ?? 0), 0)
+}
+
+function summarizeAssets(me, session) {
+  const cash = me.cash ?? 0
+  const stockValue = valueOf(me.stockValue, me.stockHoldings, session.stockPrices, STOCK_LABELS)
+  const realEstateValue = valueOf(me.realEstateValue, me.realEstateHoldings, session.realEstatePrices, REAL_ESTATE_LABELS)
+  const baseAssets = cash + stockValue + realEstateValue
+  const multiplier = badgeMultiplier((me.badges ?? []).filter(Boolean).length)
+  return {
+    totalAssets: me.totalAssets ?? Math.round(baseAssets * multiplier),
+    baseAssets,
+    multiplier,
+    parts: [
+      { key: 'cash', label: '현금', value: cash },
+      { key: 'stock', label: '주식', value: stockValue, detail: itemList(STOCK_LABELS, me.stockHoldings, '주') },
+      { key: 'realEstate', label: '부동산', value: realEstateValue, detail: itemList(REAL_ESTATE_LABELS, me.realEstateHoldings, '개') },
+    ],
+    badges: BADGE_DISPLAY_ORDER.filter(name => me.badges?.[BADGE_NAMES.indexOf(name)]).map(name => BADGE_LABELS[name]),
+    job: me.job ? JOB_LABELS[me.job] : '직업 없음',
+  }
 }
 
 function isValidAge(value) {
@@ -121,7 +156,7 @@ export default function EconomicReport() {
 
   const result = calcEconomicPotential(me, allPlayers)
   const group = RESULT_GROUPS[result.group]
-  const { holdings } = result
+  const assets = summarizeAssets(me, data)
 
   return (
     <div className={styles.page}>
@@ -159,45 +194,61 @@ export default function EconomicReport() {
         </section>
 
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>판단 근거</h3>
-          <div className={styles.axis}>
-            <p className={styles.axisLabel}>
-              <strong>{HORIZON_LABELS[result.horizon]}</strong>
-              <span>미래형 / 현재형</span>
-            </p>
-            <p className={styles.axisText}>
-              주식·부동산 보유 수 <b>{holdings.total}개</b> (역대 플레이어 평균 {formatCount(result.average)}개)
-            </p>
+          <h3 className={styles.sectionTitle}>자산 요약</h3>
+          <div className={styles.totalBox}>
+            <span className={styles.totalLabel}>총 자산</span>
+            <span className={styles.totalValue}>{formatWon(assets.totalAssets)}</span>
           </div>
-          <div className={styles.axis}>
-            <p className={styles.axisLabel}>
-              <strong>{RISK_LABELS[result.risk]}</strong>
-              <span>위험형 / 안전형</span>
+          {assets.multiplier > 1 && (
+            <p className={styles.totalFormula}>
+              현금+주식+부동산 {formatWon(assets.baseAssets)} × 성공열쇠 {assets.multiplier}배
             </p>
-            <p className={styles.axisText}>
-              보유 자산 중 빌라·바이오 비중 <b>{Math.round(result.riskyRatio * 100)}%</b> ({holdings.risky}개 / {holdings.total}개)
-            </p>
-          </div>
-        </section>
+          )}
 
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>보유 자산</h3>
-          <table className={styles.holdings}>
-            <tbody>
-              <tr>
-                <th>주식</th>
-                {Object.entries(STOCK_LABELS).map(([key, label]) => (
-                  <td key={key}>{label} {me.stockHoldings?.[key] ?? 0}</td>
-                ))}
-              </tr>
-              <tr>
-                <th>부동산</th>
-                {Object.entries(REAL_ESTATE_LABELS).map(([key, label]) => (
-                  <td key={key}>{label} {me.realEstateHoldings?.[key] ?? 0}</td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+          {assets.baseAssets > 0 && (
+            <div className={styles.mixBar} aria-hidden="true">
+              {assets.parts.map(part => part.value > 0 && (
+                <span key={part.key} className={styles[`mix_${part.key}`]} style={{ flexGrow: part.value }} />
+              ))}
+            </div>
+          )}
+
+          <ul className={styles.assetList}>
+            {assets.parts.map(part => (
+              <li key={part.key} className={styles.assetRow}>
+                <span className={`${styles.assetDot} ${styles[`mix_${part.key}`]}`} aria-hidden="true" />
+                <div className={styles.assetMain}>
+                  <div className={styles.assetHead}>
+                    <span className={styles.assetLabel}>{part.label}</span>
+                    <span className={styles.assetValue}>
+                      {formatWon(part.value)}
+                      {assets.baseAssets > 0 && <small> ({Math.round((part.value / assets.baseAssets) * 100)}%)</small>}
+                    </span>
+                  </div>
+                  {part.detail && <p className={styles.assetDetail}>{part.detail}</p>}
+                </div>
+              </li>
+            ))}
+            <li className={styles.assetRow}>
+              <span className={styles.assetDot} aria-hidden="true" />
+              <div className={styles.assetMain}>
+                <div className={styles.assetHead}>
+                  <span className={styles.assetLabel}>성공열쇠</span>
+                  <span className={styles.assetValue}>{assets.badges.length}개</span>
+                </div>
+                {assets.badges.length > 0 && <p className={styles.assetDetail}>{assets.badges.join(' · ')}</p>}
+              </div>
+            </li>
+            <li className={styles.assetRow}>
+              <span className={styles.assetDot} aria-hidden="true" />
+              <div className={styles.assetMain}>
+                <div className={styles.assetHead}>
+                  <span className={styles.assetLabel}>직업</span>
+                  <span className={styles.assetValue}>{assets.job}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
         </section>
 
         <footer className={styles.reportFooter}>
