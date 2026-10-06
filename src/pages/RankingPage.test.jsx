@@ -122,6 +122,29 @@ describe('RankingPage', () => {
     expect(survey.previousElementSibling).toBe(screen.getByRole('button', { name: '링크 복사하기' }))
   })
 
+  it('내 결과가 있는 결과 화면에서는 만족도 조사 오른쪽에 경제 잠재력 유형 버튼이 보이고 보고서로 이동한다', async () => {
+    sessionStorage.setItem('player_uuid', 'p3')
+    render(
+      <MemoryRouter initialEntries={['/result/session-1']}>
+        <Routes>
+          <Route path="/result/:sessionId" element={<RankingPage />} />
+          <Route path="/result/:sessionId/report" element={<div>보고서 화면</div>} />
+        </Routes>
+      </MemoryRouter>
+    )
+    const btn = await screen.findByRole('button', { name: '경제 잠재력 유형' })
+    expect(btn.previousElementSibling).toBe(screen.getByRole('link', { name: '만족도 조사' }))
+    await userEvent.click(btn)
+    expect(screen.getByText('보고서 화면')).toBeInTheDocument()
+  })
+
+  it('공유 링크로 들어와 내 결과가 없으면 경제 잠재력 유형 버튼이 없다', async () => {
+    sessionStorage.setItem('player_uuid', 'someone-else')
+    renderAt('/result/session-1')
+    await screen.findByText('홍길동')
+    expect(screen.queryByRole('button', { name: '경제 잠재력 유형' })).not.toBeInTheDocument()
+  })
+
   it('일반 랭킹에는 만족도 조사 버튼이 없다', async () => {
     renderAt('/ranking')
     await screen.findByText('김민준')

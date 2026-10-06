@@ -42,17 +42,22 @@ export default function RankingPage() {
   const [error, setError] = useState(null)
   const [viewingPlayer, setViewingPlayer] = useState(null)
   const [shareNotice, setShareNotice] = useState('')
+  const [hasMyResult, setHasMyResult] = useState(false)
 
   const myPlayerUuid = getPlayerUuid()
 
-  // V2: 내 수업 파악을 위해 세션 정보에서 classId 조회
+  // V2: 내 수업 파악을 위해 세션 정보에서 classId 조회.
+  // 공유 링크로 들어온 사람처럼 이 게임에 내 결과가 없으면 경제 잠재력 유형 버튼을 숨긴다.
   useEffect(() => {
     if (!isV2) return
     fetch(`/api/results/${sessionId}`)
       .then(r => r.json())
-      .then(data => setMyClassId(data.classId ?? 'unassigned'))
+      .then(data => {
+        setMyClassId(data.classId ?? 'unassigned')
+        setHasMyResult((data.players ?? []).some(p => p.playerUuid === myPlayerUuid))
+      })
       .catch(() => {})
-  }, [sessionId, isV2])
+  }, [sessionId, isV2, myPlayerUuid])
 
   useEffect(() => {
     setLoading(true)
@@ -139,6 +144,11 @@ export default function RankingPage() {
           <a className={styles.surveyBtn} href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
             만족도 조사
           </a>
+          {hasMyResult && (
+            <button type="button" className={styles.surveyBtn} onClick={() => navigate(`/result/${sessionId}/report`)}>
+              경제 잠재력 유형
+            </button>
+          )}
         </div>
       )}
       <div className={styles.inner}>
