@@ -204,7 +204,7 @@ export default function EconomicReport() {
           </div>
 
           <div className={styles.infoCard}>
-            <h3 className={styles.cardTitle}>[우리 아이의 경제적 특징]</h3>
+            <h3 className={styles.cardTitle}>[{me.name}님의 경제적 특징]</h3>
             <ul className={styles.traitList}>
               {groupReport.traits.map(trait => (
                 <li key={trait} className={styles.trait}>

@@ -113,7 +113,7 @@ describe('EconomicReport 그룹 카드', () => {
     expect(screen.getByText('월트 디즈니')).toBeInTheDocument()
     expect(screen.getByText('월트 디즈니의 EFTI : PTSN')).toBeInTheDocument()
 
-    expect(screen.getByText('[우리 아이의 경제적 특징]')).toBeInTheDocument()
+    expect(screen.getByText('[홍길동님의 경제적 특징]')).toBeInTheDocument()
     expect(screen.getByText('즐거움과 호기심을 바탕으로 적극적으로 움직여요.')).toBeInTheDocument()
 
     expect(screen.queryByText('자산 요약')).not.toBeInTheDocument()
