@@ -5,7 +5,7 @@ import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
 // 없다 — 진행 중인(미저장) 게임의 총자산을 보여주는 관리자 화면(AdminPlayerCard,
 // PlayerAssetReceipt, AdminEditModal, AdminTableView)은 이 클라이언트 전용 사본을 쓴다.
 // 공식을 바꿀 때는 반드시 server/db.js의 calculateAssetBreakdown도 함께 수정할 것.
-export function badgeMultiplier(badgeCount) {
+function badgeMultiplier(badgeCount) {
   if (badgeCount >= 6) return 2
   if (badgeCount === 5) return 1.5
   if (badgeCount === 4) return 1.2

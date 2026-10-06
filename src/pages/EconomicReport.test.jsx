@@ -95,39 +95,27 @@ describe('EconomicReport', () => {
   })
 })
 
-describe('EconomicReport 자산 요약', () => {
-  it('총자산·현금·주식·부동산 비중과 보유 내역, 성공열쇠, 직업을 요약해 보여준다', async () => {
+describe('EconomicReport 그룹 카드', () => {
+  it('기존 보고서의 그룹 특징·대표 동물·대표 인물·경제적 특징 카드를 내 그룹 기준으로 보여준다', async () => {
     sessionStorage.setItem('player_uuid', 'me')
     renderReport()
     await userEvent.type(await screen.findByLabelText('숫자'), '11')
     await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
 
-    expect(screen.getByText('110,000원')).toBeInTheDocument()
-    expect(screen.getByText('현금+주식+부동산 100,000원 × 성공열쇠 1.1배')).toBeInTheDocument()
-    expect(screen.getByText('50,000원')).toBeInTheDocument()
-    expect(screen.getByText('(50%)')).toBeInTheDocument()
-    expect(screen.getByText('반도체 1주 · 금융 0주 · 바이오 3주')).toBeInTheDocument()
-    expect(screen.getByText('단독주택 1개 · 빌라 1개 · 아파트 0개')).toBeInTheDocument()
-    expect(screen.getByText('3개')).toBeInTheDocument()
-    expect(screen.getByText('노동 · 주식 · 부동산')).toBeInTheDocument()
-    expect(screen.getByText('경영·금융')).toBeInTheDocument()
-  })
+    // 현재형·위험형 → Red Group
+    expect(screen.getByText('[오늘을 가꾸며 모험을 즐기는 그룹]')).toBeInTheDocument()
+    const picked = [...document.querySelectorAll('[aria-current]')].map(el => el.textContent)
+    expect(picked).toEqual(['✓Present(오늘 가꾸기)', '✓Risk-Tolerant(모험 즐기기)'])
 
-  it('예전 결과처럼 평가액이 비어 있으면 보유 수 × 게임 시세로 계산한다', async () => {
-    const old = { ...ME, stockValue: null, realEstateValue: null, job: '' }
-    global.fetch = vi.fn(url => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(url === '/api/rankings' ? [old] : {
-        ...RESULT, players: [old],
-        stockPrices: { bio: 1000, semiconductor: 2000 }, realEstatePrices: { dami: 7000, gaon: 3000 },
-      }),
-    }))
-    renderReport()
-    await userEvent.type(await screen.findByLabelText('숫자'), '11')
-    await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
+    expect(screen.getByRole('img', { name: '원숭이' })).toHaveAttribute('src', '/groups_report/red-animal-1.png')
+    expect(screen.getByText('PTEC')).toBeInTheDocument()
 
-    expect(screen.getByText('5,000원')).toBeInTheDocument()
-    expect(screen.getByText('10,000원')).toBeInTheDocument()
-    expect(screen.getByText('직업 없음')).toBeInTheDocument()
+    expect(screen.getByText('월트 디즈니')).toBeInTheDocument()
+    expect(screen.getByText('월트 디즈니의 EFTI : PTSN')).toBeInTheDocument()
+
+    expect(screen.getByText('[우리 아이의 경제적 특징]')).toBeInTheDocument()
+    expect(screen.getByText('즐거움과 호기심을 바탕으로 적극적으로 움직여요.')).toBeInTheDocument()
+
+    expect(screen.queryByText('자산 요약')).not.toBeInTheDocument()
   })
 })
