@@ -67,7 +67,7 @@ describe('EconomicReport', () => {
     await userEvent.type(await screen.findByLabelText('숫자'), '11')
     await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
 
-    expect(screen.getByRole('heading', { name: '경제 잠재력 보고서' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '경제적 잠재력 유형 보고서' })).toBeInTheDocument()
     expect(screen.getByText('한동대학교 · 머니빌리지 보드게임')).toBeInTheDocument()
     expect(screen.getByText('11세')).toBeInTheDocument()
     expect(screen.getByText('2026년 10월 6일')).toBeInTheDocument()

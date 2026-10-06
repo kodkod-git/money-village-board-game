@@ -100,7 +100,7 @@ export default function EconomicReport() {
         <div className={quizStyles.center}>
           <div className={quizStyles.card}>
             <p className={quizStyles.questionPrompt}>
-              {error ? '결과를 불러오지 못했어요.' : '내 게임 결과가 있을 때만\n경제 잠재력 유형을 확인할 수 있어요.'}
+              {error ? '결과를 불러오지 못했어요.' : '내 게임 결과가 있을 때만\n경제적 잠재력 유형을 확인할 수 있어요.'}
             </p>
             <button className={quizStyles.gradBtn} onClick={() => navigate(resultPath)}>결과로 돌아가기</button>
           </div>
@@ -170,7 +170,7 @@ export default function EconomicReport() {
       <article className={styles.report} style={{ '--group-color': group.color, '--group-bg': group.bgColor }}>
         <header className={styles.reportHeader}>
           <p className={styles.eyebrow}>{REPORT_PROGRAM}</p>
-          <h1 className={styles.reportTitle}>경제 잠재력 보고서</h1>
+          <h1 className={styles.reportTitle}>경제적 잠재력 유형 보고서</h1>
         </header>
 
         <dl className={styles.infoTable}>
