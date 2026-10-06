@@ -4,7 +4,11 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import EconomicReport from './EconomicReport'
 
-const ME = { name: '홍길동', playerUuid: 'me', stockHoldings: { bio: 3, semiconductor: 1 }, realEstateHoldings: { dami: 1, gaon: 1 } }
+const ME = {
+  name: '홍길동', playerUuid: 'me', job: 'a', cash: 50000, stockValue: 30000, realEstateValue: 20000, totalAssets: 110000,
+  badges: [false, true, false, true, true, false],
+  stockHoldings: { bio: 3, semiconductor: 1 }, realEstateHoldings: { dami: 1, gaon: 1 },
+}
 
 const RESULT = {
   teamCode: 'AB1234',
@@ -80,7 +84,7 @@ describe('EconomicReport', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/rankings')
     expect(screen.getByText('현재형 · 위험형')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Red Group' })).toBeInTheDocument()
-    expect(screen.getByText(/역대 플레이어 평균 8개/)).toBeInTheDocument()
+    expect(screen.queryByText('판단 근거')).not.toBeInTheDocument()
   })
 
   it('이 게임에 내 결과가 없으면 보고서를 볼 수 없다', async () => {
@@ -88,5 +92,42 @@ describe('EconomicReport', () => {
     renderReport()
     expect(await screen.findByText(/내 게임 결과가 있을 때만/)).toBeInTheDocument()
     expect(screen.queryByLabelText('숫자')).not.toBeInTheDocument()
+  })
+})
+
+describe('EconomicReport 자산 요약', () => {
+  it('총자산·현금·주식·부동산 비중과 보유 내역, 성공열쇠, 직업을 요약해 보여준다', async () => {
+    sessionStorage.setItem('player_uuid', 'me')
+    renderReport()
+    await userEvent.type(await screen.findByLabelText('숫자'), '11')
+    await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
+
+    expect(screen.getByText('110,000원')).toBeInTheDocument()
+    expect(screen.getByText('현금+주식+부동산 100,000원 × 성공열쇠 1.1배')).toBeInTheDocument()
+    expect(screen.getByText('50,000원')).toBeInTheDocument()
+    expect(screen.getByText('(50%)')).toBeInTheDocument()
+    expect(screen.getByText('반도체 1주 · 금융 0주 · 바이오 3주')).toBeInTheDocument()
+    expect(screen.getByText('단독주택 1개 · 빌라 1개 · 아파트 0개')).toBeInTheDocument()
+    expect(screen.getByText('3개')).toBeInTheDocument()
+    expect(screen.getByText('노동 · 주식 · 부동산')).toBeInTheDocument()
+    expect(screen.getByText('경영·금융')).toBeInTheDocument()
+  })
+
+  it('예전 결과처럼 평가액이 비어 있으면 보유 수 × 게임 시세로 계산한다', async () => {
+    const old = { ...ME, stockValue: null, realEstateValue: null, job: '' }
+    global.fetch = vi.fn(url => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(url === '/api/rankings' ? [old] : {
+        ...RESULT, players: [old],
+        stockPrices: { bio: 1000, semiconductor: 2000 }, realEstatePrices: { dami: 7000, gaon: 3000 },
+      }),
+    }))
+    renderReport()
+    await userEvent.type(await screen.findByLabelText('숫자'), '11')
+    await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
+
+    expect(screen.getByText('5,000원')).toBeInTheDocument()
+    expect(screen.getByText('10,000원')).toBeInTheDocument()
+    expect(screen.getByText('직업 없음')).toBeInTheDocument()
   })
 })

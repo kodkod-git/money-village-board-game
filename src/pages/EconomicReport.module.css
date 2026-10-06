@@ -185,53 +185,123 @@
   border-left: 4px solid var(--group-color);
 }
 
-.axis {
+.totalBox {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--gray-10);
+}
+
+.totalLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.totalValue {
+  font-size: 20px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.mixBar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  gap: 2px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.mixBar > span {
+  flex-basis: 0;
+  min-width: 4px;
+}
+
+
+.assetList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.assetRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   padding: 10px 12px;
 }
 
-.axisLabel {
+.assetRow + .assetRow {
+  border-top: 1px solid var(--line);
+}
+
+.assetDot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--line);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* .assetDot의 기본 회색보다 뒤에 둬야 범례 점에도 색이 입혀진다. */
+.mix_cash { background: #f2c94c; }
+.mix_stock { background: #5b8def; }
+.mix_realEstate { background: #4caf7d; }
+
+.totalFormula {
+  margin-top: -4px;
+  font-size: 12px;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.assetMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.assetHead {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
 }
 
-.axisLabel strong {
-  font-size: 15px;
-  color: var(--group-color);
+.assetLabel {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.axisLabel span {
+.assetValue {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.assetValue small {
   font-size: 11px;
+  font-weight: 400;
   color: var(--muted);
 }
 
-.axisText {
-  margin-top: 4px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.holdings {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  table-layout: fixed;
-}
-
-.holdings th,
-.holdings td {
-  border: 1px solid var(--line);
-  padding: 8px 4px;
-  text-align: center;
-}
-
-.holdings th {
-  width: 56px;
-  background: var(--gray-10);
+.assetDetail {
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--ink-2);
+  line-height: 1.5;
 }
 
 .reportFooter {
