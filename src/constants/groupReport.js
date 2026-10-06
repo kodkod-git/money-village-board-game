@@ -1,8 +1,10 @@
 // 기존 "경제적 잠재력 테스트 보고서"(groups_report/*.png) 카드 4장의 문구를 그대로 옮긴 데이터.
 // 이미지는 원본 보고서에서 잘라낸 public/groups_report/{color}-animal-N.png, {color}-person.jpg를 쓴다.
+// hero는 public/groups/{color}.png(1.3~2.1MB)를 줄인 JPG다 — 원본을 그대로 인쇄하면 Chrome이 PDF를 못 만들고 멈춘다(orange).
 // time: 'future'(내일 꿈꾸기) | 'present'(오늘 가꾸기), risk: 'averse'(안전 지키기) | 'tolerant'(모험 즐기기)
 export const GROUP_REPORTS = {
   'Blue Group': {
+    hero: '/groups_report/blue-hero.jpg',
     title: '내일을 꿈꾸며 모험을 즐기는 그룹',
     description: '앞으로의 가능성을 상상하고\n새로운 도전을 즐기는 힘이 보여요',
     time: 'future',
@@ -28,6 +30,7 @@ export const GROUP_REPORTS = {
     ],
   },
   'Orange Group': {
+    hero: '/groups_report/orange-hero.jpg',
     title: '내일을 준비하며 안전을 지키는 그룹',
     description: '차분하게 준비하고\n안정적으로 선택하는 힘이 보여요',
     time: 'future',
@@ -53,6 +56,7 @@ export const GROUP_REPORTS = {
     ],
   },
   'Green Group': {
+    hero: '/groups_report/green-hero.jpg',
     title: '오늘을 가꾸며 안전을 지키는 그룹',
     description: '지금의 일상을 차분히 돌보고\n안정적으로 준비하는 힘이 보여요',
     time: 'present',
@@ -78,6 +82,7 @@ export const GROUP_REPORTS = {
     ],
   },
   'Red Group': {
+    hero: '/groups_report/red-hero.jpg',
     title: '오늘을 가꾸며 모험을 즐기는 그룹',
     description: '지금 이 순간에 집중하고\n새로운 도전을 즐기는 힘이 보여요',
     time: 'present',

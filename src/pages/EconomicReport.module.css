@@ -418,11 +418,18 @@
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 10mm;
   }
 
-  :global(body),
-  :global(body.onboarding-mode) {
+  /* 화면 전체에 고정된 배경 장식(블러 필터)은 인쇄 시 페이지마다 다시 그려져 Chrome이
+     PDF를 만들지 못하고 멈추거나 첫 장만 내보낸다 — 인쇄에서는 숨긴다. */
+  :global(html body::before),
+  :global(html body::after) {
+    display: none;
+  }
+
+  :global(html body),
+  :global(html body.onboarding-mode) {
     display: block;
     height: auto;
     min-height: 0;
@@ -431,7 +438,9 @@
     overflow: visible;
   }
 
-  :global(body.onboarding-mode #root) {
+  /* contain: layout이 걸린 요소는 여러 페이지로 나뉘지 못해 첫 장 높이에서 잘린다.
+     index.css가 이 파일보다 늦게 로드되므로 html을 붙여 같은 선택자보다 우선하게 한다. */
+  :global(html body.onboarding-mode #root) {
     width: 100%;
     height: auto;
     min-height: 0;
@@ -441,9 +450,11 @@
     box-shadow: none;
     border-radius: 0;
     container-type: normal;
+    contain: none;
   }
 
   .page {
+    display: block;
     height: auto;
     overflow: visible;
     padding: 0;
@@ -455,10 +466,33 @@
     display: none;
   }
 
+  /* 원본 보고서처럼 A4 한 장에 담는다: 카드는 2×2, 일러스트는 낮게. */
   .report {
+    display: block;
     max-width: none;
+    padding: 16px 18px;
+    border-radius: 0;
     box-shadow: none;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  .report > * + * {
+    margin-top: 12px;
+  }
+
+  .groupImg {
+    max-height: 170px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .infoCard,
+  .groupCard,
+  .infoTable {
+    break-inside: avoid;
   }
 }

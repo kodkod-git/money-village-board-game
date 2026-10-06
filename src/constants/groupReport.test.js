@@ -11,7 +11,7 @@ describe('GROUP_REPORTS', () => {
   it.each(Object.entries(GROUP_REPORTS))('%s: 동물 4마리·특징 4개와 이미지 파일이 모두 있다', (_, report) => {
     expect(report.animals).toHaveLength(4)
     expect(report.traits).toHaveLength(4)
-    const images = [...report.animals.map(a => a.image), report.person.image]
+    const images = [report.hero, ...report.animals.map(a => a.image), report.person.image]
     images.forEach(src => expect(existsSync(`public${src}`)).toBe(true))
   })
 })

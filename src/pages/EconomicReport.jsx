@@ -143,7 +143,7 @@ export default function EconomicReport() {
         </dl>
 
         <section className={styles.groupCard}>
-          <img className={styles.groupImg} src={group.illustration} alt={`${result.group} 일러스트`} />
+          <img className={styles.groupImg} src={groupReport.hero} alt={`${result.group} 일러스트`} />
           <div className={styles.groupBody}>
             <p className={styles.groupType}>
               {HORIZON_LABELS[result.horizon]} · {RISK_LABELS[result.risk]}
