@@ -118,4 +118,16 @@ describe('EconomicReport 그룹 카드', () => {
 
     expect(screen.queryByText('자산 요약')).not.toBeInTheDocument()
   })
+
+  it('?player=로 지정하면 이 기기에 내 기록이 없어도 그 플레이어의 보고서를 보여준다', async () => {
+    sessionStorage.setItem('player_uuid', 'lost-device')
+    render(
+      <MemoryRouter initialEntries={['/result/session-1/report?player=p2']}>
+        <Routes>
+          <Route path="/result/:sessionId/report" element={<EconomicReport />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    expect(await screen.findByText('김철수님은 몇 살인가요?')).toBeInTheDocument()
+  })
 })
