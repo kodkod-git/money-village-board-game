@@ -59,4 +59,10 @@ describe('AdminPriceSettingModal', () => {
     await userEvent.click(screen.getByText('‹ 뒤로'))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('가격 pill을 누르면 계산기는 현재 가격이 아니라 0원에서 시작한다', async () => {
+    render(<AdminPriceSettingModal prices={PRICES} onConfirm={vi.fn()} onClose={vi.fn()} />)
+    await userEvent.click(screen.getAllByRole('button', { name: /2,000 원/ })[0])
+    expect(screen.getByTestId('display-value')).toHaveTextContent(/^0$/)
+  })
 })

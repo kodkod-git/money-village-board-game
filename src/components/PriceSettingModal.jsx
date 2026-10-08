@@ -80,7 +80,8 @@ export default function PriceSettingModal({ prices, onConfirm, onClose, initialC
       {editingKey && (
         <NumberInputModal
           title={editingLabel}
-          initialValue={tempPrices[category][editingKey]}
+          // 새 가격을 바로 입력할 수 있도록 계산기는 현재 가격 대신 0원에서 시작한다.
+          initialValue={0}
           unit="원"
           maxValue={MAX_ASSET_PRICE}
           onConfirm={val => {
