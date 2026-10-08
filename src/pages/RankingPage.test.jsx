@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import RankingPage from './RankingPage'
 import { SURVEY_URL } from '../constants/survey'
@@ -329,5 +329,25 @@ describe('RankingPage', () => {
     await userEvent.click(await screen.findByText('김민준'))
     await userEvent.click(screen.getByText('‹ 뒤로'))
     expect(screen.queryByText('‹ 뒤로')).not.toBeInTheDocument()
+  })
+
+  it('랭킹 상세 자산 화면 오른쪽 상단의 보고서 버튼을 누르면 그 플레이어의 경제적 잠재력 유형 보고서로 이동한다', async () => {
+    // 연결이 끊겨 이 기기에 내 기록이 없는 경우
+    sessionStorage.setItem('player_uuid', 'lost-device')
+    function ReportProbe() {
+      const { search, pathname } = useLocation()
+      return <div>보고서 {pathname}{search}</div>
+    }
+    render(
+      <MemoryRouter initialEntries={['/result/session-1']}>
+        <Routes>
+          <Route path="/result/:sessionId" element={<RankingPage />} />
+          <Route path="/result/:sessionId/report" element={<ReportProbe />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    await userEvent.click(await screen.findByText('홍길동'))
+    await userEvent.click(screen.getByRole('button', { name: '경제적 잠재력 유형 보고서' }))
+    expect(screen.getByText('보고서 /result/session-1/report?player=p3')).toBeInTheDocument()
   })
 })

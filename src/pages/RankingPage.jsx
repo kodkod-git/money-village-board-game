@@ -116,6 +116,14 @@ export default function RankingPage() {
     setShareNotice(shareGameResultToKakao(sessionId))
   }
 
+  // 연결이 끊겨 내 기록(playerUuid)을 잃은 참가자도 랭킹에서 자기 행을 골라 보고서를 볼 수 있게 한다.
+  // 팀 스코프 행에는 sessionId가 없으므로 현재 결과 화면의 sessionId를 쓴다.
+  function reportPath(row) {
+    const rowSessionId = row.sessionId ?? sessionId
+    if (!rowSessionId || !row.playerUuid) return null
+    return `/result/${rowSessionId}/report?player=${encodeURIComponent(row.playerUuid)}`
+  }
+
   function handleRowClick(row) {
     // 게임에 참여하지 않은 방문자는 메인 화면에서 시작하게 한다.
     if (!row || row.isPlaceholder) {
@@ -222,6 +230,15 @@ export default function RankingPage() {
               prices={toAdminPrices(viewingPlayer)}
               onClose={() => setViewingPlayer(null)}
               readOnly
+              headerAction={reportPath(viewingPlayer) && (
+                <button
+                  type="button"
+                  className={styles.reportBtn}
+                  onClick={() => navigate(reportPath(viewingPlayer))}
+                >
+                  경제적 잠재력 유형 보고서
+                </button>
+              )}
             />
           </div>
         </div>

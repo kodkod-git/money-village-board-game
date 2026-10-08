@@ -13,7 +13,7 @@ import StockEditModal from './StockEditModal'
 import styles from './AdminEditModal.module.css'
 import AdminAssetSummary from './AdminAssetSummary'
 
-export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false }) {
+export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false, headerAction = null }) {
   const [editingField, setEditingField] = useState(null)
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
@@ -32,6 +32,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
             </span>
           </div>
         </div>
+        {headerAction}
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
       </div>
 

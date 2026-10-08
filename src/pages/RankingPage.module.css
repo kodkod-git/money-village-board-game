@@ -231,3 +231,24 @@
 .popup::-webkit-scrollbar {
   display: none;
 }
+
+/* 랭킹 상세 자산 팝업 오른쪽 상단의 경제적 잠재력 유형 보고서 버튼 */
+.reportBtn {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: var(--admin-blue);
+  color: var(--admin-surface);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .reportBtn {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+}

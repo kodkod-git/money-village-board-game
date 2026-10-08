@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import { RESULT_GROUPS, GROUP_DETAIL_URLS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOLDER } from '../constants/quizData'
 import { GROUP_REPORTS, TIME_OPTIONS, RISK_OPTIONS } from '../constants/groupReport'
@@ -32,6 +32,7 @@ function fetchJson(url) {
 export default function EconomicReport() {
   useBodyClass('onboarding-mode')
   const { sessionId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [allPlayers, setAllPlayers] = useState(null)
@@ -51,8 +52,10 @@ export default function EconomicReport() {
   }, [sessionId])
 
   const resultPath = `/result/${sessionId}`
-  const myPlayerUuid = getPlayerUuid()
-  const me = data?.players?.find(p => p.playerUuid === myPlayerUuid)
+  // 랭킹 상세 화면에서 넘어오면 ?player=로 고른 플레이어의 보고서를 보여준다.
+  // 연결이 끊겨 이 기기에 내 기록이 남아 있지 않아도 보고서를 받을 수 있게 하기 위함.
+  const targetPlayerUuid = searchParams.get('player') ?? getPlayerUuid()
+  const me = data?.players?.find(p => p.playerUuid === targetPlayerUuid)
 
   if (error || (data && !me)) {
     return (
