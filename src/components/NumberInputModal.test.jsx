@@ -25,6 +25,12 @@ describe('NumberInputModal', () => {
     expect(screen.getByTestId('display-value')).toHaveTextContent('5')
   })
 
+  it('초기화 버튼 클릭 시 값을 0으로 되돌린다', async () => {
+    render(<NumberInputModal title="현금 입력" initialValue={1200} unit="원" onConfirm={vi.fn()} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: '초기화' }))
+    expect(screen.getByTestId('display-value')).toHaveTextContent(/^0$/)
+  })
+
   it('확인 클릭 시 onConfirm에 현재 값을 전달한다', async () => {
     const onConfirm = vi.fn()
     render(<NumberInputModal title="현금 입력" initialValue={1200} unit="원" onConfirm={onConfirm} onClose={vi.fn()} />)
