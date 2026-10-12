@@ -49,6 +49,12 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
 
   const canShare = room.registered && Boolean(room.sessionId)
 
+  // 경제적 잠재력 유형 보고서는 등록된 게임 결과(sessionId)가 있어야 만들 수 있다.
+  // 관리 화면을 잃지 않도록 새 탭으로 연다.
+  function reportPath(playerUuid) {
+    return `/result/${room.sessionId}/report?player=${encodeURIComponent(playerUuid)}`
+  }
+
   useEffect(() => {
     if (room.registered) return undefined
     pollTimer.current = setInterval(() => {
@@ -191,6 +197,8 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
               prices={room.prices}
               onEdit={() => setEditingPlayerUuid(player.playerUuid)}
               onKick={room.registered ? undefined : () => setKickTarget(player.playerUuid)}
+              onReport={() => window.open(reportPath(player.playerUuid), '_blank', 'noopener')}
+              reportDisabled={!canShare}
             />
           ) : (
             <div key={i} className={styles.emptySlot}>대기중</div>

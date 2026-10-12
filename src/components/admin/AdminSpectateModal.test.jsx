@@ -519,3 +519,19 @@ describe('팀 이름 표시', () => {
     expect(screen.getByRole('textbox')).toHaveValue('독수리 팀')
   })
 })
+
+describe('유형 보고서', () => {
+  it('등록 완료된 팀이면 보고서 버튼이 해당 플레이어 보고서를 새 탭으로 연다', async () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const registeredRoom = { ...makeRoom('AB1234', '김민준'), status: 'completed', registered: true, sessionId: 'session-1' }
+    render(<AdminSpectateModal rooms={[registeredRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: '보고서' }))
+    expect(open).toHaveBeenCalledWith('/result/session-1/report?player=AB1234-p1', '_blank', 'noopener')
+    open.mockRestore()
+  })
+
+  it('결과 등록 전이면 보고서 버튼이 비활성화된다', () => {
+    render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByRole('button', { name: '보고서' })).toBeDisabled()
+  })
+})

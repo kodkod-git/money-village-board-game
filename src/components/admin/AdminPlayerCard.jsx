@@ -6,7 +6,9 @@ import {
 } from '../../constants/gameData'
 import styles from './AdminPlayerCard.module.css'
 
-export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
+// onReport: 넘기면 수정 버튼 왼쪽에 "보고서" 버튼을 보여 준다. 결과 등록 전이라
+// 보고서가 아직 없으면 reportDisabled로 비활성화한다.
+export default function AdminPlayerCard({ player, prices, onEdit, onKick, onReport, reportDisabled = false }) {
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
   const earnedBadges = BADGE_NAMES.filter((_, i) => gameState.badges[i])
@@ -28,6 +30,17 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick }) {
             {gameState.job ? JOB_LABELS[gameState.job] : gameState.jobVisited ? '무직' : '직업 미입력'}
           </span>
         </div>
+        {onReport && (
+          <button
+            type="button"
+            className={styles.reportBtn}
+            onClick={onReport}
+            disabled={reportDisabled}
+            title={reportDisabled ? '결과 등록 후 확인할 수 있어요' : undefined}
+          >
+            보고서
+          </button>
+        )}
         <button type="button" className={styles.editBtn} onClick={onEdit}>수정</button>
         {onKick && (
           <button type="button" className={styles.kickBtn} onClick={onKick}>퇴장</button>
