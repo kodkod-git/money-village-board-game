@@ -262,7 +262,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
 
       {spectateIndex !== null && (
         <div className={styles.overlay} onClick={() => setSpectateIndex(null)}>
-          <div className={styles.popup} onClick={e => e.stopPropagation()}>
+          <div className={`${styles.popup} ${styles.spectatePopup}`} onClick={e => e.stopPropagation()}>
             <AdminSpectateModal
               rooms={rooms}
               initialIndex={spectateIndex}
