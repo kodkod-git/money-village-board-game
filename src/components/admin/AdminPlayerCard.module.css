@@ -30,6 +30,23 @@
   flex-shrink: 0;
 }
 
+.reportBtn {
+  background: var(--admin-surface);
+  color: var(--admin-blue);
+  border: 1px solid var(--admin-blue);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 5px 14px;
+  flex-shrink: 0;
+}
+
+.reportBtn:disabled {
+  color: var(--admin-disabled);
+  border-color: var(--admin-border);
+  cursor: not-allowed;
+}
+
 .kickBtn {
   background: var(--admin-surface);
   color: #ef4444;

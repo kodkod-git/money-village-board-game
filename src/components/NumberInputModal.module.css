@@ -24,6 +24,26 @@
   box-shadow: var(--shadow-card);
   max-height: calc(100% - var(--space-3xl));
   overflow-y: auto;
+  position: relative;
+}
+
+/* 우측 상단 초기화(0으로) 버튼 */
+.resetBtn {
+  position: absolute;
+  top: clamp(10px, calc(14px * min(var(--sx, 1), var(--sy, 1))), 14px);
+  right: clamp(12px, calc(18px * min(var(--sx, 1), var(--sy, 1))), 18px);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: var(--gray-10);
+  color: var(--ink-2);
+}
+
+.resetBtn:active {
+  background: var(--blue-15);
 }
 
 .handle {

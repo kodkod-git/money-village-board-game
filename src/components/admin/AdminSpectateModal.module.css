@@ -63,9 +63,13 @@
   gap: 14px;
   padding: 0 20px 4px;
   overflow-y: auto;
+  /* 화면이 아주 낮을 때만 스크롤되며, 스크롤바는 숨겨 카드 레이아웃을 가리지 않게 한다. */
+  scrollbar-width: none;
   flex: 1;
   min-height: 0;
 }
+
+.grid::-webkit-scrollbar { display: none; }
 
 .emptySlot {
   min-height: 160px;

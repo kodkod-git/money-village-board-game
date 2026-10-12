@@ -32,6 +32,12 @@ export default function NumberInputModal({ title, initialValue, unit, maxValue, 
     <div className={styles.overlay} data-testid="number-input-overlay" onClick={onClose}>
       <div className={styles.sheet} onClick={e => e.stopPropagation()}>
         <div className={styles.handle} />
+        <button type="button" className={styles.resetBtn} aria-label="초기화" onClick={() => setDisplay('0')}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+            <path d="M20 4v5h-5" />
+          </svg>
+        </button>
         <h2 className={styles.title}>{title}</h2>
         <div className={styles.display}>
           <span className={styles.value} data-testid="display-value">

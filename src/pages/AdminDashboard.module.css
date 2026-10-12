@@ -183,3 +183,8 @@
   overflow: hidden;
 }
 
+/* 팀 상세(관전) 팝업: 팀원 카드 4장(2×2)이 스크롤 없이 들어가도록 높이를 넉넉히 준다. */
+.spectatePopup {
+  max-height: 96vh;
+}
+

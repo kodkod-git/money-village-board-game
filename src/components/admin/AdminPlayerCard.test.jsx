@@ -71,3 +71,20 @@ describe('AdminPlayerCard', () => {
     expect(screen.queryByText('퇴장')).toBeNull()
   })
 })
+
+describe('AdminPlayerCard 보고서 버튼', () => {
+  it('onReport가 없으면 보고서 버튼을 보여주지 않는다', () => {
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: '보고서' })).not.toBeInTheDocument()
+  })
+
+  it('보고서 버튼은 수정 버튼 왼쪽에 있고 클릭 시 onReport를 호출한다', async () => {
+    const onReport = vi.fn()
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} onReport={onReport} />)
+    const report = screen.getByRole('button', { name: '보고서' })
+    const edit = screen.getByRole('button', { name: '수정' })
+    expect(report.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    await userEvent.click(report)
+    expect(onReport).toHaveBeenCalled()
+  })
+})
