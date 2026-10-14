@@ -5,10 +5,12 @@ const NAV_ITEMS = [
   { key: 'classes', label: '수업 목록', icon: '/icons/IconClasses.png' },
   { key: 'team-status', label: '팀 현황', icon: '/icons/IconTeams.png' },
   { key: 'ranking', label: '랭킹 보기', icon: '/icons/IconRankings.png' },
+  // 설문 응답 원본을 다루므로 마스터 관리자에게만 보인다.
+  { key: 'responses', label: '응답 및 분석', icon: '/icons/assignment.png', superOnly: true },
   { key: 'settings', label: '설정', icon: '/icons/IconSettings.png' },
 ]
 
-export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisabled }) {
+export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisabled, isSuper }) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -24,7 +26,7 @@ export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisa
       </div>
 
       <div className={styles.nav}>
-        {NAV_ITEMS.map(item => {
+        {NAV_ITEMS.filter(item => !item.superOnly || isSuper).map(item => {
           const disabled = item.key === 'team-status' || item.key === 'ranking' ? teamStatusDisabled : false
           return (
             <button
