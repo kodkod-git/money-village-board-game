@@ -91,6 +91,16 @@ describe('AdminDashboard', () => {
     expect(await screen.findByRole('heading', { name: '응답 및 분석' })).toBeInTheDocument()
   })
 
+  it('마스터 관리자에게는 전체 결과 메뉴가 보이고 누르면 해당 화면으로 전환한다', async () => {
+    renderDashboard()
+    await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
+    await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
+    await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
+    await screen.findByText('3학년 2반')
+    await userEvent.click(screen.getByRole('button', { name: '전체 결과' }))
+    expect(await screen.findByRole('heading', { name: '전체 결과' })).toBeInTheDocument()
+  })
+
   it('일반 관리자에게는 응답 및 분석 메뉴가 보이지 않는다', async () => {
     const baseFetch = global.fetch
     global.fetch = vi.fn((url, options) => url === '/api/admin/login'
@@ -102,5 +112,6 @@ describe('AdminDashboard', () => {
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
     await screen.findByText('3학년 2반')
     expect(screen.queryByRole('button', { name: '응답 및 분석' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '전체 결과' })).not.toBeInTheDocument()
   })
 })

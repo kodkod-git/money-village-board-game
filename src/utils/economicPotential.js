@@ -37,11 +37,15 @@ export function calcInvestment(player) {
   }
 }
 
-export function calcEconomicPotential(player) {
+// thresholds: 관리자 "전체 결과" 화면에서 기준값을 바꿔 가며 분포를 볼 때만 넘긴다.
+export function calcEconomicPotential(player, {
+  futureInvestRatio = FUTURE_INVEST_RATIO,
+  riskyConcentrationRatio = RISKY_CONCENTRATION_RATIO,
+} = {}) {
   const investment = calcInvestment(player)
 
-  const horizon = investment.investRatio > FUTURE_INVEST_RATIO ? 'future' : 'present'
-  const risk = investment.invested > 0 && investment.topAssetRatio >= RISKY_CONCENTRATION_RATIO ? 'risky' : 'safe'
+  const horizon = investment.investRatio > futureInvestRatio ? 'future' : 'present'
+  const risk = investment.invested > 0 && investment.topAssetRatio >= riskyConcentrationRatio ? 'risky' : 'safe'
 
   return {
     horizon,

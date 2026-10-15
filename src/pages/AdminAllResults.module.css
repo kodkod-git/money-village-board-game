@@ -1,0 +1,248 @@
+.message {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-2);
+  padding: 60px 0;
+}
+
+/* 테이블 뷰 */
+
+.classTeam,
+.teamName {
+  display: block;
+}
+
+.teamName {
+  font-size: 11px;
+  color: var(--admin-text-3);
+  margin-top: 2px;
+}
+
+.reportLink {
+  display: inline-block;
+  padding: 5px 14px;
+  border: 1px solid var(--admin-blue);
+  border-radius: 20px;
+  background: var(--admin-surface);
+  color: var(--admin-blue);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.reportLink:hover {
+  background: var(--admin-blue-soft);
+}
+
+/* 유형 분포 뷰 */
+
+.distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+}
+
+.sliderHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sliderLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.sliderValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--admin-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--admin-blue);
+  cursor: pointer;
+}
+
+.sliderFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 12px;
+  color: var(--admin-text-2);
+}
+
+.resetBtn {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-2);
+}
+
+.sliderSummary {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.chartCard {
+  padding: 20px 24px 16px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.chartHint {
+  font-size: 12px;
+  color: var(--admin-text-3);
+}
+
+.plot {
+  display: flex;
+  height: 300px;
+  /* 맨 위 막대 값 라벨이 잘리지 않게 위쪽 여유를 둔다 */
+  padding-top: 24px;
+}
+
+.yAxis {
+  position: relative;
+  width: 32px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--admin-text-3);
+}
+
+.yAxis span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+}
+
+.plotArea {
+  position: relative;
+  flex: 1;
+}
+
+.gridLines span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--admin-border);
+}
+
+.bars {
+  position: relative;
+  display: flex;
+  height: 100%;
+  gap: 24px;
+  padding: 0 24px;
+}
+
+.barColumn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.barTrack {
+  display: flex;
+  align-items: flex-end;
+  width: min(100%, 96px);
+  height: 100%;
+}
+
+.bar {
+  position: relative;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  transition: height 0.35s ease;
+}
+
+.barValue {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--admin-text);
+  white-space: nowrap;
+}
+
+.barValue small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-3);
+}
+
+.xAxis {
+  display: flex;
+  gap: 24px;
+  padding: 10px 24px 0 56px;
+}
+
+.xLabel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.xGroup {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.xAxes {
+  font-size: 11px;
+  color: var(--admin-text-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar { transition: none; }
+}
