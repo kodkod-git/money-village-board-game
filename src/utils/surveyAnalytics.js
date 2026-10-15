@@ -1,5 +1,5 @@
-import { QUESTIONS, AXIS_LABELS, GENDER_OPTIONS, RESULT_GROUPS } from '../constants/quizData'
-import { SYNERGY_QUESTIONS, SYNERGY_TYPES } from '../constants/synergyData'
+import { QUESTIONS, AXIS_LABELS, GENDER_OPTIONS, RESULT_GROUPS, NAME_TITLE, GENDER_TITLE } from '../constants/quizData'
+import { SYNERGY_QUESTIONS, SYNERGY_TYPES, MY_NAME_TITLE, CITIZEN_NAME_TITLE } from '../constants/synergyData'
 import { getTypeGroup } from './synergyScoring'
 
 // 관리자 "응답 및 분석" 화면의 테스트 탭. key는 /api/admin/survey/:test/responses 경로와 같다.
@@ -98,6 +98,47 @@ export function countByType(rows) {
       count: rows.filter(r => r.my_type === type).length,
     }
   })
+}
+
+// 질문 인사이트: 테스트별 선택형 질문 목록(드롭다운 순서 = 화면에 나오는 순서).
+export function choiceQuestions(testKey) {
+  const questions = testKey === 'synergy' ? SYNERGY_QUESTIONS : QUESTIONS
+  return questions.map(q => ({ key: q.key, label: questionHeader(q.prompt), options: q.options.map(o => o.text) }))
+}
+
+// 질문 인사이트 파이 차트에 쓰는 선택지 색. 그룹 색과 헷갈리지 않게 따로 둔다.
+const OPTION_COLORS = ['#5B8DEF', '#4CC9A0', '#F2A65A', '#9B8AFB']
+const OTHER_COLOR = '#C4C9D4'
+
+// 선택지별 응답 수. 질문 문구와 다른 값(스모어 이관 중 깨진 글자 등)은 "기타"로 묶고,
+// 답하지 않은 응답(null)은 비율 계산에서 빼고 따로 센다.
+export function countByAnswer(rows, question) {
+  const answered = rows.filter(r => r[question.key] != null && r[question.key] !== '')
+  const slices = question.options.map((text, i) => ({
+    label: text,
+    color: OPTION_COLORS[i % OPTION_COLORS.length],
+    count: answered.filter(r => r[question.key] === text).length,
+  }))
+  const other = answered.length - slices.reduce((sum, s) => sum + s.count, 0)
+  if (other > 0) slices.push({ label: '기타', color: OTHER_COLOR, count: other })
+  return {
+    slices: slices.map(s => ({ ...s, ratio: answered.length ? s.count / answered.length : 0 })),
+    answered: answered.length,
+    unanswered: rows.length - answered.length,
+  }
+}
+
+// 질문 이탈률 표의 행: 테스트 화면에 나오는 순서 그대로(정보 입력 단계 포함).
+// 노출·이탈 수는 아직 수집하지 않는다.
+export function funnelSteps(testKey) {
+  const info = testKey === 'synergy'
+    ? [{ label: questionHeader(MY_NAME_TITLE), kind: 'text' }, { label: questionHeader(CITIZEN_NAME_TITLE), kind: 'text' }]
+    : [
+        { label: questionHeader(NAME_TITLE), kind: 'text' },
+        { label: questionHeader(GENDER_TITLE), kind: 'choice' },
+        { label: '아이의 나이를 입력해주세요', kind: 'number' },
+      ]
+  return [...info, ...choiceQuestions(testKey).map(q => ({ label: q.label, kind: 'choice' }))]
 }
 
 // 기간별 인사이트 기간 필터. days가 null이면 첫 응답일부터.

@@ -20,6 +20,11 @@
   overflow: visible;
 }
 
+.pieSlice {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
 .segment {
   cursor: pointer;
   transition: stroke-width 0.15s ease;

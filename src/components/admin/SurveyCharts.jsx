@@ -93,6 +93,82 @@ export function GroupDonutChart({ groups }) {
   )
 }
 
+const PIE_SIZE = 200
+const PIE_RADIUS = PIE_SIZE / 2
+
+function piePoint(angle, radius = PIE_RADIUS) {
+  // 12시 방향에서 시계 방향으로 돈다.
+  return [PIE_RADIUS + radius * Math.sin(angle), PIE_RADIUS - radius * Math.cos(angle)]
+}
+
+function pieSlicePath(start, end) {
+  const [x1, y1] = piePoint(start)
+  const [x2, y2] = piePoint(end)
+  const largeArc = end - start > Math.PI ? 1 : 0
+  return `M ${PIE_RADIUS} ${PIE_RADIUS} L ${x1} ${y1} A ${PIE_RADIUS} ${PIE_RADIUS} 0 ${largeArc} 1 ${x2} ${y2} Z`
+}
+
+// slices: countByAnswer().slices — 선택지별 { label, color, count, ratio }
+export function AnswerPieChart({ slices }) {
+  const [hovered, setHovered] = useState(null)
+  const visible = slices.filter(s => s.count > 0)
+
+  let angle = 0
+  const paths = visible.map(s => {
+    const start = angle
+    angle += s.ratio * 2 * Math.PI
+    return { ...s, start, end: angle }
+  })
+
+  return (
+    <div className={styles.donutLayout}>
+      <div className={styles.donutWrap}>
+        <svg
+          viewBox={`0 0 ${PIE_SIZE} ${PIE_SIZE}`}
+          className={styles.donut}
+          role="img"
+          aria-label={`선택지별 응답 비율: ${slices.map(s => `${s.label} ${percent(s.ratio)}`).join(', ')}`}
+        >
+          {paths.map(s => {
+            const shapeProps = {
+              fill: s.color,
+              // 인접 조각 사이를 표면색 선으로 띄워 색만으로 구분하지 않게 한다.
+              stroke: 'var(--admin-surface)',
+              strokeWidth: visible.length > 1 ? 2 : 0,
+              className: styles.pieSlice,
+              opacity: hovered && hovered !== s.label ? 0.45 : 1,
+              onMouseEnter: () => setHovered(s.label),
+              onMouseLeave: () => setHovered(null),
+            }
+            // 한 선택지가 100%면 호 경로가 0 길이가 되므로 원으로 그린다.
+            return visible.length === 1
+              ? <circle key={s.label} cx={PIE_RADIUS} cy={PIE_RADIUS} r={PIE_RADIUS} {...shapeProps} />
+              : <path key={s.label} d={pieSlicePath(s.start, s.end)} {...shapeProps} />
+          })}
+        </svg>
+      </div>
+
+      <ul className={styles.legend}>
+        {slices.map(s => (
+          <li
+            key={s.label}
+            className={`${styles.legendItem} ${hovered === s.label ? styles.legendItemActive : ''}`}
+            onMouseEnter={() => setHovered(s.label)}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <span className={styles.swatch} style={{ background: s.color }} aria-hidden="true" />
+            <div className={styles.legendText}>
+              <span className={styles.legendName}>{s.label}</span>
+            </div>
+            <span className={styles.legendCount}>{s.count}명</span>
+            <span className={styles.legendRatio}>{percent(s.ratio)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 // types: countByType() 결과
 export function TypeHistogram({ types }) {
   const [hovered, setHovered] = useState(null)

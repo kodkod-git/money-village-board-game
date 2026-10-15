@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildColumns, countByDay, countByGroup, countByType, formatCell, formatDateParts } from './surveyAnalytics'
+import { buildColumns, countByAnswer, countByDay, countByGroup, countByType, formatCell, formatDateParts, funnelSteps } from './surveyAnalytics'
 
 describe('buildColumns', () => {
   it('알려진 컬럼 뒤에 DB에만 있는 컬럼을 붙이고 id는 숨긴다', () => {
@@ -81,5 +81,33 @@ describe('countByDay', () => {
 
   it('응답이 없으면 오늘 하루만 0으로 돌려준다', () => {
     expect(countByDay([], null, today)).toEqual([{ date: '2026-10-14', completed: 0 }])
+  })
+})
+
+describe('countByAnswer', () => {
+  const question = { key: 'q', options: ['A', 'B'] }
+
+  it('선택지별 수와 비율을 세고, 미응답은 비율에서 빼고 따로 센다', () => {
+    const result = countByAnswer([{ q: 'A' }, { q: 'A' }, { q: 'B' }, { q: null }], question)
+    expect(result.slices.map(s => [s.label, s.count])).toEqual([['A', 2], ['B', 1]])
+    expect(result.slices[0].ratio).toBeCloseTo(2 / 3)
+    expect(result).toMatchObject({ answered: 3, unanswered: 1 })
+  })
+
+  it('선택지 문구와 다른 값은 기타로 묶는다', () => {
+    const result = countByAnswer([{ q: 'A' }, { q: '깨진 글자' }], question)
+    expect(result.slices.at(-1)).toMatchObject({ label: '기타', count: 1, ratio: 0.5 })
+  })
+})
+
+describe('funnelSteps', () => {
+  it('경제적 잠재력 테스트는 이름·성별·나이와 질문 6개를 화면 순서대로 돌려준다', () => {
+    const steps = funnelSteps('potential')
+    expect(steps).toHaveLength(9)
+    expect(steps.slice(0, 3).map(s => s.kind)).toEqual(['text', 'choice', 'number'])
+  })
+
+  it('시너지 테스트는 닉네임 2개와 질문 4개다', () => {
+    expect(funnelSteps('synergy')).toHaveLength(6)
   })
 })

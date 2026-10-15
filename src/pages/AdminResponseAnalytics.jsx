@@ -1,20 +1,25 @@
 import { useState, useEffect, useMemo } from 'react'
 import { adminFetch } from '../utils/adminAuth'
 import { StatCardRow } from '../components/admin/AdminStatCards'
-import { GroupDonutChart, TypeHistogram, DailyBarChart } from '../components/admin/SurveyCharts'
+import { GroupDonutChart, TypeHistogram, DailyBarChart, AnswerPieChart } from '../components/admin/SurveyCharts'
 import { RESULT_GROUPS } from '../constants/quizData'
 import { SYNERGY_TYPES } from '../constants/synergyData'
 import { getTypeGroup } from '../utils/synergyScoring'
 import {
   SURVEY_TESTS, PERIOD_RANGES, buildColumns, formatCell, formatDateParts, countByGroup, countByType, countByDay,
+  choiceQuestions, countByAnswer, funnelSteps,
 } from '../utils/surveyAnalytics'
 import styles from './AdminResponseAnalytics.module.css'
 
 const VIEW_TABS = [
   { key: 'responses', label: '응답별 데이터' },
-  { key: 'insights', label: '응답결과 인사이트' },
-  { key: 'period', label: '기간별 인사이트' },
+  { key: 'questions', label: '질문 인사이트' },
+  { key: 'insights', label: '결과 인사이트' },
+  { key: 'period', label: '기간 인사이트' },
+  { key: 'dropout', label: '질문 이탈률' },
 ]
+
+const STEP_ICONS = { text: '✎', number: '#', choice: '☑' }
 
 // 완료 수 외의 지표는 아직 수집하지 않는다. 필요한 작업은 proposal/20261014_response_analyze.md "구현 검토 결과" 참고.
 function buildStatCards(rows) {
@@ -68,6 +73,7 @@ export default function AdminResponseAnalytics() {
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
   const [periodKey, setPeriodKey] = useState('all')
+  const [questionKey, setQuestionKey] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -82,6 +88,10 @@ export default function AdminResponseAnalytics() {
   }, [testKey, reloadKey])
 
   const columns = useMemo(() => buildColumns(testKey, rows), [testKey, rows])
+  const questions = choiceQuestions(testKey)
+  // 테스트를 바꾸면 이전 테스트의 질문 키가 없으므로 첫 질문으로 돌아간다.
+  const activeQuestion = questions.find(q => q.key === questionKey) ?? questions[0]
+  const answerCounts = useMemo(() => countByAnswer(rows, activeQuestion), [rows, activeQuestion])
   const activeTest = SURVEY_TESTS.find(t => t.key === testKey)
   const dailyCounts = useMemo(
     () => countByDay(rows, PERIOD_RANGES.find(r => r.key === periodKey).days),
@@ -134,7 +144,7 @@ export default function AdminResponseAnalytics() {
 
         {loading && <p className={styles.message}>불러오는 중...</p>}
         {error && <p className={styles.message}>{error}</p>}
-        {!loading && !error && rows.length === 0 && <p className={styles.message}>아직 응답이 없습니다.</p>}
+        {!loading && !error && rows.length === 0 && view !== 'dropout' && <p className={styles.message}>아직 응답이 없습니다.</p>}
 
         {!loading && !error && rows.length > 0 && view === 'responses' && (
           <section className={styles.panel}>
@@ -166,6 +176,27 @@ export default function AdminResponseAnalytics() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && rows.length > 0 && view === 'questions' && (
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>질문 인사이트</h2>
+              <span className={styles.panelHint}>
+                선택지별 응답 비율 · 응답 {answerCounts.answered}건
+                {answerCounts.unanswered > 0 && ` (미응답 ${answerCounts.unanswered}건 제외)`}
+              </span>
+            </div>
+            <div className={styles.chartCard}>
+              <label className={styles.questionSelect}>
+                <span className={styles.questionSelectLabel}>질문</span>
+                <select value={activeQuestion.key} onChange={e => setQuestionKey(e.target.value)}>
+                  {questions.map(q => <option key={q.key} value={q.key}>{q.label}</option>)}
+                </select>
+              </label>
+              <AnswerPieChart slices={answerCounts.slices} />
             </div>
           </section>
         )}
@@ -220,6 +251,42 @@ export default function AdminResponseAnalytics() {
             </div>
             <div className={styles.chartCard}>
               <DailyBarChart days={dailyCounts} valueKey="completed" label="완료" />
+            </div>
+          </section>
+        )}
+
+        {/* 노출·이탈은 질문 화면 진입/종료 이벤트를 수집해야 계산할 수 있다. 지금은 질문 목록만 보여준다. */}
+        {!loading && !error && view === 'dropout' && (
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>질문 이탈률</h2>
+              <span className={styles.pendingPill}>준비 중</span>
+              <span className={styles.panelHint}>질문별 노출·이탈 수는 수집 기능을 추가한 뒤 표시됩니다</span>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={`${styles.table} ${styles.funnelTable}`}>
+                <thead>
+                  <tr>
+                    <th className={styles.th}>질문</th>
+                    <th className={styles.thNum}>노출</th>
+                    <th className={styles.thNum}>이탈</th>
+                    <th className={styles.thNum}>이탈률</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funnelSteps(testKey).map((step, i) => (
+                    <tr key={step.label} className={styles.tr}>
+                      <td className={styles.td}>
+                        <span className={styles.stepIcon} aria-hidden="true">{STEP_ICONS[step.kind]}</span>
+                        <strong>{i + 1}.</strong> {step.label}
+                      </td>
+                      <td className={styles.tdNum}>—</td>
+                      <td className={styles.tdNum}>—</td>
+                      <td className={styles.tdNum}><span className={styles.pendingPill}>준비 중</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
