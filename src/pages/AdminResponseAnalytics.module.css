@@ -85,14 +85,10 @@
 .viewTabs {
   display: flex;
   gap: var(--space-xs);
-  padding: var(--space-xs);
   width: fit-content;
   max-width: 100%;
   overflow-x: auto;
   margin: 0 auto var(--space-xl);
-  border-radius: 999px;
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
 }
 
 .viewTab {
@@ -173,6 +169,97 @@
   border: 1px solid var(--admin-border);
   border-radius: 14px;
   padding: var(--space-2xl);
+}
+
+/* 질문 인사이트 */
+
+.questionSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(560px, 100%);
+  margin: 0 auto var(--space-2xl);
+  padding: 8px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-md);
+  background: var(--admin-surface);
+}
+
+.questionSelectLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-3);
+}
+
+.questionSelect select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text);
+  cursor: pointer;
+}
+
+/* 질문 이탈률 */
+
+.pendingPill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-3);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.funnelTable {
+  width: 100%;
+}
+
+.thNum,
+.tdNum {
+  width: 90px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.thNum {
+  position: sticky;
+  top: 0;
+  background: #f8f9fd;
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--admin-text-2);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.tdNum {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--admin-text-3);
+  border-bottom: 1px solid #f0f2f8;
+}
+
+.funnelTable .td {
+  max-width: none;
+  vertical-align: middle;
+}
+
+.stepIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-right: 10px;
+  border-radius: var(--admin-r-sm);
+  background: var(--admin-blue-soft);
+  color: var(--admin-blue);
+  font-size: 13px;
 }
 
 /* 응답 테이블 */

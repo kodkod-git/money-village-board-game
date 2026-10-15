@@ -50,7 +50,7 @@ describe('AdminResponseAnalytics', () => {
   it('경제적 잠재력 인사이트는 그룹별 도넛 차트를 보여준다', async () => {
     render(<AdminResponseAnalytics />)
     await screen.findByText('이도경')
-    await userEvent.click(screen.getByRole('tab', { name: '응답결과 인사이트' }))
+    await userEvent.click(screen.getByRole('tab', { name: '결과 인사이트' }))
     expect(screen.getByRole('img', { name: /Green Group 1명.*Blue Group 1명/ })).toBeInTheDocument()
   })
 
@@ -59,19 +59,43 @@ describe('AdminResponseAnalytics', () => {
     await screen.findByText('이도경')
     await userEvent.click(screen.getByRole('tab', { name: 'EFTI 시너지 테스트' }))
     await screen.findByText('머니왕')
-    await userEvent.click(screen.getByRole('tab', { name: '응답결과 인사이트' }))
+    await userEvent.click(screen.getByRole('tab', { name: '결과 인사이트' }))
     const chart = screen.getByRole('img', { name: /PTSN 1명/ })
     expect(within(chart).getAllByText(/^[FP][TA][SE][NC]$/)).toHaveLength(16)
   })
 
-  it('기간별 인사이트는 일자별 완료 수 막대 차트를 보여주고 기간을 바꿀 수 있다', async () => {
+  it('기간 인사이트는 일자별 완료 수 막대 차트를 보여주고 기간을 바꿀 수 있다', async () => {
     render(<AdminResponseAnalytics />)
     await screen.findByText('이도경')
-    await userEvent.click(screen.getByRole('tab', { name: '기간별 인사이트' }))
+    await userEvent.click(screen.getByRole('tab', { name: '기간 인사이트' }))
     expect(screen.getByRole('img', { name: /2026-10-10 1건.*2026-10-08 1건|2026-10-08 1건.*2026-10-10 1건/ })).toBeInTheDocument()
     expect(screen.getByText('2건')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('tab', { name: '최근 7일' }))
     expect(screen.getByRole('tab', { name: '최근 7일' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('질문 인사이트는 고른 질문의 선택지 비율을 파이 차트로 보여준다', async () => {
+    render(<AdminResponseAnalytics />)
+    await screen.findByText('이도경')
+    await userEvent.click(screen.getByRole('tab', { name: '질문 인사이트' }))
+    // 첫 질문(용돈): 2건 중 1건만 답했고, 답한 1건이 "바로 쓰며…"
+    expect(screen.getByRole('img', { name: /바로 쓰며 기뻐하는 편이에요. 100.0%.*모았다가 뜻있게 쓰는 편이에요. 0.0%/ })).toBeInTheDocument()
+    expect(screen.getByText(/미응답 1건 제외/)).toBeInTheDocument()
+
+    await userEvent.selectOptions(screen.getByRole('combobox'), '우리 아이는 새로운 활동을 할 때 어떤 편인가요?')
+    expect(screen.getByRole('img', { name: /익숙한 방법이 편한 편이에요. 0.0%/ })).toBeInTheDocument()
+  })
+
+  it('질문 이탈률은 질문 목록과 준비 중 안내를 보여준다', async () => {
+    render(<AdminResponseAnalytics />)
+    await screen.findByText('이도경')
+    await userEvent.click(screen.getByRole('tab', { name: '질문 이탈률' }))
+    const table = screen.getByRole('table')
+    expect(within(table).getByRole('columnheader', { name: '이탈률' })).toBeInTheDocument()
+    // 이름·성별·나이 + 질문 6개
+    expect(within(table).getAllByRole('row')).toHaveLength(1 + 9)
+    expect(within(table).getByText(/우리 아이는 용돈을 받으면/)).toBeInTheDocument()
+    expect(within(table).getAllByText('준비 중')).toHaveLength(9)
   })
 
   it('불러오기에 실패하면 오류 문구를 보여준다', async () => {
