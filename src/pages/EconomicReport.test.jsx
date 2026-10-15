@@ -10,21 +10,21 @@ const ME = {
   stockHoldings: { bio: 3, semiconductor: 1 }, realEstateHoldings: { dami: 1, gaon: 1 },
 }
 
+const PRICES = {
+  stockPrices: { bio: 10000, semiconductor: 10000, finance: 10000 },
+  realEstatePrices: { dami: 10000, gaon: 10000, chorong: 10000 },
+}
+
+// 홍길동: 현금 50,000 + 투자 60,000 → 투자 비율 약 55%, 바이오가 투자 금액의 절반(30,000)
 const RESULT = {
   teamCode: 'AB1234',
   createdAt: '2026-10-06T05:00:00.000Z',
+  ...PRICES,
   players: [
     ME,
-    { name: '김철수', playerUuid: 'p2', stockHoldings: { finance: 1 }, realEstateHoldings: {} },
+    { name: '김철수', playerUuid: 'p2', cash: 100000, stockHoldings: { finance: 1 }, realEstateHoldings: {} },
   ],
 }
-
-// 역대 전체 플레이어: 홍길동(6개) + 보유 수가 많은 다른 팀 플레이어들 → 평균 8개
-const ALL_PLAYERS = [
-  ME,
-  { name: '부자1', playerUuid: 'x1', stockHoldings: { semiconductor: 9 }, realEstateHoldings: {} },
-  { name: '부자2', playerUuid: 'x2', stockHoldings: { finance: 9 }, realEstateHoldings: {} },
-]
 
 function renderReport() {
   return render(
@@ -41,7 +41,7 @@ beforeEach(() => {
   sessionStorage.setItem('player_uuid', 'me')
   global.fetch = vi.fn(url => Promise.resolve({
     ok: true,
-    json: () => Promise.resolve(url === '/api/rankings' ? ALL_PLAYERS : RESULT),
+    json: () => Promise.resolve(RESULT),
   }))
 })
 
@@ -75,13 +75,13 @@ describe('EconomicReport', () => {
     expect(screen.getByRole('button', { name: 'PDF로 저장' })).toBeInTheDocument()
   })
 
-  it('미래형/현재형은 같은 팀이 아니라 역대 전체 플레이어 평균과 비교한다', async () => {
+  it('다른 플레이어 통계 없이 내 자산만으로 유형을 정한다', async () => {
     renderReport()
     await userEvent.type(await screen.findByLabelText('숫자'), '11')
     await userEvent.click(screen.getByRole('button', { name: '보고서 보기' }))
 
-    // 팀 평균(3.5개)보다는 많지만 역대 평균(8개)보다 적은 6개 → 현재형, 빌라·바이오 4/6 → 위험형(Red)
-    expect(global.fetch).toHaveBeenCalledWith('/api/rankings')
+    // 투자 비율 55%(70% 이하) → 현재형, 한 종목(바이오)이 투자 금액의 50% → 위험형(Red)
+    expect(global.fetch).not.toHaveBeenCalledWith('/api/rankings')
     expect(screen.getByText('현재형 · 위험형')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Red Group' })).toBeInTheDocument()
     expect(screen.queryByText('판단 근거')).not.toBeInTheDocument()

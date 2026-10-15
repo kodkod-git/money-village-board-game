@@ -1,11 +1,14 @@
 import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../constants/gameData'
 
-// 보드게임 결과(주식·부동산 보유 현황)로 경제적 잠재력 유형을 유추한다.
-// 축 A: 역대 모든 플레이어의 평균 보유 수보다 많으면 미래형, 아니면 현재형.
-// 축 B: 내 보유 자산 중 빌라·바이오 비중이 절반을 넘으면 위험형, 아니면 안전형.
+// 보드게임 결과(현금·주식·부동산)로 경제적 잠재력 유형을 유추한다.
+// 다른 참가자 통계 없이 그 플레이어 한 명의 자산만 보고 판단한다 — 결과가 쌓여도 유형이 바뀌지 않는다.
+// 가격은 팀(세션)마다 다르므로 그 게임의 가격으로 금액을 계산한다.
+// 축 A: 순자산 중 주식·부동산에 투자한 금액 비율이 70%를 넘으면 미래형, 아니면 현재형.
+// 축 B: 투자 금액 중 한 종목이 50% 이상을 차지하면(한 종목에 몰아서 투자) 위험형, 아니면 안전형.
+//       분모를 순자산이 아닌 투자 금액으로 둬야 "얼마나 투자했나"(축 A)와 겹치지 않는다.
 // 그룹 이름은 경제 잠재력 테스트(RESULT_GROUPS)와 같은 4개 그룹을 그대로 쓴다.
-const RISKY_STOCKS = ['bio']
-const RISKY_ESTATES = ['dami']
+export const FUTURE_INVEST_RATIO = 0.7
+export const RISKY_CONCENTRATION_RATIO = 0.5
 
 const GROUP_BY_AXES = {
   'future-risky': 'Blue Group',
@@ -14,32 +17,36 @@ const GROUP_BY_AXES = {
   'present-safe': 'Green Group',
 }
 
-function sumHoldings(holdings, keys) {
-  return keys.reduce((sum, key) => sum + (Number(holdings?.[key]) || 0), 0)
+function assetValues(holdings, prices, keys) {
+  return keys.map(key => (Number(holdings?.[key]) || 0) * (Number(prices?.[key]) || 0))
 }
 
-export function countHoldings(player) {
-  const stocks = sumHoldings(player.stockHoldings, Object.keys(STOCK_LABELS))
-  const realEstate = sumHoldings(player.realEstateHoldings, Object.keys(REAL_ESTATE_LABELS))
-  const risky = sumHoldings(player.stockHoldings, RISKY_STOCKS) + sumHoldings(player.realEstateHoldings, RISKY_ESTATES)
-  return { stocks, realEstate, total: stocks + realEstate, risky }
+// player는 cash, stockHoldings/realEstateHoldings와 그 게임의 stockPrices/realEstatePrices를 가진다.
+export function calcInvestment(player) {
+  const values = [
+    ...assetValues(player.stockHoldings, player.stockPrices, Object.keys(STOCK_LABELS)),
+    ...assetValues(player.realEstateHoldings, player.realEstatePrices, Object.keys(REAL_ESTATE_LABELS)),
+  ]
+  const invested = values.reduce((sum, v) => sum + v, 0)
+  const netWorth = (Number(player.cash) || 0) + invested
+  return {
+    invested,
+    netWorth,
+    investRatio: netWorth > 0 ? invested / netWorth : 0,
+    topAssetRatio: invested > 0 ? Math.max(...values) / invested : 0,
+  }
 }
 
-export function calcEconomicPotential(me, players) {
-  const mine = countHoldings(me)
-  const all = players.length > 0 ? players : [me]
-  const average = all.reduce((sum, p) => sum + countHoldings(p).total, 0) / all.length
-  const riskyRatio = mine.total > 0 ? mine.risky / mine.total : 0
+export function calcEconomicPotential(player) {
+  const investment = calcInvestment(player)
 
-  const horizon = mine.total > average ? 'future' : 'present'
-  const risk = riskyRatio > 0.5 ? 'risky' : 'safe'
+  const horizon = investment.investRatio > FUTURE_INVEST_RATIO ? 'future' : 'present'
+  const risk = investment.invested > 0 && investment.topAssetRatio >= RISKY_CONCENTRATION_RATIO ? 'risky' : 'safe'
 
   return {
     horizon,
     risk,
     group: GROUP_BY_AXES[`${horizon}-${risk}`],
-    holdings: mine,
-    average,
-    riskyRatio,
+    investment,
   }
 }

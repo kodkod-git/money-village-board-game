@@ -35,19 +35,14 @@ export default function EconomicReport() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
-  const [allPlayers, setAllPlayers] = useState(null)
   const [error, setError] = useState(false)
   const [age, setAge] = useState('')
   const [confirmed, setConfirmed] = useState(false)
 
-  // 미래형/현재형은 역대 모든 플레이어의 평균 보유 수와 비교한다 — 전체 랭킹 API가
-  // 모든 게임 결과(보유 현황 포함)를 내려주므로 그대로 쓴다.
+  // 유형은 이 플레이어 한 명의 자산만으로 정하므로 이 게임의 결과만 불러온다.
   useEffect(() => {
-    Promise.all([fetchJson(`/api/results/${sessionId}`), fetchJson('/api/rankings')])
-      .then(([result, rankings]) => {
-        setData(result)
-        setAllPlayers(rankings)
-      })
+    fetchJson(`/api/results/${sessionId}`)
+      .then(setData)
       .catch(() => setError(true))
   }, [sessionId])
 
@@ -118,7 +113,10 @@ export default function EconomicReport() {
     )
   }
 
-  const result = calcEconomicPotential(me, allPlayers)
+  // 결과 API는 가격을 플레이어가 아니라 게임(세션) 단위로 내려주므로 합쳐서 넘긴다.
+  const result = calcEconomicPotential(
+    { ...me, stockPrices: data.stockPrices, realEstatePrices: data.realEstatePrices },
+  )
   const group = RESULT_GROUPS[result.group]
   const groupReport = GROUP_REPORTS[result.group]
 
