@@ -18,8 +18,9 @@
 
 .icon {
   flex-shrink: 0;
-  width: 40px;
+  min-width: 40px;
   height: 40px;
+  padding: 0 8px;
   border-radius: 11px;
   display: flex;
   align-items: center;
@@ -39,4 +40,16 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--admin-text-2);
+}
+
+.pendingTag {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--admin-icon-bg);
+  border: 1px solid var(--admin-border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--admin-text-3);
+  white-space: nowrap;
 }

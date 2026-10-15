@@ -5,6 +5,7 @@ import AdminClassList from './AdminClassList'
 import AdminClassDashboard from './AdminClassDashboard'
 import AdminRankingView from './AdminRankingView'
 import AdminSettings from './AdminSettings'
+import AdminResponseAnalytics from './AdminResponseAnalytics'
 import AdminShell from '../components/admin/AdminShell'
 
 export default function AdminDashboard() {
@@ -41,13 +42,19 @@ export default function AdminDashboard() {
 
   function handleNavigate(key) {
     if ((key === 'team-status' || key === 'ranking') && !selectedClass) return
+    if (key === 'responses' && !profile?.isSuper) return
     setSection(key)
   }
 
   if (!token || !profile) return <AdminLogin onLogin={handleLogin} />
 
   return (
-    <AdminShell activeSection={section} onNavigate={handleNavigate} teamStatusDisabled={!selectedClass}>
+    <AdminShell
+      activeSection={section}
+      onNavigate={handleNavigate}
+      teamStatusDisabled={!selectedClass}
+      isSuper={Boolean(profile.isSuper)}
+    >
       {section === 'classes' && (
         <AdminClassList profile={profile} onSelectClass={handleSelectClass} onLogout={handleLogout} />
       )}
@@ -64,6 +71,7 @@ export default function AdminDashboard() {
           onGoToTeamStatus={() => handleNavigate('team-status')}
         />
       )}
+      {section === 'responses' && profile.isSuper && <AdminResponseAnalytics />}
       {section === 'settings' && <AdminSettings profile={profile} onLogout={handleLogout} />}
     </AdminShell>
   )

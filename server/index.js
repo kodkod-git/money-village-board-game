@@ -9,6 +9,7 @@ import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisc
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
+import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
@@ -150,6 +151,18 @@ app.get('/api/synergy/results/:id', async (req, res) => {
     res.json(result)
   } catch (err) {
     res.status(404).json({ error: 'Result not found' })
+  }
+})
+
+// 설문 응답 원본(이름·나이 포함)이라 마스터 관리자(admin)에게만 연다.
+app.get('/api/admin/survey/:test/responses', requireAdmin, async (req, res) => {
+  if (!req.admin.isSuper) return res.status(403).json({ error: 'Forbidden' })
+  if (!SURVEY_TABLES[req.params.test]) return res.status(404).json({ error: 'Unknown survey' })
+  try {
+    res.json(await listSurveyResponses(req.params.test))
+  } catch (err) {
+    console.error('survey responses error:', err)
+    res.status(500).json({ error: 'Failed to fetch survey responses' })
   }
 })
 
