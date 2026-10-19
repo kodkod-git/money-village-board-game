@@ -188,3 +188,11 @@
   max-height: 96vh;
 }
 
+
+.chartMessage {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-2);
+  padding: 60px 0;
+}

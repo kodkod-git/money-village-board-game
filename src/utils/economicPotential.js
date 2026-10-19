@@ -37,7 +37,7 @@ export function calcInvestment(player) {
   }
 }
 
-// thresholds: 관리자 "전체 결과" 화면에서 기준값을 바꿔 가며 분포를 볼 때만 넘긴다.
+// thresholds: 관리자 "게임 분석" 화면에서 기준값을 바꿔 가며 분포를 볼 때만 넘긴다.
 export function calcEconomicPotential(player, {
   futureInvestRatio = FUTURE_INVEST_RATIO,
   riskyConcentrationRatio = RISKY_CONCENTRATION_RATIO,

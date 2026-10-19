@@ -102,7 +102,7 @@ export default function AdminResponseAnalytics() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>응답 및 분석</h1>
+          <h1 className={styles.title}>테스트 분석</h1>
           <p className={styles.subtitle}>{activeTest.label}의 응답과 결과 분포를 확인할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>

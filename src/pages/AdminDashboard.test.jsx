@@ -81,27 +81,27 @@ describe('AdminDashboard', () => {
     expect(await screen.findByPlaceholderText('이름 또는 팀 검색...')).toBeInTheDocument()
   })
 
-  it('마스터 관리자에게는 응답 및 분석 메뉴가 보이고 누르면 해당 화면으로 전환한다', async () => {
+  it('마스터 관리자에게는 테스트 분석 메뉴가 보이고 누르면 해당 화면으로 전환한다', async () => {
     renderDashboard()
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
     await screen.findByText('3학년 2반')
-    await userEvent.click(screen.getByRole('button', { name: '응답 및 분석' }))
-    expect(await screen.findByRole('heading', { name: '응답 및 분석' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '테스트 분석' }))
+    expect(await screen.findByRole('heading', { name: '테스트 분석' })).toBeInTheDocument()
   })
 
-  it('마스터 관리자에게는 전체 결과 메뉴가 보이고 누르면 해당 화면으로 전환한다', async () => {
+  it('마스터 관리자에게는 게임 분석 메뉴가 보이고 누르면 해당 화면으로 전환한다', async () => {
     renderDashboard()
     await userEvent.type(screen.getByPlaceholderText('아이디'), 'admin')
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '0000')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
     await screen.findByText('3학년 2반')
-    await userEvent.click(screen.getByRole('button', { name: '전체 결과' }))
-    expect(await screen.findByRole('heading', { name: '전체 결과' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '게임 분석' }))
+    expect(await screen.findByRole('heading', { name: '게임 분석' })).toBeInTheDocument()
   })
 
-  it('일반 관리자에게는 응답 및 분석 메뉴가 보이지 않는다', async () => {
+  it('일반 관리자에게는 테스트 분석 메뉴가 보이지 않는다', async () => {
     const baseFetch = global.fetch
     global.fetch = vi.fn((url, options) => url === '/api/admin/login'
       ? Promise.resolve({ ok: true, json: () => Promise.resolve({ token: 't2', username: 'teacher', isSuper: false }) })
@@ -111,7 +111,7 @@ describe('AdminDashboard', () => {
     await userEvent.type(screen.getByPlaceholderText('비밀번호'), '1234')
     await userEvent.click(screen.getByRole('button', { name: '로그인하기' }))
     await screen.findByText('3학년 2반')
-    expect(screen.queryByRole('button', { name: '응답 및 분석' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '전체 결과' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '테스트 분석' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '게임 분석' })).not.toBeInTheDocument()
   })
 })

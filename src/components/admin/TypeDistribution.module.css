@@ -1,0 +1,384 @@
+/* 경제적 잠재력 유형 분포 뷰 — 게임 분석·팀 현황에서 함께 쓴다 */
+
+.distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+}
+
+.sliderHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sliderLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.sliderValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--admin-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--admin-blue);
+  cursor: pointer;
+}
+
+.sliderFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 12px;
+  color: var(--admin-text-2);
+}
+
+.resetBtn {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-2);
+}
+
+.sliderSummary {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+/* 두 카드를 합친 폭이 2 × 460px + 간격보다 좁아지면 auto-fit이 한 줄에 하나씩 내린다 */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 16px;
+}
+
+.chartCard {
+  /* 나란히 놓였을 때 키가 큰 사분면 카드에 맞춰 막대 차트가 늘어나도록 세로 flex로 쌓는다 */
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 24px 16px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.ringToggle {
+  margin-left: auto;
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 13px;
+  background: var(--admin-surface);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--admin-text-2);
+}
+
+.ringToggle[aria-pressed='true'] {
+  border-color: var(--admin-blue);
+  background: var(--admin-blue-soft);
+  color: var(--admin-blue);
+}
+
+.chartHint {
+  font-size: 12px;
+  color: var(--admin-text-3);
+}
+
+.plot {
+  display: flex;
+  flex: 1;
+  min-height: 300px;
+  /* 맨 위 막대 값 라벨이 잘리지 않게 위쪽 여유를 둔다 */
+  padding-top: 24px;
+}
+
+.yAxis {
+  position: relative;
+  width: 32px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--admin-text-3);
+}
+
+.yAxis span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+}
+
+.plotArea {
+  position: relative;
+  flex: 1;
+}
+
+.gridLines span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--admin-border);
+}
+
+.bars {
+  position: relative;
+  display: flex;
+  height: 100%;
+  gap: 24px;
+  padding: 0 24px;
+}
+
+.barColumn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.barTrack {
+  display: flex;
+  align-items: flex-end;
+  width: min(100%, 96px);
+  height: 100%;
+}
+
+.bar {
+  position: relative;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  transition: height 0.35s ease;
+}
+
+.barValue {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--admin-text);
+  white-space: nowrap;
+}
+
+.barValue small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-3);
+}
+
+.xAxis {
+  display: flex;
+  gap: 24px;
+  padding: 10px 24px 0 56px;
+}
+
+.xLabel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.xGroup {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.xAxes {
+  font-size: 11px;
+  color: var(--admin-text-2);
+}
+
+/* 유형 사분면 */
+
+.quadrantWrap {
+  display: flex;
+  /* 가장자리(0%·100%)에 놓인 캐릭터가 잘리지 않게 위·오른쪽 여유를 둔다 */
+  padding: 24px 32px 0 0;
+}
+
+.quadrantYAxis {
+  position: relative;
+  width: 56px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--admin-text-3);
+}
+
+.yTick {
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+}
+
+.axisTitleY {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-30%, -50%) rotate(-90deg);
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--admin-text-2);
+}
+
+.quadrant {
+  position: relative;
+  flex: 1;
+  height: 440px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-sm);
+}
+
+.region {
+  position: absolute;
+  overflow: hidden;
+}
+
+.regionFill {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+}
+
+.regionLabel {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.regionLabel small {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-text-2);
+}
+
+.topLeft { top: 8px; left: 10px; }
+.topRight { top: 8px; right: 10px; text-align: right; }
+.bottomLeft { bottom: 8px; left: 10px; }
+.bottomRight { bottom: 8px; right: 10px; text-align: right; }
+
+.divider {
+  position: absolute;
+  border-left: 1px dashed var(--admin-text-3);
+  border-top: 1px dashed var(--admin-text-3);
+}
+
+.point {
+  position: absolute;
+  transition: left 0.25s ease, bottom 0.25s ease;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: auto;
+}
+
+.point:hover {
+  z-index: 2;
+}
+
+.pointAvatar {
+  display: block;
+  width: var(--avatar-size, 30px);
+  height: var(--avatar-size, 30px);
+  border: 2px solid;
+  border-radius: 50%;
+  background: var(--admin-surface);
+  object-fit: cover;
+}
+
+/* 원 없이 캐릭터 그림만 — 그림 비율을 그대로 살린다 */
+.pointCharacter {
+  display: block;
+  width: var(--avatar-size, 30px);
+  height: var(--avatar-size, 30px);
+  object-fit: contain;
+}
+
+.pointName {
+  max-width: calc(var(--avatar-size, 30px) * 2.2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--name-size, 10px);
+  font-weight: 700;
+  color: var(--admin-text);
+  white-space: nowrap;
+}
+
+.quadrantXAxis {
+  position: relative;
+  height: 32px;
+  margin: 6px 32px 0 56px;
+  font-size: 11px;
+  color: var(--admin-text-3);
+}
+
+.xTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.axisTitleX {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 600;
+  color: var(--admin-text-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .point { transition: none; }
+}

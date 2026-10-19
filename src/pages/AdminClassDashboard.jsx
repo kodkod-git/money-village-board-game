@@ -6,6 +6,7 @@ import ClassQRModal from '../components/admin/ClassQRModal'
 import SurveyQRModal from '../components/admin/SurveyQRModal'
 import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
+import TypeDistribution from '../components/admin/TypeDistribution'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
@@ -15,6 +16,7 @@ import styles from './AdminDashboard.module.css'
 const TABS = [
   { key: 'grid', label: '그리드 뷰', icon: '/icons/IconGrid.png' },
   { key: 'table', label: '테이블 뷰', icon: '/icons/IconTable.png' },
+  { key: 'chart', label: '유형 분포 뷰', icon: '/icons/IconChart.svg' },
 ]
 
 function matchesSearch(room, query) {
@@ -39,6 +41,9 @@ export default function AdminClassDashboard({ classId, initialName }) {
   const [isCreating, setIsCreating] = useState(false)
   const [isBulkRegistering, setIsBulkRegistering] = useState(false)
   const [search, setSearch] = useState('')
+  // 유형 분포 뷰는 이 수업에서 결과 등록을 마친 참가자만 보여 준다.
+  const [results, setResults] = useState(null)
+  const [resultsError, setResultsError] = useState(false)
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
@@ -50,6 +55,18 @@ export default function AdminClassDashboard({ classId, initialName }) {
   useEffect(() => {
     loadRooms()
   }, [loadRooms])
+
+  // 팀 상태가 바뀌면(결과 등록 등) rooms가 다시 내려오므로 그때마다 결과도 새로 받는다.
+  useEffect(() => {
+    if (activeTab !== 'chart') return
+    let cancelled = false
+    setResultsError(false)
+    fetch(`/api/rankings?classId=${encodeURIComponent(classId)}`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(data => { if (!cancelled) setResults(data) })
+      .catch(() => { if (!cancelled) setResultsError(true) })
+    return () => { cancelled = true }
+  }, [activeTab, classId, rooms])
 
   useEffect(() => {
     if (!socket || !classId) return
@@ -256,6 +273,18 @@ export default function AdminClassDashboard({ classId, initialName }) {
           )}
           {activeTab === 'table' && (
             <AdminTableView rooms={filteredRooms} onDeletePlayers={handleDeleteSelectedPlayers} />
+          )}
+          {activeTab === 'chart' && resultsError && (
+            <p className={styles.chartMessage}>결과를 불러오는 중 오류가 발생했습니다.</p>
+          )}
+          {activeTab === 'chart' && !resultsError && results === null && (
+            <p className={styles.chartMessage}>불러오는 중...</p>
+          )}
+          {activeTab === 'chart' && !resultsError && results?.length === 0 && (
+            <AdminEmptyState title="등록된 게임 결과가 없습니다." subtitle="팀 결과를 등록하면 유형 분포를 확인할 수 있습니다." />
+          )}
+          {activeTab === 'chart' && !resultsError && results?.length > 0 && (
+            <TypeDistribution rows={results} scopeLabel="수업" largePoints />
           )}
         </>
       )}
