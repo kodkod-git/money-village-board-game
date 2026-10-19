@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassDashboard from './AdminClassDashboard'
@@ -139,6 +139,35 @@ describe('AdminClassDashboard', () => {
     await screen.findByText('홍길동')
     await userEvent.click(screen.getByRole('button', { name: '테이블 뷰' }))
     expect(screen.getByText('참가자')).toBeInTheDocument()
+  })
+
+  it('유형 분포 뷰 탭은 이 수업의 게임 결과만 불러와 분포와 사분면을 보여준다', async () => {
+    const result = {
+      name: '결과학생', cash: 0, character: 'Innovator-독수리', sessionId: 's-1', playerUuid: 'u-1',
+      stockHoldings: { semiconductor: 2 }, realEstateHoldings: {},
+      stockPrices: { semiconductor: 10000 }, realEstatePrices: {},
+    }
+    const baseFetch = global.fetch
+    global.fetch = vi.fn((url, options) => url.startsWith('/api/rankings')
+      ? Promise.resolve({ ok: true, json: () => Promise.resolve([result]) })
+      : baseFetch(url, options))
+    renderDashboard()
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByRole('button', { name: '유형 분포 뷰' }))
+    expect(global.fetch).toHaveBeenCalledWith('/api/rankings?classId=class-1')
+    expect(await screen.findByRole('img', { name: '유형 분포: Blue Group 1명, Orange Group 0명, Red Group 0명, Green Group 0명' })).toBeInTheDocument()
+    expect(screen.getByText(/수업 1명/)).toBeInTheDocument()
+    expect(within(screen.getByRole('group', { name: '유형 사분면' })).getByText('결과학생')).toBeInTheDocument()
+    // 팀 현황은 인원이 적어 캐릭터를 크게 그린다(1명이면 최대 크기).
+    expect(screen.getByRole('group', { name: '유형 사분면' }).style.getPropertyValue('--avatar-size')).toBe('70px')
+
+    // 기본은 그룹 색 테두리 원에 담고, 원 표시를 끄면 캐릭터만 그린다.
+    const character = () => within(screen.getByRole('group', { name: '유형 사분면' })).getByText('결과학생').previousElementSibling
+    expect(screen.getByRole('button', { name: '원 표시 ON' })).toHaveAttribute('aria-pressed', 'true')
+    expect(character().style.borderColor).not.toBe('')
+    await userEvent.click(screen.getByRole('button', { name: '원 표시 ON' }))
+    expect(screen.getByRole('button', { name: '원 표시 OFF' })).toHaveAttribute('aria-pressed', 'false')
+    expect(character().style.borderColor).toBe('')
   })
 
   it('팀 카드 클릭 시 관전 팝업을 연다', async () => {

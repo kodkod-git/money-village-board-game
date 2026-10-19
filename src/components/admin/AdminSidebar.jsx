@@ -6,9 +6,9 @@ const NAV_ITEMS = [
   { key: 'team-status', label: '팀 현황', icon: '/icons/IconTeams.png' },
   { key: 'ranking', label: '랭킹 보기', icon: '/icons/IconRankings.png' },
   // 설문 응답 원본을 다루므로 마스터 관리자에게만 보인다.
-  { key: 'responses', label: '응답 및 분석', icon: '/icons/assignment.png', superOnly: true },
+  { key: 'responses', label: '테스트 분석', icon: '/icons/assignment.png', superOnly: true },
   // 모든 수업의 참가자 결과를 보여 주므로 마찬가지로 마스터 관리자 전용이다.
-  { key: 'all-results', label: '전체 결과', icon: '/icons/IconTable.png', superOnly: true },
+  { key: 'all-results', label: '게임 분석', icon: '/icons/IconGame.svg', superOnly: true },
   { key: 'settings', label: '설정', icon: '/icons/IconSettings.png' },
 ]
 

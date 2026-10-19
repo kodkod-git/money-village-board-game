@@ -2,7 +2,7 @@ import { QUESTIONS, AXIS_LABELS, GENDER_OPTIONS, RESULT_GROUPS, NAME_TITLE, GEND
 import { SYNERGY_QUESTIONS, SYNERGY_TYPES, MY_NAME_TITLE, CITIZEN_NAME_TITLE } from '../constants/synergyData'
 import { getTypeGroup } from './synergyScoring'
 
-// 관리자 "응답 및 분석" 화면의 테스트 탭. key는 /api/admin/survey/:test/responses 경로와 같다.
+// 관리자 "테스트 분석" 화면의 테스트 탭. key는 /api/admin/survey/:test/responses 경로와 같다.
 export const SURVEY_TESTS = [
   { key: 'potential', label: '경제적 잠재력 유형 테스트' },
   { key: 'synergy', label: 'EFTI 시너지 테스트' },
