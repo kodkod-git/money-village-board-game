@@ -11,6 +11,14 @@ vi.mock('react-router-dom', async () => {
 
 import QuizResult from './QuizResult'
 
+// 행동 로그는 별도 요청이라 fetch 목과 섞이지 않게 모듈째 대체한다.
+vi.mock('../utils/surveyTracking', () => ({
+  trackSurveyEvent: vi.fn(),
+  markSurveyStart: vi.fn(),
+  takeSurveyDuration: vi.fn(() => 42000),
+}))
+import { trackSurveyEvent, markSurveyStart } from '../utils/surveyTracking'
+
 function renderResult(id = 'result-1') {
   return render(
     <MemoryRouter initialEntries={[`/quiz/result/${id}`]}>
@@ -33,6 +41,26 @@ describe('QuizResult', () => {
     })
     global.navigator.clipboard = { writeText: vi.fn() }
     delete window.Kakao
+  })
+
+  it('더 알아보기 링크와 공유 버튼을 누르면 어떤 것을 눌렀는지 로그를 남긴다', async () => {
+    trackSurveyEvent.mockClear()
+    renderResult()
+    await waitFor(() => screen.getByText('Green Group'))
+    fireEvent.click(screen.getByText('우리 아이 경제 그룹 자세히 보기'))
+    fireEvent.click(screen.getByText('다양한 경제 유형 알아보기'))
+    fireEvent.click(screen.getByText('네이버 리뷰 작성하기'))
+    fireEvent.click(screen.getByLabelText('카카오톡 공유하기'))
+    fireEvent.click(screen.getByLabelText('링크 공유하기'))
+    fireEvent.click(screen.getByLabelText('사진 공유하기'))
+    expect(trackSurveyEvent.mock.calls).toEqual([
+      ['potential', 'link_click', { target: 'group_detail', resultId: 'result-1' }],
+      ['potential', 'link_click', { target: 'economic_types', resultId: 'result-1' }],
+      ['potential', 'link_click', { target: 'naver_review', resultId: 'result-1' }],
+      ['potential', 'share_click', { target: 'kakao', resultId: 'result-1' }],
+      ['potential', 'share_click', { target: 'link', resultId: 'result-1' }],
+      ['potential', 'share_click', { target: 'photo', resultId: 'result-1' }],
+    ])
   })
 
   it('결과 그룹명과 태그라인을 렌더링한다', async () => {

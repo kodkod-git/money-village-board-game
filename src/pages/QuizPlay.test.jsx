@@ -9,6 +9,14 @@ vi.mock('react-router-dom', async () => {
 })
 
 import QuizPlay from './QuizPlay'
+
+// 행동 로그는 별도 요청이라 fetch 목과 섞이지 않게 모듈째 대체한다.
+vi.mock('../utils/surveyTracking', () => ({
+  trackSurveyEvent: vi.fn(),
+  markSurveyStart: vi.fn(),
+  takeSurveyDuration: vi.fn(() => 42000),
+}))
+import { trackSurveyEvent, markSurveyStart } from '../utils/surveyTracking'
 import { QUESTIONS } from '../constants/quizData'
 
 function answerAllQuestions() {
@@ -61,6 +69,14 @@ describe('QuizPlay', () => {
     expect(body.childGender).toBe('male')
     expect(body.childAge).toBe(7)
     expect(body.resultGroup).toBe('Green Group')
+  })
+
+  it('첫 화면에서 세션 시간을 재기 시작하고, 저장이 끝나면 걸린 시간과 함께 완료 로그를 남긴다', async () => {
+    trackSurveyEvent.mockClear()
+    render(<MemoryRouter><QuizPlay /></MemoryRouter>)
+    expect(markSurveyStart).toHaveBeenCalledWith('potential')
+    answerAllQuestions()
+    await waitFor(() => expect(trackSurveyEvent).toHaveBeenCalledWith('potential', 'complete', { durationMs: 42000, resultId: 'result-1' }))
   })
 
   it('성별을 선택하고 다음 버튼을 눌러야 나이 입력 단계로 넘어간다', () => {

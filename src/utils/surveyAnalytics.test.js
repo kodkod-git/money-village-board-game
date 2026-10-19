@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildColumns, countByAnswer, countByDay, countByGroup, countByType, formatCell, formatDateParts, funnelSteps } from './surveyAnalytics'
+import { buildColumns, buildMetricCards, countByAnswer, countByDay, countByGroup, countByType, formatCell, formatDateParts, formatDuration, funnelSteps } from './surveyAnalytics'
 
 describe('buildColumns', () => {
   it('알려진 컬럼 뒤에 DB에만 있는 컬럼을 붙이고 id는 숨긴다', () => {
@@ -109,5 +109,29 @@ describe('funnelSteps', () => {
 
   it('시너지 테스트는 닉네임 2개와 질문 4개다', () => {
     expect(funnelSteps('synergy')).toHaveLength(6)
+  })
+})
+
+describe('formatDuration', () => {
+  it('초·분 단위로 읽기 쉽게 바꾼다', () => {
+    expect(formatDuration(null)).toBe('—')
+    expect(formatDuration(45400)).toBe('45초')
+    expect(formatDuration(120000)).toBe('2분')
+    expect(formatDuration(92000)).toBe('1분 32초')
+  })
+})
+
+describe('buildMetricCards', () => {
+  it('지표가 없으면 6개 카드를 —로 채운다', () => {
+    const cards = buildMetricCards(null)
+    expect(cards).toHaveLength(6)
+    expect(cards.every(c => c.value === '—')).toBe(true)
+  })
+
+  it('분모가 0이면 비율을 —로 둔다', () => {
+    const zero = { total: 0, unique: 0 }
+    const cards = buildMetricCards({ visit: zero, complete: zero, linkClick: { ...zero, participants: 0 }, shareClick: zero, avgDurationMs: null })
+    expect(cards.find(c => c.label === '완료').sub).toBe('완료율 —')
+    expect(cards.find(c => c.label === '전환율(CTR)').value).toBe('—')
   })
 })

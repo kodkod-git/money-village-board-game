@@ -4,6 +4,7 @@ import { RESULT_GROUPS, ANIMAL_EMOJIS, ECONOMIC_TYPES_URL } from '../constants/q
 import { SYNERGY_TYPES, SYNERGY_AXES, ACADEMY_INQUIRY_URL } from '../constants/synergyData'
 import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from '../utils/synergyScoring'
 import useBodyClass from '../hooks/useBodyClass'
+import { trackSurveyEvent } from '../utils/surveyTracking'
 import styles from './QuizResult.module.css'
 import synergyStyles from './SynergyResult.module.css'
 
@@ -29,6 +30,9 @@ export default function SynergyResult() {
     const timer = setTimeout(() => setNotice(''), 2000)
     return () => clearTimeout(timer)
   }, [notice])
+
+  const trackLink = target => trackSurveyEvent('synergy', 'link_click', { target, resultId })
+  const trackShare = target => trackSurveyEvent('synergy', 'share_click', { target, resultId })
 
   const handleCopyLink = useCallback(() => {
     navigator.clipboard.writeText(window.location.href)
@@ -154,13 +158,13 @@ export default function SynergyResult() {
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>더 알아보기</p>
-          <a className={styles.navBtn} style={navBtnStyle} href={myInfo.detailUrl} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={myInfo.detailUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('type_detail')}>
             나의 경제 유형 자세히 보기
           </a>
-          <a className={styles.navBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('economic_types')}>
             다양한 경제 유형 알아보기
           </a>
-          <a className={styles.navBtn} style={navBtnStyle} href={ACADEMY_INQUIRY_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={ACADEMY_INQUIRY_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('academy_inquiry')}>
             초등 경제 수업 문의하기
           </a>
         </div>
@@ -170,12 +174,12 @@ export default function SynergyResult() {
           <div className={styles.shareRow}>
             <button
               className={`${styles.iconBtn} ${styles.kakaoIconBtn}`}
-              onClick={() => handleKakaoShare(myType, background)}
+              onClick={() => { trackShare('kakao'); handleKakaoShare(myType, background) }}
               aria-label="카카오톡 공유하기"
             >
               <img className={styles.iconBtnImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
             </button>
-            <button className={styles.iconBtn} onClick={handleCopyLink} aria-label="링크 공유하기">
+            <button className={styles.iconBtn} onClick={() => { trackShare('link'); handleCopyLink() }} aria-label="링크 공유하기">
               <img className={styles.iconBtnImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
             </button>
           </div>

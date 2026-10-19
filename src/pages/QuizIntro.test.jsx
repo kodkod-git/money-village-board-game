@@ -9,11 +9,25 @@ vi.mock('react-router-dom', async () => {
 })
 
 import QuizIntro from './QuizIntro'
+
+// 행동 로그는 별도 요청이라 fetch 목과 섞이지 않게 모듈째 대체한다.
+vi.mock('../utils/surveyTracking', () => ({
+  trackSurveyEvent: vi.fn(),
+  markSurveyStart: vi.fn(),
+  takeSurveyDuration: vi.fn(() => 42000),
+}))
+import { trackSurveyEvent, markSurveyStart } from '../utils/surveyTracking'
 import { QUESTIONS } from '../constants/quizData'
 
 describe('QuizIntro', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
+  })
+
+  it('들어오면 잠재력 테스트 참여(visit) 로그를 남긴다', () => {
+    trackSurveyEvent.mockClear()
+    render(<MemoryRouter><QuizIntro /></MemoryRouter>)
+    expect(trackSurveyEvent).toHaveBeenCalledWith('potential', 'visit')
   })
 
   it('제목과 시작 버튼을 렌더링한다', () => {

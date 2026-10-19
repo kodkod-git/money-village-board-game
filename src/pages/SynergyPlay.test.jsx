@@ -10,6 +10,14 @@ vi.mock('react-router-dom', async () => {
 
 import SynergyPlay from './SynergyPlay'
 
+// 행동 로그는 별도 요청이라 fetch 목과 섞이지 않게 모듈째 대체한다.
+vi.mock('../utils/surveyTracking', () => ({
+  trackSurveyEvent: vi.fn(),
+  markSurveyStart: vi.fn(),
+  takeSurveyDuration: vi.fn(() => 42000),
+}))
+import { trackSurveyEvent, markSurveyStart } from '../utils/surveyTracking'
+
 function renderPlay(citizenType = 'FASN') {
   return render(
     <MemoryRouter initialEntries={[`/synergy/${citizenType}`]}>
@@ -70,6 +78,23 @@ describe('SynergyPlay', () => {
     await act(async () => { await Promise.resolve(); await Promise.resolve() })
     act(() => vi.advanceTimersByTime(600))
     expect(mockNavigate).toHaveBeenCalledWith('/synergy/FASN/result/synergy-1')
+  })
+
+  it('시민권 링크로 들어오면 참여 로그를 남기고 세션 시간을 재며, 저장 후 완료 로그를 남긴다', async () => {
+    trackSurveyEvent.mockClear()
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ id: 'synergy-1' }) })
+    renderPlay()
+    expect(trackSurveyEvent).toHaveBeenCalledWith('synergy', 'visit')
+    expect(markSurveyStart).toHaveBeenCalledWith('synergy')
+    completeTest()
+    await act(async () => { await Promise.resolve(); await Promise.resolve() })
+    expect(trackSurveyEvent).toHaveBeenCalledWith('synergy', 'complete', { durationMs: 42000, resultId: 'synergy-1' })
+  })
+
+  it('잘못된 시민권 링크는 참여로 세지 않는다', () => {
+    trackSurveyEvent.mockClear()
+    renderPlay('ZZZZ')
+    expect(trackSurveyEvent).not.toHaveBeenCalled()
   })
 
   it('저장에 실패하면 다시 시도할 수 있다', async () => {

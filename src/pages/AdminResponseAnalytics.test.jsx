@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import AdminResponseAnalytics from './AdminResponseAnalytics'
@@ -15,19 +15,48 @@ const SYNERGY_ROWS = [
   { id: 's1', submitted_at: '2026-10-11T10:00:00', my_name: '머니왕', citizen_name: '경제박사', citizen_type: 'FASN', my_type: 'PTSN', source: 'app' },
 ]
 
+const METRICS = {
+  since: '2026-10-19T01:00:00Z',
+  visit: { total: 15, unique: 10 },
+  complete: { total: 9, unique: 8 },
+  linkClick: { total: 7, unique: 4, participants: 3 },
+  shareClick: { total: 3, unique: 2 },
+  avgDurationMs: 92000,
+}
+
 beforeEach(() => {
   global.fetch = vi.fn(url => {
+    if (url.endsWith('/metrics')) return Promise.resolve({ ok: true, json: () => Promise.resolve(METRICS) })
     const data = url.includes('/synergy/') ? SYNERGY_ROWS : POTENTIAL_ROWS
     return Promise.resolve({ ok: true, json: () => Promise.resolve(data) })
   })
 })
 
 describe('AdminResponseAnalytics', () => {
-  it('완료 수를 보여주고 아직 수집하지 않는 지표는 준비 중으로 표시한다', async () => {
+  it('상단 지표는 행동 로그 집계로 채운다(유니크 수 + 전체 횟수)', async () => {
     render(<AdminResponseAnalytics />)
     await screen.findByText('이도경')
-    expect(screen.getByText('완료').previousSibling).toHaveTextContent('2')
-    expect(screen.getAllByText('준비 중')).toHaveLength(5)
+    const card = label => screen.getByText(label).closest('div').parentElement
+    await waitFor(() => expect(card('참여')).toHaveTextContent('10'))
+    expect(card('참여')).toHaveTextContent('접속 15회')
+    expect(card('완료')).toHaveTextContent('8')
+    expect(card('완료')).toHaveTextContent('완료율 80%')
+    expect(card('평균 세션시간')).toHaveTextContent('1분 32초')
+    expect(card('링크 클릭 수')).toHaveTextContent('4')
+    expect(card('링크 클릭 수')).toHaveTextContent('클릭 7회')
+    // 참여 10명 중 링크를 누른 참여자 3명 (공유받아 누른 1명은 제외)
+    expect(card('전환율(CTR)')).toHaveTextContent('30%')
+    expect(card('공유버튼 클릭 수')).toHaveTextContent('2')
+    expect(screen.getByText(/2026-10-19부터 수집한 행동 로그 기준/)).toBeInTheDocument()
+    expect(fetch).toHaveBeenCalledWith('/api/admin/survey/potential/metrics', expect.anything())
+  })
+
+  it('지표를 불러오지 못해도 응답 목록은 보여 준다', async () => {
+    const base = global.fetch
+    global.fetch = vi.fn(url => (url.endsWith('/metrics') ? Promise.resolve({ ok: false }) : base(url)))
+    render(<AdminResponseAnalytics />)
+    expect(await screen.findByText('이도경')).toBeInTheDocument()
+    expect(await screen.findByText('지표를 불러오지 못했습니다.')).toBeInTheDocument()
   })
 
   it('응답별 데이터 테이블에 DB 컬럼을 모두 보여준다', async () => {
@@ -44,7 +73,8 @@ describe('AdminResponseAnalytics', () => {
     await screen.findByText('이도경')
     await userEvent.click(screen.getByRole('tab', { name: 'EFTI 시너지 테스트' }))
     expect(await screen.findByText('머니왕')).toBeInTheDocument()
-    expect(fetch).toHaveBeenLastCalledWith('/api/admin/survey/synergy/responses', expect.anything())
+    expect(fetch).toHaveBeenCalledWith('/api/admin/survey/synergy/responses', expect.anything())
+    expect(fetch).toHaveBeenCalledWith('/api/admin/survey/synergy/metrics', expect.anything())
   })
 
   it('경제적 잠재력 인사이트는 그룹별 도넛 차트를 보여준다', async () => {

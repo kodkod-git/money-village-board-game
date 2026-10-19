@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import {
@@ -8,6 +8,7 @@ import {
 } from '../constants/quizData'
 import { calcQuizResult } from '../utils/quizScoring'
 import useBodyClass from '../hooks/useBodyClass'
+import { trackSurveyEvent, markSurveyStart, takeSurveyDuration } from '../utils/surveyTracking'
 import styles from './QuizPlay.module.css'
 
 const STEP_NAME = 'name'
@@ -29,6 +30,9 @@ export default function QuizPlay() {
   const [answers, setAnswers] = useState({})
   const [polarities, setPolarities] = useState({})
 
+  // 세션 시간은 첫 입력 화면에 들어온 순간부터 잰다.
+  useEffect(() => { markSurveyStart('potential') }, [])
+
   function submitResult() {
     setStep(STEP_ANALYZING)
     const { axisTodayTomorrow, axisSafetyAdventure, resultGroup } = calcQuizResult(polarities)
@@ -42,6 +46,7 @@ export default function QuizPlay() {
     })
       .then(r => { if (!r.ok) throw new Error('save failed'); return r.json() })
       .then(data => {
+        trackSurveyEvent('potential', 'complete', { durationMs: takeSurveyDuration('potential'), resultId: data.id })
         setStep(STEP_DONE)
         setTimeout(() => navigate(`/quiz/result/${data.id}`), 600)
       })

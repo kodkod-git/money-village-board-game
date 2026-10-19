@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import useBodyClass from '../hooks/useBodyClass'
@@ -5,11 +6,15 @@ import {
   INTRO_TITLE_LINE1, INTRO_TITLE_LINE2, INTRO_SUBTITLE, INTRO_SUBTITLE_EMPHASIS,
   INTRO_META_TIME, INTRO_META_ANALYSIS, INTRO_FOOTER, QUESTIONS,
 } from '../constants/quizData'
+import { trackSurveyEvent } from '../utils/surveyTracking'
 import styles from './QuizIntro.module.css'
 
 export default function QuizIntro() {
   const navigate = useNavigate()
   useBodyClass('onboarding-mode')
+
+  // 참여: 테스트 링크로 들어온 수
+  useEffect(() => { trackSurveyEvent('potential', 'visit') }, [])
 
   return (
     <div className={styles.page}>

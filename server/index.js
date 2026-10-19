@@ -10,6 +10,7 @@ import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updat
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
+import { parseSurveyEvent, saveSurveyEvent, listSurveyEvents, summarizeSurveyEvents } from './surveyEvents.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
@@ -163,6 +164,30 @@ app.get('/api/admin/survey/:test/responses', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('survey responses error:', err)
     res.status(500).json({ error: 'Failed to fetch survey responses' })
+  }
+})
+
+// 설문 테스트 행동 로그(참여·완료·링크 클릭·공유 클릭). 테스트 화면에서 로그인 없이 보낸다.
+app.post('/api/survey/events', async (req, res) => {
+  const row = parseSurveyEvent(req.body)
+  if (!row) return res.status(400).json({ error: 'Invalid survey event' })
+  try {
+    await saveSurveyEvent(row)
+    res.status(204).end()
+  } catch (err) {
+    console.error('survey event save error:', err)
+    res.status(500).json({ error: 'Failed to save survey event' })
+  }
+})
+
+app.get('/api/admin/survey/:test/metrics', requireAdmin, async (req, res) => {
+  if (!req.admin.isSuper) return res.status(403).json({ error: 'Forbidden' })
+  if (!SURVEY_TABLES[req.params.test]) return res.status(404).json({ error: 'Unknown survey' })
+  try {
+    res.json(summarizeSurveyEvents(await listSurveyEvents(req.params.test)))
+  } catch (err) {
+    console.error('survey metrics error:', err)
+    res.status(500).json({ error: 'Failed to fetch survey metrics' })
   }
 })
 
