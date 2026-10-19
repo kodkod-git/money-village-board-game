@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import {
@@ -8,6 +8,7 @@ import {
 } from '../constants/synergyData'
 import { calcSynergyType, normalizeSynergyType } from '../utils/synergyScoring'
 import useBodyClass from '../hooks/useBodyClass'
+import { trackSurveyEvent, markSurveyStart, takeSurveyDuration } from '../utils/surveyTracking'
 import styles from './QuizPlay.module.css'
 
 const STEP_MY_NAME = 'myName'
@@ -27,6 +28,13 @@ export default function SynergyPlay() {
   const [citizenName, setCitizenName] = useState('')
   const [answers, setAnswers] = useState({})
   const [letters, setLetters] = useState({})
+
+  // 시너지 테스트는 시민권 QR 링크가 곧바로 첫 입력 화면이라, 여기서 참여를 세고 세션 시간도 잰다.
+  useEffect(() => {
+    if (!citizenType) return
+    trackSurveyEvent('synergy', 'visit')
+    markSurveyStart('synergy')
+  }, [citizenType])
 
   if (!citizenType) {
     return (
@@ -56,6 +64,7 @@ export default function SynergyPlay() {
     })
       .then(r => { if (!r.ok) throw new Error('save failed'); return r.json() })
       .then(data => {
+        trackSurveyEvent('synergy', 'complete', { durationMs: takeSurveyDuration('synergy'), resultId: data.id })
         setTimeout(() => navigate(`/synergy/${citizenType}/result/${data.id}`), 600)
       })
       .catch(() => setStep(STEP_ERROR))

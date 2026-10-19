@@ -9,6 +9,7 @@ import {
   ECONOMIC_TYPES_URL,
 } from '../constants/quizData'
 import useBodyClass from '../hooks/useBodyClass'
+import { trackSurveyEvent } from '../utils/surveyTracking'
 import styles from './QuizResult.module.css'
 
 const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY
@@ -33,6 +34,9 @@ export default function QuizResult() {
     const timer = setTimeout(() => setNotice(''), 2000)
     return () => clearTimeout(timer)
   }, [notice])
+
+  const trackLink = target => trackSurveyEvent('potential', 'link_click', { target, resultId })
+  const trackShare = target => trackSurveyEvent('potential', 'share_click', { target, resultId })
 
   const handleCopyLink = useCallback(() => {
     navigator.clipboard.writeText(window.location.href)
@@ -139,13 +143,13 @@ export default function QuizResult() {
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>더 알아보기</p>
-          <a className={styles.navBtn} style={navBtnStyle} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={GROUP_DETAIL_URLS[result.result_group]} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('group_detail')}>
             우리 아이 경제 그룹 자세히 보기
           </a>
-          <a className={styles.navBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={ECONOMIC_TYPES_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('economic_types')}>
             다양한 경제 유형 알아보기
           </a>
-          <a className={styles.navBtn} style={navBtnStyle} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.navBtn} style={navBtnStyle} href={NAVER_REVIEW_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLink('naver_review')}>
             네이버 리뷰 작성하기
           </a>
         </div>
@@ -155,15 +159,15 @@ export default function QuizResult() {
           <div className={styles.shareRow}>
             <button
               className={`${styles.iconBtn} ${styles.kakaoIconBtn}`}
-              onClick={() => handleKakaoShare(group, result.result_group)}
+              onClick={() => { trackShare('kakao'); handleKakaoShare(group, result.result_group) }}
               aria-label="카카오톡 공유하기"
             >
               <img className={styles.iconBtnImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
             </button>
-            <button className={styles.iconBtn} onClick={handleCopyLink} aria-label="링크 공유하기">
+            <button className={styles.iconBtn} onClick={() => { trackShare('link'); handleCopyLink() }} aria-label="링크 공유하기">
               <img className={styles.iconBtnImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
             </button>
-            <a className={styles.iconBtn} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기">
+            <a className={styles.iconBtn} href={group.illustration} download={group.illustration.split('/').pop()} aria-label="사진 공유하기" onClick={() => trackShare('photo')}>
               <img className={styles.iconBtnImg} src="/icons/download.png" alt="" aria-hidden="true" />
             </a>
           </div>

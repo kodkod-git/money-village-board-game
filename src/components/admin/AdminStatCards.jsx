@@ -1,13 +1,17 @@
 import styles from './AdminStatCards.module.css'
 
-// cards: [{ label, value, tone, pending? }]. pending이면 아직 수집하지 않는 지표라 값 대신 "준비 중"을 단다.
+// cards: [{ label, value, tone, pending?, sub? }]. pending이면 아직 수집하지 않는 지표라 값 대신 "준비 중"을 단다.
+// sub는 라벨 아래 보조 문구(예: "완료율 62%").
 export function StatCardRow({ cards }) {
   return (
     <div className={styles.row}>
       {cards.map(card => (
         <div key={card.label} className={styles.card}>
           <div className={`${styles.icon} ${styles[`tone-${card.tone}`]}`}>{card.value}</div>
-          <span className={styles.label}>{card.label}</span>
+          <div className={styles.text}>
+            <span className={styles.label}>{card.label}</span>
+            {card.sub && <span className={styles.sub}>{card.sub}</span>}
+          </div>
           {card.pending && <span className={styles.pendingTag}>준비 중</span>}
         </div>
       ))}

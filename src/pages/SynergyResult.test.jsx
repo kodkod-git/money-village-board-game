@@ -12,6 +12,14 @@ vi.mock('react-router-dom', async () => {
 
 import SynergyResult from './SynergyResult'
 
+// 행동 로그는 별도 요청이라 fetch 목과 섞이지 않게 모듈째 대체한다.
+vi.mock('../utils/surveyTracking', () => ({
+  trackSurveyEvent: vi.fn(),
+  markSurveyStart: vi.fn(),
+  takeSurveyDuration: vi.fn(() => 42000),
+}))
+import { trackSurveyEvent, markSurveyStart } from '../utils/surveyTracking'
+
 function mockResult(row) {
   global.fetch = vi.fn().mockResolvedValue({
     ok: true,
@@ -40,6 +48,23 @@ describe('SynergyResult', () => {
     mockNavigate.mockClear()
     global.navigator.clipboard = { writeText: vi.fn() }
     delete window.Kakao
+  })
+
+  it('더 알아보기 링크와 공유 버튼을 누르면 어떤 것을 눌렀는지 로그를 남긴다', async () => {
+    trackSurveyEvent.mockClear()
+    await renderResult()
+    fireEvent.click(screen.getByText('나의 경제 유형 자세히 보기'))
+    fireEvent.click(screen.getByText('다양한 경제 유형 알아보기'))
+    fireEvent.click(screen.getByText('초등 경제 수업 문의하기'))
+    fireEvent.click(screen.getByLabelText('카카오톡 공유하기'))
+    fireEvent.click(screen.getByLabelText('링크 공유하기'))
+    expect(trackSurveyEvent.mock.calls).toEqual([
+      ['synergy', 'link_click', { target: 'type_detail', resultId: 'synergy-1' }],
+      ['synergy', 'link_click', { target: 'economic_types', resultId: 'synergy-1' }],
+      ['synergy', 'link_click', { target: 'academy_inquiry', resultId: 'synergy-1' }],
+      ['synergy', 'share_click', { target: 'kakao', resultId: 'synergy-1' }],
+      ['synergy', 'share_click', { target: 'link', resultId: 'synergy-1' }],
+    ])
   })
 
   it('나의 경제적 성향과 대표 동물을 보여준다', async () => {

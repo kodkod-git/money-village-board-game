@@ -170,3 +170,35 @@ export function countByDay(rows, days, today = new Date()) {
   }
   return result
 }
+
+// 상단 지표 카드. metrics는 GET /api/admin/survey/:test/metrics 응답(server/surveyEvents.js summarizeSurveyEvents).
+// 참여·완료·클릭은 방문자 ID로 중복을 뺀 사람 수(유니크)를 크게, 전체 횟수를 보조로 보여 준다.
+export function formatDuration(ms) {
+  if (ms == null) return '—'
+  const seconds = Math.round(ms / 1000)
+  if (seconds < 60) return `${seconds}초`
+  const minutes = Math.floor(seconds / 60)
+  const rest = seconds % 60
+  return rest ? `${minutes}분 ${rest}초` : `${minutes}분`
+}
+
+function percent(numerator, denominator) {
+  return denominator > 0 ? `${Math.round((numerator / denominator) * 100)}%` : '—'
+}
+
+export function buildMetricCards(metrics) {
+  if (!metrics?.visit) {
+    return ['참여', '완료', '평균 세션시간', '링크 클릭 수', '전환율(CTR)', '공유버튼 클릭 수']
+      .map(label => ({ label, value: '—', tone: 'neutral' }))
+  }
+  const { visit, complete, linkClick, shareClick, avgDurationMs } = metrics
+  return [
+    { label: '참여', value: visit.unique, tone: 'neutral', sub: `접속 ${visit.total}회` },
+    { label: '완료', value: complete.unique, tone: 'blue', sub: `완료율 ${percent(complete.unique, visit.unique)}` },
+    { label: '평균 세션시간', value: formatDuration(avgDurationMs), tone: 'neutral' },
+    { label: '링크 클릭 수', value: linkClick.unique, tone: 'purple', sub: `클릭 ${linkClick.total}회` },
+    // 참여 기록이 있는 사람의 클릭만 분자에 넣어, 공유받은 결과 화면의 클릭이 CTR을 부풀리지 않게 한다.
+    { label: '전환율(CTR)', value: percent(linkClick.participants ?? 0, visit.unique), tone: 'purple', sub: '링크 클릭한 참여자 ÷ 참여' },
+    { label: '공유버튼 클릭 수', value: shareClick.unique, tone: 'yellow', sub: `클릭 ${shareClick.total}회` },
+  ]
+}

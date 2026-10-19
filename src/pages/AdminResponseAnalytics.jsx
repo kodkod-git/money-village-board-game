@@ -7,7 +7,7 @@ import { SYNERGY_TYPES } from '../constants/synergyData'
 import { getTypeGroup } from '../utils/synergyScoring'
 import {
   SURVEY_TESTS, PERIOD_RANGES, buildColumns, formatCell, formatDateParts, countByGroup, countByType, countByDay,
-  choiceQuestions, countByAnswer, funnelSteps,
+  choiceQuestions, countByAnswer, funnelSteps, buildMetricCards,
 } from '../utils/surveyAnalytics'
 import styles from './AdminResponseAnalytics.module.css'
 
@@ -20,18 +20,6 @@ const VIEW_TABS = [
 ]
 
 const STEP_ICONS = { text: '✎', number: '#', choice: '☑' }
-
-// 완료 수 외의 지표는 아직 수집하지 않는다. 필요한 작업은 proposal/20261014_response_analyze.md "구현 검토 결과" 참고.
-function buildStatCards(rows) {
-  return [
-    { label: '참여', value: '—', tone: 'neutral', pending: true },
-    { label: '완료', value: rows.length, tone: 'blue' },
-    { label: '평균 세션시간', value: '—', tone: 'neutral', pending: true },
-    { label: '링크 클릭 수', value: '—', tone: 'neutral', pending: true },
-    { label: '전환율(CTR)', value: '—', tone: 'neutral', pending: true },
-    { label: '공유버튼 클릭 수', value: '—', tone: 'neutral', pending: true },
-  ]
-}
 
 function ResponseCell({ column, value }) {
   if (column.type === 'date') {
@@ -74,6 +62,9 @@ export default function AdminResponseAnalytics() {
   const [reloadKey, setReloadKey] = useState(0)
   const [periodKey, setPeriodKey] = useState('all')
   const [questionKey, setQuestionKey] = useState(null)
+  // 상단 지표(행동 로그 집계). 응답 목록과 따로 불러와, 한쪽이 실패해도 다른 쪽은 보인다.
+  const [metrics, setMetrics] = useState(null)
+  const [metricsError, setMetricsError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -84,6 +75,17 @@ export default function AdminResponseAnalytics() {
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(data => { if (!cancelled) { setRows(data); setLoading(false) } })
       .catch(() => { if (!cancelled) { setError('응답을 불러오는 중 오류가 발생했습니다.'); setLoading(false) } })
+    return () => { cancelled = true }
+  }, [testKey, reloadKey])
+
+  useEffect(() => {
+    let cancelled = false
+    setMetrics(null)
+    setMetricsError(false)
+    adminFetch(`/api/admin/survey/${testKey}/metrics`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(data => { if (!cancelled) setMetrics(data) })
+      .catch(() => { if (!cancelled) setMetricsError(true) })
     return () => { cancelled = true }
   }, [testKey, reloadKey])
 
@@ -125,7 +127,14 @@ export default function AdminResponseAnalytics() {
       </div>
 
       <div className={styles.content}>
-        <StatCardRow cards={buildStatCards(rows)} />
+        <StatCardRow cards={buildMetricCards(metrics)} />
+        <p className={styles.metricsNote}>
+          {metricsError
+            ? '지표를 불러오지 못했습니다.'
+            : metrics?.since
+              ? `${formatDateParts(metrics.since).date}부터 수집한 행동 로그 기준 · 참여·완료·클릭은 1인 1회로 센 수(중복 제거)`
+              : '행동 로그 수집 전입니다. 테스트 접속이 생기면 지표가 채워집니다.'}
+        </p>
 
         <div className={styles.viewTabs} role="tablist" aria-label="보기 선택">
           {VIEW_TABS.map(tab => (
