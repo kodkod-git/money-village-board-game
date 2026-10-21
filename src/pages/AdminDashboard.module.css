@@ -196,3 +196,11 @@
   color: var(--admin-text-2);
   padding: 60px 0;
 }
+
+.registerReason {
+  align-self: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text-3);
+  white-space: nowrap;
+}

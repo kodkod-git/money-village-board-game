@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassDashboard from './AdminClassDashboard'
@@ -421,5 +421,97 @@ describe('AdminClassDashboard', () => {
 
     expect(await screen.findByText('일괄 결과등록에 실패했습니다')).toBeInTheDocument()
     expect(alertSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('AdminClassDashboard 경쟁 모드', () => {
+  const POOL = [
+    { playerUuid: 'p9', name: '대기학생', character: 'Innovator-사자', connected: true, gameState: { isCompleted: true } },
+  ]
+
+  function mockCompetitionFetch({ pool = POOL, rooms = ROOMS } = {}) {
+    global.fetch = vi.fn((url, options) => {
+      if (url === '/api/admin/classes/class-1/pool') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(pool) })
+      }
+      if (options?.method === 'POST' || options?.method === 'DELETE') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(rooms) })
+    })
+  }
+
+  function renderCompetition() {
+    return render(
+      <SocketProvider>
+        <AdminClassDashboard classId="class-1" initialName="경쟁반" mode="competition" />
+        <Toaster />
+      </SocketProvider>
+    )
+  }
+
+  it('통계 카드와 팀 카드 사이에 참여자 블럭을 보여준다', async () => {
+    mockCompetitionFetch()
+    renderCompetition()
+    const block = await screen.findByRole('region', { name: '참여자' })
+    expect(within(block).getByText('대기학생')).toBeInTheDocument()
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1/pool', expect.anything())
+  })
+
+  it('팀 코드를 숨기고 버튼 이름은 결과 등록이다', async () => {
+    mockCompetitionFetch()
+    renderCompetition()
+    await screen.findByText('홍길동')
+    expect(screen.queryByText('CD5678')).toBeNull()
+    expect(screen.getByRole('button', { name: '결과 등록' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '전체 등록' })).toBeNull()
+  })
+
+  it('미배정·입력 중 참여자가 있으면 결과 등록을 막고 이유를 보여준다', async () => {
+    mockCompetitionFetch()
+    renderCompetition()
+    expect(await screen.findByText('미배정 1명 · 입력 중 1명')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '결과 등록' })).toBeDisabled()
+  })
+
+  it('전원 배정·입력 완료면 결과 등록을 누를 수 있다', async () => {
+    const doneRooms = ROOMS.map(room => ({
+      ...room, players: room.players.map(p => ({ ...p, gameState: { ...p.gameState, isCompleted: true } })),
+    }))
+    mockCompetitionFetch({ pool: [], rooms: doneRooms })
+    renderCompetition()
+    await screen.findByText('홍길동')
+    await waitFor(() => expect(screen.getByRole('button', { name: '결과 등록' })).toBeEnabled())
+  })
+
+  it('참여자를 팀 카드에 놓으면 배정 API를 부른다', async () => {
+    mockCompetitionFetch()
+    renderCompetition()
+    await screen.findByText('대기학생')
+    fireEvent.drop(screen.getByTestId('admin-team-card'), { dataTransfer: { getData: () => 'p9' } })
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1/assign', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ playerUuid: 'p9', toRoomCode: 'CD5678' }),
+      }))
+    )
+  })
+
+  it('참여자를 삭제하면 확인 후 삭제 API를 부른다', async () => {
+    mockCompetitionFetch()
+    renderCompetition()
+    await userEvent.click(await screen.findByRole('button', { name: '대기학생 삭제' }))
+    await userEvent.click(screen.getByRole('button', { name: '삭제' }))
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1/pool/p9', expect.objectContaining({ method: 'DELETE' }))
+    )
+  })
+
+  it('일반 모드에서는 참여자 블럭이 없고 대기 명단을 부르지 않는다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    expect(screen.queryByRole('region', { name: '참여자' })).toBeNull()
+    expect(global.fetch).not.toHaveBeenCalledWith('/api/admin/classes/class-1/pool', expect.anything())
+    expect(screen.getByText('CD5678')).toBeInTheDocument()
   })
 })
