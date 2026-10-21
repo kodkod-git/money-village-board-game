@@ -1,49 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
-import StepBar from '../components/StepBar'
-import JobPicker from '../components/JobPicker'
-import BadgePicker from '../components/BadgePicker'
-import AssetListEditor from '../components/AssetListEditor'
-import NumberInputModal from '../components/NumberInputModal'
+import AssetInputSteps, { defaultGameState } from '../components/AssetInputSteps'
 import AlertModal from '../components/AlertModal'
 import { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import useBodyClass from '../hooks/useBodyClass'
-import {
-  REAL_ESTATE_LABELS, ESTATE_IMAGES,
-  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
-} from '../constants/gameData'
 import styles from './IndividualPage.module.css'
-
-const STEPS = ['직업', '성공열쇠', '주식', '부동산', '현금']
-const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'stocksVisited', 3: 'realEstateVisited' }
-
-function priceLabels(prices, category) {
-  return Object.fromEntries(Object.entries(DEFAULT_PRICES[category]).map(([key, defaultPrice]) => [
-    key, `${(prices?.[category]?.[key] ?? defaultPrice).toLocaleString('ko-KR')}원`,
-  ]))
-}
-
-function defaultGameState() {
-  return {
-    cash: 0, job: null,
-    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
-    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
-    badges: [false, false, false, false, false, false],
-    jobVisited: false, badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
-  }
-}
-
-function computeCompletedUpTo(gameState) {
-  let upTo = -1
-  if (gameState.job !== null || gameState.jobVisited) upTo = 0
-  if (gameState.badgesVisited) upTo = 1
-  if (gameState.stocksVisited) upTo = 2
-  if (gameState.realEstateVisited) upTo = 3
-  if (gameState.isCompleted) upTo = 4
-  return upTo
-}
 
 export default function IndividualPage() {
   useBodyClass('onboarding-mode')
@@ -54,10 +17,8 @@ export default function IndividualPage() {
   const [player, setPlayer] = useState(null)
   const [prices, setPrices] = useState(DEFAULT_PRICES)
   const [gameState, setGameState] = useState(defaultGameState)
-  const [step, setStep] = useState(0)
-  const [completedUpTo, setCompletedUpTo] = useState(-1)
-  const [cashDisplay, setCashDisplay] = useState('0')
-  const [showCashModal, setShowCashModal] = useState(false)
+  // 서버에서 참가자 정보를 다시 받을 때마다 올려서 입력 단계의 완료 표시·현금을 다시 맞춘다.
+  const [syncToken, setSyncToken] = useState(0)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   // 강퇴 시 안내 모달을 먼저 띄우고, "확인"을 눌러야 로비로 이동한다.
   const [exitNotice, setExitNotice] = useState(null)
@@ -65,20 +26,19 @@ export default function IndividualPage() {
   useEffect(() => {
     if (!socket) return
 
+    function applyPlayer(me) {
+      setPlayer(me)
+      setGameState(me.gameState ?? defaultGameState())
+      setSyncToken(t => t + 1)
+    }
+
     function syncPlayer() {
       fetch(`/api/rooms/${code}`)
         .then(r => r.json())
         .then(data => {
           setPrices(data.prices)
           const me = data.players?.find(p => p.socketId === socket.id)
-          if (me) {
-            setPlayer(me)
-            const gs = me.gameState ?? defaultGameState()
-            setGameState(gs)
-            setCashDisplay(String(gs.cash ?? 0))
-            setCompletedUpTo(computeCompletedUpTo(gs))
-            return
-          }
+          if (me) { applyPlayer(me); return }
           const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
           const playerUuid = sessionStorage.getItem('player_uuid')
           if (!stored || stored.code !== code) { navigate(`/team/${code}`); return }
@@ -93,11 +53,7 @@ export default function IndividualPage() {
                 setPrices(data2.prices)
                 const me2 = data2.players?.find(p => p.socketId === socket.id)
                 if (!me2) { navigate(`/team/${code}`); return }
-                setPlayer(me2)
-                const gs = me2.gameState ?? defaultGameState()
-                setGameState(gs)
-                setCashDisplay(String(gs.cash ?? 0))
-                setCompletedUpTo(computeCompletedUpTo(gs))
+                applyPlayer(me2)
               })
               .catch(() => navigate(`/team/${code}`))
           })
@@ -135,176 +91,23 @@ export default function IndividualPage() {
     navigate(`/lobby?${params}`)
   }
 
-  function emitState(newState) {
-    socket?.emit('update-player-state', { code, gameState: newState })
-  }
-
-  function handleNext() {
-    if (step === 4) { handleComplete(); return }
-
-    const visitedKey = VISITED_KEY_BY_STEP[step]
-    if (visitedKey && !gameState[visitedKey]) {
-      const next = { ...gameState, [visitedKey]: true }
-      setGameState(next)
-      emitState(next)
-    }
-
-    setCompletedUpTo(prev => Math.max(prev, step))
-    setStep(step + 1)
-  }
-
-  function handleComplete() {
-    const cashVal = parseInt(cashDisplay.replace(/[^0-9]/g, ''), 10) || 0
-    const next = { ...gameState, cash: cashVal, isCompleted: true }
+  function updateState(next) {
     setGameState(next)
-    emitState(next)
-    navigate(`/team/${code}`)
+    socket?.emit('update-player-state', { code, gameState: next })
   }
 
   if (!player) return null
 
-  const isFillStep = step >= 0 && step <= 4
-
   return (
-    <div className={`${styles.page} ${isFillStep ? styles.pageFill : ''}`}>
+    <div className={`${styles.page} ${styles.pageFill}`}>
       <BackButton onClick={() => setShowLeaveConfirm(true)} />
-      <StepBar
-        steps={STEPS}
-        currentStep={step}
-        completedUpTo={completedUpTo}
-        onStepClick={completedUpTo >= 0 ? i => setStep(i) : undefined}
+      <AssetInputSteps
+        gameState={gameState}
+        prices={prices}
+        syncToken={syncToken}
+        onChange={updateState}
+        onComplete={next => { updateState(next); navigate(`/team/${code}`) }}
       />
-      <hr className={styles.divider} />
-
-      {step === 0 && (
-        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>직업 선택</h1>
-          <p className={styles.stepSubtitle}>나의 직업을 선택해주세요</p>
-          <div className={styles.fillWrapper}>
-            <JobPicker
-              fill
-              value={gameState.job}
-              onChange={job => {
-                const next = { ...gameState, job }
-                setGameState(next)
-                emitState(next)
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {step === 1 && (
-        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>성공열쇠</h1>
-          <p className={styles.stepSubtitle}>획득한 성공열쇠를 모두 선택해주세요</p>
-          <div className={styles.fillWrapper}>
-            <BadgePicker
-              fill
-              badges={gameState.badges}
-              onToggle={i => {
-                const badges = [...gameState.badges]
-                badges[i] = !badges[i]
-                const next = { ...gameState, badges }
-                setGameState(next)
-                emitState(next)
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>부동산</h1>
-          <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <div className={styles.fillWrapper}>
-            <AssetListEditor
-              fill
-              labels={REAL_ESTATE_LABELS}
-              images={ESTATE_IMAGES}
-              priceLabels={priceLabels(prices, 'realEstate')}
-              imageFolder="estate"
-              values={gameState.realEstate}
-              onChange={(key, val) => {
-                const realEstate = { ...gameState.realEstate, [key]: val }
-                const next = { ...gameState, realEstate, realEstateVisited: true }
-                setGameState(next)
-                emitState(next)
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>주식</h1>
-          <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
-          <div className={styles.fillWrapper}>
-            <AssetListEditor
-              fill
-              labels={STOCK_LABELS}
-              images={STOCK_IMAGES}
-              priceLabels={priceLabels(prices, 'stocks')}
-              imageFolder="stock"
-              values={gameState.stocks}
-              onChange={(key, val) => {
-                const stocks = { ...gameState.stocks, [key]: val }
-                const next = { ...gameState, stocks, stocksVisited: true }
-                setGameState(next)
-                emitState(next)
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {step === 4 && (
-        <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
-          <h1 className={styles.stepTitle}>현금</h1>
-          <p className={styles.stepSubtitle}>보유 현금을 입력해주세요</p>
-          <div className={styles.fillWrapper}>
-            <div className={styles.cashCard}>
-              <span className={styles.cashLabel}>현금 (원)</span>
-              <button
-                type="button"
-                className={styles.cashInputBtn}
-                onClick={() => setShowCashModal(true)}
-              >
-                {cashDisplay === '0' ? (
-                  <span className={styles.cashPlaceholder}>예: 5000</span>
-                ) : (
-                  <span className={styles.cashValue}>{Number(cashDisplay).toLocaleString()}원</span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {showCashModal && (
-            <NumberInputModal
-              title="현금 입력"
-              initialValue={Number(cashDisplay)}
-              unit="원"
-              maxValue={MAX_CASH}
-              onConfirm={val => {
-                setCashDisplay(String(val))
-                setShowCashModal(false)
-              }}
-              onClose={() => setShowCashModal(false)}
-            />
-          )}
-        </div>
-      )}
-
-      <div className={styles.bottomBar}>
-        <button
-          className={styles.nextBtn}
-          onClick={handleNext}
-        >
-          {step === 4 ? '완료' : '다음'}
-        </button>
-      </div>
 
       {showLeaveConfirm && (
         <LeaveConfirmModal
