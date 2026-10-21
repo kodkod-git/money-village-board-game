@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import AssetInputSteps from '../components/AssetInputSteps'
 import AlertModal from '../components/AlertModal'
@@ -25,6 +25,11 @@ export default function CompetitionPlay() {
   const [gameState, setGameState] = useState(null)
   const [syncToken, setSyncToken] = useState(0)
   const [removed, setRemoved] = useState(false)
+  // 재접속 시 join 응답보다 화면의 입력이 최신이다(끊긴 동안 보낸 저장은 새 소켓에서 버려진다).
+  const latestGameState = useRef(null)
+  latestGameState.current = gameState
+  const removedRef = useRef(false)
+  removedRef.current = removed
 
   useEffect(() => {
     if (!hasProfile) navigate(joinPath, { replace: true })
@@ -34,6 +39,7 @@ export default function CompetitionPlay() {
     if (!socket || !hasProfile) return
 
     function join() {
+      if (removedRef.current) return
       socket.emit('join-class-pool', { classId, playerUuid: getPlayerUuid(), name, affiliation, character }, res => {
         if (!res?.ok) {
           if (res?.error === 'NOT_COMPETITION') {
@@ -44,6 +50,10 @@ export default function CompetitionPlay() {
         }
         if (res.state === 'submitted') {
           navigate(`/result/${res.sessionId}`, { replace: true })
+          return
+        }
+        if (latestGameState.current) {
+          socket.emit('update-pool-player-state', { classId, gameState: latestGameState.current })
           return
         }
         setGameState(res.gameState)

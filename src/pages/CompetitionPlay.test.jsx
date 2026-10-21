@@ -117,6 +117,30 @@ describe('CompetitionPlay', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/join?classId=class-1')
   })
 
+  it('재접속하면 서버의 예전 상태로 덮어쓰지 않고 화면의 최신 입력을 다시 저장한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getByRole('heading', { name: '성공열쇠' })).toBeInTheDocument()
+
+    // 서버는 끊긴 동안의 저장을 받지 못해 예전(기본) 상태를 돌려준다
+    act(() => socketHandler('connect')())
+
+    expect(screen.getByRole('heading', { name: '성공열쇠' })).toBeInTheDocument()
+    expect(socket.emit).toHaveBeenLastCalledWith('update-pool-player-state', expect.objectContaining({
+      gameState: expect.objectContaining({ jobVisited: true }),
+    }))
+  })
+
+  it('명단에서 삭제된 뒤 재접속해도 다시 들어가지 않는다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    act(() => socketHandler('you-were-kicked')())
+    socket.emit.mockClear()
+    act(() => socketHandler('connect')())
+    expect(socket.emit).not.toHaveBeenCalledWith('join-class-pool', expect.anything(), expect.anything())
+  })
+
   it('이름이나 캐릭터가 없으면 QR 첫 화면으로 보낸다', async () => {
     renderPage('/compete/class-1')
     await vi.waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/join?classId=class-1', { replace: true }))
