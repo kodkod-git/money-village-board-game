@@ -132,6 +132,26 @@ describe('CompetitionPlay', () => {
     }))
   })
 
+  it('관리자가 수정해 보낸 상태(player-state-updated)를 반영한다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    act(() => socketHandler('player-state-updated')({ gameState: { ...defaultGameState(), isCompleted: true } }))
+    expect(screen.getByText('결과가 곧 나올 예정이니, 나가거나 화면을 끄지 마시고 조금만 기다려주세요')).toBeInTheDocument()
+  })
+
+  it('재접속했을 때 서버가 입력 완료로 바꿔 놓았으면 화면 상태로 덮어쓰지 않고 서버 상태를 따른다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    socket.emit.mockClear()
+    joinResponse = { ...joinResponse, gameState: { ...defaultGameState(), isCompleted: true } }
+
+    act(() => socketHandler('connect')())
+
+    expect(screen.getByText('결과가 곧 나올 예정이니, 나가거나 화면을 끄지 마시고 조금만 기다려주세요')).toBeInTheDocument()
+    expect(socket.emit).not.toHaveBeenCalledWith('update-pool-player-state', expect.anything())
+  })
+
   it('명단에서 삭제된 뒤 재접속해도 다시 들어가지 않는다', async () => {
     renderPage()
     await screen.findByText('직업 선택')

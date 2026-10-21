@@ -15,7 +15,7 @@ import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, getClassMode, UNASSIGNED_CLASS } from './classes.js'
 import { listPool, removeFromPool, markPoolDisconnected, deletePool, rememberSubmitted } from './classPool.js'
-import { joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus } from './competition.js'
+import { isPlayerJoinableRoom, joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus } from './competition.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -46,8 +46,18 @@ app.get('/api/classes/:classId/mode', async (req, res) => {
   }
 })
 
-app.post('/api/rooms', (req, res) => {
-  const room = createRoom({ classId: req.body?.classId ?? null })
+app.post('/api/rooms', async (req, res) => {
+  const classId = req.body?.classId ?? null
+  try {
+    // 경쟁 모드 수업의 팀은 관리자만 만든다.
+    if (classId && (await getClassMode(classId)) === 'competition') {
+      return res.status(409).json({ error: '경쟁 모드 수업에서는 팀을 직접 만들 수 없어요' })
+    }
+  } catch (err) {
+    console.error('create room mode check error:', err)
+    return res.status(500).json({ error: '수업 정보를 확인하지 못했어요' })
+  }
+  const room = createRoom({ classId })
   broadcastClassRooms(room.classId)
   res.json({ code: room.code })
 })
@@ -381,6 +391,7 @@ app.post('/api/admin/classes/:classId/assign', requireAdmin, async (req, res) =>
   if (!playerUuid) return res.status(400).json({ error: 'playerUuid가 필요합니다' })
   try {
     if (!(await hasClassAccess(req.admin, classId))) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+    if ((await getClassMode(classId)) !== 'competition') return res.status(400).json({ error: '경쟁 모드 수업에서만 팀을 배정할 수 있어요' })
     const result = assignPlayer(classId, playerUuid, toRoomCode ? String(toRoomCode).toUpperCase() : null)
     if (!result.ok) return res.status(result.status).json({ error: result.error })
 
@@ -615,6 +626,10 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
     io.to(code).emit('room-updated', { players: room.players })
     broadcastClassRooms(room.classId)
     const player = room.players.find(p => p.playerUuid === playerUuid)
+    // 경쟁 모드 학생 화면은 room-updated를 듣지 않으므로, 관리자 수정이 덮어써지지 않게 본인에게 직접 알린다.
+    if (room.mode === 'competition' && player.socketId) {
+      io.to(player.socketId).emit('player-state-updated', { gameState: player.gameState })
+    }
     return res.json({
       playerUuid: player.playerUuid,
       name: player.name,
@@ -702,6 +717,10 @@ io.on('connection', (socket) => {
 
   socket.on('join-room', ({ code, name, character, isHost, playerUuid, affiliation }, callback) => {
     try {
+      const target = getRoom(code.toUpperCase())
+      if (target && !isPlayerJoinableRoom(target)) {
+        return callback?.({ ok: false, error: '경쟁 모드 팀에는 직접 참가할 수 없어요' })
+      }
       const room = addPlayer(code.toUpperCase(), {
         socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation,
       })

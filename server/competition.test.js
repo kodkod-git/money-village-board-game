@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
-  joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus,
+  isPlayerJoinableRoom, joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus,
 } from './competition.js'
 import { createRoom, getRoom, addAssignedPlayer, clearRooms, defaultGameState, getRoomBySocketId } from './rooms.js'
 import { joinPool, listPool, findPoolPlayer, rememberSubmitted, clearPools } from './classPool.js'
@@ -169,5 +169,12 @@ describe('competitionStatus', () => {
 
   it('팀이 하나도 없으면 ready가 아니다', () => {
     expect(competitionStatus('class-1').ready).toBe(false)
+  })
+})
+
+describe('isPlayerJoinableRoom', () => {
+  it('경쟁 모드 팀에는 직접 참가할 수 없고 일반 팀에는 참가할 수 있다', () => {
+    expect(isPlayerJoinableRoom(createRoom({ classId: 'class-1', mode: 'competition' }))).toBe(false)
+    expect(isPlayerJoinableRoom(createRoom({ classId: 'class-1' }))).toBe(true)
   })
 })

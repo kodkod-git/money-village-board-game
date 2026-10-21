@@ -196,7 +196,15 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
   async function handleConfirmDeletePoolPlayer() {
     const target = poolDeleteTarget
     setPoolDeleteTarget(null)
-    await adminFetch(`/api/admin/classes/${classId}/pool/${target.playerUuid}`, { method: 'DELETE' })
+    try {
+      const res = await adminFetch(`/api/admin/classes/${classId}/pool/${target.playerUuid}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({}))
+        toast(error || '참여자 삭제에 실패했습니다')
+      }
+    } catch {
+      toast('참여자 삭제에 실패했습니다')
+    }
     loadRooms()
   }
 

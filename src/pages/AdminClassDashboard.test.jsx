@@ -507,6 +507,21 @@ describe('AdminClassDashboard 경쟁 모드', () => {
     )
   })
 
+  it('참여자 삭제가 실패하면 토스트로 알린다', async () => {
+    mockCompetitionFetch()
+    const base = global.fetch
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: '삭제 권한이 없어요' }) })
+      }
+      return base(url, options)
+    })
+    renderCompetition()
+    await userEvent.click(await screen.findByRole('button', { name: '대기학생 삭제' }))
+    await userEvent.click(screen.getByRole('button', { name: '삭제' }))
+    expect(await screen.findByText('삭제 권한이 없어요')).toBeInTheDocument()
+  })
+
   it('일반 모드에서는 참여자 블럭이 없고 대기 명단을 부르지 않는다', async () => {
     renderDashboard()
     await screen.findByText('홍길동')

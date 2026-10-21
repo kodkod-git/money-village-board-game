@@ -10,6 +10,11 @@ const TEAM_NOT_FOUND = '팀을 찾을 수 없어요 (이미 결과가 등록된 
 const PLAYER_MOVED = '이미 다른 곳으로 옮겨진 참여자예요'
 const TEAM_FULL = '팀 인원이 가득 찼어요 (최대 4명)'
 
+// 플레이어가 직접(방 코드·로비로) 들어갈 수 있는 방인가. 경쟁 모드 팀은 관리자 배정으로만 채운다.
+export function isPlayerJoinableRoom(room) {
+  return room.mode !== 'competition'
+}
+
 // QR로 들어온(또는 다시 들어온) 플레이어를 지금 있어야 할 곳으로 보낸다.
 // 결과 등록됨 → 결과 화면, 팀에 배정됨 → 그 방에 재접속, 그 밖에는 대기 명단.
 export function joinCompetition(classId, { playerUuid, name, affiliation = '', character, socketId }) {

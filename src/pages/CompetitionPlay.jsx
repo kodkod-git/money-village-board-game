@@ -52,7 +52,9 @@ export default function CompetitionPlay() {
           navigate(`/result/${res.sessionId}`, { replace: true })
           return
         }
-        if (latestGameState.current) {
+        // 끊긴 동안 관리자가 입력 완료로 바꿨다면 화면의 예전 입력으로 되돌리지 않는다.
+        const adminCompleted = res.gameState?.isCompleted && !latestGameState.current?.isCompleted
+        if (latestGameState.current && !adminCompleted) {
           socket.emit('update-pool-player-state', { classId, gameState: latestGameState.current })
           return
         }
@@ -70,10 +72,17 @@ export default function CompetitionPlay() {
     if (!socket) return
     const onSubmitted = ({ sessionId }) => navigate(`/result/${sessionId}`)
     const onKicked = () => setRemoved(true)
+    // 관리자가 이 참여자의 입력을 직접 고쳤을 때
+    const onStateUpdated = ({ gameState: next }) => {
+      setGameState(next)
+      setSyncToken(t => t + 1)
+    }
     socket.on('game-submitted', onSubmitted)
+    socket.on('player-state-updated', onStateUpdated)
     socket.on('you-were-kicked', onKicked)
     return () => {
       socket.off('game-submitted', onSubmitted)
+      socket.off('player-state-updated', onStateUpdated)
       socket.off('you-were-kicked', onKicked)
     }
   }, [socket, navigate])
