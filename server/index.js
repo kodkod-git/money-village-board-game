@@ -97,6 +97,10 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
   try {
     const sessionId = await saveGameResult(room)
+    // 경쟁 모드 팀을 관전 화면에서 하나만 등록해도, 다시 들어온 학생이 결과 화면으로 갈 수 있게 기록한다.
+    if (room.mode === 'competition') {
+      for (const player of room.players) rememberSubmitted(room.classId, player.playerUuid, sessionId)
+    }
     deleteRoomByCode(req.params.code.toUpperCase())
     io.to(req.params.code.toUpperCase()).emit('game-submitted', { sessionId })
     broadcastClassRooms(room.classId)
@@ -323,7 +327,7 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
           for (const player of room.players) rememberSubmitted(resolvedClassId, player.playerUuid, sessionId)
         }
         deleteRoomByCode(room.code)
-      io.to(room.code).emit('game-submitted', { sessionId })
+        io.to(room.code).emit('game-submitted', { sessionId })
         registered += 1
       } catch (err) {
         console.error(`bulk submit error for room ${room.code}:`, err)
