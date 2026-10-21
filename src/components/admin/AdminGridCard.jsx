@@ -3,6 +3,8 @@ import { ROOM_STATUS_LABELS } from '../../constants/gameData'
 import PriceSettingModal, { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES } from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import { teamDisplayName } from '../../utils/teamDisplayName'
+import { toast } from '../../utils/toast'
+import { PLAYER_DRAG_TYPE, TEAM_FULL_MESSAGE, MAX_TEAM_PLAYERS } from '../../constants/competition'
 import styles from './AdminGridCard.module.css'
 
 const STATUS_BADGE_CLASS = {
@@ -18,7 +20,8 @@ const TABS = [
   { key: 'realEstate', label: '부동산' },
 ]
 
-export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged }) {
+// competition: 경쟁 모드 수업. 팀 코드·팀장 표시를 숨기고, onAssign이 있으면 참여자를 끌어다 놓아 배정할 수 있다.
+export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged, competition = false, onAssign }) {
   const [tab, setTab] = useState('lobby')
   const [showPriceModal, setShowPriceModal] = useState(false)
 
@@ -29,6 +32,18 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
   const priceImages = tab === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
   const priceFolder = tab === 'stocks' ? 'stock' : 'estate'
   const priceValues = tab === 'stocks' ? room.prices?.stocks : room.prices?.realEstate
+  const canDrag = competition && !room.registered && Boolean(onAssign)
+
+  function handleDrop(e) {
+    e.preventDefault()
+    const playerUuid = e.dataTransfer.getData(PLAYER_DRAG_TYPE)
+    if (!playerUuid || room.players.some(p => p?.playerUuid === playerUuid)) return
+    if (room.players.length >= MAX_TEAM_PLAYERS) {
+      toast(TEAM_FULL_MESSAGE)
+      return
+    }
+    onAssign(playerUuid, room.code)
+  }
 
   async function handlePriceConfirm(newPrices) {
     const res = await adminFetch(`/api/admin/rooms/${room.code}/prices`, {
@@ -50,11 +65,16 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
   }
 
   return (
-    <div className={styles.cardWrapper}>
+    <div
+      className={styles.cardWrapper}
+      data-testid="admin-team-card"
+      onDragOver={canDrag ? e => e.preventDefault() : undefined}
+      onDrop={canDrag ? handleDrop : undefined}
+    >
       <div className={styles.cardHeader}>
         <div className={styles.headerLeft}>
           <span className={styles.titleBadge}>{displayName}</span>
-          <span className={styles.codeBadge}>{room.code}</span>
+          {!competition && <span className={styles.codeBadge}>{room.code}</span>}
         </div>
         <div className={styles.tabs}>
           {TABS.map(t => (
@@ -83,10 +103,16 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
         {tab === 'lobby' ? (
           <div className={styles.slots}>
             {slots.map((player, i) => (
-              <div key={i} className={styles.slot} data-testid="admin-player-slot">
+              <div
+                key={i}
+                className={styles.slot}
+                data-testid="admin-player-slot"
+                draggable={canDrag && player ? true : undefined}
+                onDragStart={canDrag && player ? e => e.dataTransfer.setData(PLAYER_DRAG_TYPE, player.playerUuid) : undefined}
+              >
                 {player ? (
                   <>
-                    {i === 0 && <span className={styles.leaderBadge} aria-hidden="true">★</span>}
+                    {i === 0 && !competition && <span className={styles.leaderBadge} aria-hidden="true">★</span>}
                     {player.connected === false && (
                       <span className={styles.disconnectedBadge}>연결 끊김</span>
                     )}

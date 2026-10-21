@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminGridCard from './AdminGridCard'
@@ -164,6 +164,56 @@ describe('AdminGridCard', () => {
         })
       )
       expect(onRoomChanged).toHaveBeenCalled()
+    })
+  })
+
+  describe('경쟁 모드', () => {
+    const dragOf = (playerUuid) => ({ dataTransfer: { getData: () => playerUuid, setData: vi.fn() } })
+
+    it('팀 코드와 팀장 표시(★)를 숨긴다', () => {
+      render(<AdminGridCard competition room={makeRoom()} onSpectate={vi.fn()} onAssign={vi.fn()} />)
+      expect(screen.queryByText('AB1234')).toBeNull()
+      expect(screen.queryByText('★')).toBeNull()
+    })
+
+    it('일반 모드에서는 팀 코드와 ★를 그대로 보여준다', () => {
+      render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
+      expect(screen.getByText('AB1234')).toBeInTheDocument()
+      expect(screen.getByText('★')).toBeInTheDocument()
+    })
+
+    it('참여자를 팀 카드에 놓으면 그 팀으로 배정한다', () => {
+      const onAssign = vi.fn()
+      render(<AdminGridCard competition room={makeRoom()} onSpectate={vi.fn()} onAssign={onAssign} />)
+      fireEvent.drop(screen.getByTestId('admin-team-card'), dragOf('p9'))
+      expect(onAssign).toHaveBeenCalledWith('p9', 'AB1234')
+    })
+
+    it('4명이 찬 팀이나 이미 그 팀에 있는 플레이어는 배정하지 않는다', () => {
+      const onAssign = vi.fn()
+      const players = [1, 2, 3, 4].map(n => ({ playerUuid: `p${n}`, character: 'Adventurer-강아지', name: `학생${n}` }))
+      render(<AdminGridCard competition room={makeRoom({ players })} onSpectate={vi.fn()} onAssign={onAssign} />)
+      fireEvent.drop(screen.getByTestId('admin-team-card'), dragOf('p9'))
+      fireEvent.drop(screen.getByTestId('admin-team-card'), dragOf('p1'))
+      expect(onAssign).not.toHaveBeenCalled()
+    })
+
+    it('팀의 플레이어 슬롯을 끌면 playerUuid를 싣는다', () => {
+      const room = makeRoom({ players: [{ playerUuid: 'p1', character: 'Adventurer-강아지', name: '김민준' }] })
+      render(<AdminGridCard competition room={room} onSpectate={vi.fn()} onAssign={vi.fn()} />)
+      const slot = screen.getAllByTestId('admin-player-slot')[0]
+      expect(slot).toHaveAttribute('draggable', 'true')
+      const setData = vi.fn()
+      fireEvent.dragStart(slot, { dataTransfer: { setData } })
+      expect(setData).toHaveBeenCalledWith('text/plain', 'p1')
+    })
+
+    it('등록 완료된 팀은 드래그·드롭을 받지 않는다', () => {
+      const onAssign = vi.fn()
+      render(<AdminGridCard competition room={makeRoom({ registered: true })} onSpectate={vi.fn()} onAssign={onAssign} />)
+      fireEvent.drop(screen.getByTestId('admin-team-card'), dragOf('p9'))
+      expect(onAssign).not.toHaveBeenCalled()
+      expect(screen.getAllByTestId('admin-player-slot')[0]).not.toHaveAttribute('draggable')
     })
   })
 })
