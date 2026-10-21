@@ -7,6 +7,7 @@ import CharacterSelect from './pages/CharacterSelect'
 import Lobby from './pages/Lobby'
 import Team from './pages/Team'
 import IndividualPage from './pages/IndividualPage'
+import CompetitionPlay from './pages/CompetitionPlay'
 import RankingPage from './pages/RankingPage'
 import EconomicReport from './pages/EconomicReport'
 import AdminDashboard from './pages/AdminDashboard'
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/team/:code" element={<Team />} />
         <Route path="/team/:code/individual" element={<IndividualPage />} />
+        <Route path="/compete/:classId" element={<CompetitionPlay />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
         <Route path="/result/:sessionId/report" element={<EconomicReport />} />

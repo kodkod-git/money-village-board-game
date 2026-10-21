@@ -1,0 +1,42 @@
+/* 대기 화면은 다른 온보딩 화면(캐릭터 선택)과 같은 프레임·하단 버튼을 쓴다. */
+.page {
+  composes: page from './CharacterSelect.module.css';
+}
+
+.waitBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, calc(20px * var(--sy, 1)), 20px);
+  text-align: center;
+}
+
+.character {
+  width: clamp(140px, calc(240px * min(var(--sx, 1), var(--sy, 1))), 240px);
+  height: auto;
+}
+
+.name {
+  font-size: clamp(22px, calc(32px * min(var(--sx, 1), var(--sy, 1))), 32px);
+  font-weight: 800;
+  color: var(--ink, #1a1a1a);
+}
+
+.message {
+  max-width: 520px;
+  font-size: clamp(15px, calc(20px * min(var(--sx, 1), var(--sy, 1))), 20px);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink-2, #5c5c5c);
+  word-break: keep-all;
+}
+
+.bottomBar {
+  composes: bottomBar from './CharacterSelect.module.css';
+}
+
+.retryBtn {
+  composes: ctaBtn from './CharacterSelect.module.css';
+}
