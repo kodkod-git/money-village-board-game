@@ -2,12 +2,13 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import RoomCard from './RoomCard'
 
-const BASE_PROPS = { hostName: '철수', status: 'live', characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
+const BASE_PROPS = { teamNumber: 3, status: 'live', characters: ['Adventurer-강아지', 'Guardian-판다'], onClick: () => {} }
 
 describe('RoomCard', () => {
-  it('방장 닉네임을 "OO님의 방" 형태로 제목에 보여준다', () => {
+  it('제목을 "OO님의 방"이 아니라 팀 번호("팀 N")로 보여준다', () => {
     render(<RoomCard {...BASE_PROPS} />)
-    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
+    expect(screen.getByText('팀 3')).toBeInTheDocument()
+    expect(screen.queryByText(/님의 방/)).toBeNull()
   })
 
   it('참여한 캐릭터만큼 이미지를 왼쪽부터 렌더링한다', () => {
@@ -42,34 +43,23 @@ describe('RoomCard', () => {
   it('클릭 시 onClick을 호출한다', () => {
     const onClick = vi.fn()
     render(<RoomCard {...BASE_PROPS} onClick={onClick} />)
-    fireEvent.click(screen.getByText('철수님의 방'))
+    fireEvent.click(screen.getByText('팀 3'))
     expect(onClick).toHaveBeenCalled()
   })
 
-  it('title이 있으면(관리자가 만든 방) hostName 대신 title을 그대로 보여준다', () => {
+  it('title이 있으면(관리자가 이름을 정한 방) 팀 번호 대신 title을 그대로 보여준다', () => {
     render(<RoomCard {...BASE_PROPS} title="TEAM 1" />)
     expect(screen.getByText('TEAM 1')).toBeInTheDocument()
-    expect(screen.queryByText('철수님의 방')).toBeNull()
+    expect(screen.queryByText('팀 3')).toBeNull()
   })
 
-  it('title이 빈 문자열이면(관리자가 이름을 아직 정하지 않은 방) hostName 기반 표시로 폴백한다', () => {
+  it('title이 빈 문자열이면 팀 번호로 폴백한다', () => {
     render(<RoomCard {...BASE_PROPS} title="" />)
-    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
+    expect(screen.getByText('팀 3')).toBeInTheDocument()
   })
 
-  it('팀장이 없고 title도 없으면(관리자가 만든 방) "???님의 방" 대신 관리자 화면과 같은 "팀 N"을 보여준다', () => {
-    render(<RoomCard {...BASE_PROPS} hostName={null} title="" teamNumber={6} />)
-    expect(screen.getByText('팀 6')).toBeInTheDocument()
-    expect(screen.queryByText(/\?\?\?/)).toBeNull()
-  })
-
-  it('팀장이 있으면 teamNumber가 있어도 "OO님의 방"을 보여준다', () => {
-    render(<RoomCard {...BASE_PROPS} teamNumber={2} />)
-    expect(screen.getByText('철수님의 방')).toBeInTheDocument()
-  })
-
-  it('팀장·title·번호가 모두 없으면 "새 팀"으로 보여준다', () => {
-    render(<RoomCard {...BASE_PROPS} hostName={null} />)
+  it('title·번호가 모두 없으면 "새 팀"으로 보여준다', () => {
+    render(<RoomCard {...BASE_PROPS} teamNumber={null} />)
     expect(screen.getByText('새 팀')).toBeInTheDocument()
   })
 })

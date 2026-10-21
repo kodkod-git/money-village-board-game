@@ -37,11 +37,10 @@ export default function Lobby() {
   const initialCode = searchParams.get('code') ?? ''
   const [codeInput, setCodeInput] = useState(initialCode.toUpperCase())
 
-  // 코드로만 참여하는 "팀 참여" 화면은 다른 온보딩 화면(홈·이름 입력·캐릭터
-  // 선택·팀 화면)과 같은 #root 프레임(container-type: size)을 써야 NameInput
-  // 스타일의 cqw/cqh 스케일(--sx/--sy)이 정상 계산된다. classId 그리드(로비)
-  // 뷰는 기존 레이아웃을 그대로 둔다.
-  useBodyClass(classId ? null : 'onboarding-mode')
+  // 로비(classId 그리드)와 코드로만 참여하는 "팀 참여" 화면 모두 다른 온보딩
+  // 화면(홈·이름 입력·캐릭터 선택·팀 화면)과 같은 #root 프레임(container-type:
+  // size)을 써야 cqw/cqh 스케일(--sx/--sy)이 정상 계산되고 디자인이 통일된다.
+  useBodyClass('onboarding-mode')
 
   const loadRooms = useCallback(() => {
     if (!classId) return
@@ -163,27 +162,28 @@ export default function Lobby() {
     <div className={styles.page}>
       <BackButton />
       <div className={styles.header}>
-        <h1 className={styles.title}>로비</h1>
+        <h2 className={styles.title}>로비</h2>
         <p className={styles.subtitle}>참여할 팀을 선택하거나 새 팀을 만드세요</p>
       </div>
       <hr className={styles.divider} />
 
-      <div className={styles.grid}>
-        {rooms.map(room => (
-          <RoomCard
-            key={room.code}
-            title={room.title}
-            hostName={room.hostName}
-            teamNumber={room.teamNumber}
-            status={room.status}
-            characters={room.characters}
-            onClick={() => handleJoinRoomCard(room.code)}
-          />
-        ))}
-        <button className={styles.createCard} onClick={handleCreate} disabled={isJoining} type="button">
-          <span className={styles.createIcon} aria-hidden="true">+</span>
-          <span className={styles.createLabel}>방 만들기</span>
-        </button>
+      <div className={styles.gridWrapper}>
+        <div className={styles.grid}>
+          {rooms.map(room => (
+            <RoomCard
+              key={room.code}
+              title={room.title}
+              teamNumber={room.teamNumber}
+              status={room.status}
+              characters={room.characters}
+              onClick={() => handleJoinRoomCard(room.code)}
+            />
+          ))}
+          <button className={styles.createCard} onClick={handleCreate} disabled={isJoining} type="button">
+            <span className={styles.createIcon} aria-hidden="true">+</span>
+            <span className={styles.createLabel}>방 만들기</span>
+          </button>
+        </div>
       </div>
 
       {showCodeModal && (

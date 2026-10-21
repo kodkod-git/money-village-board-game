@@ -45,13 +45,21 @@ describe('Lobby (team grid)', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/rooms?classId=class-1'))
   })
 
-  it('조회된 팀을 방장 닉네임이 담긴 카드로 렌더링한다', async () => {
+  it('조회된 팀을 방장 닉네임이 아니라 팀 번호로 렌더링한다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 2, characters: ['c1', 'c2'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 2, characters: ['c1', 'c2'], hostName: '영희', teamNumber: 1 }],
     })
     renderLobby()
-    expect(await screen.findByText('영희님의 방')).toBeInTheDocument()
+    expect(await screen.findByText('팀 1')).toBeInTheDocument()
+    expect(screen.queryByText('영희님의 방')).toBeNull()
+  })
+
+  it('로비(팀 그리드) 화면도 다른 온보딩 화면과 같은 onboarding-mode 프레임을 쓴다', () => {
+    const { unmount } = renderLobby()
+    expect(document.body.classList.contains('onboarding-mode')).toBe(true)
+    unmount()
+    expect(document.body.classList.contains('onboarding-mode')).toBe(false)
   })
 
   it('팀장이 없는 방(관리자가 만든 방)은 서버가 준 번호로 "팀 N"이라고 보여준다', async () => {
@@ -74,12 +82,12 @@ describe('Lobby (team grid)', () => {
     fetch.mockResolvedValue({
       ok: true,
       json: async () => [
-        { code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' },
-        { code: 'B1B1B1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '민수' },
+        { code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 },
+        { code: 'B1B1B1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '민수', teamNumber: 2 },
       ],
     })
     renderLobby()
-    await screen.findByText('민수님의 방')
+    await screen.findByText('팀 2')
     const buttons = screen.getAllByRole('button').map(btn => btn.textContent)
     expect(buttons.at(-1)).toContain('방 만들기')
   })
@@ -110,25 +118,25 @@ describe('Lobby (team grid)', () => {
   it('카드를 클릭하면 join-room을 emit하고 팀 화면으로 이동한다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/team/A3F9C1', { replace: true }))
   })
 
   it('참여에 실패하면 alert 없이 토스트로 서버 메시지를 안내한다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: '이미 시작된 팀이에요' }))
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
 
     expect(await screen.findByText('이미 시작된 팀이에요')).toBeInTheDocument()
     expect(alertSpy).not.toHaveBeenCalled()
@@ -138,12 +146,12 @@ describe('Lobby (team grid)', () => {
   it('정원이 찬 팀에 참여하면 서버의 영어 에러 대신 한글 안내를 토스트로 보여준다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 4, characters: ['c1', 'c2', 'c3', 'c4'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 4, characters: ['c1', 'c2', 'c3', 'c4'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: 'Room is full' }))
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
 
     expect(await screen.findByText('팀 인원이 가득 찼어요 (최대 4명). 다른 팀을 골라주세요.')).toBeInTheDocument()
     expect(screen.queryByText('Room is full')).toBeNull()
@@ -153,12 +161,12 @@ describe('Lobby (team grid)', () => {
   it('없어진 팀에 참여하면 한글 안내를 보여준다', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: 'Room not found' }))
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
 
     expect(await screen.findByText('팀을 찾을 수 없어요. 코드를 다시 확인해주세요.')).toBeInTheDocument()
   })
@@ -182,12 +190,12 @@ describe('Lobby (team grid)', () => {
     sessionStorage.setItem('player_uuid', 'existing-uuid')
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalled())
 
     const [, payload] = socket.emit.mock.calls.find(([ev]) => ev === 'join-room')
@@ -201,12 +209,12 @@ describe('Lobby (team grid)', () => {
     sessionStorage.setItem('player_uuid', 'stale-uuid')
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
     renderLobby()
-    fireEvent.click(await screen.findByText('영희님의 방'))
+    fireEvent.click(await screen.findByText('팀 1'))
     await waitFor(() => expect(mockNavigate).toHaveBeenCalled())
 
     const [, payload] = socket.emit.mock.calls.find(([ev]) => ev === 'join-room')
@@ -216,12 +224,12 @@ describe('Lobby (team grid)', () => {
   it('카드를 연속으로 두 번 클릭해도 join-room은 한 번만 emit된다(중복 클릭 방지)', async () => {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희' }],
+      json: async () => [{ code: 'A3F9C1', status: 'live', playerCount: 1, characters: ['c1'], hostName: '영희', teamNumber: 1 }],
     })
     const socket = io()
     socket.emit.mockImplementation(() => {}) // ack never fires, simulating a still-pending request
     renderLobby()
-    const card = await screen.findByText('영희님의 방')
+    const card = await screen.findByText('팀 1')
     fireEvent.click(card)
     fireEvent.click(card)
 
