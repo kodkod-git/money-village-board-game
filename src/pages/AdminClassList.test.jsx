@@ -9,6 +9,12 @@ const CLASSES = [
   { id: 'unassigned', name: '미배정 수업' },
 ]
 
+const CLASSES_WITH_COMPETITION = [
+  { id: 'class-1', name: '3학년 2반', mode: 'normal', createdAt: '2026-07-27T00:00:00.000Z' },
+  { id: 'class-2', name: '경쟁반', mode: 'competition', createdAt: '2026-07-28T00:00:00.000Z' },
+  { id: 'unassigned', name: '미배정 수업', mode: 'normal' },
+]
+
 beforeEach(() => {
   setAdminSession('test-token', { username: 'admin', isSuper: true })
   global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(CLASSES) })
@@ -34,11 +40,19 @@ describe('AdminClassList', () => {
     expect(screen.getByText(new Date('2026-07-27T00:00:00.000Z').toLocaleDateString('ko-KR'))).toBeInTheDocument()
   })
 
-  it('수업 클릭 시 onSelectClass를 {id,name}과 함께 호출한다', async () => {
+  it('수업 클릭 시 onSelectClass를 {id,name,mode}와 함께 호출한다', async () => {
     const onSelectClass = vi.fn()
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={onSelectClass} onLogout={vi.fn()} />)
     await userEvent.click(await screen.findByText('3학년 2반'))
-    expect(onSelectClass).toHaveBeenCalledWith({ id: 'class-1', name: '3학년 2반' })
+    expect(onSelectClass).toHaveBeenCalledWith({ id: 'class-1', name: '3학년 2반', mode: 'normal' })
+  })
+
+  it('경쟁 모드 수업을 고르면 mode competition을 넘긴다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(CLASSES_WITH_COMPETITION) })
+    const onSelectClass = vi.fn()
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={onSelectClass} onLogout={vi.fn()} />)
+    await userEvent.click(await screen.findByText('경쟁반'))
+    expect(onSelectClass).toHaveBeenCalledWith({ id: 'class-2', name: '경쟁반', mode: 'competition' })
   })
 
   it('수업 생성하기로 새 수업을 만들면 목록을 새로고침한다', async () => {
@@ -56,7 +70,7 @@ describe('AdminClassList', () => {
     await waitFor(() =>
       expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ name: '3학년 3반' }),
+        body: JSON.stringify({ name: '3학년 3반', mode: 'normal' }),
       }))
     )
   })
@@ -132,5 +146,37 @@ describe('AdminClassList', () => {
 
     await userEvent.click(screen.getByText('확인'))
     expect(screen.queryByText('수업 이름을 입력해주세요')).not.toBeInTheDocument()
+  })
+
+  it('경쟁 모드를 골라 수업을 만들 수 있다', async () => {
+    global.fetch = vi.fn((url, options) => {
+      if (options?.method === 'POST') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ id: 'class-3', name: '경쟁 2반', mode: 'competition' }) })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(CLASSES) })
+    })
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('3학년 2반')
+    expect(screen.getByRole('radio', { name: '일반' })).toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: '경쟁' }))
+    await userEvent.type(screen.getByPlaceholderText('새 수업 이름'), '경쟁 2반')
+    await userEvent.click(screen.getByText('수업 생성하기'))
+
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: '경쟁 2반', mode: 'competition' }),
+      }))
+    )
+    await waitFor(() => expect(screen.getByRole('radio', { name: '일반' })).toBeChecked())
+  })
+
+  it('경쟁 모드 수업에만 경쟁 배지를 붙인다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(CLASSES_WITH_COMPETITION) })
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('경쟁반')
+    const badges = screen.getAllByText('경쟁', { selector: 'span' })
+    expect(badges).toHaveLength(1)
+    expect(badges[0].closest('li')).toHaveTextContent('경쟁반')
   })
 })

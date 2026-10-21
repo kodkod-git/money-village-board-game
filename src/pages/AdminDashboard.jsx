@@ -63,6 +63,7 @@ export default function AdminDashboard() {
         <AdminClassDashboard
           classId={selectedClass.id}
           initialName={selectedClass.name}
+          mode={selectedClass.mode}
         />
       )}
       {section === 'ranking' && selectedClass && (

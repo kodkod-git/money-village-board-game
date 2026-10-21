@@ -9,9 +9,15 @@ function formatDate(isoString) {
   return new Date(isoString).toLocaleDateString('ko-KR')
 }
 
+const CLASS_MODE_OPTIONS = [
+  { value: 'normal', label: '일반' },
+  { value: 'competition', label: '경쟁' },
+]
+
 export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [classes, setClasses] = useState([])
   const [newClassName, setNewClassName] = useState('')
+  const [newClassMode, setNewClassMode] = useState('normal')
   const [error, setError] = useState('')
   const [qrClass, setQrClass] = useState(null)
   const [showSurveyQr, setShowSurveyQr] = useState(false)
@@ -39,7 +45,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
     const res = await adminFetch('/api/admin/classes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newClassName.trim() }),
+      body: JSON.stringify({ name: newClassName.trim(), mode: newClassMode }),
     })
     const data = await res.json()
     if (!res.ok) {
@@ -47,6 +53,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
       return
     }
     setNewClassName('')
+    setNewClassMode('normal')
     loadClasses()
   }
 
@@ -74,6 +81,20 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
           value={newClassName}
           onChange={e => setNewClassName(e.target.value)}
         />
+        <div className={styles.modeGroup} role="radiogroup" aria-label="수업 모드">
+          {CLASS_MODE_OPTIONS.map(option => (
+            <label key={option.value} className={styles.modeOption}>
+              <input
+                type="radio"
+                name="class-mode"
+                value={option.value}
+                checked={newClassMode === option.value}
+                onChange={() => setNewClassMode(option.value)}
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
         <button type="submit" className={styles.createBtn}>수업 생성하기</button>
       </form>
       {error && <p className={styles.error}>{error}</p>}
@@ -81,8 +102,9 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
       <ul className={styles.list}>
         {classes.map(cls => (
           <li key={cls.id} className={styles.item}>
-            <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name })}>
+            <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name, mode: cls.mode ?? 'normal' })}>
               <span className={styles.itemName}>{cls.name}</span>
+              {cls.mode === 'competition' && <span className={styles.modeBadge}>경쟁</span>}
               {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
             </button>
             {cls.id !== 'unassigned' && (
