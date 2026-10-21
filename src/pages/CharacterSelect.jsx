@@ -4,12 +4,14 @@ import BackButton from '../components/BackButton'
 import CharacterCard from '../components/CharacterCard'
 import { CHARACTERS } from '../constants/characters'
 import useBodyClass from '../hooks/useBodyClass'
+import { fetchClassMode } from '../utils/classMode'
 import styles from './CharacterSelect.module.css'
 
 export default function CharacterSelect() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selected, setSelected] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   useBodyClass('onboarding-mode')
 
   const name = searchParams.get('name') ?? ''
@@ -17,8 +19,15 @@ export default function CharacterSelect() {
   const classId = searchParams.get('classId') ?? ''
   const code = searchParams.get('code') ?? ''
 
-  function handleSubmit() {
-    if (!selected) return
+  async function handleSubmit() {
+    if (!selected || isSubmitting) return
+    setIsSubmitting(true)
+    // 경쟁 모드 수업은 팀을 직접 고르지 않으므로 로비를 건너뛰고 바로 자산 입력으로 간다.
+    if (classId && (await fetchClassMode(classId)) === 'competition') {
+      const params = new URLSearchParams({ affiliation, name, character: selected })
+      navigate(`/compete/${encodeURIComponent(classId)}?${params}`)
+      return
+    }
     const params = new URLSearchParams({ affiliation, name, character: selected })
     if (code) params.set('code', code)
     if (classId) params.set('classId', classId)
@@ -45,7 +54,7 @@ export default function CharacterSelect() {
         </div>
       </div>
       <div className={styles.bottomBar}>
-        <button className={styles.ctaBtn} onClick={handleSubmit} disabled={!selected}>
+        <button className={styles.ctaBtn} onClick={handleSubmit} disabled={!selected || isSubmitting}>
           이 캐릭터로 시작하기
         </button>
       </div>
