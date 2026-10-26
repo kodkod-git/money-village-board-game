@@ -125,6 +125,21 @@ describe('calculateAssetBreakdown', () => {
     expect(result.stockValue).toBe(20000)
     expect(result.totalAssets).toBe(20000)
   })
+
+  it('gameState.prices가 있으면 넘겨받은 가격 대신 그 가격으로 계산한다', () => {
+    const state = makeState({
+      stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      prices: {
+        stocks: { semiconductor: 5000, finance: 2000, bio: 2000 },
+        realEstate: { gaon: 30000, dami: 10000, chorong: 10000 },
+      },
+    })
+    const result = calculateAssetBreakdown(state, PRICES)
+    expect(result.stockValue).toBe(10000)
+    expect(result.realEstateValue).toBe(30000)
+    expect(result.totalAssets).toBe(40000)
+  })
 })
 
 describe('saveGameResult', () => {

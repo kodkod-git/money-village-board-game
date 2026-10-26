@@ -13,15 +13,17 @@ function badgeMultiplier(badgeCount) {
   return 1
 }
 
+// 경쟁 모드 참여자는 자기가 정한 가격(gameState.prices)을 가진다. 없으면 방(세션) 가격을 쓴다.
 export function calculateAssetBreakdown(gameState, prices) {
   const { cash, stocks, realEstate, badges } = gameState
+  const usedPrices = gameState.prices ?? prices
   const badgeCount = badges.filter(Boolean).length
 
   const stockValue = Object.keys(STOCK_LABELS).reduce(
-    (sum, key) => sum + (stocks[key] ?? 0) * (prices.stocks[key] ?? 0), 0
+    (sum, key) => sum + (stocks[key] ?? 0) * (usedPrices.stocks[key] ?? 0), 0
   )
   const realEstateValue = Object.keys(REAL_ESTATE_LABELS).reduce(
-    (sum, key) => sum + (realEstate[key] ?? 0) * (prices.realEstate[key] ?? 0), 0
+    (sum, key) => sum + (realEstate[key] ?? 0) * (usedPrices.realEstate[key] ?? 0), 0
   )
   const baseAssets = (cash ?? 0) + stockValue + realEstateValue
   const totalAssets = Math.round(baseAssets * badgeMultiplier(badgeCount))

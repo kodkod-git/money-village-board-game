@@ -53,4 +53,32 @@ describe('calculateAssetBreakdown', () => {
     expect(result.realEstateValue).toBe(0)
     expect(result.totalAssets).toBe(0)
   })
+
+  it('gameState.prices가 없으면 넘겨받은 가격을 쓴다', () => {
+    const gameState = {
+      cash: 0,
+      stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+    }
+    expect(calculateAssetBreakdown(gameState, prices)).toEqual({
+      cash: 0, stockValue: 4000, realEstateValue: 10000, totalAssets: 14000,
+    })
+  })
+
+  it('gameState.prices가 있으면 그 가격을 먼저 쓴다', () => {
+    const gameState = {
+      cash: 0,
+      stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+      prices: {
+        stocks: { semiconductor: 5000, finance: 2000, bio: 2000 },
+        realEstate: { gaon: 30000, dami: 10000, chorong: 10000 },
+      },
+    }
+    expect(calculateAssetBreakdown(gameState, prices)).toEqual({
+      cash: 0, stockValue: 10000, realEstateValue: 30000, totalAssets: 40000,
+    })
+  })
 })
