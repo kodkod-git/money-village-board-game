@@ -674,6 +674,9 @@ app.get('/api/results/:sessionId', async (req, res) => {
         totalAssets: Number(r.total_assets),
         stockValue: r.stock_value != null ? Number(r.stock_value) : null,
         realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
+        // 경쟁 모드 참여자는 자기 가격, 일반 모드는 위의 세션 가격과 같다.
+        stockPrices: r.stock_prices ?? session.stock_prices,
+        realEstatePrices: r.real_estate_prices ?? session.real_estate_prices,
         playerUuid: r.player_uuid,
         teamCode: session.team_code,
       })),

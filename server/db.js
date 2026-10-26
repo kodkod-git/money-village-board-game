@@ -278,7 +278,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
+const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, stock_prices, real_estate_prices, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
 
 // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
 // 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
@@ -306,8 +306,9 @@ function mapRankingRow(r, i) {
     teamCode: r.game_sessions?.team_code ?? '',
     teamName: r.game_sessions?.title || r.game_sessions?.team_code || '',
     className: r.game_sessions?.classes?.name ?? UNASSIGNED_CLASS,
-    stockPrices: r.game_sessions?.stock_prices ?? null,
-    realEstatePrices: r.game_sessions?.real_estate_prices ?? null,
+    // 경쟁 모드 참여자는 자기 가격, 일반 모드는 그 게임(세션)의 가격.
+    stockPrices: r.stock_prices ?? r.game_sessions?.stock_prices ?? null,
+    realEstatePrices: r.real_estate_prices ?? r.game_sessions?.real_estate_prices ?? null,
     // 결과 등록 시각. 관리자 "게임 분석" 테이블을 최신순으로 보여 줄 때 쓴다.
     createdAt: r.created_at,
   }

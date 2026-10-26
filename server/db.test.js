@@ -549,6 +549,23 @@ describe('getRankings', () => {
 
     expect(result[0].className).toBe('미배정 수업')
   })
+
+  it('행에 참여자 가격이 있으면 stockPrices/realEstatePrices로 그 가격을, 없으면 세션 가격을 쓴다', async () => {
+    const session = { team_code: 'AB', title: null, stock_prices: { bio: 1 }, real_estate_prices: { gaon: 1 }, class_id: null, classes: null }
+    const builder = makeQueryBuilder({ data: [
+      { player_uuid: 'p1', total_assets: 2, stock_prices: { bio: 9 }, real_estate_prices: { gaon: 9 }, game_sessions: session },
+      { player_uuid: 'p2', total_assets: 1, stock_prices: null, real_estate_prices: null, game_sessions: session },
+    ], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    const rows = await getRankings()
+
+    expect(builder.select).toHaveBeenCalledWith(expect.stringContaining('stock_prices, real_estate_prices, session_id'))
+    expect(rows[0]).toMatchObject({ stockPrices: { bio: 9 }, realEstatePrices: { gaon: 9 } })
+    expect(rows[1]).toMatchObject({ stockPrices: { bio: 1 }, realEstatePrices: { gaon: 1 } })
+  })
 })
 
 describe('getAllCompletedTeams', () => {
