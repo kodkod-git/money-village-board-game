@@ -5,6 +5,7 @@ import { RESULT_GROUPS, GROUP_DETAIL_URLS, AGE_SUBTITLE, AGE_LABEL, AGE_PLACEHOL
 import { GROUP_REPORTS, TIME_OPTIONS, RISK_OPTIONS } from '../constants/groupReport'
 import { calcEconomicPotential } from '../utils/economicPotential'
 import { getPlayerUuid } from '../utils/playerUuid'
+import { pricesForPlayer } from '../utils/playerPrices'
 import useBodyClass from '../hooks/useBodyClass'
 import quizStyles from './QuizPlay.module.css'
 import styles from './EconomicReport.module.css'
@@ -113,10 +114,8 @@ export default function EconomicReport() {
     )
   }
 
-  // 결과 API는 가격을 플레이어가 아니라 게임(세션) 단위로 내려주므로 합쳐서 넘긴다.
-  const result = calcEconomicPotential(
-    { ...me, stockPrices: data.stockPrices, realEstatePrices: data.realEstatePrices },
-  )
+  // 경쟁 모드는 참여자마다, 일반 모드는 게임(세션)마다 가격이 다르다.
+  const result = calcEconomicPotential({ ...me, ...pricesForPlayer(me, data) })
   const group = RESULT_GROUPS[result.group]
   const groupReport = GROUP_REPORTS[result.group]
 

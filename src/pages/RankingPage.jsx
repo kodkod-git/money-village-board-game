@@ -5,6 +5,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
+import { pricesForPlayer } from '../utils/playerPrices'
 import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
 import { SURVEY_URL } from '../constants/survey'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
@@ -80,8 +81,7 @@ export default function RankingPage() {
               // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공열쇠 배수 미적용).
               // 팀 스코프 응답엔 netWorth가 없으므로 여기서 계산한다.
               netWorth: (p.cash ?? 0) + (p.stockValue ?? 0) + (p.realEstateValue ?? 0),
-              stockPrices: data.stockPrices,
-              realEstatePrices: data.realEstatePrices,
+              ...pricesForPlayer(p, data),
             }))
             .sort((a, b) => (b[vk] ?? 0) - (a[vk] ?? 0))
             .map((p, i) => ({ ...p, rank: i + 1 }))
