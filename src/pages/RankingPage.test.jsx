@@ -18,7 +18,10 @@ function renderAt(path) {
   )
 }
 
+let competitionResponse = null // null이면 404(일반 모드)
+
 beforeEach(() => {
+  competitionResponse = null
   global.fetch = vi.fn((url) => {
     if (url === '/api/rankings?category=stock') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
@@ -39,6 +42,11 @@ beforeEach(() => {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
         { rank: 1, name: '유아인', className: '1반', teamCode: 'IJ3456', character: 'wolf', stockValue: 88000, totalAssets: 150000, playerUuid: 'p5' },
       ]) })
+    }
+    if (url.endsWith('/competition')) {
+      return competitionResponse
+        ? Promise.resolve({ ok: true, json: () => Promise.resolve(competitionResponse) })
+        : Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) })
     }
     if (url.startsWith('/api/results/')) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({
@@ -65,6 +73,42 @@ afterEach(() => {
 })
 
 describe('RankingPage', () => {
+  it('경쟁 모드 결과면 팀 비교 4장 뒤에 랭킹을 보여준다', async () => {
+    competitionResponse = {
+      mySessionId: 'session-1',
+      teams: [
+        { sessionId: 'session-1', name: '팀 1', cash: 10, stockValue: 20, realEstateValue: 30, totalAssets: 60, playerCount: 2 },
+        { sessionId: 'session-2', name: '팀 2', cash: 40, stockValue: 5, realEstateValue: 6, totalAssets: 51, playerCount: 2 },
+      ],
+    }
+    renderAt('/result/session-1')
+    expect(await screen.findByRole('heading', { name: '더 많은 현금을 가진 팀은?' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '총 자산이 더 많은 팀은?' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /번째 화면$/ })).toHaveLength(5)
+    expect(screen.getByRole('heading', { name: '랭킹' })).toBeInTheDocument()
+    expect(fetch).toHaveBeenCalledWith('/api/results/session-1/competition')
+  })
+
+  it('일반 모드(404)면 캐러셀 없이 기존 랭킹만 보여준다', async () => {
+    renderAt('/result/session-1')
+    expect(await screen.findByRole('heading', { name: '랭킹' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '1번째 화면' })).not.toBeInTheDocument()
+  })
+
+  it('대시보드 요청이 실패해도 기존 랭킹을 보여준다', async () => {
+    const baseFetch = global.fetch
+    global.fetch = vi.fn(url => (url.endsWith('/competition') ? Promise.reject(new Error('net')) : baseFetch(url)))
+    renderAt('/result/session-1')
+    expect(await screen.findByRole('heading', { name: '랭킹' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '1번째 화면' })).not.toBeInTheDocument()
+  })
+
+  it('홈 랭킹(/ranking)은 대시보드를 요청하지 않는다', async () => {
+    renderAt('/ranking')
+    await screen.findByRole('heading', { name: '랭킹' })
+    expect(fetch).not.toHaveBeenCalledWith(expect.stringMatching(/\/competition$/))
+  })
+
   it('카카오톡으로 현재 결과의 고유 링크를 공유한다', async () => {
     vi.stubEnv('VITE_KAKAO_JS_KEY', 'test-kakao-key')
     const kakao = { isInitialized: vi.fn(() => false), init: vi.fn(), Share: { sendDefault: vi.fn() } }
