@@ -68,15 +68,15 @@
 
 ### 가격 고르기 · 확인
 
-- `resolvePrices(gameState, fallbackPrices)` → `gameState?.prices ?? fallbackPrices`. `server/db.js`와 `src/utils/calculateAssets.js` 양쪽에 둔다(두 파일은 서로의 사본이라는 기존 주석을 따른다).
+- `server/db.js`와 `src/utils/calculateAssets.js`의 `calculateAssetBreakdown(gameState, prices)`가 **안에서** `gameState.prices ?? prices`로 가격을 고른다(두 파일은 서로의 사본이라는 기존 주석을 따른다). 그래서 이 함수를 부르는 모든 곳(서버 저장·수정, 관리자 카드·수정 모달·테이블의 실시간 금액)이 따로 고치지 않아도 참여자 가격을 쓴다.
 - `sanitizePrices(prices)` (서버, `server/prices.js` 새 모듈): `STOCK_LABELS`, `REAL_ESTATE_LABELS`의 키만 남기고, 0 이상 `MAX_ASSET_PRICE` 이하의 정수가 아닌 값은 `DEFAULT_PRICES` 값으로 바꾼다. `prices`가 객체가 아니면 `undefined`를 돌려준다(가격 없음).
   - `update-pool-player-state`, 관리자 참여자 상태 수정 경로, 등록 후 수정(`PATCH` 결과 수정)에서 `gameState.prices`에 적용한다.
 
 ### 평가액 계산
 
-- `saveGameResult`: 참여자마다 `resolvePrices(player.gameState, prices)`로 평가액을 계산한다. `player.gameState.prices`가 있으면 `stock_prices`, `real_estate_prices` 컬럼에 저장한다. 세션의 `stock_prices`·`real_estate_prices`에는 지금처럼 방 가격이 들어간다.
+- `saveGameResult`: 참여자마다 `calculateAssetBreakdown(player.gameState, prices)`로 평가액을 계산한다(참여자 가격 우선). `player.gameState.prices`가 있으면 `stock_prices`, `real_estate_prices` 컬럼에 저장한다. 세션의 `stock_prices`·`real_estate_prices`에는 지금처럼 방 가격이 들어간다.
 - `updateGameResult`: 행의 `stock_prices`가 있으면 그것을, 없으면 세션 가격을 쓴다. 고친 값에 `prices`가 들어 있으면 그 가격으로 다시 계산하고 컬럼도 바꾼다.
-- 진행 중 상태 계산(관리자 팀 카드의 실시간 금액 등 `calculateAssetBreakdown`을 부르는 곳)도 `resolvePrices`를 거친다.
+- `getAllCompletedTeams`(관리자 팀 현황의 등록된 팀): 행에 가격이 있으면 `gameState.prices`로 넣어 준다.
 
 ### API
 
@@ -90,14 +90,14 @@
 
 ### 프론트의 가격 읽기
 
-- `EconomicReport`, `ParentGuide`: 내 행의 `stockPrices`·`realEstatePrices`를 먼저 쓰고, 없으면 최상위(세션) 가격을 쓴다.
-- `RankingPage` 팀 범위: 행의 가격을 먼저 쓰고, 없으면 세션 가격을 쓴다.
+- 공용 헬퍼 `src/utils/playerPrices.js`의 `pricesForPlayer(player, result)` → `{ stockPrices: player.stockPrices ?? result.stockPrices, realEstatePrices: … }`.
+- `EconomicReport`, `ParentGuide`, `RankingPage` 팀 범위가 이 헬퍼를 쓴다.
 - `adminPlayerAdapters.toAdminPrices`: 변경 없음(행의 `stockPrices`를 이미 읽는다).
 
 ### 관리자
 
-- `AdminGridCard`: `room.mode === 'competition'`이면 가격 설정 버튼과 주식·부동산 탭의 가격 표시를 숨긴다(수량은 그대로 보인다).
-- `AdminSpectateModal`: 경쟁 모드면 가격 설정 버튼이 `AdminPriceSettingModal`을 **그 참여자의 `gameState.prices`**(없으면 `DEFAULT_PRICES`)로 열고, 확인하면 기존 참여자 상태 저장 경로로 `prices`를 저장한다. 일반 모드는 지금처럼 방 가격을 고친다.
+- `AdminGridCard`: `competition` prop이 켜져 있으면 팀/주식/부동산 탭 줄을 숨긴다. 주식·부동산 탭은 팀 가격만 보여주고 카드를 누르면 팀 가격 설정이 열리므로, 탭을 숨기면 둘 다 사라진다. 카드를 누르면 항상 관전 화면이 열린다.
+- `AdminSpectateModal`: `competition` prop을 새로 받는다(`AdminClassDashboard`가 넘긴다). 켜져 있으면 팀 단위 "가격 설정" 버튼을 숨기고, 참여자 수정 화면(`AdminEditModal`)의 `headerAction` 자리에 **"가격 설정"** 버튼을 둔다. 이 버튼은 `AdminPriceSettingModal`을 그 참여자의 `gameState.prices`(없으면 `DEFAULT_PRICES`)로 열고, 확인하면 기존 저장 경로(`PATCH …/players/:playerUuid`, `{ prices }`)로 저장한다. 수정 화면의 종목 가격 표시도 참여자 가격을 쓴다. 일반 모드는 바뀌지 않는다.
 
 ## 4. 결과 화면 대시보드
 
@@ -107,7 +107,7 @@
   - `404`이거나 실패하면 → 지금 화면 그대로(대시보드 없음).
   - 성공하면 → `CompetitionResultCarousel`로 감싼다.
 - `/ranking`(홈 랭킹)은 요청하지 않으며 바뀌지 않는다.
-- 기존 랭킹 본문(제목 · 카테고리 탭 · 범위 탭 · 시상대 · 표 · 참여자 수정 모달)을 `src/components/RankingContent.jsx`로 분리한다. 일반 모드와 캐러셀 ⑤가 같이 쓴다. 데이터 불러오기 상태는 지금처럼 `RankingPage`가 갖고 props로 넘긴다.
+- 기존 랭킹 본문(`.inner` 블록: 제목 · 카테고리 탭 · 범위 탭 · 시상대 · 표)을 같은 파일 안의 JSX 변수 `rankingBody`로 옮긴다. 일반 모드는 그대로 그리고, 경쟁 모드는 캐러셀의 ⑤ 화면으로 넘긴다. 상태와 데이터 불러오기는 지금처럼 `RankingPage`에 둔다(컴포넌트로 나누면 props만 10개가 넘어가서 같은 파일에 둔다). 참여자 수정 모달(오버레이)은 캐러셀 바깥에 그대로 둔다.
 - "처음으로" 버튼과 공유·만족도 조사·경제적 잠재력 유형 버튼은 캐러셀 바깥 위쪽에 두어 모든 장에서 보이게 한다.
 
 ### `CompetitionResultCarousel` (`src/components/CompetitionResultCarousel.jsx`)
@@ -146,7 +146,8 @@
 
 **서버**
 
-- `resolvePrices`: 참여자 가격 우선, 없으면 대체 가격.
+- `calculateAssetBreakdown`(서버·클라이언트): `gameState.prices`가 있으면 그 가격을, 없으면 넘겨받은 가격을 쓴다.
+- `pricesForPlayer`: 참여자 가격 우선, 없으면 결과(세션) 가격.
 - `sanitizePrices`: 모르는 키 제거, 음수·소수·최대값 초과·문자열은 기본값으로 바꿈, 객체가 아니면 `undefined`.
 - `saveGameResult`: 참여자 가격으로 평가액을 계산하고 새 컬럼에 저장, 가격이 없는 참여자는 세션 가격을 쓰고 컬럼은 null.
 - `updateGameResult`: 행 가격이 있을 때와 없을 때, 고친 값에 가격이 들어 있을 때.
