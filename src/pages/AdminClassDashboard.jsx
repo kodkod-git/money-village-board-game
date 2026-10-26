@@ -362,6 +362,7 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
             <AdminSpectateModal
               rooms={rooms}
               initialIndex={spectateIndex}
+              competition={competition}
               onPlayerUpdate={handlePlayerUpdate}
               onClose={() => setSpectateIndex(null)}
               onRoomChanged={loadRooms}
