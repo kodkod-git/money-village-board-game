@@ -597,6 +597,30 @@ describe('getAllCompletedTeams', () => {
       }],
     }])
   })
+
+  it('행에 참여자 가격이 있으면 gameState.prices로 넣고, 없으면 넣지 않는다', async () => {
+    const playerPrices = {
+      stocks: { semiconductor: 5000, finance: 2000, bio: 2000 },
+      realEstate: { gaon: 30000, dami: 10000, chorong: 10000 },
+    }
+    const sessions = [{ id: 's1', team_code: 'AB1234', created_at: 't', class_id: 'c1', title: null,
+      stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate }]
+    const results = [
+      { session_id: 's1', player_uuid: 'p1', name: 'A', character: 'fox', affiliation: '', cash: 0, job: 'a',
+        stock_holdings: {}, real_estate_holdings: {}, badges: [],
+        stock_prices: playerPrices.stocks, real_estate_prices: playerPrices.realEstate },
+      { session_id: 's1', player_uuid: 'p2', name: 'B', character: 'fox', affiliation: '', cash: 0, job: 'a',
+        stock_holdings: {}, real_estate_holdings: {}, badges: [], stock_prices: null, real_estate_prices: null },
+    ]
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => makeQueryBuilder({ data: table === 'game_sessions' ? sessions : results, error: null }))
+
+    const { getAllCompletedTeams } = await import('./db.js')
+    const [team] = await getAllCompletedTeams()
+
+    expect(team.players[0].gameState.prices).toEqual(playerPrices)
+    expect(team.players[1].gameState).not.toHaveProperty('prices')
+  })
 })
 
 describe('updateGameResult', () => {
@@ -654,6 +678,70 @@ describe('updateGameResult', () => {
     }))
     expect(updated.gameState.cash).toBe(20000)
     expect(updated.playerUuid).toBe('p1')
+  })
+
+  it('행의 참여자 가격으로 재계산하고, 고친 값에 prices가 있으면 그 가격으로 바꿔 저장한다', async () => {
+    const mockSessionSingle = vi.fn().mockResolvedValue({
+      data: { id: 'session-1', stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate },
+      error: null,
+    })
+    const mockSessionEq = vi.fn().mockReturnValue({ single: mockSessionSingle })
+    const mockSessionSelect = vi.fn().mockReturnValue({ eq: mockSessionEq })
+
+    const rowPrices = {
+      stocks: { semiconductor: 5000, finance: 2000, bio: 2000 },
+      realEstate: { gaon: 30000, dami: 10000, chorong: 10000 },
+    }
+    const currentRow = {
+      cash: 0, job: 'a',
+      stock_holdings: { semiconductor: 2, finance: 0, bio: 0 },
+      real_estate_holdings: { gaon: 1, dami: 0, chorong: 0 },
+      badges: [false, false, false, false, false, false],
+      stock_prices: rowPrices.stocks, real_estate_prices: rowPrices.realEstate,
+    }
+    const mockCurrentSingle = vi.fn().mockResolvedValue({ data: currentRow, error: null })
+    const mockCurrentEqEq = vi.fn().mockReturnValue({ single: mockCurrentSingle })
+    const mockCurrentEq = vi.fn().mockReturnValue({ eq: mockCurrentEqEq })
+    const mockCurrentSelect = vi.fn().mockReturnValue({ eq: mockCurrentEq })
+
+    const mockUpdateSingle = vi.fn().mockResolvedValue({ data: { player_uuid: 'p1', ...currentRow }, error: null })
+    const mockUpdateSelect = vi.fn().mockReturnValue({ single: mockUpdateSingle })
+    const mockUpdateEqEq = vi.fn().mockReturnValue({ select: mockUpdateSelect })
+    const mockUpdateEq = vi.fn().mockReturnValue({ eq: mockUpdateEqEq })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq })
+
+    let callCount = 0
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { select: mockSessionSelect }
+      if (table === 'game_results') {
+        callCount += 1
+        return callCount === 1 ? { select: mockCurrentSelect } : { update: mockUpdate }
+      }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { updateGameResult } = await import('./db.js')
+
+    // 1) 가격을 고치지 않으면 행에 저장된 참여자 가격으로 계산한다.
+    const updated = await updateGameResult('AB1234', 'p1', { cash: 1000 })
+    expect(mockUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
+      cash: 1000, stock_value: 10000, real_estate_value: 30000, total_assets: 41000,
+    }))
+    expect(mockUpdate.mock.lastCall[0]).not.toHaveProperty('stock_prices')
+    expect(updated.gameState.prices).toEqual(rowPrices)
+
+    // 2) 고친 값에 prices가 있으면 그 가격으로 계산하고 컬럼도 바꾼다.
+    callCount = 0
+    const newPrices = {
+      stocks: { semiconductor: 1000, finance: 2000, bio: 2000 },
+      realEstate: { gaon: 5000, dami: 10000, chorong: 10000 },
+    }
+    await updateGameResult('AB1234', 'p1', { prices: newPrices })
+    expect(mockUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
+      stock_value: 2000, real_estate_value: 5000, total_assets: 7000,
+      stock_prices: newPrices.stocks, real_estate_prices: newPrices.realEstate,
+    }))
   })
 })
 

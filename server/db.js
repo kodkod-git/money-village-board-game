@@ -37,6 +37,12 @@ function toJobColumn(job) {
   return job ?? ''
 }
 
+// game_results 행의 참여자 가격(경쟁 모드). 일반 모드 행은 null이므로 undefined를 돌려준다.
+function rowPrices(row) {
+  if (!row.stock_prices && !row.real_estate_prices) return undefined
+  return { stocks: row.stock_prices ?? {}, realEstate: row.real_estate_prices ?? {} }
+}
+
 export async function saveGameResult(room) {
   const { code, prices, players, classId = null, title = null, createdAt = null } = room
 
@@ -148,6 +154,7 @@ export async function getAllCompletedTeams() {
           realEstate: r.real_estate_holdings,
           badges: r.badges,
           isCompleted: true,
+          ...(rowPrices(r) ? { prices: rowPrices(r) } : {}),
         },
       })),
   }))
@@ -225,6 +232,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
     stocks: current.stock_holdings,
     realEstate: current.real_estate_holdings,
     badges: current.badges,
+    prices: rowPrices(current),
     ...partialGameState,
   }
 
@@ -236,6 +244,10 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
     if (key in partialGameState) updateRow[column] = partialGameState[key]
   }
   if ('job' in updateRow) updateRow.job = toJobColumn(updateRow.job)
+  if (partialGameState.prices) {
+    updateRow.stock_prices = partialGameState.prices.stocks
+    updateRow.real_estate_prices = partialGameState.prices.realEstate
+  }
   updateRow.total_assets = breakdown.totalAssets
   updateRow.stock_value = breakdown.stockValue
   updateRow.real_estate_value = breakdown.realEstateValue
@@ -261,6 +273,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
       realEstate: updated.real_estate_holdings,
       badges: updated.badges,
       isCompleted: true,
+      ...(rowPrices(updated) ? { prices: rowPrices(updated) } : {}),
     },
   }
 }
