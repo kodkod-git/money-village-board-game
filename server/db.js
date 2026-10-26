@@ -376,3 +376,42 @@ export async function getSessionCreatedAtsByClassId(classId) {
   if (error) throw error
   return (data ?? []).map(session => session.created_at)
 }
+
+function sumColumn(rows, column) {
+  return rows.reduce((sum, row) => sum + (Number(row[column]) || 0), 0)
+}
+
+// 경쟁 모드 결과 화면의 팀 비교 대시보드. 경쟁 모드 수업의 결과가 아니면 null.
+// 팀 이름은 관리자 팀 현황(teamDisplayName)과 같이 제목이 있으면 제목, 없으면 만든 순서대로 "팀 N".
+export async function getCompetitionTeams(sessionId) {
+  const { data: session, error: sessionError } = await supabase
+    .from('game_sessions')
+    .select('id, class_id, classes(mode)')
+    .eq('id', sessionId)
+    .maybeSingle()
+  if (sessionError) throw sessionError
+  if (!session?.class_id || session.classes?.mode !== 'competition') return null
+
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('game_sessions')
+    .select('id, title, created_at, game_results(cash, stock_value, real_estate_value, total_assets)')
+    .eq('class_id', session.class_id)
+    .order('created_at', { ascending: true })
+  if (sessionsError) throw sessionsError
+
+  return {
+    mySessionId: session.id,
+    teams: sessions.map((s, i) => {
+      const rows = s.game_results ?? []
+      return {
+        sessionId: s.id,
+        name: s.title?.trim() || `팀 ${i + 1}`,
+        cash: sumColumn(rows, 'cash'),
+        stockValue: sumColumn(rows, 'stock_value'),
+        realEstateValue: sumColumn(rows, 'real_estate_value'),
+        totalAssets: sumColumn(rows, 'total_assets'),
+        playerCount: rows.length,
+      }
+    }),
+  }
+}

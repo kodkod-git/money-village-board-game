@@ -1057,3 +1057,67 @@ describe('getSessionCreatedAtsByClassId', () => {
     await expect(getSessionCreatedAtsByClassId('class-1')).rejects.toEqual({ message: 'boom' })
   })
 })
+
+describe('getCompetitionTeams', () => {
+  function builder(result) {
+    const b = {
+      select: vi.fn(() => b),
+      eq: vi.fn(() => b),
+      order: vi.fn(() => b),
+      maybeSingle: vi.fn(() => Promise.resolve(result)),
+      then: resolve => resolve(result),
+    }
+    return b
+  }
+
+  it('경쟁 모드 수업의 등록된 팀을 만든 순서로 "팀 N"(제목 우선)으로 부르고 팀별로 합산한다', async () => {
+    const sessionBuilder = builder({ data: { id: 's2', class_id: 'c1', classes: { mode: 'competition' } }, error: null })
+    const teamsBuilder = builder({ data: [
+      { id: 's1', title: null, created_at: 't1', game_results: [
+        { cash: 1000, stock_value: 2000, real_estate_value: 3000, total_assets: 6000 },
+        { cash: 500, stock_value: '100', real_estate_value: null, total_assets: 600 },
+      ] },
+      { id: 's2', title: '  호랑이팀 ', created_at: 't2', game_results: [
+        { cash: 0, stock_value: 0, real_estate_value: 0, total_assets: 0 },
+      ] },
+      { id: 's3', title: '', created_at: 't3', game_results: [] },
+    ], error: null })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValueOnce(sessionBuilder).mockReturnValueOnce(teamsBuilder)
+
+    const { getCompetitionTeams } = await import('./db.js')
+    const result = await getCompetitionTeams('s2')
+
+    expect(sessionBuilder.eq).toHaveBeenCalledWith('id', 's2')
+    expect(teamsBuilder.eq).toHaveBeenCalledWith('class_id', 'c1')
+    expect(teamsBuilder.order).toHaveBeenCalledWith('created_at', { ascending: true })
+    expect(result).toEqual({
+      mySessionId: 's2',
+      teams: [
+        { sessionId: 's1', name: '팀 1', cash: 1500, stockValue: 2100, realEstateValue: 3000, totalAssets: 6600, playerCount: 2 },
+        { sessionId: 's2', name: '호랑이팀', cash: 0, stockValue: 0, realEstateValue: 0, totalAssets: 0, playerCount: 1 },
+        { sessionId: 's3', name: '팀 3', cash: 0, stockValue: 0, realEstateValue: 0, totalAssets: 0, playerCount: 0 },
+      ],
+    })
+  })
+
+  it('일반 모드 수업·미배정 수업·없는 세션이면 null을 돌려준다', async () => {
+    const { getCompetitionTeams } = await import('./db.js')
+    for (const data of [
+      { id: 's1', class_id: 'c1', classes: { mode: 'normal' } },
+      { id: 's1', class_id: null, classes: null },
+      null,
+    ]) {
+      mockFrom.mockReset()
+      mockFrom.mockReturnValueOnce(builder({ data, error: null }))
+      expect(await getCompetitionTeams('s1')).toBeNull()
+    }
+  })
+
+  it('조회 에러가 나면 예외를 던진다', async () => {
+    mockFrom.mockReset()
+    mockFrom.mockReturnValueOnce(builder({ data: null, error: { message: 'boom' } }))
+    const { getCompetitionTeams } = await import('./db.js')
+    await expect(getCompetitionTeams('s1')).rejects.toEqual({ message: 'boom' })
+  })
+})

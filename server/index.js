@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, teamNumbersForClass, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
-import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId } from './db.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId, getCompetitionTeams } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
@@ -16,6 +16,7 @@ import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, getClassMode, UNASSIGNED_CLASS } from './classes.js'
 import { listPool, removeFromPool, markPoolDisconnected, deletePool, rememberSubmitted } from './classPool.js'
 import { isPlayerJoinableRoom, joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus } from './competition.js'
+import { withSanitizedPrices } from './prices.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -613,6 +614,7 @@ app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
 app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
   const { playerUuid } = req.params
+  // 경쟁 모드에서 관리자가 참여자 가격을 고칠 때도 같은 규칙으로 확인한다.
   const partialGameState = req.body
 
   const classId = await findRoomClassId(code)
@@ -646,6 +648,18 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
   } catch (err) {
     console.error('admin patch error:', err)
     res.status(404).json({ error: 'Player not found' })
+  }
+})
+
+// 경쟁 모드 결과 화면의 팀 비교 대시보드. 경쟁 모드 수업이 아니면 404 — 화면은 기존 랭킹만 보여준다.
+app.get('/api/results/:sessionId/competition', async (req, res) => {
+  try {
+    const result = await getCompetitionTeams(req.params.sessionId)
+    if (!result) return res.status(404).json({ error: 'Not a competition result' })
+    res.json(result)
+  } catch (err) {
+    console.error('competition teams error:', err)
+    res.status(500).json({ error: 'Failed to fetch competition teams' })
   }
 })
 
