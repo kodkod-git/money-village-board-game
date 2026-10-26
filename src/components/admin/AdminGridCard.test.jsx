@@ -176,6 +176,16 @@ describe('AdminGridCard', () => {
       expect(screen.queryByText('★')).toBeNull()
     })
 
+    it('주식·부동산 가격 탭을 숨기고, 카드를 누르면 관전 화면을 연다', async () => {
+      const onSpectate = vi.fn()
+      const room = makeRoom()
+      render(<AdminGridCard competition room={room} onSpectate={onSpectate} />)
+      expect(screen.queryByRole('button', { name: '주식' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: '부동산' })).not.toBeInTheDocument()
+      await userEvent.click(screen.getByRole('button', { name: /김민준/ }))
+      expect(onSpectate).toHaveBeenCalledWith(room)
+    })
+
     it('일반 모드에서는 팀 코드와 ★를 그대로 보여준다', () => {
       render(<AdminGridCard room={makeRoom()} onSpectate={vi.fn()} />)
       expect(screen.getByText('AB1234')).toBeInTheDocument()

@@ -76,18 +76,21 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
           <span className={styles.titleBadge}>{displayName}</span>
           {!competition && <span className={styles.codeBadge}>{room.code}</span>}
         </div>
-        <div className={styles.tabs}>
-          {TABS.map(t => (
-            <button
-              key={t.key}
-              type="button"
-              className={`${styles.tab} ${tab === t.key ? styles.tabActive : ''}`}
-              onClick={() => setTab(t.key)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* 경쟁 모드는 참여자가 각자 가격을 정하므로 팀 가격 탭(보기·설정)을 쓰지 않는다. */}
+        {!competition && (
+          <div className={styles.tabs}>
+            {TABS.map(t => (
+              <button
+                key={t.key}
+                type="button"
+                className={`${styles.tab} ${tab === t.key ? styles.tabActive : ''}`}
+                onClick={() => setTab(t.key)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <button className={styles.card} onClick={handleCardClick} type="button">
