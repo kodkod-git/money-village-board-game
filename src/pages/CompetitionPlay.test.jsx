@@ -45,7 +45,7 @@ function socketHandler(event) {
 }
 
 describe('CompetitionPlay', () => {
-  it('대기 명단에 들어가 가격 없이 자산을 입력하고, 바뀔 때마다 서버에 저장한다', async () => {
+  it('대기 명단에 들어가 자산을 입력하고, 바뀔 때마다 서버에 저장한다', async () => {
     renderPage()
     expect(await screen.findByText('직업 선택')).toBeInTheDocument()
     expect(socket.emit).toHaveBeenCalledWith('join-class-pool', expect.objectContaining({
@@ -57,8 +57,28 @@ describe('CompetitionPlay', () => {
       classId: 'class-1', gameState: expect.objectContaining({ jobVisited: true }),
     }))
     await userEvent.click(screen.getByText('다음'))
-    expect(screen.getByRole('heading', { name: '주식' })).toBeInTheDocument()
-    expect(screen.queryAllByText(/^[\d,]+원$/)).toHaveLength(0)
+    expect(screen.getByRole('heading', { name: '주식 가격' })).toBeInTheDocument()
+  })
+
+  it('가격이 없는 참여자는 기본 가격으로 채워서 보여준다', async () => {
+    renderPage()
+    await screen.findByText('직업 선택')
+    await userEvent.click(screen.getByText('다음'))
+    await userEvent.click(screen.getByText('다음'))
+    expect(screen.getAllByText('2,000')).toHaveLength(3)
+  })
+
+  it('다시 입력하기를 눌러도 정한 가격은 그대로 둔다', async () => {
+    const prices = {
+      stocks: { semiconductor: 7000, finance: 2000, bio: 2000 },
+      realEstate: { gaon: 10000, dami: 10000, chorong: 10000 },
+    }
+    joinResponse = { ...joinResponse, gameState: { ...defaultGameState(), prices, isCompleted: true } }
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: '다시 입력하기' }))
+    expect(socket.emit).toHaveBeenLastCalledWith('update-pool-player-state', expect.objectContaining({
+      gameState: expect.objectContaining({ isCompleted: false, prices }),
+    }))
   })
 
   it('입력을 마친 상태면 캐릭터·이름·안내 문구가 있는 대기 화면을 보여준다', async () => {
@@ -82,7 +102,7 @@ describe('CompetitionPlay', () => {
   it('현금 단계에서 완료를 누르면 대기 화면으로 바뀐다', async () => {
     renderPage()
     await screen.findByText('직업 선택')
-    for (let i = 0; i < 4; i++) await userEvent.click(screen.getByText('다음'))
+    for (let i = 0; i < 6; i++) await userEvent.click(screen.getByText('다음'))
     await userEvent.click(screen.getByText('완료'))
     expect(screen.getByText('결과가 곧 나올 예정이니, 나가거나 화면을 끄지 마시고 조금만 기다려주세요')).toBeInTheDocument()
     expect(socket.emit).toHaveBeenLastCalledWith('update-pool-player-state', expect.objectContaining({

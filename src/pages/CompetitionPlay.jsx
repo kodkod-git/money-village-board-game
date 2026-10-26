@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import AssetInputSteps from '../components/AssetInputSteps'
 import AlertModal from '../components/AlertModal'
+import { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import useBodyClass from '../hooks/useBodyClass'
 import { getPlayerUuid } from '../utils/playerUuid'
@@ -9,6 +10,11 @@ import inputStyles from './IndividualPage.module.css'
 import styles from './CompetitionPlay.module.css'
 
 // 경쟁 모드: 팀 없이 자산을 입력하고, 입력을 마치면 관리자가 결과를 등록할 때까지 기다린다.
+// 가격 단계가 생기기 전에 들어온 참여자처럼 가격이 없으면 기본 가격으로 시작한다.
+function withPrices(gameState) {
+  return gameState?.prices ? gameState : { ...gameState, prices: DEFAULT_PRICES }
+}
+
 export default function CompetitionPlay() {
   useBodyClass('onboarding-mode')
   const { classId } = useParams()
@@ -58,7 +64,7 @@ export default function CompetitionPlay() {
           socket.emit('update-pool-player-state', { classId, gameState: latestGameState.current })
           return
         }
-        setGameState(res.gameState)
+        setGameState(withPrices(res.gameState))
         setSyncToken(t => t + 1)
       })
     }
@@ -74,7 +80,7 @@ export default function CompetitionPlay() {
     const onKicked = () => setRemoved(true)
     // 관리자가 이 참여자의 입력을 직접 고쳤을 때
     const onStateUpdated = ({ gameState: next }) => {
-      setGameState(next)
+      setGameState(withPrices(next))
       setSyncToken(t => t + 1)
     }
     socket.on('game-submitted', onSubmitted)
@@ -123,7 +129,7 @@ export default function CompetitionPlay() {
 
   return (
     <div className={`${inputStyles.page} ${inputStyles.pageFill}`}>
-      <AssetInputSteps hidePrices gameState={gameState} syncToken={syncToken} onChange={save} onComplete={save} />
+      <AssetInputSteps editablePrices gameState={gameState} syncToken={syncToken} onChange={save} onComplete={save} />
     </div>
   )
 }
