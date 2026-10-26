@@ -103,8 +103,10 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
         {classes.map(cls => (
           <li key={cls.id} className={styles.item}>
             <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name, mode: cls.mode ?? 'normal' })}>
-              <span className={styles.itemName}>{cls.name}</span>
-              {cls.mode === 'competition' && <span className={styles.modeBadge}>경쟁</span>}
+              <span className={styles.itemTitleRow}>
+                <span className={styles.itemName}>{cls.name}</span>
+                {cls.mode === 'competition' && <span className={styles.modeBadge}>경쟁</span>}
+              </span>
               {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
             </button>
             {cls.id !== 'unassigned' && (

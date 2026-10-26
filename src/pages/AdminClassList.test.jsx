@@ -178,5 +178,7 @@ describe('AdminClassList', () => {
     const badges = screen.getAllByText('경쟁', { selector: 'span' })
     expect(badges).toHaveLength(1)
     expect(badges[0].closest('li')).toHaveTextContent('경쟁반')
+    // 배지는 수업 이름 밑이 아니라 같은 줄(이름 옆)에 있다.
+    expect(badges[0].parentElement).toHaveTextContent(/^경쟁반경쟁$/)
   })
 })
