@@ -615,7 +615,7 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
   const code = req.params.code.toUpperCase()
   const { playerUuid } = req.params
   // 경쟁 모드에서 관리자가 참여자 가격을 고칠 때도 같은 규칙으로 확인한다.
-  const partialGameState = req.body
+  const partialGameState = withSanitizedPrices(req.body)
 
   const classId = await findRoomClassId(code)
   if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
@@ -726,7 +726,7 @@ io.on('connection', (socket) => {
   socket.on('update-pool-player-state', ({ gameState } = {}) => {
     const info = socket.data.competition
     if (!info || !gameState) return
-    const result = updateCompetitionPlayerState(info.classId, info.playerUuid, socket.id, gameState)
+    const result = updateCompetitionPlayerState(info.classId, info.playerUuid, socket.id, withSanitizedPrices(gameState))
     if (!result) return
     if (result.room) io.to(result.room.code).emit('room-updated', { players: result.room.players })
     broadcastClassRooms(info.classId)
