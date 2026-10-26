@@ -278,6 +278,49 @@ describe('saveGameResult', () => {
 
     expect(mockSessionInsert).toHaveBeenCalledWith(expect.objectContaining({ title: 'TEAM 1' }))
   })
+
+  it('참여자 가격이 있으면 그 가격으로 계산하고 행에 저장한다. 없으면 컬럼은 null이다', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSessionInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => {
+      if (table === 'game_sessions') return { insert: mockSessionInsert }
+      if (table === 'game_results') return { insert: mockResultsInsert }
+      throw new Error(`unexpected table: ${table}`)
+    })
+
+    const { saveGameResult } = await import('./db.js')
+    const playerPrices = {
+      stocks: { semiconductor: 5000, finance: 2000, bio: 2000 },
+      realEstate: { gaon: 30000, dami: 10000, chorong: 10000 },
+    }
+    const holdings = {
+      stocks: { semiconductor: 2, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 1, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+    }
+
+    await saveGameResult({
+      code: 'AB1234', prices: PRICES, classId: 'class-1',
+      players: [
+        { playerUuid: 'p1', name: 'A', character: 'fox', gameState: makeState({ job: 'a', ...holdings, prices: playerPrices }) },
+        { playerUuid: 'p2', name: 'B', character: 'fox', gameState: makeState({ job: 'a', ...holdings }) },
+      ],
+    })
+
+    expect(mockResultsInsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        player_uuid: 'p1', stock_value: 10000, real_estate_value: 30000,
+        stock_prices: playerPrices.stocks, real_estate_prices: playerPrices.realEstate,
+      }),
+      expect.objectContaining({
+        player_uuid: 'p2', stock_value: 4000, real_estate_value: 10000,
+        stock_prices: null, real_estate_prices: null,
+      }),
+    ])
+  })
 })
 
 describe('getRankings', () => {

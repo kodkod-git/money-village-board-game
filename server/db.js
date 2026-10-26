@@ -74,6 +74,9 @@ export async function saveGameResult(room) {
       total_assets: breakdown.totalAssets,
       stock_value: breakdown.stockValue,
       real_estate_value: breakdown.realEstateValue,
+      // 경쟁 모드 참여자가 직접 정한 가격. 일반 모드는 null이고 세션 가격을 쓴다.
+      stock_prices: player.gameState.prices?.stocks ?? null,
+      real_estate_prices: player.gameState.prices?.realEstate ?? null,
     }
   })
 
