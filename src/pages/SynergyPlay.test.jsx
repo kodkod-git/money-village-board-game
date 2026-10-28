@@ -80,11 +80,11 @@ describe('SynergyPlay', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/synergy/FASN/result/synergy-1')
   })
 
-  it('시민권 링크로 들어오면 참여 로그를 남기고 세션 시간을 재며, 저장 후 완료 로그를 남긴다', async () => {
+  it('테스트 화면에 들어오면 세션 시간을 재고(참여는 시작 화면에서 센다), 저장 후 완료 로그를 남긴다', async () => {
     trackSurveyEvent.mockClear()
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ id: 'synergy-1' }) })
     renderPlay()
-    expect(trackSurveyEvent).toHaveBeenCalledWith('synergy', 'visit')
+    expect(trackSurveyEvent).not.toHaveBeenCalledWith('synergy', 'visit')
     expect(markSurveyStart).toHaveBeenCalledWith('synergy')
     completeTest()
     await act(async () => { await Promise.resolve(); await Promise.resolve() })

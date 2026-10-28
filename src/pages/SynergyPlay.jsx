@@ -29,11 +29,9 @@ export default function SynergyPlay() {
   const [answers, setAnswers] = useState({})
   const [letters, setLetters] = useState({})
 
-  // 시너지 테스트는 시민권 QR 링크가 곧바로 첫 입력 화면이라, 여기서 참여를 세고 세션 시간도 잰다.
+  // 참여(visit)는 시작 화면(SynergyIntro)에서 세고, 여기서는 세션 시간을 잰다.
   useEffect(() => {
-    if (!citizenType) return
-    trackSurveyEvent('synergy', 'visit')
-    markSurveyStart('synergy')
+    if (citizenType) markSurveyStart('synergy')
   }, [citizenType])
 
   if (!citizenType) {

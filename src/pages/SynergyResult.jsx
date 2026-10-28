@@ -5,6 +5,7 @@ import { SYNERGY_TYPES, SYNERGY_AXES, ACADEMY_INQUIRY_URL } from '../constants/s
 import { calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from '../utils/synergyScoring'
 import useBodyClass from '../hooks/useBodyClass'
 import { trackSurveyEvent } from '../utils/surveyTracking'
+import { uploadSynergyThumbnail, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT } from '../utils/synergyThumbnail'
 import styles from './QuizResult.module.css'
 import synergyStyles from './SynergyResult.module.css'
 
@@ -17,6 +18,7 @@ export default function SynergyResult() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(false)
   const [notice, setNotice] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState(null)
 
   useEffect(() => {
     fetch(`/api/synergy/results/${resultId}`)
@@ -30,6 +32,27 @@ export default function SynergyResult() {
     const timer = setTimeout(() => setNotice(''), 2000)
     return () => clearTimeout(timer)
   }, [notice])
+
+  const citizenType = normalizeSynergyType(result?.citizen_type)
+  const myType = normalizeSynergyType(result?.my_type)
+
+  // 카카오 공유 썸네일(나와 시민권자 캐릭터가 함께 나오는 이미지)은 미리 올려둔다.
+  // 버튼을 누른 뒤에 올리면 비동기 대기 때문에 PC에서 공유 팝업이 막힐 수 있다.
+  useEffect(() => {
+    const kakao = window.Kakao
+    if (!myType || !citizenType || !KAKAO_JS_KEY || !kakao?.Share?.uploadImage) return
+    let cancelled = false
+    if (!kakao.isInitialized()) kakao.init(KAKAO_JS_KEY)
+    uploadSynergyThumbnail(kakao, {
+      background: getSynergyBackground(myType, citizenType),
+      leftCharacter: getCharacterImage(SYNERGY_TYPES[myType].animal),
+      rightCharacter: getCharacterImage(SYNERGY_TYPES[citizenType].animal),
+      icon: '/synergy/synergy.png',
+    })
+      .then(url => { if (!cancelled) setThumbnailUrl(url) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [myType, citizenType])
 
   const trackLink = target => trackSurveyEvent('synergy', 'link_click', { target, resultId })
   const trackShare = target => trackSurveyEvent('synergy', 'share_click', { target, resultId })
@@ -51,14 +74,14 @@ export default function SynergyResult() {
       content: {
         title: `${type} - 경제적 성향 시너지 테스트`,
         description: SYNERGY_TYPES[type].title,
-        imageUrl: `${window.location.origin}${background}`,
+        // 썸네일 업로드가 아직이거나 실패했으면 배경 이미지로 대신한다.
+        ...(thumbnailUrl
+          ? { imageUrl: thumbnailUrl, imageWidth: THUMBNAIL_WIDTH, imageHeight: THUMBNAIL_HEIGHT }
+          : { imageUrl: `${window.location.origin}${background}` }),
         link: { mobileWebUrl: window.location.href, webUrl: window.location.href },
       },
     })
-  }, [])
-
-  const citizenType = normalizeSynergyType(result?.citizen_type)
-  const myType = normalizeSynergyType(result?.my_type)
+  }, [thumbnailUrl])
 
   if (error || (result && (!citizenType || !myType))) {
     const retryType = normalizeSynergyType(rawCitizenType)

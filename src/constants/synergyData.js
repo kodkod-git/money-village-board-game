@@ -2,6 +2,11 @@
 // 테스트를 푼 사람의 유형과 시민권자 유형의 시너지를 보여준다.
 // 원본: 스모어 "경제 잠재력 테스트 FASN" (https://smore.im/quiz/NOHUAfFNc3)
 
+// 시작 화면. QR 링크(/synergy/:citizenType)로 들어오면 가장 먼저 보인다.
+export const INTRO_TITLE = '경제적 성향 시너지 테스트'
+export const INTRO_SUBTITLE = '시민권자 친구와 나의 경제 시너지는?'
+export const INTRO_SHARE_TEXT = '친구와 나의 경제적 성향 시너지를 알아보세요!'
+
 export const MY_NAME_TITLE = '나의 닉네임을\n입력해주세요'
 export const CITIZEN_NAME_TITLE = '시민권자(친구)의 닉네임을\n입력해주세요'
 export const NAME_SUBTITLE = '결과 화면에 표시됩니다'
