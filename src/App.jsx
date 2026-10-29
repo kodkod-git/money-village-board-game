@@ -17,6 +17,7 @@ import QuizResult from './pages/QuizResult'
 import SynergyIntro from './pages/SynergyIntro'
 import SynergyPlay from './pages/SynergyPlay'
 import SynergyResult from './pages/SynergyResult'
+import ParentGuide from './pages/ParentGuide'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
         <Route path="/result/:sessionId/report" element={<EconomicReport />} />
+        <Route path="/result/:sessionId/guide" element={<ParentGuide />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/quiz" element={<QuizIntro />} />
         <Route path="/quiz/play" element={<QuizPlay />} />

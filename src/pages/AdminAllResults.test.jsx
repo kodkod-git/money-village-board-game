@@ -50,6 +50,18 @@ describe('AdminAllResults', () => {
     expect(links[0]).toHaveAttribute('target', '_blank')
   })
 
+  it('테이블 뷰는 보고서 옆 컬럼에 학부모 안내서 링크를 단다', async () => {
+    render(<AdminAllResults />)
+    await screen.findByText('블루')
+    await userEvent.click(screen.getByRole('tab', { name: '테이블 뷰' }))
+    const headers = screen.getAllByRole('columnheader').map(th => th.textContent)
+    expect(headers.slice(-2)).toEqual(['보고서', '안내서'])
+    const links = screen.getAllByRole('link', { name: '안내서' })
+    expect(links).toHaveLength(4)
+    expect(links[3]).toHaveAttribute('href', '/result/session-블루/guide?player=uuid-%EB%B8%94%EB%A3%A8')
+    expect(links[0]).toHaveAttribute('target', '_blank')
+  })
+
   it('유형 분포 뷰는 기본 기준(70%, 50%)으로 게임 결과 유형 분포를 보여 준다', async () => {
     render(<AdminAllResults />)
     await screen.findByText('블루')

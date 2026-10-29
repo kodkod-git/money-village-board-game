@@ -25,6 +25,10 @@ function reportPath(row) {
   return `/result/${row.sessionId}/report?player=${encodeURIComponent(row.playerUuid)}`
 }
 
+function guidePath(row) {
+  return `/result/${row.sessionId}/guide?player=${encodeURIComponent(row.playerUuid)}`
+}
+
 function ResultsTable({ rows }) {
   const [sort, setSort] = useState({ key: null, dir: 'desc' })
 
@@ -59,6 +63,7 @@ function ResultsTable({ rows }) {
               </th>
             ))}
             <th className={tableStyles.th}>보고서</th>
+            <th className={tableStyles.th}>안내서</th>
           </tr>
         </thead>
         <tbody>
@@ -85,6 +90,13 @@ function ResultsTable({ rows }) {
                 {row.sessionId && row.playerUuid ? (
                   <a className={styles.reportLink} href={reportPath(row)} target="_blank" rel="noopener noreferrer">
                     보고서
+                  </a>
+                ) : '-'}
+              </td>
+              <td className={tableStyles.td}>
+                {row.sessionId && row.playerUuid ? (
+                  <a className={styles.reportLink} href={guidePath(row)} target="_blank" rel="noopener noreferrer">
+                    안내서
                   </a>
                 ) : '-'}
               </td>
