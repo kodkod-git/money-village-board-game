@@ -70,7 +70,6 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
     onComplete({ ...gameState, cash: cashVal, isCompleted: true })
   }
 
-
   return (
     <>
       <StepBar
