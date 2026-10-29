@@ -535,33 +535,3 @@ describe('유형 보고서', () => {
     expect(screen.getByRole('button', { name: '보고서' })).toBeDisabled()
   })
 })
-
-describe('경쟁 모드', () => {
-  it('팀 가격 설정 버튼을 숨기고, 참여자 수정 화면에서 그 참여자의 가격을 저장한다', async () => {
-    const prices = {
-      stocks: { ...PRICES.stocks, semiconductor: 7000 },
-      realEstate: PRICES.realEstate,
-    }
-    const base = makeRoom('AB1234', '김민준')
-    const room = { ...base, players: [{ ...base.players[0], gameState: { ...base.players[0].gameState, prices } }] }
-    global.fetch = vi.fn((_url, options) => {
-      if (options?.method === 'PATCH') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(room.players[0]) })
-      }
-      return Promise.resolve({ json: () => Promise.resolve({ players: [], prices: PRICES }) })
-    })
-
-    render(<AdminSpectateModal competition rooms={[room]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
-    expect(screen.queryByRole('button', { name: '가격 설정' })).not.toBeInTheDocument()
-
-    await userEvent.click(screen.getByText('수정'))
-    await userEvent.click(screen.getByRole('button', { name: '가격 설정' }))
-    expect(screen.getByText('7,000 원 ›')).toBeInTheDocument()
-    await userEvent.click(screen.getByText('확인하기'))
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      '/api/admin/rooms/AB1234/players/AB1234-p1',
-      expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ prices }) })
-    )
-  })
-})

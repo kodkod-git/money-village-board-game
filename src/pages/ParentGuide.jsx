@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { GUIDE_CONCEPTS, GUIDE_GRID, GUIDE_GROUPS, GUIDE_ORGANIZATION, GUIDE_STAGE } from '../constants/parentGuide'
 import { buildParentGuide, formatManwon } from '../utils/parentGuide'
-import { pricesForPlayer } from '../utils/playerPrices'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './ParentGuide.module.css'
 
@@ -60,7 +59,7 @@ export default function ParentGuide() {
   }
   if (!data) return <p className={styles.message}>불러오는 중...</p>
 
-  const guide = buildParentGuide(me, pricesForPlayer(me, data))
+  const guide = buildParentGuide(me, { stockPrices: data.stockPrices, realEstatePrices: data.realEstatePrices })
   const group = GUIDE_GROUPS[guide.group]
 
   return (

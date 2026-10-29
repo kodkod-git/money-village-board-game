@@ -3,10 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
-import CompetitionResultCarousel from '../components/CompetitionResultCarousel'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
-import { pricesForPlayer } from '../utils/playerPrices'
 import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
 import { SURVEY_URL } from '../constants/survey'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
@@ -45,16 +43,6 @@ export default function RankingPage() {
   const [viewingPlayer, setViewingPlayer] = useState(null)
   const [shareNotice, setShareNotice] = useState('')
   const [hasMyResult, setHasMyResult] = useState(false)
-  // 경쟁 모드 결과면 팀 비교 대시보드를 랭킹 앞에 붙인다. undefined = 확인 중, null = 일반 결과(또는 실패).
-  const [competition, setCompetition] = useState(isV2 ? undefined : null)
-
-  useEffect(() => {
-    if (!isV2) return
-    fetch(`/api/results/${sessionId}/competition`)
-      .then(r => (r.ok ? r.json() : null))
-      .then(data => setCompetition(Array.isArray(data?.teams) ? data : null))
-      .catch(() => setCompetition(null))
-  }, [sessionId, isV2])
 
   const myPlayerUuid = getPlayerUuid()
 
@@ -92,7 +80,8 @@ export default function RankingPage() {
               // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공열쇠 배수 미적용).
               // 팀 스코프 응답엔 netWorth가 없으므로 여기서 계산한다.
               netWorth: (p.cash ?? 0) + (p.stockValue ?? 0) + (p.realEstateValue ?? 0),
-              ...pricesForPlayer(p, data),
+              stockPrices: data.stockPrices,
+              realEstatePrices: data.realEstatePrices,
             }))
             .sort((a, b) => (b[vk] ?? 0) - (a[vk] ?? 0))
             .map((p, i) => ({ ...p, rank: i + 1 }))
@@ -144,71 +133,6 @@ export default function RankingPage() {
     setViewingPlayer(row)
   }
 
-  const rankingBody = (
-    <div className={styles.inner}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>랭킹</h1>
-        <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
-        {shareNotice && <p role="status" className={styles.subtitle}>{shareNotice}</p>}
-      </div>
-      <div className={styles.topTabs}>
-        {CATEGORY_TABS.map(tab => (
-          <button
-            key={tab.key}
-            className={`${styles.topTab} ${category === tab.key ? styles.topTabActive : ''}`}
-            onClick={() => {
-              // rows를 함께 비워야 이전 탭의 데이터(다른 valueKey 형태)가
-              // 새 탭의 렌더에 잘못 섞여 RankingPodium이 깨지는 것을 막는다.
-              setRows([])
-              setCategory(tab.key)
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {isV2 && (
-        <div className={styles.tabs}>
-          {SCOPE_TABS.map(tab => (
-            <button
-              key={tab.key}
-              className={`${styles.tab} ${scope === tab.key ? styles.tabActive : ''}`}
-              onClick={() => {
-                setRows([])
-                setScope(tab.key)
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <hr className={styles.divider} />
-
-      {loading && <p className={styles.message}>불러오는 중...</p>}
-      {error && <p className={styles.message}>{error}</p>}
-      {!loading && !error && (
-        <RankingTable
-          rows={rows}
-          valueKey={valueKey}
-          highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
-          onRowClick={handleRowClick}
-          podium={
-            // 순위 1~3위가 모두 있을 때만 시상대를 보여준다. 아래 목록에도 동일한
-            // 상위 랭커가 다시 나타나므로, 일부만 채워진 시상대는 오히려 어색하다.
-            // 목록과 같은 스크롤 영역 안에 있어야 하므로 RankingTable에 넘겨 그
-            // 안에서 렌더링한다.
-            podiumRows.length === 3
-              ? <RankingPodium rows={podiumRows} valueKey={valueKey} onRowClick={handleRowClick} />
-              : null
-          }
-        />
-      )}
-    </div>
-  )
-
   return (
     <div className={styles.page}>
       {isV2 ? <BackButton to="/" label="처음으로" /> : <BackButton />}
@@ -235,13 +159,68 @@ export default function RankingPage() {
           )}
         </div>
       )}
-      {competition === undefined && <p className={styles.message}>불러오는 중...</p>}
-      {competition && (
-        <CompetitionResultCarousel teams={competition.teams} mySessionId={competition.mySessionId}>
-          {rankingBody}
-        </CompetitionResultCarousel>
-      )}
-      {competition === null && rankingBody}
+      <div className={styles.inner}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>랭킹</h1>
+          <p className={styles.subtitle}>총 자산 순위를 확인하세요</p>
+          {shareNotice && <p role="status" className={styles.subtitle}>{shareNotice}</p>}
+        </div>
+        <div className={styles.topTabs}>
+          {CATEGORY_TABS.map(tab => (
+            <button
+              key={tab.key}
+              className={`${styles.topTab} ${category === tab.key ? styles.topTabActive : ''}`}
+              onClick={() => {
+                // rows를 함께 비워야 이전 탭의 데이터(다른 valueKey 형태)가
+                // 새 탭의 렌더에 잘못 섞여 RankingPodium이 깨지는 것을 막는다.
+                setRows([])
+                setCategory(tab.key)
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {isV2 && (
+          <div className={styles.tabs}>
+            {SCOPE_TABS.map(tab => (
+              <button
+                key={tab.key}
+                className={`${styles.tab} ${scope === tab.key ? styles.tabActive : ''}`}
+                onClick={() => {
+                  setRows([])
+                  setScope(tab.key)
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <hr className={styles.divider} />
+
+        {loading && <p className={styles.message}>불러오는 중...</p>}
+        {error && <p className={styles.message}>{error}</p>}
+        {!loading && !error && (
+          <RankingTable
+            rows={rows}
+            valueKey={valueKey}
+            highlightPlayerUuid={isV2 ? myPlayerUuid : undefined}
+            onRowClick={handleRowClick}
+            podium={
+              // 순위 1~3위가 모두 있을 때만 시상대를 보여준다. 아래 목록에도 동일한
+              // 상위 랭커가 다시 나타나므로, 일부만 채워진 시상대는 오히려 어색하다.
+              // 목록과 같은 스크롤 영역 안에 있어야 하므로 RankingTable에 넘겨 그
+              // 안에서 렌더링한다.
+              podiumRows.length === 3
+                ? <RankingPodium rows={podiumRows} valueKey={valueKey} onRowClick={handleRowClick} />
+                : null
+            }
+          />
+        )}
+      </div>
 
       {viewingPlayer && (
         <div className={styles.overlay} onClick={() => setViewingPlayer(null)}>

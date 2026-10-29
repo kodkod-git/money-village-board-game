@@ -24,15 +24,6 @@
   height: 40px; padding: 0 18px; border: none; border-radius: var(--admin-r-sm);
   background: var(--admin-blue); color: white; font-size: 13px; font-weight: 700;
 }
-.modeGroup {
-  display: flex; align-items: center; gap: 12px; padding: 0 4px;
-  font-size: 13px; font-weight: 700; color: var(--admin-text-2);
-}
-.modeOption { display: flex; align-items: center; gap: 4px; cursor: pointer; }
-.modeBadge {
-  padding: 2px 8px; border-radius: 999px;
-  background: var(--admin-blue); color: white; font-size: 11px; font-weight: 700;
-}
 .error { color: #e53935; font-size: 12px; margin-bottom: 12px; }
 .list { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
 .item {
@@ -45,7 +36,6 @@
   padding: 12px 14px;
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
 }
-.itemTitleRow { display: flex; align-items: center; gap: 6px; }
 .itemName { font-size: 15px; font-weight: 700; color: var(--admin-text); }
 .itemDate { font-size: 11px; font-weight: 500; color: var(--admin-text-3); }
 .qrBtn {

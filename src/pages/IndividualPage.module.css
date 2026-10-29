@@ -265,21 +265,3 @@
   text-align: center;
   line-height: 1.6;
 }
-
-/* 경쟁 모드 가격 단계: 제목 오른쪽에 초기화 버튼 */
-.priceStepHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-}
-
-.priceResetBtn {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--ink-2);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}

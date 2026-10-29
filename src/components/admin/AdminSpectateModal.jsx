@@ -5,7 +5,6 @@ import AdminPriceSettingModal from './AdminPriceSettingModal'
 import ConfirmDialog from './ConfirmDialog'
 import AdminTeamAssetsModal from './AdminTeamAssetsModal'
 import AdminAddPlayerModal from './AdminAddPlayerModal'
-import { DEFAULT_PRICES } from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import { copyGameResultLink, shareGameResultToKakao } from '../../utils/shareGameResult'
 import { teamDisplayName } from '../../utils/teamDisplayName'
@@ -13,8 +12,7 @@ import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
 
-// competition: 경쟁 모드 수업. 참여자가 각자 가격을 정하므로 팀 가격 대신 참여자 수정 화면에서 그 참여자의 가격을 고친다.
-export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose, onRoomChanged, competition = false }) {
+export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose, onRoomChanged }) {
   // 코드로 현재 팀을 추적한다 — onRoomChanged로 목록을 다시 불러오면
   // 최신순 재정렬 때문에 이 방의 배열 인덱스가 바뀔 수 있으므로,
   // 숫자 인덱스만 들고 있으면 편집 중 다른 팀으로 화면이 튈 수 있다.
@@ -24,7 +22,6 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const [kickTarget, setKickTarget] = useState(null)
   const [confirmRegister, setConfirmRegister] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
-  const [showPlayerPriceModal, setShowPlayerPriceModal] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
   const [shareNotice, setShareNotice] = useState('')
@@ -139,29 +136,13 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
 
   if (editingPlayerUuid) {
     const player = room.players.find(p => p.playerUuid === editingPlayerUuid)
-    const playerPrices = player.gameState.prices ?? DEFAULT_PRICES
     return (
-      <>
-        <AdminEditModal
-          player={player}
-          prices={competition ? playerPrices : room.prices}
-          onSave={(field, value) => handleSave(editingPlayerUuid, field, value)}
-          onClose={() => setEditingPlayerUuid(null)}
-          headerAction={competition && (
-            <button type="button" className={styles.priceBtn} onClick={() => setShowPlayerPriceModal(true)}>가격 설정</button>
-          )}
-        />
-        {showPlayerPriceModal && (
-          <AdminPriceSettingModal
-            prices={playerPrices}
-            onConfirm={async newPrices => {
-              setShowPlayerPriceModal(false)
-              await handleSave(editingPlayerUuid, 'prices', newPrices)
-            }}
-            onClose={() => setShowPlayerPriceModal(false)}
-          />
-        )}
-      </>
+      <AdminEditModal
+        player={player}
+        prices={room.prices}
+        onSave={(field, value) => handleSave(editingPlayerUuid, field, value)}
+        onClose={() => setEditingPlayerUuid(null)}
+      />
     )
   }
 
@@ -226,7 +207,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       </div>
 
       <div className={styles.actions}>
-        {!room.registered && !competition && (
+        {!room.registered && (
           <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
         )}
         {room.status === 'completed-but-unregistered' && (

@@ -8,8 +8,6 @@ import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import TypeDistribution from '../components/admin/TypeDistribution'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
-import CompetitionPoolBlock from '../components/admin/CompetitionPoolBlock'
-import { competitionReadiness } from '../utils/competitionReadiness'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -30,8 +28,7 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName, mode = 'normal' }) {
-  const competition = mode === 'competition'
+export default function AdminClassDashboard({ classId, initialName }) {
   const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
   const [rooms, setRooms] = useState([])
@@ -47,22 +44,13 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
   // 유형 분포 뷰는 이 수업에서 결과 등록을 마친 참가자만 보여 준다.
   const [results, setResults] = useState(null)
   const [resultsError, setResultsError] = useState(false)
-  // 경쟁 모드: QR로 들어왔지만 아직 팀에 배정되지 않은 참여자
-  const [pool, setPool] = useState([])
-  const [poolDeleteTarget, setPoolDeleteTarget] = useState(null)
 
   const loadRooms = useCallback(() => {
     adminFetch(`/api/admin/rooms?classId=${encodeURIComponent(classId)}`)
       .then(r => r.json())
       .then(setRooms)
       .catch(() => {})
-    if (competition) {
-      adminFetch(`/api/admin/classes/${encodeURIComponent(classId)}/pool`)
-        .then(r => r.json())
-        .then(setPool)
-        .catch(() => {})
-    }
-  }, [classId, competition])
+  }, [classId])
 
   useEffect(() => {
     loadRooms()
@@ -95,8 +83,6 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
     room.status === 'completed-but-unregistered' && !room.registered &&
     room.players.some(p => p?.connected === false)
   )
-  const readiness = competition ? competitionReadiness(pool, rooms) : null
-  const registerLabel = competition ? '결과 등록' : '전체 등록'
 
   async function handleCreateRoom() {
     if (isCreating) return
@@ -176,38 +162,6 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
     loadRooms()
   }
 
-  async function handleAssign(playerUuid, toRoomCode) {
-    try {
-      const res = await adminFetch(`/api/admin/classes/${classId}/assign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerUuid, toRoomCode }),
-      })
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({}))
-        toast(error || '팀 배정에 실패했습니다')
-      }
-    } catch {
-      toast('팀 배정에 실패했습니다')
-    }
-    loadRooms()
-  }
-
-  async function handleConfirmDeletePoolPlayer() {
-    const target = poolDeleteTarget
-    setPoolDeleteTarget(null)
-    try {
-      const res = await adminFetch(`/api/admin/classes/${classId}/pool/${target.playerUuid}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({}))
-        toast(error || '참여자 삭제에 실패했습니다')
-      }
-    } catch {
-      toast('참여자 삭제에 실패했습니다')
-    }
-    loadRooms()
-  }
-
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -258,25 +212,19 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
             <img src="/icons/IconDelete.png" alt="" className={styles.btnIcon} />
             <span>전체 삭제</span>
           </button>
-          {readiness && !readiness.ready && (
-            <span className={styles.registerReason}>{readiness.reason}</span>
-          )}
           <button
             className={styles.bulkRegisterBtn}
             onClick={() => setConfirmBulkRegister(true)}
-            disabled={isBulkRegistering || (readiness !== null && !readiness.ready)}
+            disabled={isBulkRegistering}
             type="button"
           >
             <img src="/icons/IconRegister.png" alt="" className={styles.btnIcon} />
-            <span>{registerLabel}</span>
+            <span>전체 등록</span>
           </button>
         </div>
       </div>
 
       {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
-      {competition && (
-        <CompetitionPoolBlock players={pool} onAssign={handleAssign} onDelete={setPoolDeleteTarget} />
-      )}
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
       {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
@@ -294,27 +242,14 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
       {confirmBulkRegister && (
         <ConfirmDialog
           tone="primary"
-          title={registerLabel}
+          title="전체 등록"
           description={
-            competition
-              ? '모든 팀의 결과를 등록하고 참여자에게 결과 화면을 보여줄까요?'
-              : hasDisconnectedPendingTeam
-                ? '연결끊김 상태인 참가자가 존재하고, 일부 참여자에게는 결과화면이 나오지 않을 수 있습니다. 그래도 진행하시겠습니까?'
-                : '등록 대기 중인 팀을 모두 결과 등록하시겠습니까?'
+            hasDisconnectedPendingTeam
+              ? '연결끊김 상태인 참가자가 존재하고, 일부 참여자에게는 결과화면이 나오지 않을 수 있습니다. 그래도 진행하시겠습니까?'
+              : '등록 대기 중인 팀을 모두 결과 등록하시겠습니까?'
           }
           onCancel={() => setConfirmBulkRegister(false)}
           onConfirm={() => { setConfirmBulkRegister(false); handleBulkRegister() }}
-        />
-      )}
-
-      {poolDeleteTarget && (
-        <ConfirmDialog
-          tone="danger"
-          title="참여자 삭제"
-          description={<>'{poolDeleteTarget.name}' 참여자를 명단에서 삭제할까요?<br />입력한 내용도 함께 사라집니다.</>}
-          confirmLabel="삭제"
-          onCancel={() => setPoolDeleteTarget(null)}
-          onConfirm={handleConfirmDeletePoolPlayer}
         />
       )}
 
@@ -334,8 +269,6 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
               onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}
               onCreate={classId === 'unassigned' ? undefined : handleCreateRoom}
               onRoomChanged={loadRooms}
-              competition={competition}
-              onAssign={competition ? handleAssign : undefined}
             />
           )}
           {activeTab === 'table' && (
@@ -362,7 +295,6 @@ export default function AdminClassDashboard({ classId, initialName, mode = 'norm
             <AdminSpectateModal
               rooms={rooms}
               initialIndex={spectateIndex}
-              competition={competition}
               onPlayerUpdate={handlePlayerUpdate}
               onClose={() => setSpectateIndex(null)}
               onRoomChanged={loadRooms}
