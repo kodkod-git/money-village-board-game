@@ -422,4 +422,32 @@ describe('AdminClassDashboard', () => {
     expect(await screen.findByText('일괄 결과등록에 실패했습니다')).toBeInTheDocument()
     expect(alertSpy).not.toHaveBeenCalled()
   })
+
+  it('트로피 탭을 누르면 배너·클랜 화면을 보여주고 검색창을 숨긴다', async () => {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    global.fetch.mockImplementation(url =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(
+          url.includes('/clans') ? { participants: [], clans: [] } : ROOMS
+        ),
+      })
+    )
+    await userEvent.click(screen.getByRole('button', { name: '팀 대결' }))
+    expect(await screen.findByText('결과 등록을 마친 참여자가 여기에 표시돼요')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /팀 대결 결과/ })).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('이름 또는 팀 검색...')).not.toBeInTheDocument()
+  })
+
+  it('배너를 누르면 onOpenClanRecap을 부른다', async () => {
+    const onOpenClanRecap = vi.fn()
+    render(
+      <SocketProvider>
+        <AdminClassDashboard classId="class-1" initialName="3학년 2반" initialTab="clans" onOpenClanRecap={onOpenClanRecap} />
+      </SocketProvider>
+    )
+    await userEvent.click(await screen.findByRole('button', { name: /팀 대결 결과/ }))
+    expect(onOpenClanRecap).toHaveBeenCalledTimes(1)
+  })
 })

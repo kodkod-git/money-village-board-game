@@ -8,6 +8,8 @@ import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import TypeDistribution from '../components/admin/TypeDistribution'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
+import ClanTab from '../components/admin/ClanTab'
+import ClanRecapBanner from '../components/admin/ClanRecapBanner'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -17,6 +19,7 @@ const TABS = [
   { key: 'grid', label: '그리드 뷰', icon: '/icons/IconGrid.png' },
   { key: 'table', label: '테이블 뷰', icon: '/icons/IconTable.png' },
   { key: 'chart', label: '유형 분포 뷰', icon: '/icons/IconChart.svg' },
+  { key: 'clans', label: '팀 대결', icon: '/icons/IconTrophy.svg' },
 ]
 
 function matchesSearch(room, query) {
@@ -28,9 +31,9 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName }) {
+export default function AdminClassDashboard({ classId, initialName, initialTab = 'grid', onOpenClanRecap }) {
   const { socket } = useSocketContext()
-  const [activeTab, setActiveTab] = useState('grid')
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
   const [name, setName] = useState(initialName)
@@ -178,12 +181,14 @@ export default function AdminClassDashboard({ classId, initialName }) {
           <p className={styles.subtitle}>진행중인 팀과 완료한 팀을 확인하고 수정할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>
-          <input
-            className={styles.searchInput}
-            placeholder="이름 또는 팀 검색..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          {activeTab !== 'clans' && (
+            <input
+              className={styles.searchInput}
+              placeholder="이름 또는 팀 검색..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          )}
           <div className={styles.viewToggle}>
             {TABS.map(tab => (
               <button
@@ -224,6 +229,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
         </div>
       </div>
 
+      {activeTab === 'clans' && rooms.length > 0 && <ClanRecapBanner onOpen={onOpenClanRecap} />}
       {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
@@ -286,6 +292,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
           {activeTab === 'chart' && !resultsError && results?.length > 0 && (
             <TypeDistribution rows={results} scopeLabel="수업" largePoints />
           )}
+          {activeTab === 'clans' && <ClanTab classId={classId} />}
         </>
       )}
 
