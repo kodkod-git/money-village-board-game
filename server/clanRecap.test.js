@@ -34,6 +34,15 @@ describe('buildClanRecap', () => {
     expect(buildClanRecap([row('r1')], [])).toEqual({ teamCount: 0, memberCount: 0, teams: [] })
   })
 
+  it('음수 값은 0으로 센다', () => {
+    const recap = buildClanRecap(
+      [row('r1', { cash: -50, totalAssets: 10 }), row('r2', { cash: 30, totalAssets: 20 })],
+      [{ id: 'k1', name: '팀 1', memberIds: ['r1', 'r2'] }],
+    )
+    expect(recap.teams[0].cash).toBe(30)
+    expect(recap.teams[0].totalAssets).toBe(30)
+  })
+
   it('소수 합계는 반올림한다', () => {
     const recap = buildClanRecap(
       [row('r1', { totalAssets: 100.4 }), row('r2', { totalAssets: 0.4 })],

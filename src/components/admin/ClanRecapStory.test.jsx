@@ -28,10 +28,10 @@ describe('ClanRecapStory', () => {
     expect(heading()).toBe('3학년 2반 팀 대결 결과')
     expect(screen.getByText('2개 팀 · 4명이 겨뤘어요')).toBeInTheDocument()
     expect(progressStates()).toEqual(['current', 'todo', 'todo', 'todo', 'todo', 'todo'])
-    expect(screen.queryByRole('button', { name: '이전' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '이전' })).toBeDisabled()
   })
 
-  it('다음·이전 버튼으로 넘기고, 마지막 장에서는 다음 버튼이 없다', async () => {
+  it('다음·이전 버튼으로 넘기고, 마지막 장에서는 다음 버튼이 비활성', async () => {
     renderStory()
     await userEvent.click(screen.getByRole('button', { name: '다음' }))
     expect(heading()).toBe('현금을 가장 많이 모은 팀은?')
@@ -40,7 +40,7 @@ describe('ClanRecapStory', () => {
     expect(heading()).toBe('3학년 2반 팀 대결 결과')
     for (let i = 0; i < 5; i++) await userEvent.click(screen.getByRole('button', { name: '다음' }))
     expect(heading()).toBe('최종 순위')
-    expect(screen.queryByRole('button', { name: '다음' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
   })
 
   it('장 순서는 인트로 → 현금 → 주식 → 부동산 → 총 자산 → 최종 순위', async () => {
@@ -69,6 +69,46 @@ describe('ClanRecapStory', () => {
     expect(heading()).toBe('3학년 2반 팀 대결 결과')
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('PageDown/PageUp으로 넘기고 Space는 다음으로 넘긴다', () => {
+    renderStory()
+    fireEvent.keyDown(window, { key: 'PageDown' })
+    expect(heading()).toBe('현금을 가장 많이 모은 팀은?')
+    fireEvent.keyDown(window, { key: 'PageUp' })
+    expect(heading()).toBe('3학년 2반 팀 대결 결과')
+    fireEvent.keyDown(window, { key: ' ' })
+    expect(heading()).toBe('현금을 가장 많이 모은 팀은?')
+  })
+
+  it('버튼에 포커스가 있을 때 Space는 장을 따로 넘기지 않는다', () => {
+    renderStory()
+    fireEvent.keyDown(screen.getByRole('button', { name: '다음' }), { key: ' ' })
+    expect(heading()).toBe('3학년 2반 팀 대결 결과')
+  })
+
+  it('열면 카드에 포커스가 가고 닫으면 이전 포커스로 돌아간다', () => {
+    const opener = document.createElement('button')
+    document.body.appendChild(opener)
+    opener.focus()
+    const { unmount } = renderStory()
+    expect(document.activeElement).toBe(screen.getByTestId('recap-card'))
+    unmount()
+    expect(document.activeElement).toBe(opener)
+    opener.remove()
+  })
+
+  it('Tab 포커스는 대화상자 안에서 순환한다', () => {
+    renderStory()
+    const dialog = screen.getByRole('dialog')
+    const items = dialog.querySelectorAll('button:not([disabled]), [data-recap-card]')
+    const first = items[0]
+    const lastItem = items[items.length - 1]
+    lastItem.focus()
+    fireEvent.keyDown(lastItem, { key: 'Tab' })
+    expect(document.activeElement).toBe(first)
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(lastItem)
   })
 
   it('카드의 왼쪽 1/3을 누르면 이전, 나머지를 누르면 다음', () => {

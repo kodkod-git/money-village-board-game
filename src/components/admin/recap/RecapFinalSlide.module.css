@@ -24,7 +24,7 @@
 .rank1 { animation-delay: 0.8s; }
 .medal { font-size: 32px; line-height: 1; }
 .name { font-size: 14px; font-weight: 800; color: #fff; text-align: center; overflow-wrap: anywhere; }
-.value { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.85); white-space: nowrap; }
+.value { font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.85); white-space: normal; overflow-wrap: anywhere; text-align: center; }
 .block {
   width: 100%;
   display: flex;
@@ -62,6 +62,16 @@
 .restRank { font-size: 13px; font-weight: 800; color: rgba(255, 255, 255, 0.7); }
 .restName { font-size: 14px; font-weight: 700; color: #fff; overflow-wrap: anywhere; }
 .restValue { font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.85); white-space: nowrap; }
+
+/* 팀이 7개 이상이면 시상대와 목록을 줄여 한 화면에 담는다 */
+.compact .rank1 .block { height: 80px; }
+.compact .rank2 .block { height: 60px; }
+.compact .rank3 .block { height: 44px; }
+.compact .medal { font-size: 24px; }
+.compact .rest { gap: 4px; margin-top: 8px; }
+.compact .restRow { padding: 4px 10px; }
+.compact .restRank, .compact .restValue { font-size: 12px; }
+.compact .restName { font-size: 13px; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }

@@ -37,6 +37,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
   const [activeTab, setActiveTab] = useState('grid')
   // 팀 대결 결과 스토리: 배너를 누를 때 한 번 불러온다(열려 있는 동안 갱신하지 않음).
   const [recap, setRecap] = useState(null)
+  const closeRecap = useCallback(() => setRecap(null), [])
   const [isLoadingRecap, setIsLoadingRecap] = useState(false)
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
@@ -262,7 +263,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
       {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
-      {recap && <ClanRecapStory className={name} recap={recap} onClose={() => setRecap(null)} />}
+      {recap && <ClanRecapStory className={name} recap={recap} onClose={closeRecap} />}
 
       {confirmDeleteAll && (
         <ConfirmDialog

@@ -47,6 +47,10 @@
   animation: fade 0.3s ease-out var(--delay) both;
 }
 
+/* 팀이 많을 때 한 화면에 들어가도록 간격과 막대 높이를 줄인다 */
+.slide[data-compact='true'] .bars { gap: 8px; }
+.slide[data-compact='true'] .track { height: 14px; }
+
 @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop {

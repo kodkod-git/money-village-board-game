@@ -15,7 +15,7 @@ export default function RecapCategorySlide({ title, valueKey, teams }) {
   const delayOf = index => Math.round((ranked.length - 1 - index) * step)
 
   return (
-    <div className={styles.slide}>
+    <div className={styles.slide} data-compact={ranked.length >= 8 ? 'true' : undefined}>
       <h2 className={styles.title}>{title}</h2>
       <p className={styles.winner} data-testid="recap-winner" style={{ '--delay': `${delayOf(0) + FILL_MS}ms` }}>
         🏆 {winners.join(' · ')}
@@ -29,7 +29,7 @@ export default function RecapCategorySlide({ title, valueKey, teams }) {
                 className={styles.bar}
                 data-testid="recap-bar"
                 style={{
-                  width: `${topValue > 0 ? (team[valueKey] / topValue) * 100 : 0}%`,
+                  width: `${topValue > 0 ? (Math.max(0, team[valueKey]) / topValue) * 100 : 0}%`,
                   '--delay': `${delayOf(index)}ms`,
                 }}
               />

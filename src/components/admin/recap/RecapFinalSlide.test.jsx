@@ -16,6 +16,14 @@ describe('RecapFinalSlide', () => {
     expect(rest).toEqual(['4위가100원', '5위마50원'])
   })
 
+  it('팀이 7개 이상이면 compact 표시가 붙는다', () => {
+    const many = Array.from({ length: 8 }, (_, i) => t(`t${i}`, `팀${i}`, 100 - i))
+    const { container, rerender } = render(<RecapFinalSlide teams={many} />)
+    expect(container.firstChild).toHaveAttribute('data-compact', 'true')
+    rerender(<RecapFinalSlide teams={many.slice(0, 6)} />)
+    expect(container.firstChild).not.toHaveAttribute('data-compact')
+  })
+
   it('팀이 하나면 1위 자리만 있고 목록은 없다', () => {
     render(<RecapFinalSlide teams={[t('a', '가', 100)]} />)
     expect(screen.getByTestId('podium-1')).toHaveTextContent('가')

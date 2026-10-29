@@ -27,7 +27,8 @@
 
 .stage { display: flex; align-items: center; gap: 24px; }
 
-.navBtn, .navSpacer { flex: none; width: 44px; height: 44px; }
+.navBtn { flex: none; width: 44px; height: 44px; }
+.navHidden { visibility: hidden; }
 .navBtn {
   border: none;
   border-radius: 50%;
@@ -41,6 +42,7 @@
 .navBtn:hover { background: #fff; }
 
 .card {
+  outline: none;
   position: relative;
   display: flex;
   flex-direction: column;

@@ -9,7 +9,7 @@ export function buildClanRecap(rows, clans) {
       const members = clan.memberIds.map(id => byId.get(id)).filter(Boolean)
       const team = { id: clan.id, name: clan.name, memberCount: members.length }
       for (const key of SUM_KEYS) {
-        team[key] = Math.round(members.reduce((sum, m) => sum + (Number(m[key]) || 0), 0))
+        team[key] = Math.round(members.reduce((sum, m) => sum + Math.max(0, Number(m[key]) || 0), 0))
       }
       return team
     })

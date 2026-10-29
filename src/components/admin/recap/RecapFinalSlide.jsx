@@ -9,9 +9,10 @@ export default function RecapFinalSlide({ teams }) {
   const ranked = rankTeams(teams, 'totalAssets')
   const podium = PODIUM_ORDER.filter(i => ranked[i]).map(i => ({ team: ranked[i], rank: i + 1 }))
   const rest = ranked.slice(3)
+  const compact = teams.length >= 7
 
   return (
-    <div className={styles.slide}>
+    <div className={`${styles.slide} ${compact ? styles.compact : ''}`} data-compact={compact ? 'true' : undefined}>
       <h2 className={styles.title}>최종 순위</h2>
       <p className={styles.subtitle}>총 자산 기준</p>
       <div className={styles.podium}>
