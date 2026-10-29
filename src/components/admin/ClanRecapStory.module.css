@@ -1,0 +1,79 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 12, 0.92);
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+.closeBtn:hover { background: rgba(255, 255, 255, 0.1); }
+
+.stage { display: flex; align-items: center; gap: 24px; }
+
+.navBtn, .navSpacer { flex: none; width: 44px; height: 44px; }
+.navBtn {
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #111;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.navBtn:hover { background: #fff; }
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: min(88vh, 820px);
+  aspect-ratio: 9 / 16;
+  padding: 16px 20px 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  animation: cardIn 0.45s ease-out 0.1s both;
+  transition: background 0.4s ease;
+}
+.intro, .final { background: linear-gradient(160deg, #0b1f14 0%, #0f3b24 55%, #1d7a45 100%); }
+.cash { background: linear-gradient(160deg, #06281a 0%, #0b5a34 60%, #23a35f 100%); }
+.stock { background: linear-gradient(160deg, #0a1633 0%, #123d8a 60%, #2f6fe0 100%); }
+.estate { background: linear-gradient(160deg, #2b1405 0%, #8a3f0c 60%, #e07a1f 100%); }
+.total { background: linear-gradient(160deg, #1c0b33 0%, #4b1d8a 60%, #8a4fe0 100%); }
+
+.progress { display: flex; gap: 4px; }
+.segment { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.3); }
+.segment[data-state='done'] { background: rgba(255, 255, 255, 0.85); }
+.segment[data-state='current'] { background: #fff; box-shadow: 0 0 6px rgba(255, 255, 255, 0.7); }
+
+.className { margin-top: 10px; font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
+
+.content { flex: 1; min-height: 0; animation: slideIn 0.3s ease-out both; }
+
+@keyframes fadeIn { from { background: rgba(10, 10, 12, 0); } to { background: rgba(10, 10, 12, 0.92); } }
+@keyframes cardIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes slideIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop, .card, .content { animation: none; }
+}
