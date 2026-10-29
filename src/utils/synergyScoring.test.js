@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage } from './synergyScoring'
+import { calcSynergyType, calcSynergyScores, normalizeSynergyType, getTypeGroup, getSynergyBackground, getCharacterImage, getSynergyThumbnail } from './synergyScoring'
 import { SYNERGY_TYPES } from '../constants/synergyData'
 
 describe('calcSynergyType', () => {
@@ -48,6 +48,12 @@ describe('getTypeGroup', () => {
     for (const [code, info] of Object.entries(SYNERGY_TYPES)) {
       expect(RESULT_GROUPS[getTypeGroup(code)].animals).toContain(info.animal)
     }
+  })
+})
+
+describe('getSynergyThumbnail', () => {
+  it('나·시민권자 유형 조합마다 서버 합성 썸네일 URL을 만든다', () => {
+    expect(getSynergyThumbnail('PTEN', 'FAEC')).toBe('/api/synergy/thumbnail/PTEN/FAEC.jpg')
   })
 })
 

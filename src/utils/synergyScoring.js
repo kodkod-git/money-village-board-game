@@ -1,5 +1,5 @@
-import { SYNERGY_QUESTIONS, SYNERGY_TYPES, TYPE_GROUP } from '../constants/synergyData'
-import { CHARACTERS } from '../constants/characters'
+import { SYNERGY_QUESTIONS, SYNERGY_TYPES, TYPE_GROUP } from '../constants/synergyData.js'
+import { CHARACTERS } from '../constants/characters.js'
 
 export function calcSynergyType(letters) {
   return [...SYNERGY_QUESTIONS]
@@ -29,6 +29,14 @@ export function getTypeGroup(type) {
 export function getSynergyBackground(myType, citizenType) {
   const colorOf = type => getTypeGroup(type).split(' ')[0].toLowerCase()
   return `/synergy/${colorOf(myType)}_${colorOf(citizenType)}.png`
+}
+
+// 카카오톡 공유 썸네일. 서버(server/synergyThumbnail.js)가 결과 화면 hero를 2:1로 합성해 준다.
+export const THUMBNAIL_WIDTH = 800
+export const THUMBNAIL_HEIGHT = 400
+
+export function getSynergyThumbnail(myType, citizenType) {
+  return `/api/synergy/thumbnail/${myType}/${citizenType}.jpg`
 }
 
 // public/characters/{역할}-{동물}.png 중 대표 동물에 해당하는 캐릭터를 찾는다.

@@ -9,6 +9,7 @@ import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisc
 import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId, getCompetitionTeams } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
+import { renderSynergyThumbnail } from './synergyThumbnail.js'
 import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
 import { parseSurveyEvent, saveSurveyEvent, listSurveyEvents, summarizeSurveyEvents } from './surveyEvents.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
@@ -170,6 +171,21 @@ app.post('/api/synergy/results', async (req, res) => {
   } catch (err) {
     console.error('synergy save error:', err)
     res.status(500).json({ error: 'Failed to save synergy result' })
+  }
+})
+
+app.get('/api/synergy/thumbnail/:myType/:citizenType.jpg', async (req, res) => {
+  const { myType, citizenType } = req.params
+  if (!SYNERGY_TYPE_PATTERN.test(myType) || !SYNERGY_TYPE_PATTERN.test(citizenType)) {
+    return res.status(404).end()
+  }
+  try {
+    const image = await renderSynergyThumbnail(myType, citizenType)
+    res.set('Cache-Control', 'public, max-age=31536000, immutable')
+    res.type('jpg').send(image)
+  } catch (err) {
+    console.error('synergy thumbnail error:', err)
+    res.status(500).end()
   }
 })
 
