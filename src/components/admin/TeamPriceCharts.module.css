@@ -94,11 +94,6 @@
   border-top: 1px solid var(--admin-border);
 }
 
-/* 0% 기준선은 다른 눈금선보다 진하게 */
-.gridLines .zeroLine {
-  border-top-color: var(--admin-text-3);
-}
-
 .groups {
   position: relative;
   display: flex;
@@ -114,7 +109,7 @@
   gap: 2px;
 }
 
-/* 막대 한 칸 — 0% 선 위아래로 막대를 놓을 수 있게 플롯 높이 전체를 차지한다 */
+/* 막대 한 칸 — 툴팁을 막대 끝에 붙일 수 있게 플롯 높이 전체를 차지한다 */
 .slot {
   position: relative;
   flex-shrink: 1;
@@ -122,17 +117,13 @@
   height: 100%;
 }
 
-/* 데이터 끝(상승은 위, 하락은 아래)만 둥글린다 */
 .bar {
   position: absolute;
+  bottom: 0;
   left: 0;
   right: 0;
   border-radius: 4px 4px 0 0;
-  transition: bottom 0.35s ease, height 0.35s ease;
-}
-
-.barDown {
-  border-radius: 0 0 4px 4px;
+  transition: height 0.35s ease;
 }
 
 .slot:hover .bar {
