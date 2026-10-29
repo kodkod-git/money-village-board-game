@@ -17,6 +17,7 @@ import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
 import { createClan, renameClan, deleteClan, assignToClan, listClans, pruneMembers, deleteClassClans, isValidClanName } from './clans.js'
 import { buildClanView } from './clanView.js'
+import { buildClanRecap } from './clanRecap.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -365,6 +366,18 @@ app.get('/api/admin/classes/:classId/clans', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('list clans error:', err)
     res.status(500).json({ error: '팀 정보를 불러오지 못했어요' })
+  }
+})
+
+app.get('/api/admin/classes/:classId/clans/recap', requireAdmin, async (req, res) => {
+  const { classId } = req.params
+  try {
+    if (await denyClassAccess(req, res)) return
+    const rows = await loadClanRows(classId)
+    res.json(buildClanRecap(rows, listClans(classId)))
+  } catch (err) {
+    console.error('clan recap error:', err)
+    res.status(500).json({ error: '팀 대결 결과를 불러오지 못했어요' })
   }
 })
 
