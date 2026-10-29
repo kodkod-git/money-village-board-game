@@ -6,7 +6,7 @@ import {
   updatePlayerStateByUuid, updatePlayerState, computeLiveRoomStatus,
   deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder,
   listPublicRoomsByClassId, getRoomBySocketId, removePlayerByUuid, updateRoomTitle,
-  teamNumbersForClass, addAssignedPlayer, findRoomByPlayerUuid, MAX_PLAYERS,
+  teamNumbersForClass,
 } from './rooms.js'
 
 beforeEach(() => clearRooms())
@@ -764,56 +764,5 @@ describe('teamNumbersForClass', () => {
     const numbers = teamNumbersForClass('unassigned')
     expect(numbers.get(room.code)).toBe(1)
     expect(numbers.size).toBe(1)
-  })
-})
-
-describe('경쟁 모드 방', () => {
-  const ASSIGNED = {
-    playerUuid: 'p1', name: '철수', affiliation: '서울초', character: 'ptsc', socketId: 's1', connected: true,
-    gameState: { cash: 5000, isCompleted: true },
-  }
-
-  it('mode를 지정하지 않으면 normal, 지정하면 그 값을 가진다', () => {
-    expect(createRoom().mode).toBe('normal')
-    expect(createRoom({ mode: 'competition' }).mode).toBe('competition')
-  })
-
-  it('addAssignedPlayer는 gameState를 그대로 넣고 팀장이 아닌 플레이어로 추가한다', () => {
-    const { code } = createRoom({ classId: 'class-1', mode: 'competition' })
-    const room = addAssignedPlayer(code, ASSIGNED)
-    expect(room.players[0]).toMatchObject({ ...ASSIGNED, isHost: false })
-    expect(getRoomBySocketId('s1').code).toBe(code)
-  })
-
-  it('addAssignedPlayer는 소켓이 없는 플레이어도 받는다', () => {
-    const { code } = createRoom({ classId: 'class-1', mode: 'competition' })
-    addAssignedPlayer(code, { ...ASSIGNED, socketId: null })
-    expect(getRoom(code).players).toHaveLength(1)
-    expect(getRoomBySocketId(null)).toBeNull()
-  })
-
-  it('addAssignedPlayer는 4명이 찬 방이면 던진다', () => {
-    const { code } = createRoom({ classId: 'class-1', mode: 'competition' })
-    for (let i = 0; i < MAX_PLAYERS; i++) addAssignedPlayer(code, { ...ASSIGNED, playerUuid: `p${i}`, socketId: `s${i}` })
-    expect(() => addAssignedPlayer(code, { ...ASSIGNED, playerUuid: 'p9', socketId: 's9' })).toThrow('Room is full')
-  })
-
-  it('findRoomByPlayerUuid는 같은 수업의 방에서만 찾는다', () => {
-    const { code } = createRoom({ classId: 'class-1', mode: 'competition' })
-    addAssignedPlayer(code, ASSIGNED)
-    expect(findRoomByPlayerUuid('class-1', 'p1').code).toBe(code)
-    expect(findRoomByPlayerUuid('class-2', 'p1')).toBeNull()
-    expect(findRoomByPlayerUuid('class-1', 'nobody')).toBeNull()
-  })
-
-  it('경쟁 모드 방은 연결이 끊겨도 유예 시간 뒤 플레이어를 지우지 않는다', () => {
-    vi.useFakeTimers()
-    const { code } = createRoom({ classId: 'class-1', mode: 'competition' })
-    addAssignedPlayer(code, ASSIGNED)
-    markDisconnected('s1')
-    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
-    expect(getRoom(code).players).toHaveLength(1)
-    expect(getRoom(code).players[0].connected).toBe(false)
-    vi.useRealTimers()
   })
 })

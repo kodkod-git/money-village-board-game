@@ -13,17 +13,15 @@ function badgeMultiplier(badgeCount) {
   return 1
 }
 
-// 경쟁 모드 참여자는 자기가 정한 가격(gameState.prices)을 가진다. 없으면 방(세션) 가격을 쓴다.
 export function calculateAssetBreakdown(gameState, prices) {
   const { cash, stocks, realEstate, badges } = gameState
-  const usedPrices = gameState.prices ?? prices
   const badgeCount = badges.filter(Boolean).length
 
   const stockValue = Object.keys(STOCK_LABELS).reduce(
-    (sum, key) => sum + (stocks[key] ?? 0) * (usedPrices.stocks[key] ?? 0), 0
+    (sum, key) => sum + (stocks[key] ?? 0) * (prices.stocks[key] ?? 0), 0
   )
   const realEstateValue = Object.keys(REAL_ESTATE_LABELS).reduce(
-    (sum, key) => sum + (realEstate[key] ?? 0) * (usedPrices.realEstate[key] ?? 0), 0
+    (sum, key) => sum + (realEstate[key] ?? 0) * (prices.realEstate[key] ?? 0), 0
   )
   const baseAssets = (cash ?? 0) + stockValue + realEstateValue
   const totalAssets = Math.round(baseAssets * badgeMultiplier(badgeCount))
@@ -35,12 +33,6 @@ export function calculateAssetBreakdown(gameState, prices) {
 // 관리자 직접 등록) 미선택은 빈 문자열로 저장한다. 화면에서는 null과 똑같이 "직업 없음"으로 보인다.
 function toJobColumn(job) {
   return job ?? ''
-}
-
-// game_results 행의 참여자 가격(경쟁 모드). 일반 모드 행은 null이므로 undefined를 돌려준다.
-function rowPrices(row) {
-  if (!row.stock_prices && !row.real_estate_prices) return undefined
-  return { stocks: row.stock_prices ?? {}, realEstate: row.real_estate_prices ?? {} }
 }
 
 export async function saveGameResult(room) {
@@ -80,9 +72,6 @@ export async function saveGameResult(room) {
       total_assets: breakdown.totalAssets,
       stock_value: breakdown.stockValue,
       real_estate_value: breakdown.realEstateValue,
-      // 경쟁 모드 참여자가 직접 정한 가격. 일반 모드는 null이고 세션 가격을 쓴다.
-      stock_prices: player.gameState.prices?.stocks ?? null,
-      real_estate_prices: player.gameState.prices?.realEstate ?? null,
     }
   })
 
@@ -154,7 +143,6 @@ export async function getAllCompletedTeams() {
           realEstate: r.real_estate_holdings,
           badges: r.badges,
           isCompleted: true,
-          ...(rowPrices(r) ? { prices: rowPrices(r) } : {}),
         },
       })),
   }))
@@ -232,7 +220,6 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
     stocks: current.stock_holdings,
     realEstate: current.real_estate_holdings,
     badges: current.badges,
-    prices: rowPrices(current),
     ...partialGameState,
   }
 
@@ -244,10 +231,6 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
     if (key in partialGameState) updateRow[column] = partialGameState[key]
   }
   if ('job' in updateRow) updateRow.job = toJobColumn(updateRow.job)
-  if (partialGameState.prices) {
-    updateRow.stock_prices = partialGameState.prices.stocks
-    updateRow.real_estate_prices = partialGameState.prices.realEstate
-  }
   updateRow.total_assets = breakdown.totalAssets
   updateRow.stock_value = breakdown.stockValue
   updateRow.real_estate_value = breakdown.realEstateValue
@@ -273,12 +256,11 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
       realEstate: updated.real_estate_holdings,
       badges: updated.badges,
       isCompleted: true,
-      ...(rowPrices(updated) ? { prices: rowPrices(updated) } : {}),
     },
   }
 }
 
-const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, stock_prices, real_estate_prices, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
+const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
 
 // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
 // 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
@@ -306,9 +288,8 @@ function mapRankingRow(r, i) {
     teamCode: r.game_sessions?.team_code ?? '',
     teamName: r.game_sessions?.title || r.game_sessions?.team_code || '',
     className: r.game_sessions?.classes?.name ?? UNASSIGNED_CLASS,
-    // 경쟁 모드 참여자는 자기 가격, 일반 모드는 그 게임(세션)의 가격.
-    stockPrices: r.stock_prices ?? r.game_sessions?.stock_prices ?? null,
-    realEstatePrices: r.real_estate_prices ?? r.game_sessions?.real_estate_prices ?? null,
+    stockPrices: r.game_sessions?.stock_prices ?? null,
+    realEstatePrices: r.game_sessions?.real_estate_prices ?? null,
     // 결과 등록 시각. 관리자 "게임 분석" 테이블을 최신순으로 보여 줄 때 쓴다.
     createdAt: r.created_at,
   }
@@ -375,43 +356,4 @@ export async function getSessionCreatedAtsByClassId(classId) {
   const { data, error } = await query
   if (error) throw error
   return (data ?? []).map(session => session.created_at)
-}
-
-function sumColumn(rows, column) {
-  return rows.reduce((sum, row) => sum + (Number(row[column]) || 0), 0)
-}
-
-// 경쟁 모드 결과 화면의 팀 비교 대시보드. 경쟁 모드 수업의 결과가 아니면 null.
-// 팀 이름은 관리자 팀 현황(teamDisplayName)과 같이 제목이 있으면 제목, 없으면 만든 순서대로 "팀 N".
-export async function getCompetitionTeams(sessionId) {
-  const { data: session, error: sessionError } = await supabase
-    .from('game_sessions')
-    .select('id, class_id, classes(mode)')
-    .eq('id', sessionId)
-    .maybeSingle()
-  if (sessionError) throw sessionError
-  if (!session?.class_id || session.classes?.mode !== 'competition') return null
-
-  const { data: sessions, error: sessionsError } = await supabase
-    .from('game_sessions')
-    .select('id, title, created_at, game_results(cash, stock_value, real_estate_value, total_assets)')
-    .eq('class_id', session.class_id)
-    .order('created_at', { ascending: true })
-  if (sessionsError) throw sessionsError
-
-  return {
-    mySessionId: session.id,
-    teams: sessions.map((s, i) => {
-      const rows = s.game_results ?? []
-      return {
-        sessionId: s.id,
-        name: s.title?.trim() || `팀 ${i + 1}`,
-        cash: sumColumn(rows, 'cash'),
-        stockValue: sumColumn(rows, 'stock_value'),
-        realEstateValue: sumColumn(rows, 'real_estate_value'),
-        totalAssets: sumColumn(rows, 'total_assets'),
-        playerCount: rows.length,
-      }
-    }),
-  }
 }

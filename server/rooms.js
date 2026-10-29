@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-export const MAX_PLAYERS = 4
+const MAX_PLAYERS = 4
 
 const rooms = new Map()
 const socketToRoom = new Map()
@@ -47,11 +47,11 @@ function defaultPrices() {
   }
 }
 
-export function createRoom({ classId = null, title = null, mode = 'normal' } = {}) {
+export function createRoom({ classId = null, title = null } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title, mode }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title }
   rooms.set(code, room)
   return room
 }
@@ -147,8 +147,6 @@ export function markDisconnected(socketId) {
   if (!player) return null
 
   player.connected = false
-  // 경쟁 모드는 관리자가 배정한 팀이라 자동으로 빼지 않는다(관리자가 직접 정리).
-  if (room.mode === 'competition') return room
   cancelPlayerDisconnectTimer(code, player.playerUuid)
   const key = playerTimerKey(code, player.playerUuid)
   const timer = setTimeout(() => {
@@ -298,27 +296,6 @@ export function updateRoomTitle(code, title) {
   if (!room) return null
   room.title = title
   return room
-}
-
-// 경쟁 모드: 대기 명단에서 꺼낸 플레이어를 입력 상태 그대로 팀에 넣는다. 팀장 개념은 쓰지 않는다.
-export function addAssignedPlayer(code, { socketId = null, name, character, playerUuid, affiliation = '', connected = true, gameState }) {
-  const room = rooms.get(code)
-  if (!room) throw new Error('Room not found')
-  if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
-  room.players.push({
-    socketId, name, character, isHost: false, playerUuid, affiliation, connected,
-    gameState: gameState ?? defaultGameState(),
-  })
-  if (socketId) socketToRoom.set(socketId, code)
-  room.updatedAt = new Date()
-  return room
-}
-
-export function findRoomByPlayerUuid(classId, playerUuid) {
-  for (const room of rooms.values()) {
-    if (room.classId === classId && room.players.some(p => p.playerUuid === playerUuid)) return room
-  }
-  return null
 }
 
 export function clearRooms() {

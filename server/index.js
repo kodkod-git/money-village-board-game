@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, teamNumbersForClass, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
-import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId, getCompetitionTeams } from './db.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { renderSynergyThumbnail } from './synergyThumbnail.js'
@@ -14,10 +14,7 @@ import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
 import { parseSurveyEvent, saveSurveyEvent, listSurveyEvents, summarizeSurveyEvents } from './surveyEvents.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, getClassMode, UNASSIGNED_CLASS } from './classes.js'
-import { listPool, removeFromPool, markPoolDisconnected, deletePool, rememberSubmitted } from './classPool.js'
-import { isPlayerJoinableRoom, joinCompetition, updateCompetitionPlayerState, assignPlayer, returnRoomPlayersToPool, competitionStatus } from './competition.js'
-import { withSanitizedPrices } from './prices.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -38,28 +35,8 @@ function broadcastClassRooms(classId) {
   io.to(`class:${classId ?? 'unassigned'}`).emit('class-rooms-updated')
 }
 
-// 플레이어 화면이 캐릭터 선택 뒤 일반(로비)/경쟁(자산 입력) 중 어디로 갈지 정할 때 쓴다.
-app.get('/api/classes/:classId/mode', async (req, res) => {
-  try {
-    res.json({ mode: await getClassMode(req.params.classId) })
-  } catch (err) {
-    console.error('class mode lookup error:', err?.message ?? err)
-    res.json({ mode: 'normal' })
-  }
-})
-
-app.post('/api/rooms', async (req, res) => {
-  const classId = req.body?.classId ?? null
-  try {
-    // 경쟁 모드 수업의 팀은 관리자만 만든다.
-    if (classId && (await getClassMode(classId)) === 'competition') {
-      return res.status(409).json({ error: '경쟁 모드 수업에서는 팀을 직접 만들 수 없어요' })
-    }
-  } catch (err) {
-    console.error('create room mode check error:', err)
-    return res.status(500).json({ error: '수업 정보를 확인하지 못했어요' })
-  }
-  const room = createRoom({ classId })
+app.post('/api/rooms', (req, res) => {
+  const room = createRoom({ classId: req.body?.classId ?? null })
   broadcastClassRooms(room.classId)
   res.json({ code: room.code })
 })
@@ -109,10 +86,6 @@ app.post('/api/rooms/:code/submit', async (req, res) => {
 
   try {
     const sessionId = await saveGameResult(room)
-    // 경쟁 모드 팀을 관전 화면에서 하나만 등록해도, 다시 들어온 학생이 결과 화면으로 갈 수 있게 기록한다.
-    if (room.mode === 'competition') {
-      for (const player of room.players) rememberSubmitted(room.classId, player.playerUuid, sessionId)
-    }
     deleteRoomByCode(req.params.code.toUpperCase())
     io.to(req.params.code.toUpperCase()).emit('game-submitted', { sessionId })
     broadcastClassRooms(room.classId)
@@ -283,10 +256,10 @@ app.get('/api/admin/classes', requireAdmin, async (req, res) => {
 })
 
 app.post('/api/admin/classes', requireAdmin, async (req, res) => {
-  const { name, mode } = req.body
+  const { name } = req.body
   if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
   try {
-    const cls = await createClass(name, req.admin.adminId, mode)
+    const cls = await createClass(name, req.admin.adminId)
     res.json(cls)
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
@@ -319,7 +292,6 @@ app.delete('/api/admin/classes/:id', requireAdmin, async (req, res) => {
     if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
     deleteRoomsByClassId(id)
-    deletePool(id)
     await deleteCompletedTeamsByClassId(id)
     await deleteClass(id)
 
@@ -337,10 +309,6 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
     if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
     const resolvedClassId = classId === 'unassigned' ? null : classId
-    const competition = resolvedClassId && (await getClassMode(resolvedClassId)) === 'competition'
-    if (competition && !competitionStatus(resolvedClassId).ready) {
-      return res.status(409).json({ error: '미배정 또는 입력 중인 참여자가 있어요' })
-    }
     const now = new Date()
     const pendingRooms = listAllRooms().filter(room =>
       room.classId === resolvedClassId && computeLiveRoomStatus(room, now) === 'completed-but-unregistered'
@@ -350,9 +318,6 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
     for (const room of pendingRooms) {
       try {
         const sessionId = await saveGameResult(room)
-        if (competition) {
-          for (const player of room.players) rememberSubmitted(resolvedClassId, player.playerUuid, sessionId)
-        }
         deleteRoomByCode(room.code)
         io.to(room.code).emit('game-submitted', { sessionId })
         registered += 1
@@ -366,63 +331,6 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
   } catch (err) {
     console.error('bulk submit error:', err)
     res.status(500).json({ error: 'Failed to submit pending results' })
-  }
-})
-
-app.get('/api/admin/classes/:classId/pool', requireAdmin, async (req, res) => {
-  const { classId } = req.params
-  try {
-    if (!(await hasClassAccess(req.admin, classId))) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
-    res.json(listPool(classId).map(p => ({
-      playerUuid: p.playerUuid, name: p.name, character: p.character, affiliation: p.affiliation,
-      connected: p.connected, gameState: p.gameState,
-    })))
-  } catch (err) {
-    console.error('pool list error:', err)
-    res.status(500).json({ error: 'Failed to fetch pool' })
-  }
-})
-
-app.delete('/api/admin/classes/:classId/pool/:playerUuid', requireAdmin, async (req, res) => {
-  const { classId, playerUuid } = req.params
-  try {
-    if (!(await hasClassAccess(req.admin, classId))) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
-    const removed = removeFromPool(classId, playerUuid)
-    if (!removed) return res.status(404).json({ error: 'Player not found' })
-    if (removed.socketId) {
-      const target = io.sockets.sockets.get(removed.socketId)
-      if (target) target.data.competition = null
-      io.to(removed.socketId).emit('you-were-kicked')
-    }
-    broadcastClassRooms(classId)
-    res.json({ ok: true })
-  } catch (err) {
-    console.error('pool delete error:', err)
-    res.status(500).json({ error: 'Failed to delete pool player' })
-  }
-})
-
-app.post('/api/admin/classes/:classId/assign', requireAdmin, async (req, res) => {
-  const { classId } = req.params
-  const { playerUuid, toRoomCode } = req.body ?? {}
-  if (!playerUuid) return res.status(400).json({ error: 'playerUuid가 필요합니다' })
-  try {
-    if (!(await hasClassAccess(req.admin, classId))) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
-    if ((await getClassMode(classId)) !== 'competition') return res.status(400).json({ error: '경쟁 모드 수업에서만 팀을 배정할 수 있어요' })
-    const result = assignPlayer(classId, playerUuid, toRoomCode ? String(toRoomCode).toUpperCase() : null)
-    if (!result.ok) return res.status(result.status).json({ error: result.error })
-
-    // 결과 등록 때 보내는 game-submitted를 받도록 플레이어 소켓을 방 채널에 넣고 뺀다.
-    const target = result.player.socketId ? io.sockets.sockets.get(result.player.socketId) : null
-    if (target && result.fromRoomCode !== result.toRoomCode) {
-      if (result.fromRoomCode) target.leave(result.fromRoomCode)
-      if (result.toRoomCode) target.join(result.toRoomCode)
-    }
-    broadcastClassRooms(classId)
-    res.json({ ok: true })
-  } catch (err) {
-    console.error('assign error:', err)
-    res.status(500).json({ error: 'Failed to assign player' })
   }
 })
 
@@ -486,8 +394,7 @@ app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
     // 이름을 직접 정할 때까지는 로비에서 학생 방과 동일하게 방장 이름 기반 표시로 폴백한다).
     const title = resolvedClassId ? '' : null
 
-    const mode = resolvedClassId ? await getClassMode(resolvedClassId) : 'normal'
-    const room = createRoom({ classId: resolvedClassId, title, mode })
+    const room = createRoom({ classId: resolvedClassId, title })
     broadcastClassRooms(room.classId)
     res.json({ code: room.code })
   } catch (err) {
@@ -546,10 +453,6 @@ app.delete('/api/admin/rooms/:code', requireAdmin, async (req, res) => {
     return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
   }
 
-  // 경쟁 모드 팀을 지워도 학생 입력은 남기고 대기 명단으로 돌려보낸다.
-  for (const player of returnRoomPlayersToPool(code)) {
-    if (player.socketId) io.sockets.sockets.get(player.socketId)?.leave(code)
-  }
   if (deleteRoomByCode(code)) {
     broadcastClassRooms(classId)
     return res.json({ ok: true })
@@ -630,8 +533,7 @@ app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
 app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
   const { playerUuid } = req.params
-  // 경쟁 모드에서 관리자가 참여자 가격을 고칠 때도 같은 규칙으로 확인한다.
-  const partialGameState = withSanitizedPrices(req.body)
+  const partialGameState = req.body
 
   const classId = await findRoomClassId(code)
   if (classId === undefined) return res.status(404).json({ error: 'Room not found' })
@@ -644,10 +546,6 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
     io.to(code).emit('room-updated', { players: room.players })
     broadcastClassRooms(room.classId)
     const player = room.players.find(p => p.playerUuid === playerUuid)
-    // 경쟁 모드 학생 화면은 room-updated를 듣지 않으므로, 관리자 수정이 덮어써지지 않게 본인에게 직접 알린다.
-    if (room.mode === 'competition' && player.socketId) {
-      io.to(player.socketId).emit('player-state-updated', { gameState: player.gameState })
-    }
     return res.json({
       playerUuid: player.playerUuid,
       name: player.name,
@@ -664,18 +562,6 @@ app.patch('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (req
   } catch (err) {
     console.error('admin patch error:', err)
     res.status(404).json({ error: 'Player not found' })
-  }
-})
-
-// 경쟁 모드 결과 화면의 팀 비교 대시보드. 경쟁 모드 수업이 아니면 404 — 화면은 기존 랭킹만 보여준다.
-app.get('/api/results/:sessionId/competition', async (req, res) => {
-  try {
-    const result = await getCompetitionTeams(req.params.sessionId)
-    if (!result) return res.status(404).json({ error: 'Not a competition result' })
-    res.json(result)
-  } catch (err) {
-    console.error('competition teams error:', err)
-    res.status(500).json({ error: 'Failed to fetch competition teams' })
   }
 })
 
@@ -704,9 +590,6 @@ app.get('/api/results/:sessionId', async (req, res) => {
         totalAssets: Number(r.total_assets),
         stockValue: r.stock_value != null ? Number(r.stock_value) : null,
         realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
-        // 경쟁 모드 참여자는 자기 가격, 일반 모드는 위의 세션 가격과 같다.
-        stockPrices: r.stock_prices ?? session.stock_prices,
-        realEstatePrices: r.real_estate_prices ?? session.real_estate_prices,
         playerUuid: r.player_uuid,
         teamCode: session.team_code,
       })),
@@ -724,36 +607,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join-class-pool', async ({ classId, playerUuid, name, affiliation, character } = {}, callback) => {
-    if (!classId || !playerUuid || !name || !character) return callback?.({ ok: false, error: 'INVALID' })
-    try {
-      if ((await getClassMode(classId)) !== 'competition') return callback?.({ ok: false, error: 'NOT_COMPETITION' })
-      const result = joinCompetition(classId, { playerUuid, name, affiliation: affiliation ?? '', character, socketId: socket.id })
-      if (result.state !== 'submitted') socket.data.competition = { classId, playerUuid }
-      if (result.roomCode) socket.join(result.roomCode)
-      broadcastClassRooms(classId)
-      callback?.({ ok: true, state: result.state, gameState: result.gameState ?? null, sessionId: result.sessionId ?? null })
-    } catch (err) {
-      console.error('join-class-pool error:', err)
-      callback?.({ ok: false, error: err.message })
-    }
-  })
-
-  socket.on('update-pool-player-state', ({ gameState } = {}) => {
-    const info = socket.data.competition
-    if (!info || !gameState) return
-    const result = updateCompetitionPlayerState(info.classId, info.playerUuid, socket.id, withSanitizedPrices(gameState))
-    if (!result) return
-    if (result.room) io.to(result.room.code).emit('room-updated', { players: result.room.players })
-    broadcastClassRooms(info.classId)
-  })
-
   socket.on('join-room', ({ code, name, character, isHost, playerUuid, affiliation }, callback) => {
     try {
-      const target = getRoom(code.toUpperCase())
-      if (target && !isPlayerJoinableRoom(target)) {
-        return callback?.({ ok: false, error: '경쟁 모드 팀에는 직접 참가할 수 없어요' })
-      }
       const room = addPlayer(code.toUpperCase(), {
         socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation,
       })
@@ -831,9 +686,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    const poolClassId = markPoolDisconnected(socket.id)
-    if (poolClassId) broadcastClassRooms(poolClassId)
-
     const room = markDisconnected(socket.id)
     if (!room) return
     io.to(room.code).emit('room-updated', { players: room.players })
