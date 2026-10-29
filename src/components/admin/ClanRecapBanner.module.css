@@ -1,0 +1,47 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: var(--space-xl);
+  padding: 18px 20px;
+  border: 1px solid #1f6f43;
+  border-radius: var(--admin-r-lg);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 0) 0 0 / 8px 8px,
+    linear-gradient(100deg, #0b1f14 0%, #0f3b24 55%, #145c34 100%);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.banner:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(20, 92, 52, 0.35); }
+.banner:focus-visible { outline: 2px solid #3ddc84; outline-offset: 2px; }
+
+.icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: #3ddc84;
+  -webkit-mask: url(/icons/IconTrophy.svg) center / contain no-repeat;
+  mask: url(/icons/IconTrophy.svg) center / contain no-repeat;
+}
+
+.text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.title { font-size: 18px; font-weight: 900; letter-spacing: 0.02em; color: #3ddc84; }
+.subtitle { font-size: 13px; font-weight: 600; color: #b9f6d0; }
+
+.arrow {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #3ddc84;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #3ddc84;
+}
