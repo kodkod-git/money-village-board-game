@@ -1,0 +1,190 @@
+/* 팀별 주식·부동산 가격 묶음 막대 — 팀 현황 유형 분포 탭 */
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 24px 16px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.chartHint {
+  font-size: 12px;
+  color: var(--admin-text-3);
+}
+
+.legend {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.plot {
+  display: flex;
+  height: 260px;
+  padding-top: 8px;
+}
+
+.yAxis {
+  position: relative;
+  width: 40px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--admin-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.yAxis span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+  white-space: nowrap;
+}
+
+.plotArea {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.gridLines span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--admin-border);
+}
+
+/* 0% 기준선은 다른 눈금선보다 진하게 */
+.gridLines .zeroLine {
+  border-top-color: var(--admin-text-3);
+}
+
+.groups {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+
+.group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  /* 같은 팀 막대 사이에 2px 간격을 둬 색이 맞닿지 않게 한다 */
+  gap: 2px;
+}
+
+/* 막대 한 칸 — 0% 선 위아래로 막대를 놓을 수 있게 플롯 높이 전체를 차지한다 */
+.slot {
+  position: relative;
+  flex-shrink: 1;
+  min-width: 2px;
+  height: 100%;
+}
+
+/* 데이터 끝(상승은 위, 하락은 아래)만 둥글린다 */
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 4px 4px 0 0;
+  transition: bottom 0.35s ease, height 0.35s ease;
+}
+
+.barDown {
+  border-radius: 0 0 4px 4px;
+}
+
+.slot:hover .bar {
+  filter: brightness(0.92);
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transform: translate(-50%, -6px);
+  padding: 6px 10px;
+  border-radius: var(--admin-r-sm);
+  background: var(--admin-text);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.tooltip small {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.slot:hover .tooltip {
+  opacity: 1;
+}
+
+.xAxis {
+  display: flex;
+  padding: 8px 0 0 40px;
+}
+
+.xLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .tooltip { transition: none; }
+}
