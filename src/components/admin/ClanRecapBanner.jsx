@@ -1,9 +1,9 @@
 import styles from './ClanRecapBanner.module.css'
 
 // 트로피 탭 맨 위의 클랜 통계 배너(Discord Checkpoint 배너 참고). 띠 전체가 버튼이다.
-export default function ClanRecapBanner({ onOpen }) {
+export default function ClanRecapBanner({ onOpen, disabled = false }) {
   return (
-    <button type="button" className={styles.banner} onClick={onOpen}>
+    <button type="button" className={styles.banner} onClick={onOpen} disabled={disabled}>
       <span className={styles.icon} aria-hidden="true" />
       <span className={styles.text}>
         <span className={styles.title}>팀 대결 결과</span>

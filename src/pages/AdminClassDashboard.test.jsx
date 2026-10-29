@@ -440,14 +440,53 @@ describe('AdminClassDashboard', () => {
     expect(screen.queryByPlaceholderText('이름 또는 팀 검색...')).not.toBeInTheDocument()
   })
 
-  it('배너를 누르면 onOpenClanRecap을 부른다', async () => {
-    const onOpenClanRecap = vi.fn()
-    render(
-      <SocketProvider>
-        <AdminClassDashboard classId="class-1" initialName="3학년 2반" initialTab="clans" onOpenClanRecap={onOpenClanRecap} />
-      </SocketProvider>
-    )
+  function mockClanFetch(recapResponse) {
+    global.fetch.mockImplementation(url => {
+      if (url.includes('/clans/recap')) return Promise.resolve(recapResponse)
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(url.includes('/clans') ? { participants: [], clans: [] } : ROOMS),
+      })
+    })
+  }
+
+  async function openTrophyTab() {
+    renderDashboard()
+    await screen.findByText('홍길동')
+    await userEvent.click(screen.getByRole('button', { name: '팀 대결' }))
+  }
+
+  it('배너를 누르면 recap을 불러와 스토리를 연다', async () => {
+    mockClanFetch({
+      ok: true,
+      json: () => Promise.resolve({
+        teamCount: 1,
+        memberCount: 2,
+        teams: [{ id: 'k1', name: '호랑이반', memberCount: 2, cash: 1, stockValue: 1, realEstateValue: 1, totalAssets: 3 }],
+      }),
+    })
+    await openTrophyTab()
     await userEvent.click(await screen.findByRole('button', { name: /팀 대결 결과/ }))
-    expect(onOpenClanRecap).toHaveBeenCalledTimes(1)
+    expect(await screen.findByRole('dialog', { name: '팀 대결 결과' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '3학년 2반 팀 대결 결과' })).toBeInTheDocument()
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes/class-1/clans/recap', expect.anything())
+    await userEvent.click(screen.getByRole('button', { name: '닫기' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('비교할 팀이 없으면 스토리를 열지 않고 안내한다', async () => {
+    mockClanFetch({ ok: true, json: () => Promise.resolve({ teamCount: 0, memberCount: 0, teams: [] }) })
+    await openTrophyTab()
+    await userEvent.click(await screen.findByRole('button', { name: /팀 대결 결과/ }))
+    expect(await screen.findByText('팀에 참여자를 배정하면 결과를 볼 수 있어요')).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('recap 요청이 실패하면 서버 오류를 안내한다', async () => {
+    mockClanFetch({ ok: false, json: () => Promise.resolve({ error: '팀 대결 결과를 불러오지 못했어요' }) })
+    await openTrophyTab()
+    await userEvent.click(await screen.findByRole('button', { name: /팀 대결 결과/ }))
+    expect(await screen.findByText('팀 대결 결과를 불러오지 못했어요')).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })

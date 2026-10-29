@@ -45,3 +45,5 @@
   font-weight: 800;
   color: #3ddc84;
 }
+
+.banner:disabled { cursor: progress; opacity: 0.7; transform: none; box-shadow: none; }

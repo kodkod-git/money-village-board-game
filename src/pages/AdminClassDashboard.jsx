@@ -10,6 +10,7 @@ import TypeDistribution from '../components/admin/TypeDistribution'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import ClanTab from '../components/admin/ClanTab'
 import ClanRecapBanner from '../components/admin/ClanRecapBanner'
+import ClanRecapStory from '../components/admin/ClanRecapStory'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -31,9 +32,12 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName, initialTab = 'grid', onOpenClanRecap }) {
+export default function AdminClassDashboard({ classId, initialName }) {
   const { socket } = useSocketContext()
-  const [activeTab, setActiveTab] = useState(initialTab)
+  const [activeTab, setActiveTab] = useState('grid')
+  // 팀 대결 결과 스토리: 배너를 누를 때 한 번 불러온다(열려 있는 동안 갱신하지 않음).
+  const [recap, setRecap] = useState(null)
+  const [isLoadingRecap, setIsLoadingRecap] = useState(false)
   const [rooms, setRooms] = useState([])
   const [spectateIndex, setSpectateIndex] = useState(null)
   const [name, setName] = useState(initialName)
@@ -86,6 +90,28 @@ export default function AdminClassDashboard({ classId, initialName, initialTab =
     room.status === 'completed-but-unregistered' && !room.registered &&
     room.players.some(p => p?.connected === false)
   )
+
+  async function handleOpenRecap() {
+    if (isLoadingRecap) return
+    setIsLoadingRecap(true)
+    try {
+      const res = await adminFetch(`/api/admin/classes/${encodeURIComponent(classId)}/clans/recap`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast(data.error || '팀 대결 결과를 불러오지 못했어요')
+        return
+      }
+      if (data.teamCount === 0) {
+        toast('팀에 참여자를 배정하면 결과를 볼 수 있어요')
+        return
+      }
+      setRecap(data)
+    } catch {
+      toast('팀 대결 결과를 불러오지 못했어요')
+    } finally {
+      setIsLoadingRecap(false)
+    }
+  }
 
   async function handleCreateRoom() {
     if (isCreating) return
@@ -229,11 +255,14 @@ export default function AdminClassDashboard({ classId, initialName, initialTab =
         </div>
       </div>
 
-      {activeTab === 'clans' && rooms.length > 0 && <ClanRecapBanner onOpen={onOpenClanRecap} />}
+      {activeTab === 'clans' && rooms.length > 0 && (
+        <ClanRecapBanner onOpen={handleOpenRecap} disabled={isLoadingRecap} />
+      )}
       {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
       {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
+      {recap && <ClanRecapStory className={name} recap={recap} onClose={() => setRecap(null)} />}
 
       {confirmDeleteAll && (
         <ConfirmDialog
