@@ -15,6 +15,8 @@ import { parseSurveyEvent, saveSurveyEvent, listSurveyEvents, summarizeSurveyEve
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
 import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
+import { createClan, renameClan, deleteClan, assignToClan, listClans, pruneMembers, deleteClassClans, isValidClanName } from './clans.js'
+import { buildClanView } from './clanView.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -294,6 +296,7 @@ app.delete('/api/admin/classes/:id', requireAdmin, async (req, res) => {
     deleteRoomsByClassId(id)
     await deleteCompletedTeamsByClassId(id)
     await deleteClass(id)
+    deleteClassClans(id)
 
     res.json({ ok: true })
   } catch (err) {
@@ -331,6 +334,99 @@ app.post('/api/admin/classes/:classId/submit-pending', requireAdmin, async (req,
   } catch (err) {
     console.error('bulk submit error:', err)
     res.status(500).json({ error: 'Failed to submit pending results' })
+  }
+})
+
+// ── 팀(클랜): 결과 등록을 마친 참여자를 관리자가 묶는다. 메모리에만 저장된다(server/clans.js). ──
+
+function broadcastClassClans(classId) {
+  io.to(`class:${classId}`).emit('class-clans-updated')
+}
+
+// 이 수업의 결과 행을 읽고, DB에서 사라진 결과를 클랜에서 정리한다.
+async function loadClanRows(classId) {
+  const rows = await getRankings({ classId })
+  pruneMembers(classId, new Set(rows.map(r => r.resultId)))
+  return rows
+}
+
+async function denyClassAccess(req, res) {
+  if (await hasClassAccess(req.admin, req.params.classId)) return false
+  res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
+  return true
+}
+
+app.get('/api/admin/classes/:classId/clans', requireAdmin, async (req, res) => {
+  const { classId } = req.params
+  try {
+    if (await denyClassAccess(req, res)) return
+    const rows = await loadClanRows(classId)
+    res.json(buildClanView(rows, listClans(classId)))
+  } catch (err) {
+    console.error('list clans error:', err)
+    res.status(500).json({ error: '팀 정보를 불러오지 못했어요' })
+  }
+})
+
+app.post('/api/admin/classes/:classId/clans', requireAdmin, async (req, res) => {
+  const { classId } = req.params
+  try {
+    if (await denyClassAccess(req, res)) return
+    const clan = createClan(classId)
+    broadcastClassClans(classId)
+    res.json(clan)
+  } catch (err) {
+    console.error('create clan error:', err)
+    res.status(500).json({ error: '팀을 만들지 못했어요' })
+  }
+})
+
+app.patch('/api/admin/classes/:classId/clans/:clanId', requireAdmin, async (req, res) => {
+  const { classId, clanId } = req.params
+  try {
+    if (await denyClassAccess(req, res)) return
+    const name = req.body?.name
+    if (!isValidClanName(name)) return res.status(400).json({ error: '팀 이름은 1~20자로 입력해주세요' })
+    const clan = renameClan(classId, clanId, name)
+    if (!clan) return res.status(404).json({ error: '팀을 찾을 수 없어요' })
+    broadcastClassClans(classId)
+    res.json(clan)
+  } catch (err) {
+    console.error('rename clan error:', err)
+    res.status(500).json({ error: '팀 이름을 바꾸지 못했어요' })
+  }
+})
+
+app.delete('/api/admin/classes/:classId/clans/:clanId', requireAdmin, async (req, res) => {
+  const { classId, clanId } = req.params
+  try {
+    if (await denyClassAccess(req, res)) return
+    if (!deleteClan(classId, clanId)) return res.status(404).json({ error: '팀을 찾을 수 없어요' })
+    broadcastClassClans(classId)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('delete clan error:', err)
+    res.status(500).json({ error: '팀을 삭제하지 못했어요' })
+  }
+})
+
+app.post('/api/admin/classes/:classId/clans/assign', requireAdmin, async (req, res) => {
+  const { classId } = req.params
+  const { resultId, toClanId = null } = req.body ?? {}
+  try {
+    if (await denyClassAccess(req, res)) return
+    const rows = await loadClanRows(classId)
+    if (!rows.some(r => r.resultId === resultId)) {
+      return res.status(404).json({ error: '참여자를 찾을 수 없어요' })
+    }
+    if (!assignToClan(classId, resultId, toClanId)) {
+      return res.status(404).json({ error: '팀을 찾을 수 없어요' })
+    }
+    broadcastClassClans(classId)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('assign clan error:', err)
+    res.status(500).json({ error: '팀 배정에 실패했어요' })
   }
 })
 
