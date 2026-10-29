@@ -19,7 +19,7 @@ vi.mock('./supabase.js', () => ({
   supabase: { from: (...args) => mockFrom(...args) },
 }))
 
-import { calculateAssetBreakdown } from './db.js'
+import { calculateAssetBreakdown, getRankings } from './db.js'
 
 const PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
@@ -892,5 +892,21 @@ describe('getSessionCreatedAtsByClassId', () => {
     const { getSessionCreatedAtsByClassId } = await import('./db.js')
 
     await expect(getSessionCreatedAtsByClassId('class-1')).rejects.toEqual({ message: 'boom' })
+  })
+})
+
+describe('getRankings', () => {
+  it('각 행의 game_results.id를 resultId로 내려준다', async () => {
+    mockFrom.mockReturnValueOnce(makeQueryBuilder({
+      data: [{
+        id: 'result-1', player_uuid: 'p1', name: '홍길동', character: 'c', total_assets: 100,
+        cash: 100, stock_value: 0, real_estate_value: 0, session_id: 's1',
+        game_sessions: { team_code: 'AB1234', title: '', class_id: 'class-1' },
+      }],
+      error: null,
+    }))
+    const rows = await getRankings({ classId: 'class-1' })
+    expect(rows[0].resultId).toBe('result-1')
+    expect(rows[0].teamName).toBe('AB1234')
   })
 })

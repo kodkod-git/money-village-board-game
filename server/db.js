@@ -260,7 +260,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
+const RANKING_SELECT = 'id, player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
 
 // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
 // 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
@@ -271,6 +271,8 @@ function netWorthOf(r) {
 function mapRankingRow(r, i) {
   return {
     rank: i + 1,
+    // 관리자 트로피 탭에서 참여자를 팀(클랜)에 배정할 때 쓰는 결과 행 id
+    resultId: r.id,
     name: r.name,
     affiliation: r.affiliation,
     character: r.character,
