@@ -1,0 +1,71 @@
+.slide { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 24px 4px 8px; }
+.title { font-size: 26px; font-weight: 900; color: #fff; text-align: center; }
+.subtitle { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.7); text-align: center; }
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.slot {
+  flex: 1;
+  max-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  animation: rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.rank3 { animation-delay: 0.1s; }
+.rank2 { animation-delay: 0.4s; }
+.rank1 { animation-delay: 0.8s; }
+.medal { font-size: 32px; line-height: 1; }
+.name { font-size: 14px; font-weight: 800; color: #fff; text-align: center; overflow-wrap: anywhere; }
+.value { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.85); white-space: nowrap; }
+.block {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  border-radius: 10px 10px 0 0;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+}
+.rank1 .block { height: 120px; background: rgba(255, 226, 122, 0.35); }
+.rank2 .block { height: 88px; }
+.rank3 .block { height: 64px; }
+
+.rest {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+  overflow-y: auto;
+  animation: fade 0.4s ease-out 1.2s both;
+}
+.restRow {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.restRank { font-size: 13px; font-weight: 800; color: rgba(255, 255, 255, 0.7); }
+.restName { font-size: 14px; font-weight: 700; color: #fff; overflow-wrap: anywhere; }
+.restValue { font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.85); white-space: nowrap; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .slot, .rest { animation: none; }
+}
