@@ -1,0 +1,57 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-lg);
+  background: var(--admin-input-bg, white);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.over { border-color: var(--admin-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+
+.header { display: flex; align-items: center; gap: 8px; }
+.name {
+  border: none; background: none; padding: 2px 4px; margin-left: -4px;
+  border-radius: var(--admin-r-sm);
+  font-size: 16px; font-weight: 800; color: var(--admin-text); cursor: text;
+}
+.name:hover { background: var(--admin-bg); }
+.nameInput {
+  min-width: 0; flex: 1;
+  padding: 2px 6px;
+  border: 1px solid var(--admin-blue); border-radius: var(--admin-r-sm);
+  font-size: 16px; font-weight: 800;
+}
+.count { font-size: 13px; font-weight: 700; color: var(--admin-blue); }
+.deleteBtn {
+  margin-left: auto;
+  width: 24px; height: 24px; border: none; border-radius: 50%;
+  background: transparent; color: var(--admin-text-3); font-size: 18px; line-height: 1;
+}
+.deleteBtn:hover { background: #fdecea; color: #e53935; }
+
+.slots { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.member, .emptySlot {
+  min-height: 96px;
+  border-radius: var(--admin-r-md);
+}
+.member {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  padding: 8px;
+  background: var(--admin-bg);
+  cursor: grab;
+}
+.member:active { cursor: grabbing; }
+.emptySlot { border: 1.5px dashed var(--admin-border); }
+.avatar { width: 44px; height: 44px; object-fit: contain; }
+.memberName { font-size: 13px; font-weight: 700; color: var(--admin-text); }
+.memberTeam { font-size: 11px; color: var(--admin-text-3); }
+
+.moreBtn {
+  align-self: center;
+  padding: 4px 12px;
+  border: 1px solid var(--admin-border); border-radius: 999px;
+  background: var(--admin-bg);
+  font-size: 12px; font-weight: 700; color: var(--admin-text-2, var(--admin-text));
+}
