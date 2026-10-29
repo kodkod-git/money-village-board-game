@@ -7,7 +7,7 @@ import {
 } from '../constants/gameData'
 import styles from './PriceSettingModal.module.css'
 
-// 한 종류(주식 또는 부동산)의 가격 목록과 계산기. 관리자 가격 설정 모달과 경쟁 모드 가격 단계가 함께 쓴다.
+// 한 종류(주식 또는 부동산)의 가격 목록과 계산기. 관리자 가격 설정 모달(PriceSettingModal)에서 쓴다.
 // prices: 그 종류의 { 종목키: 가격 } / onChange: 바뀐 { 종목키: 가격 } 전체를 받는다.
 export default function PriceListEditor({ category, prices, onChange }) {
   const [editingKey, setEditingKey] = useState(null)

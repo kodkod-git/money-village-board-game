@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   function handleNavigate(key) {
     if ((key === 'team-status' || key === 'ranking') && !selectedClass) return
     if ((key === 'responses' || key === 'all-results') && !profile?.isSuper) return
+    if (key === 'team-status') setTeamStatusTab('grid')
     setSection(key)
   }
 

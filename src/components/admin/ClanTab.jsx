@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import ClanParticipantBlock from './ClanParticipantBlock'
 import ClanCard from './ClanCard'
 import ConfirmDialog from './ConfirmDialog'
@@ -17,24 +17,39 @@ export default function ClanTab({ classId }) {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const base = `/api/admin/classes/${encodeURIComponent(classId)}/clans`
 
+  // 요청 순서 번호: 가장 최근에 시작한 요청의 응답만 반영한다(늦게 도착한 옛 응답이 새 상태를 덮지 않게).
+  const seqRef = useRef(0)
+
   const load = useCallback(() => {
+    const seq = ++seqRef.current
     adminFetch(base)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
-      .then(data => { setView(data); setLoadError(false) })
-      .catch(() => setLoadError(true))
+      .then(data => {
+        if (seq !== seqRef.current) return
+        setView(data)
+        setLoadError(false)
+      })
+      .catch(() => { if (seq === seqRef.current) setLoadError(true) })
   }, [base])
 
   useEffect(() => { load() }, [load])
 
   // 클랜 변경은 class-clans-updated, 결과 등록·등록된 팀 삭제는 class-rooms-updated로 알 수 있다.
+  // class-rooms-updated는 학생 입력마다 오므로 300ms 디바운스한다.
   // 채널 가입(watch-class-rooms)은 AdminClassDashboard가 한다.
   useEffect(() => {
     if (!socket) return
+    let timer = null
+    const onRoomsUpdated = () => {
+      clearTimeout(timer)
+      timer = setTimeout(load, 300)
+    }
     socket.on('class-clans-updated', load)
-    socket.on('class-rooms-updated', load)
+    socket.on('class-rooms-updated', onRoomsUpdated)
     return () => {
+      clearTimeout(timer)
       socket.off('class-clans-updated', load)
-      socket.off('class-rooms-updated', load)
+      socket.off('class-rooms-updated', onRoomsUpdated)
     }
   }, [socket, load])
 
@@ -55,15 +70,17 @@ export default function ClanTab({ classId }) {
   }
 
   function handleMove(resultId, toClanId) {
+    seqRef.current += 1 // 낙관적 변경 이전에 시작한 GET 응답은 무시한다
     setView(v => moveInView(v, resultId, toClanId))
     send('/assign', { method: 'POST', body: JSON.stringify({ resultId, toClanId }) }, '팀 배정에 실패했어요')
   }
 
-  async function handleCreate() {
-    if (await send('', { method: 'POST' }, '팀을 만들지 못했어요')) load()
+  function handleCreate() {
+    send('', { method: 'POST' }, '팀을 만들지 못했어요')
   }
 
   function handleRename(clanId, name) {
+    seqRef.current += 1
     setView(v => ({ ...v, clans: v.clans.map(c => (c.id === clanId ? { ...c, name } : c)) }))
     send(`/${clanId}`, { method: 'PATCH', body: JSON.stringify({ name }) }, '팀 이름을 바꾸지 못했어요')
   }
@@ -71,7 +88,7 @@ export default function ClanTab({ classId }) {
   async function handleConfirmDelete() {
     const target = deleteTarget
     setDeleteTarget(null)
-    if (await send(`/${target.id}`, { method: 'DELETE' }, '팀을 삭제하지 못했어요')) load()
+    await send(`/${target.id}`, { method: 'DELETE' }, '팀을 삭제하지 못했어요')
   }
 
   if (loadError && !view) return <p className={styles.message}>팀 정보를 불러오지 못했어요.</p>

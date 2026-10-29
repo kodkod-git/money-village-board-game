@@ -20,7 +20,7 @@ export default function ClanParticipantBlock({ participants, onDropMember }) {
       className={`${styles.block} ${isOver ? styles.over : ''}`}
       aria-label="참여자"
       onDragOver={e => { e.preventDefault(); setIsOver(true) }}
-      onDragLeave={() => setIsOver(false)}
+      onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setIsOver(false) }}
       onDrop={handleDrop}
     >
       <div className={styles.header}>

@@ -35,6 +35,7 @@ export default function ClanCard({ clan, onDropMember, onRename, onDelete }) {
   }
 
   function handleKeyDown(e) {
+    if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter') commit()
     if (e.key === 'Escape') {
       finishedRef.current = true
@@ -55,7 +56,7 @@ export default function ClanCard({ clan, onDropMember, onRename, onDelete }) {
       className={`${styles.card} ${isOver ? styles.over : ''}`}
       aria-label={clan.name}
       onDragOver={e => { e.preventDefault(); setIsOver(true) }}
-      onDragLeave={() => setIsOver(false)}
+      onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setIsOver(false) }}
       onDrop={handleDrop}
     >
       <div className={styles.header}>

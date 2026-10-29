@@ -5,6 +5,7 @@ import ClanTab from './ClanTab'
 import Toaster from '../Toaster'
 import { _resetToasts } from '../../utils/toast'
 import { setAdminSession, clearAdminSession } from '../../utils/adminAuth'
+import { io } from 'socket.io-client'
 import { SocketProvider } from '../../contexts/SocketContext'
 import { CLAN_MEMBER_DRAG_TYPE } from '../../constants/clan'
 
@@ -78,12 +79,35 @@ describe('ClanTab', () => {
     await waitFor(() => expect(callsTo('/api/admin/classes/class-1/clans')).toHaveLength(2))
   })
 
-  it('"팀 만들기"는 POST 후 다시 불러온다', async () => {
+  it('"팀 만들기"는 POST를 보낸다', async () => {
     renderTab()
     await screen.findByText('홍길동')
     await userEvent.click(screen.getByRole('button', { name: /팀 만들기/ }))
-    await waitFor(() => expect(callsTo('/api/admin/classes/class-1/clans')).toHaveLength(3))
-    expect(callsTo('/api/admin/classes/class-1/clans')[1][1].method).toBe('POST')
+    await waitFor(() => expect(callsTo('/api/admin/classes/class-1/clans').some(([, o]) => o?.method === 'POST')).toBe(true))
+  })
+
+  it('먼저 시작한 요청의 응답이 늦게 도착해도 최신 응답을 유지한다', async () => {
+    const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r }); return { promise, resolve } }
+    const d1 = deferred()
+    const d2 = deferred()
+    const queue = [d1, d2]
+    global.fetch = vi.fn(() => queue.shift().promise)
+    const respond = view => ({ ok: true, json: () => Promise.resolve(view) })
+    const OLD = { participants: [{ resultId: 'r1', name: '옛참여자', character: 'Adventurer-강아지', teamName: 'AB1234' }], clans: [] }
+    const NEW = { participants: [{ resultId: 'r2', name: '새참여자', character: 'Adventurer-강아지', teamName: 'AB1234' }], clans: [] }
+
+    renderTab()
+    const clansHandlers = () => io().on.mock.calls.filter(([ev]) => ev === 'class-clans-updated')
+    await waitFor(() => expect(clansHandlers().length).toBeGreaterThan(0))
+    clansHandlers().at(-1)[1]()
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2))
+
+    d2.resolve(respond(NEW))
+    expect(await screen.findByText('새참여자')).toBeInTheDocument()
+    d1.resolve(respond(OLD))
+    await new Promise(r => setTimeout(r, 20))
+    expect(screen.getByText('새참여자')).toBeInTheDocument()
+    expect(screen.queryByText('옛참여자')).not.toBeInTheDocument()
   })
 
   it('삭제는 확인 후 DELETE를 보낸다', async () => {
