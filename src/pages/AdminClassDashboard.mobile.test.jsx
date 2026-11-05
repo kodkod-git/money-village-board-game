@@ -62,12 +62,36 @@ describe('AdminClassDashboard 모바일', () => {
     await screen.findAllByTestId('admin-player-slot')
     await userEvent.click(screen.getByRole('button', { name: '테이블 뷰' }))
     expect(screen.queryByTestId('admin-player-slot')).not.toBeInTheDocument()
+    expect(screen.getByRole('table')).toBeInTheDocument()
 
     viewport.resize(390)
     expect(screen.getAllByTestId('admin-player-slot').length).toBeGreaterThan(0)
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
     viewport.resize(1280)
     expect(screen.queryByTestId('admin-player-slot')).not.toBeInTheDocument()
+    expect(screen.getByRole('table')).toBeInTheDocument()
+  })
+
+  it('유형 분포 뷰를 보다가 좁히면 결과를 불러오지 않고, 넓히면 다시 한 번 불러온다', async () => {
+    const baseFetch = global.fetch
+    global.fetch = vi.fn((url, options) => url.startsWith('/api/rankings')
+      ? Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+      : baseFetch(url, options))
+    const rankingCalls = () => global.fetch.mock.calls.filter(([url]) => url.startsWith('/api/rankings')).length
+    const viewport = mockViewport(1280)
+    renderDashboard()
+    await screen.findAllByTestId('admin-player-slot')
+    await userEvent.click(screen.getByRole('button', { name: '유형 분포 뷰' }))
+    await screen.findByText('등록된 게임 결과가 없습니다.')
+    expect(rankingCalls()).toBe(1)
+
+    viewport.resize(390)
+    expect(rankingCalls()).toBe(1)
+
+    viewport.resize(1280)
+    expect(rankingCalls()).toBe(2)
+    await screen.findByText('등록된 게임 결과가 없습니다.')
   })
 
   it('전체 삭제는 메뉴를 거쳐 확인 창을 띄운다', async () => {
