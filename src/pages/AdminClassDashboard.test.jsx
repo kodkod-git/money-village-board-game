@@ -462,7 +462,11 @@ describe('AdminClassDashboard', () => {
       json: () => Promise.resolve({
         teamCount: 1,
         memberCount: 2,
-        teams: [{ id: 'k1', name: '호랑이반', memberCount: 2, cash: 1, stockValue: 1, realEstateValue: 1, totalAssets: 3 }],
+        teams: [{
+          id: 'k1', name: '호랑이반', memberCount: 2, cash: 1, stockValue: 1, realEstateValue: 1, totalAssets: 3,
+          members: [{ id: 'r1', name: '가', character: 'Innovator-사자', totalAssets: 3 }],
+        }],
+        games: [],
       }),
     })
     await openTrophyTab()

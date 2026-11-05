@@ -1,0 +1,56 @@
+/* 카드 전체를 덮지만 클릭은 카드로 통과시킨다 */
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 52%;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.32) 0 6px, rgba(255, 255, 255, 0.08) 18px, rgba(0, 0, 0, 0.32) 36px),
+    linear-gradient(180deg, #a3132a, #6d0c1c);
+}
+.curtainLeft { left: 0; animation: openLeft 1.1s cubic-bezier(0.6, 0, 0.3, 1) 0.5s both; }
+.curtainRight { right: 0; animation: openRight 1.1s cubic-bezier(0.6, 0, 0.3, 1) 0.5s both; }
+
+.piece {
+  position: absolute;
+  top: -16px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: fall var(--fall-ms) linear var(--fall-delay) 3 both;
+}
+
+.popper {
+  position: absolute;
+  bottom: 6%;
+  font-size: 72px;
+  line-height: 1;
+  animation: pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.5) 1.3s both;
+}
+.popperLeft { left: 4%; transform-origin: bottom left; }
+.popperRight { right: 4%; transform-origin: bottom right; --flip: -1; }
+
+@keyframes openLeft { from { transform: none; } to { transform: translateX(-100%); } }
+@keyframes openRight { from { transform: none; } to { transform: translateX(100%); } }
+@keyframes fall {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--drift), 860px) rotate(720deg); }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scaleX(var(--flip, 1)) scale(0.2); }
+  to { opacity: 1; transform: scaleX(var(--flip, 1)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer { display: none; }
+}

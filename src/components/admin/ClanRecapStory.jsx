@@ -1,10 +1,100 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import RecapIntroSlide from './recap/RecapIntroSlide'
-import RecapCategorySlide from './recap/RecapCategorySlide'
-import RecapFinalSlide from './recap/RecapFinalSlide'
-import { RECAP_CATEGORIES } from '../../utils/clanRecap'
+import RecapCastSlide from './recap/RecapCastSlide'
+import RecapSpotlightSlide from './recap/RecapSpotlightSlide'
+import RecapPriceIntroSlide from './recap/RecapPriceIntroSlide'
+import RecapPriceSlide from './recap/RecapPriceSlide'
+import RecapVersusSlide from './recap/RecapVersusSlide'
+import { topTeams, formatWon, withSubjectParticle, buildPriceComparison } from '../../utils/clanRecap'
 import styles from './ClanRecapStory.module.css'
+
+function winnerNames(winners) {
+  return winners.map(winner => `${winner.name}님`).join(', ')
+}
+
+// 인트로 → 게임별 1등 → 전체 1위 → 주식·부동산 가격 비교 → 팀별 총 자산 → 우승 팀.
+// 게임이 하나면 게임별 1등이 전체 1위와 겹치므로 빼고, 가격 차이가 없는 종류의 비교 장도 뺀다.
+function buildSlides(className, recap) {
+  const { teams, games } = recap
+  const players = teams.flatMap(team => team.members)
+
+  const gameSlides = games.length < 2 ? [] : [
+    {
+      key: 'cast',
+      theme: 'cast',
+      content: <RecapCastSlide title="게임별 통계를 확인해볼까요?" players={players} />,
+    },
+    ...games.map((game, i) => {
+      const winners = topTeams(game.players, 'totalAssets')
+      const tie = winners.length > 1 ? '공동 ' : ''
+      const ending = i % 2 === 0 ? '차지했어요!' : '차지했군요!'
+      return {
+        key: `game-${game.id}`,
+        theme: 'spotlight',
+        content: (
+          <RecapSpotlightSlide
+            title={`${game.name}에서는 ${winnerNames(winners)}이 ${tie}1등을 ${ending}`}
+            winners={winners}
+            caption={formatWon(winners[0].totalAssets)}
+            others={game.players.filter(player => !winners.includes(player))}
+          />
+        ),
+      }
+    }),
+  ]
+
+  const overallWinners = topTeams(players, 'totalAssets')
+  const priceSlides = ['stock', 'estate']
+    .map(kind => ({ kind, comparison: buildPriceComparison(games, kind) }))
+    .filter(({ comparison }) => comparison)
+    .map(({ kind, comparison }) => ({
+      key: `price-${kind}`,
+      theme: kind,
+      content: <RecapPriceSlide comparison={comparison} />,
+    }))
+
+  const winningTeams = topTeams(teams, 'totalAssets')
+  const winningNames = winningTeams.map(team => team.name).join(', ')
+
+  return [
+    {
+      key: 'intro',
+      theme: 'intro',
+      content: <RecapIntroSlide className={className} teams={teams} gameCount={games.length} />,
+    },
+    ...gameSlides,
+    {
+      key: 'overall',
+      theme: 'spotlight',
+      content: (
+        <RecapSpotlightSlide
+          title="대망의 전체 게임 결과 1위는?"
+          winners={overallWinners}
+          caption={formatWon(overallWinners[0].totalAssets)}
+          celebrate
+        />
+      ),
+    },
+    ...(priceSlides.length > 0
+      ? [{ key: 'price-intro', theme: 'total', content: <RecapPriceIntroSlide /> }, ...priceSlides]
+      : []),
+    { key: 'versus', theme: 'versus', content: <RecapVersusSlide teams={teams} /> },
+    {
+      key: 'winner',
+      theme: 'spotlight',
+      content: (
+        <RecapSpotlightSlide
+          title={`${withSubjectParticle(winningNames)} ${winningTeams.length > 1 ? '공동 ' : ''}우승을 차지했습니다!`}
+          winners={winningTeams.flatMap(team => team.members)}
+          caption={`총 자산 ${formatWon(winningTeams[0].totalAssets)}`}
+          celebrate
+          hideTitleUntilReveal
+        />
+      ),
+    },
+  ]
+}
 
 // 팀 대결 결과 스토리: 어두운 오버레이 위 세로 카드를 인스타그램 스토리처럼 넘겨 본다.
 // 자동으로 넘어가지 않는다(선생님이 설명하며 넘긴다). 배경을 눌러도 닫히지 않는다.
@@ -15,19 +105,7 @@ export default function ClanRecapStory({ className, recap, onClose }) {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
 
-  const slides = [
-    {
-      key: 'intro',
-      theme: 'intro',
-      content: <RecapIntroSlide className={className} teamCount={recap.teamCount} memberCount={recap.memberCount} />,
-    },
-    ...RECAP_CATEGORIES.map(category => ({
-      key: category.valueKey,
-      theme: category.theme,
-      content: <RecapCategorySlide title={category.title} valueKey={category.valueKey} teams={recap.teams} />,
-    })),
-    { key: 'final', theme: 'final', content: <RecapFinalSlide teams={recap.teams} /> },
-  ]
+  const slides = buildSlides(className, recap)
   const last = slides.length - 1
   const slide = slides[index]
 

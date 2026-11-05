@@ -7,7 +7,6 @@ import SurveyQRModal from '../components/admin/SurveyQRModal'
 import AdminStatCards from '../components/admin/AdminStatCards'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
 import TypeDistribution from '../components/admin/TypeDistribution'
-import TeamPriceCharts from '../components/admin/TeamPriceCharts'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import ClanTab from '../components/admin/ClanTab'
 import ClanRecapBanner from '../components/admin/ClanRecapBanner'
@@ -321,10 +320,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
             <AdminEmptyState title="등록된 게임 결과가 없습니다." subtitle="팀 결과를 등록하면 유형 분포를 확인할 수 있습니다." />
           )}
           {activeTab === 'chart' && !resultsError && results?.length > 0 && (
-            <>
-              <TypeDistribution rows={results} scopeLabel="수업" largePoints />
-              <TeamPriceCharts rows={results} />
-            </>
+            <TypeDistribution rows={results} scopeLabel="수업" largePoints />
           )}
           {activeTab === 'clans' && <ClanTab classId={classId} />}
         </>

@@ -1,0 +1,109 @@
+.slide { display: flex; flex-direction: column; gap: 12px; height: 100%; padding-top: 8px; }
+.title { font-size: 21px; font-weight: 900; line-height: 1.35; color: #fff; text-align: center; word-break: keep-all; }
+
+/* 카드 패딩만큼 밀어 내어 팀 색이 카드 끝까지 닿게 한다 */
+.arena { position: relative; flex: 1; min-height: 0; margin: 0 -20px -24px; }
+
+.panel { position: absolute; inset: 0; }
+.body {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+.teamName { max-width: 100%; font-size: 18px; font-weight: 900; color: #fff; overflow-wrap: anywhere; }
+.total {
+  font-size: 19px;
+  font-weight: 900;
+  color: #ffe9a8;
+  font-variant-numeric: tabular-nums;
+  animation: fade 0.5s ease-out 0.7s both;
+}
+.crowd {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  list-style: none;
+}
+.member { width: var(--size); animation: enter 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) var(--delay) both; }
+.member img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4)); }
+
+.vs {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #14161f;
+  color: #ffe9a8;
+  font-size: 22px;
+  font-weight: 900;
+  font-style: italic;
+  animation: stamp 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.5) 0.5s both;
+}
+
+/* 2팀: 위·아래 사선 */
+.duel .panel:nth-child(1) { clip-path: polygon(0 0, 100% 0, 100% 40%, 0 60%); }
+.duel .panel:nth-child(2) { clip-path: polygon(0 60%, 100% 40%, 100% 100%, 0 100%); }
+.duel .panel:nth-child(1) .body { top: 2%; left: 4%; right: 4%; height: 38%; }
+.duel .panel:nth-child(2) .body { bottom: 3%; left: 4%; right: 4%; height: 38%; }
+.duel .vs { top: 50%; left: 50%; }
+
+/* 3팀: 위 한 칸, 아래 두 칸이 만나는 Y자 */
+.triple .panel:nth-child(1) { clip-path: polygon(0 0, 100% 0, 100% 27%, 50% 40%, 0 27%); }
+.triple .panel:nth-child(2) { clip-path: polygon(0 27%, 50% 40%, 46% 100%, 0 100%); }
+.triple .panel:nth-child(3) { clip-path: polygon(100% 27%, 50% 40%, 46% 100%, 100% 100%); }
+.triple .panel:nth-child(1) .body { top: 2%; left: 4%; right: 4%; height: 25%; }
+.triple .panel:nth-child(2) .body { top: 46%; left: 2%; width: 42%; bottom: 3%; }
+.triple .panel:nth-child(3) .body { top: 46%; right: 2%; width: 46%; bottom: 3%; }
+.triple .vs { top: 40%; left: 50%; }
+
+/* 4팀: 기울어진 십자 */
+.quad .panel:nth-child(1) { clip-path: polygon(0 0, 54% 0, 50% 50%, 0 54%); }
+.quad .panel:nth-child(2) { clip-path: polygon(54% 0, 100% 0, 100% 46%, 50% 50%); }
+.quad .panel:nth-child(3) { clip-path: polygon(0 54%, 50% 50%, 46% 100%, 0 100%); }
+.quad .panel:nth-child(4) { clip-path: polygon(50% 50%, 100% 46%, 100% 100%, 46% 100%); }
+.quad .panel:nth-child(1) .body { top: 2%; left: 2%; width: 46%; height: 42%; }
+.quad .panel:nth-child(2) .body { top: 2%; right: 2%; width: 42%; height: 40%; }
+.quad .panel:nth-child(3) .body { top: 58%; left: 2%; width: 42%; bottom: 2%; }
+.quad .panel:nth-child(4) .body { top: 54%; right: 2%; width: 46%; bottom: 2%; }
+.quad .vs { top: 50%; left: 50%; }
+
+/* 1팀 또는 5팀 이상: 줄로 쌓는다 */
+.list { display: flex; flex-direction: column; }
+.list .panel { position: relative; inset: auto; flex: 1; min-height: 0; }
+.list .body {
+  position: static;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: center;
+  padding: 2px 16px;
+  text-align: left;
+}
+.list .teamName { font-size: 14px; }
+.list .total { font-size: 14px; }
+.list .crowd { grid-column: 1 / -1; justify-content: flex-start; }
+
+/* 칸이 좁은 3·4팀 대결에서는 글자를 줄인다 */
+.triple .teamName, .quad .teamName { font-size: 15px; }
+.triple .total, .quad .total { font-size: 15px; }
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes enter { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+@keyframes stamp { from { opacity: 0; transform: translate(-50%, -50%) scale(2.2); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .total, .member, .vs { animation: none; }
+}

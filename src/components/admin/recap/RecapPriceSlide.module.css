@@ -1,0 +1,54 @@
+.slide { display: flex; flex-direction: column; gap: 12px; height: 100%; padding-top: 8px; }
+.title { font-size: 20px; font-weight: 900; line-height: 1.4; color: #fff; word-break: keep-all; }
+[data-compact] .title { font-size: 18px; }
+
+.charts { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.chart {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #14161f;
+}
+.chartHeader { display: flex; align-items: center; gap: 8px; }
+.icon { width: 28px; height: 28px; object-fit: contain; }
+.chartTitle { font-size: 15px; font-weight: 800; color: #f0efec; }
+
+.rows { display: flex; flex-direction: column; gap: 6px; list-style: none; }
+.row {
+  display: grid;
+  grid-template-columns: 44px 1fr 92px;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.gameName { font-weight: 700; color: #c3c2b7; white-space: nowrap; }
+.track { height: 24px; }
+.bar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  animation: grow 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) 0.2s both;
+}
+.value { font-weight: 800; color: #f0efec; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* 게임이 많으면 행을 차트 높이에 맞춰 나눠 갖는다 */
+[data-compact] .chart { gap: 2px; padding: 4px 10px; overflow: hidden; }
+[data-compact] .icon { width: 16px; height: 16px; }
+[data-compact] .chartTitle { font-size: 13px; }
+[data-compact] .rows { flex: 1; min-height: 0; gap: 0; }
+[data-compact] .row { flex: 1; min-height: 0; font-size: 10px; line-height: 1; }
+[data-compact] .track { height: 8px; }
+
+.note { font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
+
+@keyframes grow { from { width: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar { animation: none; }
+}

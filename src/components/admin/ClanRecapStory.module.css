@@ -56,19 +56,27 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   animation: cardIn 0.45s ease-out 0.1s both;
   transition: background 0.4s ease;
+  /* 장 안의 캐릭터 크기를 카드 폭 기준(cqw)으로 잡아 화면 높이가 낮아도 비율을 지킨다 */
+  container-type: inline-size;
 }
-.intro, .final { background: linear-gradient(160deg, #0b1f14 0%, #0f3b24 55%, #1d7a45 100%); }
-.cash { background: linear-gradient(160deg, #06281a 0%, #0b5a34 60%, #23a35f 100%); }
+.intro, .cast { background: linear-gradient(160deg, #0b1f14 0%, #0f3b24 55%, #1d7a45 100%); }
 .stock { background: linear-gradient(160deg, #0a1633 0%, #123d8a 60%, #2f6fe0 100%); }
 .estate { background: linear-gradient(160deg, #2b1405 0%, #8a3f0c 60%, #e07a1f 100%); }
 .total { background: linear-gradient(160deg, #1c0b33 0%, #4b1d8a 60%, #8a4fe0 100%); }
+.versus { background: #14161f; }
+.spotlight { background: linear-gradient(180deg, #ffd24d 0%, #ffe98f 45%, #fff6cf 100%); }
 
-.progress { display: flex; gap: 4px; }
+/* 커튼·배경 효과가 카드 전체를 덮어도 진행 막대와 수업 이름은 위에 남긴다 */
+.progress { position: relative; z-index: 3; display: flex; gap: 4px; }
 .segment { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.3); }
 .segment[data-state='done'] { background: rgba(255, 255, 255, 0.85); }
 .segment[data-state='current'] { background: #fff; box-shadow: 0 0 6px rgba(255, 255, 255, 0.7); }
+.spotlight .segment { background: rgba(58, 29, 0, 0.25); }
+.spotlight .segment[data-state='done'] { background: rgba(58, 29, 0, 0.7); }
+.spotlight .segment[data-state='current'] { background: #3a1d00; box-shadow: none; }
 
-.className { margin-top: 10px; font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
+.className { position: relative; z-index: 3; margin-top: 10px; font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
+.spotlight .className { color: rgba(58, 29, 0, 0.75); }
 
 .content { flex: 1; min-height: 0; animation: slideIn 0.3s ease-out both; }
 
