@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import AdminSpectateModal from './AdminSpectateModal'
 import { setAdminSession, clearAdminSession } from '../../utils/adminAuth'
+import { mockViewport, restoreViewport } from '../../test-utils/mockViewport'
 
 const PRICES = {
   stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
@@ -533,5 +534,83 @@ describe('유형 보고서', () => {
   it('결과 등록 전이면 보고서 버튼이 비활성화된다', () => {
     render(<AdminSpectateModal rooms={ROOMS} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByRole('button', { name: '보고서' })).toBeDisabled()
+  })
+})
+
+describe('AdminSpectateModal 모바일', () => {
+  afterEach(restoreViewport)
+
+  function swipe(fromX, fromY, toX, toY) {
+    const target = screen.getByText(/ \/ 2$/)
+    fireEvent.touchStart(target, { touches: [{ clientX: fromX, clientY: fromY }] })
+    fireEvent.touchEnd(target, { changedTouches: [{ clientX: toX, clientY: toY }] })
+  }
+
+  function renderModal(initialIndex = 0, rooms = ROOMS) {
+    return render(<AdminSpectateModal rooms={rooms} initialIndex={initialIndex} onPlayerUpdate={vi.fn()} onClose={vi.fn()} onRoomChanged={vi.fn()} />)
+  }
+
+  it('왼쪽으로 밀면 다음 팀, 오른쪽으로 밀면 이전 팀으로 간다', () => {
+    mockViewport(390)
+    renderModal()
+    swipe(300, 100, 200, 110)
+    expect(screen.getByText('2 / 2')).toBeInTheDocument()
+    swipe(100, 100, 200, 110)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  })
+
+  it('세로로 움직이거나 50px보다 짧으면 팀이 바뀌지 않는다', () => {
+    mockViewport(390)
+    renderModal()
+    swipe(300, 100, 200, 300)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+    swipe(300, 100, 260, 100)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  })
+
+  it('첫 팀과 마지막 팀에서는 더 넘어가지 않는다', () => {
+    mockViewport(390)
+    renderModal()
+    swipe(100, 100, 300, 100)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+    swipe(300, 100, 100, 100)
+    swipe(300, 100, 100, 100)
+    expect(screen.getByText('2 / 2')).toBeInTheDocument()
+  })
+
+  it('다른 창이 열려 있으면 넘겨지지 않는다', async () => {
+    mockViewport(390)
+    renderModal()
+    await userEvent.click(screen.getByRole('button', { name: '가격 설정' }))
+    swipe(300, 100, 100, 100)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  })
+
+  it('PC에서는 넘겨지지 않는다', () => {
+    mockViewport(1280)
+    renderModal()
+    swipe(300, 100, 100, 100)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  })
+
+  it('삭제와 자세히 보기는 메뉴 안에 있고, 삭제는 확인 창을 거친다', async () => {
+    mockViewport(390)
+    renderModal()
+    expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '자세히 보기' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '팀 메뉴' }))
+    const labels = screen.getAllByRole('menuitem').map(el => el.textContent)
+    expect(labels).toEqual(['자세히 보기', '직접 등록하기', '삭제'])
+    await userEvent.click(screen.getByRole('menuitem', { name: '삭제' }))
+    expect(screen.getByText('팀 삭제')).toBeInTheDocument()
+  })
+
+  it('등록된 팀은 메뉴에 공유 항목이 있고 가격 설정 버튼이 없다', async () => {
+    mockViewport(390)
+    const rooms = [{ ...ROOMS[0], registered: true, sessionId: 's1' }, ROOMS[1]]
+    renderModal(0, rooms)
+    expect(screen.queryByRole('button', { name: '가격 설정' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '팀 메뉴' }))
+    expect(screen.getAllByRole('menuitem').map(el => el.textContent)).toEqual(['카카오 공유', '링크 복사', '자세히 보기', '삭제'])
   })
 })

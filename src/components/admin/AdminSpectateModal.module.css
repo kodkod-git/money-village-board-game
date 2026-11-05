@@ -84,9 +84,6 @@
   color: var(--admin-disabled);
 }
 
-@media (max-width: 460px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 
 .actions {
   display: flex;
@@ -156,3 +153,33 @@
 
 .addPlayerBtn { background: var(--admin-purple-tint); color: var(--admin-purple); border: 1px solid var(--admin-purple); }
 
+
+@media (max-width: 767px) {
+  .page { touch-action: pan-y; }
+
+  .nav { padding: 12px 12px 8px; }
+
+  .navArrow { width: 44px; height: 44px; border-radius: 22px; }
+
+  .teamNameInput { font-size: 18px; }
+
+  .dots { padding: 0 12px 8px; }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 0 12px 4px;
+  }
+
+  .actions {
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .priceBtn,
+  .registerBtn { flex: 1; min-width: 0; padding: 0 8px; }
+
+  /* 버튼이 하나도 없을 때도 메뉴를 오른쪽 끝에 둔다. */
+  .actions > :last-child { margin-left: auto; }
+}

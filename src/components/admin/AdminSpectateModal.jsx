@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminPlayerCard from './AdminPlayerCard'
+import AdminOverflowMenu from './AdminOverflowMenu'
 import AdminEditModal from './AdminEditModal'
 import AdminPriceSettingModal from './AdminPriceSettingModal'
 import ConfirmDialog from './ConfirmDialog'
 import AdminTeamAssetsModal from './AdminTeamAssetsModal'
 import AdminAddPlayerModal from './AdminAddPlayerModal'
+import useIsAdminMobile from '../../hooks/useIsAdminMobile'
 import { adminFetch } from '../../utils/adminAuth'
 import { copyGameResultLink, shareGameResultToKakao } from '../../utils/shareGameResult'
 import { teamDisplayName } from '../../utils/teamDisplayName'
 import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
+const SWIPE_MIN_PX = 50
 
 export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate, onClose, onRoomChanged }) {
   // 코드로 현재 팀을 추적한다 — onRoomChanged로 목록을 다시 불러오면
@@ -29,6 +32,9 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const room = rooms[index]
   const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
   const pollTimer = useRef(null)
+  const isMobile = useIsAdminMobile()
+  const touchStart = useRef(null)
+  const hasOpenLayer = Boolean(confirmDelete || kickTarget || confirmRegister || showPriceModal || showDetail || showAddPlayer)
   const displayName = teamDisplayName(room, index)
   const [titleDraft, setTitleDraft] = useState(displayName)
 
@@ -134,6 +140,29 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     onClose()
   }
 
+  function handleTouchStart(event) {
+    // 팀 이름을 고치거나 다른 창을 쓰는 중에는 손가락 움직임을 넘기기로 보지 않는다.
+    if (!isMobile || hasOpenLayer || event.target.closest('input')) {
+      touchStart.current = null
+      return
+    }
+    const { clientX, clientY } = event.touches[0]
+    touchStart.current = { x: clientX, y: clientY }
+  }
+
+  function handleTouchEnd(event) {
+    const start = touchStart.current
+    touchStart.current = null
+    if (!start) return
+    const { clientX, clientY } = event.changedTouches[0]
+    const dx = clientX - start.x
+    const dy = clientY - start.y
+    // 세로 스크롤 중에 팀이 바뀌지 않도록 가로 이동이 더 클 때만 넘긴다.
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return
+    const next = rooms[dx < 0 ? index + 1 : index - 1]
+    if (next) setCurrentCode(next.code)
+  }
+
   if (editingPlayerUuid) {
     const player = room.players.find(p => p.playerUuid === editingPlayerUuid)
     return (
@@ -146,8 +175,25 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     )
   }
 
+  const priceButton = !room.registered && (
+    <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
+  )
+  const registerButton = room.status === 'completed-but-unregistered' && (
+    <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
+  )
+  const canAddPlayer = !room.registered && room.players.length < 4
+  const menuItems = [
+    ...(canShare ? [
+      { key: 'kakao', label: '카카오 공유', onSelect: () => setShareNotice(shareGameResultToKakao(room.sessionId)) },
+      { key: 'link', label: '링크 복사', onSelect: async () => setShareNotice(await copyGameResultLink(room.sessionId)) },
+    ] : []),
+    { key: 'detail', label: '자세히 보기', onSelect: () => setShowDetail(true) },
+    ...(canAddPlayer ? [{ key: 'add', label: '직접 등록하기', onSelect: () => setShowAddPlayer(true) }] : []),
+    { key: 'delete', label: '삭제', danger: true, onSelect: () => setConfirmDelete(true) },
+  ]
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className={styles.nav}>
         <button
           type="button"
@@ -206,39 +252,43 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         ))}
       </div>
 
-      <div className={styles.actions}>
-        {!room.registered && (
-          <button type="button" className={styles.priceBtn} onClick={() => setShowPriceModal(true)}>가격 설정</button>
-        )}
-        {room.status === 'completed-but-unregistered' && (
-          <button type="button" className={styles.registerBtn} onClick={() => setConfirmRegister(true)}>결과 등록</button>
-        )}
-        {canShare && (
-          <button
-            type="button"
-            className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
-            onClick={() => setShareNotice(shareGameResultToKakao(room.sessionId))}
-            aria-label="카카오톡 공유하기"
-          >
-            <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
-          </button>
-        )}
-        {canShare && (
-          <button
-            type="button"
-            className={styles.shareIconBtn}
-            onClick={async () => setShareNotice(await copyGameResultLink(room.sessionId))}
-            aria-label="링크 복사하기"
-          >
-            <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
-          </button>
-        )}
-        <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
-        {!room.registered && room.players.length < 4 && (
-          <button type="button" className={styles.addPlayerBtn} onClick={() => setShowAddPlayer(true)}>직접 등록하기</button>
-        )}
-        <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
-      </div>
+      {isMobile ? (
+        <div className={styles.actions}>
+          {priceButton}
+          {registerButton}
+          <AdminOverflowMenu label="팀 메뉴" placement="up" items={menuItems} />
+        </div>
+      ) : (
+        <div className={styles.actions}>
+          {priceButton}
+          {registerButton}
+          {canShare && (
+            <button
+              type="button"
+              className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
+              onClick={() => setShareNotice(shareGameResultToKakao(room.sessionId))}
+              aria-label="카카오톡 공유하기"
+            >
+              <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
+            </button>
+          )}
+          {canShare && (
+            <button
+              type="button"
+              className={styles.shareIconBtn}
+              onClick={async () => setShareNotice(await copyGameResultLink(room.sessionId))}
+              aria-label="링크 복사하기"
+            >
+              <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
+            </button>
+          )}
+          <button type="button" className={styles.detailBtn} onClick={() => setShowDetail(true)}>자세히 보기</button>
+          {canAddPlayer && (
+            <button type="button" className={styles.addPlayerBtn} onClick={() => setShowAddPlayer(true)}>직접 등록하기</button>
+          )}
+          <button type="button" className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>삭제</button>
+        </div>
+      )}
       {shareNotice && <p role="status" className={styles.shareNotice}>{shareNotice}</p>}
 
       {confirmDelete && (

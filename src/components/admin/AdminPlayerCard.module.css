@@ -109,3 +109,21 @@
   font-weight: 700;
   white-space: nowrap;
 }
+
+@media (max-width: 767px) {
+  .card { padding: 12px; }
+
+  .header { flex-wrap: wrap; gap: 8px 4px; }
+
+  .identity { flex: 1 1 calc(100% - 52px); }
+
+  .editBtn,
+  .reportBtn,
+  .kickBtn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+}
