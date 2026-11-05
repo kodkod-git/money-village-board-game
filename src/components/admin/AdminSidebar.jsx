@@ -1,16 +1,6 @@
 import { useState } from 'react'
+import { NAV_ITEMS } from './adminNavItems'
 import styles from './AdminSidebar.module.css'
-
-const NAV_ITEMS = [
-  { key: 'classes', label: '수업 목록', icon: '/icons/IconClasses.png' },
-  { key: 'team-status', label: '팀 현황', icon: '/icons/IconTeams.png' },
-  { key: 'ranking', label: '랭킹 보기', icon: '/icons/IconRankings.png' },
-  // 설문 응답 원본을 다루므로 마스터 관리자에게만 보인다.
-  { key: 'responses', label: '테스트 분석', icon: '/icons/assignment.png', superOnly: true },
-  // 모든 수업의 참가자 결과를 보여 주므로 마찬가지로 마스터 관리자 전용이다.
-  { key: 'all-results', label: '게임 분석', icon: '/icons/IconGame.svg', superOnly: true },
-  { key: 'settings', label: '설정', icon: '/icons/IconSettings.png' },
-]
 
 export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisabled, isSuper }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -29,7 +19,7 @@ export default function AdminSidebar({ activeSection, onNavigate, teamStatusDisa
 
       <div className={styles.nav}>
         {NAV_ITEMS.filter(item => !item.superOnly || isSuper).map(item => {
-          const disabled = item.key === 'team-status' || item.key === 'ranking' ? teamStatusDisabled : false
+          const disabled = item.needsClass ? teamStatusDisabled : false
           return (
             <button
               key={item.key}
