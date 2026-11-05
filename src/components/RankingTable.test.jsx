@@ -10,6 +10,12 @@ const mockRows = [
 ]
 
 describe('RankingTable', () => {
+  it('getSub를 넘기면 두 번째 줄을 그 값으로 바꾼다', () => {
+    render(<MemoryRouter><RankingTable rows={[{ ...mockRows[0], teamName: '1조' }]} getSub={row => row.teamName} /></MemoryRouter>)
+    expect(screen.getByText('1조')).toBeInTheDocument()
+    expect(screen.queryByText('1반')).not.toBeInTheDocument()
+  })
+
   it('등수, 이름, 수업, 총자산을 렌더링한다', () => {
     render(<MemoryRouter><RankingTable rows={mockRows} /></MemoryRouter>)
     expect(screen.getByText('1위')).toBeInTheDocument()
