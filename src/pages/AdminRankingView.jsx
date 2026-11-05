@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 import RankBadge from '../components/admin/RankBadge'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import AdminEmptyState from '../components/admin/AdminEmptyState'
+import RankingPodium from '../components/RankingPodium'
+import RankingTable from '../components/RankingTable'
+import useIsAdminMobile from '../hooks/useIsAdminMobile'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
 import { JOB_LABELS } from '../constants/gameData'
 import styles from './AdminRankingView.module.css'
@@ -40,6 +43,8 @@ function matchesSearch(row, query) {
   return row.name?.toLowerCase().includes(q) || row.teamCode?.toLowerCase().includes(q)
 }
 
+const teamLabel = row => row.teamName || row.teamCode
+
 export default function AdminRankingView({ classId, classDisplayName, onGoToTeamStatus }) {
   const [category, setCategory] = useState('totalAssets')
   const [rows, setRows] = useState([])
@@ -47,6 +52,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [viewingPlayer, setViewingPlayer] = useState(null)
+  const isMobile = useIsAdminMobile()
 
   useEffect(() => {
     setLoading(true)
@@ -65,6 +71,92 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
   const podiumRows = PODIUM_ORDER.map(i => rows[i]).filter(Boolean)
   const activeLabel = CATEGORY_TABS.find(t => t.key === category)?.label
 
+  const searchBox = (
+    <div className={styles.searchWrap}>
+      <svg className={styles.searchIcon} viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+      <input
+        className={styles.searchInput}
+        placeholder="이름 또는 팀 검색..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+    </div>
+  )
+  const categoryTabs = (
+    <div className={styles.tabs}>
+      {CATEGORY_TABS.map(tab => (
+        <button
+          key={tab.key}
+          type="button"
+          className={`${styles.tab} ${category === tab.key ? styles.tabActive : ''}`}
+          onClick={() => { setRows([]); setCategory(tab.key) }}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  )
+  const statusAndEmpty = (
+    <>
+      {loading && <p className={styles.message}>불러오는 중...</p>}
+      {error && <p className={styles.message}>{error}</p>}
+      {!loading && !error && rows.length === 0 && (
+        <AdminEmptyState
+          icon={EMPTY_ICON}
+          tone="blue"
+          title="아직 랭킹 정보가 없습니다."
+          subtitle="게임 결과가 등록되면 랭킹을 확인할 수 있습니다."
+          actionLabel="팀 현황 보기"
+          actionVariant="outline"
+          onAction={onGoToTeamStatus}
+        />
+      )}
+    </>
+  )
+  const playerPopup = viewingPlayer && (
+    <div className={styles.overlay} onClick={() => setViewingPlayer(null)}>
+      <div className={styles.popup} onClick={e => e.stopPropagation()}>
+        <AdminEditModal
+          player={toAdminPlayer(viewingPlayer)}
+          prices={toAdminPrices(viewingPlayer)}
+          onClose={() => setViewingPlayer(null)}
+          readOnly
+        />
+      </div>
+    </div>
+  )
+
+  if (isMobile) {
+    // RankingPodium이 안에서 2·1·3위 순서로 바꾸므로 podiumRows가 아니라 원래 순서를 넘긴다.
+    const showPodium = rows.length >= 3 && !search.trim()
+    return (
+      <div className={styles.page}>
+        <div className={styles.mobileHeader}>
+          <h1 className={styles.title}>자산 랭킹</h1>
+          <p className={styles.subtitle}>{classDisplayName}</p>
+          {categoryTabs}
+          {searchBox}
+        </div>
+        <div className={styles.mobileContent}>
+          {statusAndEmpty}
+          {!loading && !error && rows.length > 0 && (
+            <RankingTable
+              rows={filteredRows}
+              valueKey={valueKey}
+              getSub={teamLabel}
+              onRowClick={setViewingPlayer}
+              podium={showPodium ? <RankingPodium rows={rows.slice(0, 3)} valueKey={valueKey} onRowClick={setViewingPlayer} /> : null}
+            />
+          )}
+        </div>
+        {playerPopup}
+      </div>
+    )
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -73,48 +165,14 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
           <p className={styles.subtitle}>{classDisplayName} · {activeLabel} 기준 순위를 확인할 수 있습니다</p>
         </div>
         <div className={styles.headerActions}>
-          <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-              <circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <input
-              className={styles.searchInput}
-              placeholder="이름 또는 팀 검색..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <div className={styles.tabs}>
-            {CATEGORY_TABS.map(tab => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`${styles.tab} ${category === tab.key ? styles.tabActive : ''}`}
-                onClick={() => { setRows([]); setCategory(tab.key) }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {searchBox}
+          {categoryTabs}
           <span className={styles.adminBadge}>★ 관리자 모드</span>
         </div>
       </div>
 
       <div className={styles.content}>
-        {loading && <p className={styles.message}>불러오는 중...</p>}
-        {error && <p className={styles.message}>{error}</p>}
-        {!loading && !error && rows.length === 0 && (
-          <AdminEmptyState
-            icon={EMPTY_ICON}
-            tone="blue"
-            title="아직 랭킹 정보가 없습니다."
-            subtitle="게임 결과가 등록되면 랭킹을 확인할 수 있습니다."
-            actionLabel="팀 현황 보기"
-            actionVariant="outline"
-            onAction={onGoToTeamStatus}
-          />
-        )}
+        {statusAndEmpty}
         {!loading && !error && rows.length > 0 && (
           <>
             {podiumRows.length === 3 && (
@@ -178,7 +236,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
                           </div>
                         </div>
                       </td>
-                      <td className={styles.td}>{row.teamName || row.teamCode}</td>
+                      <td className={styles.td}>{teamLabel(row)}</td>
                       <td className={styles.tdRight}>{formatWon(row.cash)}</td>
                       <td className={styles.tdRight}>{formatWon(row.realEstateValue)}</td>
                       <td className={styles.tdRight}>{formatWon(row.stockValue)}</td>
@@ -192,18 +250,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
         )}
       </div>
 
-      {viewingPlayer && (
-        <div className={styles.overlay} onClick={() => setViewingPlayer(null)}>
-          <div className={styles.popup} onClick={e => e.stopPropagation()}>
-            <AdminEditModal
-              player={toAdminPlayer(viewingPlayer)}
-              prices={toAdminPrices(viewingPlayer)}
-              onClose={() => setViewingPlayer(null)}
-              readOnly
-            />
-          </div>
-        </div>
-      )}
+      {playerPopup}
     </div>
   )
 }
