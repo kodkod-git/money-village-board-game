@@ -65,3 +65,12 @@
 
 .confirmBtnDanger { background: #dc2626; }
 .confirmBtnPrimary { background: var(--admin-blue); }
+
+@media (max-width: 767px) {
+  .overlay { padding: 16px; }
+
+  .card {
+    width: min(420px, calc(100vw - 32px));
+    padding: 24px 20px 20px;
+  }
+}

@@ -69,3 +69,13 @@
 .footerLabel { font-size: 12px; font-weight: 700; color: var(--admin-disabled); }
 
 .footerValue { font-size: 18px; font-weight: 900; color: var(--admin-text); }
+
+@media (max-width: 767px) {
+  .receipt {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    align-self: stretch;
+  }
+}

@@ -85,3 +85,30 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+@media (max-width: 767px) {
+  .overlay { align-items: flex-end; padding: 0; }
+
+  .panel {
+    width: 100%;
+    max-height: 90dvh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .header { padding: 10px 16px; }
+
+  .closeBtn { width: 44px; height: 44px; border-radius: 22px; }
+
+  .strip {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .actions { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+
+  .footerCloseBtn { width: 100%; }
+}

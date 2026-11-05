@@ -25,3 +25,9 @@
   border-radius: 8px;
   padding: 8px;
 }
+
+@media (max-width: 767px) {
+  .modal { width: min(330px, calc(100% - 32px)); }
+
+  .close { top: 6px; right: 6px; width: 44px; height: 44px; }
+}
