@@ -57,4 +57,26 @@ describe('AdminOverflowMenu', () => {
     await userEvent.keyboard('{Escape}')
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument()
   })
+
+  it('열면 메뉴를 보이는 위치로 스크롤한다', async () => {
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+    render(<AdminOverflowMenu label="수업 메뉴" items={[{ key: 'qr', label: 'QR 코드', onSelect: vi.fn() }]} />)
+    await open()
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' })
+    delete Element.prototype.scrollIntoView
+  })
+
+  it('Esc로 닫으면 포커스가 트리거로 돌아간다', async () => {
+    render(<AdminOverflowMenu label="수업 메뉴" items={[{ key: 'qr', label: 'QR 코드', onSelect: vi.fn() }]} />)
+    await open()
+    await userEvent.keyboard('{Escape}')
+    expect(screen.getByRole('button', { name: '수업 메뉴' })).toHaveFocus()
+  })
+
+  it('메뉴에 접근 가능한 이름이 있다', async () => {
+    render(<AdminOverflowMenu label="수업 메뉴" items={[{ key: 'qr', label: 'QR 코드', onSelect: vi.fn() }]} />)
+    await open()
+    expect(screen.getByRole('menu', { name: '수업 메뉴' })).toBeInTheDocument()
+  })
 })
