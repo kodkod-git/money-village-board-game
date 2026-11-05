@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import AssetQtyStepper from './AssetQtyStepper'
+import { mockViewport, restoreViewport } from '../../test-utils/mockViewport'
 
 describe('AssetQtyStepper', () => {
   it('+ 버튼 클릭 시 onChange에 value+1을 문자열로 전달한다', async () => {
@@ -33,5 +34,31 @@ describe('AssetQtyStepper', () => {
     render(<AssetQtyStepper value={0} onChange={onChange} max={100} label="금융" />)
     await userEvent.type(screen.getByLabelText('금융 수량'), '5')
     expect(onChange).toHaveBeenCalledWith('5')
+  })
+})
+
+describe('AssetQtyStepper 모바일', () => {
+  afterEach(restoreViewport)
+
+  it('숫자를 누르면 키패드가 열리고, 고른 값을 문자열로 넘기며 최댓값으로 제한한다', async () => {
+    mockViewport(390)
+    const onChange = vi.fn()
+    render(<AssetQtyStepper value="1" onChange={onChange} max={50} label="바이오" />)
+    await userEvent.click(screen.getByRole('button', { name: '바이오 수량' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+    expect(onChange).toHaveBeenCalledWith('19')
+
+    await userEvent.click(screen.getByRole('button', { name: '바이오 수량' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '9' }))
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+    expect(onChange).toHaveBeenLastCalledWith('50')
+  })
+
+  it('PC에서는 입력칸을 그대로 보여 준다', () => {
+    mockViewport(1280)
+    render(<AssetQtyStepper value="1" onChange={vi.fn()} max={50} label="바이오" />)
+    expect(screen.getByRole('spinbutton', { name: '바이오 수량' })).toBeInTheDocument()
   })
 })

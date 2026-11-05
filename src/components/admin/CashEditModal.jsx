@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { MAX_CASH } from '../../constants/gameData'
+import NumberInputModal from '../NumberInputModal'
+import useIsAdminMobile from '../../hooks/useIsAdminMobile'
 import styles from './FieldEditModal.module.css'
 
 function formatKoreanWon(value) {
@@ -21,6 +23,7 @@ function formatKoreanWon(value) {
 
 export default function CashEditModal({ initialValue, onConfirm, onClose }) {
   const [display, setDisplay] = useState(String(initialValue ?? 0))
+  const isMobile = useIsAdminMobile()
 
   function handleChange(raw) {
     const digitsOnly = raw.replace(/[^0-9]/g, '')
@@ -34,6 +37,19 @@ export default function CashEditModal({ initialValue, onConfirm, onClose }) {
   }
 
   const parsedValue = Math.min(parseInt(display, 10) || 0, MAX_CASH)
+
+  if (isMobile) {
+    return (
+      <NumberInputModal
+        title="현금"
+        initialValue={initialValue}
+        unit="원"
+        maxValue={MAX_CASH}
+        onConfirm={value => { onConfirm(value); onClose() }}
+        onClose={onClose}
+      />
+    )
+  }
 
   return (
     <div className={styles.overlay} onClick={onClose}>
