@@ -8,12 +8,20 @@ import AdminSettings from './AdminSettings'
 import AdminResponseAnalytics from './AdminResponseAnalytics'
 import AdminAllResults from './AdminAllResults'
 import AdminShell from '../components/admin/AdminShell'
+import useIsAdminMobile from '../hooks/useIsAdminMobile'
+import styles from './AdminDashboard.module.css'
+
+// 모바일에서는 PC에서만 볼 수 있는 분석 화면을 열지 않는다.
+const DESKTOP_ONLY_SECTIONS = ['responses', 'all-results']
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(() => getAdminToken())
   const [profile, setProfile] = useState(() => getAdminProfile())
   const [selectedClass, setSelectedClass] = useState(null)
   const [section, setSection] = useState('classes')
+  const isMobile = useIsAdminMobile()
+  // section은 그대로 두어, 창을 다시 넓히면 보던 화면으로 돌아온다.
+  const desktopOnly = isMobile && DESKTOP_ONLY_SECTIONS.includes(section)
 
   // 로그인 화면은 다른 페이지들과 동일하게 폰 프레임 카드 안에 보여주고,
   // 로그인 이후(수업 목록/수업 대시보드)에만 화면 전체를 쓰는 관리자 모드로 전환한다.
@@ -72,8 +80,9 @@ export default function AdminDashboard() {
           onGoToTeamStatus={() => handleNavigate('team-status')}
         />
       )}
-      {section === 'responses' && profile.isSuper && <AdminResponseAnalytics />}
-      {section === 'all-results' && profile.isSuper && <AdminAllResults />}
+      {desktopOnly && <p className={styles.desktopOnly}>PC에서 이용해 주세요</p>}
+      {!desktopOnly && section === 'responses' && profile.isSuper && <AdminResponseAnalytics />}
+      {!desktopOnly && section === 'all-results' && profile.isSuper && <AdminAllResults />}
       {section === 'settings' && <AdminSettings profile={profile} onLogout={handleLogout} />}
     </AdminShell>
   )

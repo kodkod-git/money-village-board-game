@@ -14,3 +14,7 @@
   height: 100%;
   overflow: hidden;
 }
+
+.shellMobile { flex-direction: column; }
+
+.shellMobile .main { height: auto; min-height: 0; }
