@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassList from './AdminClassList'
 import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
+import { mockViewport, restoreViewport } from '../test-utils/mockViewport'
 
 const CLASSES = [
   { id: 'class-1', name: '3학년 2반', createdAt: '2026-07-27T00:00:00.000Z' },
@@ -132,5 +133,32 @@ describe('AdminClassList', () => {
 
     await userEvent.click(screen.getByText('확인'))
     expect(screen.queryByText('수업 이름을 입력해주세요')).not.toBeInTheDocument()
+  })
+})
+
+describe('AdminClassList 모바일', () => {
+  afterEach(restoreViewport)
+
+  function renderList() {
+    return render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+  }
+
+  it('행의 버튼 3개를 메뉴로 옮기고, 미배정 수업에는 메뉴를 두지 않는다', async () => {
+    mockViewport(390)
+    renderList()
+    await screen.findByText('3학년 2반')
+    expect(screen.queryByRole('button', { name: 'QR' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '3학년 2반 메뉴' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '미배정 수업 메뉴' })).not.toBeInTheDocument()
+  })
+
+  it('삭제는 메뉴를 거쳐 확인 창을 띄운다', async () => {
+    mockViewport(390)
+    renderList()
+    await userEvent.click(await screen.findByRole('button', { name: '3학년 2반 메뉴' }))
+    expect(screen.getAllByRole('menuitem').map(el => el.textContent)).toEqual(['만족도 조사', 'QR', '삭제'])
+    await userEvent.click(screen.getByRole('menuitem', { name: '삭제' }))
+    expect(screen.getByText('수업 삭제')).toBeInTheDocument()
   })
 })

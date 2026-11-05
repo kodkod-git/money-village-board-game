@@ -3,6 +3,8 @@ import { adminFetch } from '../utils/adminAuth'
 import ClassQRModal from '../components/admin/ClassQRModal'
 import SurveyQRModal from '../components/admin/SurveyQRModal'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
+import AdminOverflowMenu from '../components/admin/AdminOverflowMenu'
+import useIsAdminMobile from '../hooks/useIsAdminMobile'
 import styles from './AdminClassList.module.css'
 
 function formatDate(isoString) {
@@ -17,6 +19,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [showSurveyQr, setShowSurveyQr] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showEmptyNameWarning, setShowEmptyNameWarning] = useState(false)
+  const isMobile = useIsAdminMobile()
 
   const loadClasses = useCallback(() => {
     adminFetch('/api/admin/classes')
@@ -85,13 +88,22 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
               <span className={styles.itemName}>{cls.name}</span>
               {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
             </button>
-            {cls.id !== 'unassigned' && (
+            {cls.id !== 'unassigned' && (isMobile ? (
+              <AdminOverflowMenu
+                label={`${cls.name} 메뉴`}
+                items={[
+                  { key: 'survey', label: '만족도 조사', onSelect: () => setShowSurveyQr(true) },
+                  { key: 'qr', label: 'QR', onSelect: () => setQrClass(cls) },
+                  { key: 'delete', label: '삭제', danger: true, onSelect: () => setDeleteTarget(cls) },
+                ]}
+              />
+            ) : (
               <>
                 <button type="button" className={styles.qrBtn} onClick={() => setShowSurveyQr(true)}>만족도 조사</button>
                 <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
                 <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(cls)}>삭제</button>
               </>
-            )}
+            ))}
           </li>
         ))}
       </ul>

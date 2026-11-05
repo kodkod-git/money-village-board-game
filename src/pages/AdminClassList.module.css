@@ -48,3 +48,25 @@
   border-radius: var(--admin-r-sm); height: 32px; padding: 0 12px;
   font-size: 12px; font-weight: 700; color: #e53935;
 }
+
+@media (max-width: 767px) {
+  .page { padding: 16px; }
+
+  .header { margin-bottom: 16px; }
+
+  .headerActions { display: none; }
+
+  .createForm { flex-direction: column; max-width: none; }
+
+  .createInput { flex: none; height: 44px; font-size: 16px; }
+
+  .createBtn { height: 44px; font-size: 14px; }
+
+  .list { max-width: none; }
+
+  .item { padding: 4px 8px 4px 4px; }
+
+  .itemBtn { min-width: 0; }
+
+  .itemName { overflow-wrap: anywhere; }
+}
