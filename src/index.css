@@ -323,3 +323,8 @@ body.admin-mode #root {
   box-shadow: none;
   overflow: auto;
 }
+
+/* 화면이 낮은 폰에서 기본 min-height 때문에 #root가 화면보다 커져 하단 시트가 잘리지 않게 한다. */
+@media (max-width: 767px) {
+  body.admin-mode #root { min-height: 0; }
+}
