@@ -1,0 +1,59 @@
+.root { position: relative; flex-shrink: 0; }
+
+.trigger {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--admin-r-sm);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--admin-text-2);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  min-width: 168px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-r-md);
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.18);
+}
+
+.menuUp {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.item {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--admin-r-sm);
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text);
+  white-space: nowrap;
+}
+
+.item:disabled { color: var(--admin-disabled); cursor: not-allowed; }
+
+/* 되돌릴 수 없는 작업은 선으로 나눠 다른 항목과 구분한다. */
+.itemDanger {
+  margin-top: 4px;
+  border-top: 1px solid var(--admin-border);
+  border-radius: 0 0 var(--admin-r-sm) var(--admin-r-sm);
+  color: #dc2626;
+}
+
+.itemDanger:first-child { margin-top: 0; border-top: none; }
