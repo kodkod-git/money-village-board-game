@@ -140,7 +140,7 @@
 
   .header { padding: 8px 16px; }
 
-  .backBtn { min-height: 44px; }
+  .backBtn { min-height: 44px; min-width: 44px; padding: 0 8px; background: none; }
 
   .title { font-size: 18px; }
 

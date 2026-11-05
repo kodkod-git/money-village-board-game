@@ -30,4 +30,6 @@
   .modal { width: min(330px, calc(100% - 32px)); }
 
   .close { top: 6px; right: 6px; width: 44px; height: 44px; }
+
+  .modal h2 { padding-inline: 44px; }
 }
