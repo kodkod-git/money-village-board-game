@@ -613,4 +613,29 @@ describe('AdminSpectateModal 모바일', () => {
     await userEvent.click(screen.getByRole('button', { name: '팀 메뉴' }))
     expect(screen.getAllByRole('menuitem').map(el => el.textContent)).toEqual(['카카오 공유', '링크 복사', '자세히 보기', '삭제'])
   })
+
+  it('이름을 고치던 중 넘기면 이전 팀에 저장한다', async () => {
+    mockViewport(390)
+    const rooms = [{ ...ROOMS[0], title: '기존 이름' }, { ...ROOMS[1], title: '다음 팀' }]
+    renderModal(0, rooms)
+    const input = screen.getByDisplayValue('기존 이름')
+    await userEvent.clear(input)
+    await userEvent.type(input, '새 이름')
+    expect(input).toHaveFocus()
+    swipe(300, 100, 100, 100)
+    const patch = global.fetch.mock.calls.find(([url, options]) => url === '/api/admin/rooms/AB1234' && options?.method === 'PATCH')
+    expect(patch).toBeTruthy()
+    expect(JSON.parse(patch[1].body)).toEqual({ title: '새 이름' })
+  })
+
+  it('메뉴가 열린 채 넘기면 메뉴를 닫는다', async () => {
+    mockViewport(390)
+    renderModal()
+    await userEvent.click(screen.getByRole('button', { name: '팀 메뉴' }))
+    const item = screen.getByRole('menuitem', { name: '삭제' })
+    fireEvent.touchStart(item, { touches: [{ clientX: 300, clientY: 100 }] })
+    fireEvent.touchEnd(item, { changedTouches: [{ clientX: 100, clientY: 100 }] })
+    expect(screen.getByText('2 / 2')).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument()
+  })
 })

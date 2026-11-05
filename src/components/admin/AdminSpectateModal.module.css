@@ -155,7 +155,7 @@
 
 
 @media (max-width: 767px) {
-  .page { touch-action: pan-y; }
+  .page { touch-action: pan-y pinch-zoom; }
 
   .nav { padding: 12px 12px 8px; }
 

@@ -160,7 +160,10 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
     // 세로 스크롤 중에 팀이 바뀌지 않도록 가로 이동이 더 클 때만 넘긴다.
     if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return
     const next = rooms[dx < 0 ? index + 1 : index - 1]
-    if (next) setCurrentCode(next.code)
+    if (!next) return
+    // 입력 중인 팀 이름을 이전 팀에 저장한 뒤 넘어간다.
+    if (document.activeElement?.tagName === 'INPUT') document.activeElement.blur()
+    setCurrentCode(next.code)
   }
 
   if (editingPlayerUuid) {
@@ -256,7 +259,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         <div className={styles.actions}>
           {priceButton}
           {registerButton}
-          <AdminOverflowMenu label="팀 메뉴" placement="up" items={menuItems} />
+          <AdminOverflowMenu key={room.code} label="팀 메뉴" placement="up" items={menuItems} />
         </div>
       ) : (
         <div className={styles.actions}>

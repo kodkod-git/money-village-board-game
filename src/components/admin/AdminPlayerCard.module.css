@@ -117,6 +117,8 @@
 
   .identity { flex: 1 1 calc(100% - 52px); }
 
+  .nameRow { flex-wrap: wrap; }
+
   .editBtn,
   .reportBtn,
   .kickBtn {
