@@ -70,6 +70,8 @@ describe('AdminOverflowMenu', () => {
   it('Esc로 닫으면 포커스가 트리거로 돌아간다', async () => {
     render(<AdminOverflowMenu label="수업 메뉴" items={[{ key: 'qr', label: 'QR 코드', onSelect: vi.fn() }]} />)
     await open()
+    await userEvent.tab()
+    expect(screen.getByRole('menuitem', { name: 'QR 코드' })).toHaveFocus()
     await userEvent.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: '수업 메뉴' })).toHaveFocus()
   })
