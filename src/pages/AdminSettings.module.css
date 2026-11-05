@@ -68,3 +68,18 @@
   font-weight: 700;
   color: var(--admin-text-2);
 }
+
+@media (max-width: 767px) {
+  .header { padding: 0 16px; }
+
+  .content { padding: 16px; }
+
+  .card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    max-width: none;
+  }
+
+  .logoutBtn { width: 100%; height: 44px; }
+}
