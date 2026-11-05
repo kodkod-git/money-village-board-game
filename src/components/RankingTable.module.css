@@ -161,3 +161,14 @@
   text-align: center;
   color: var(--white);
 }
+
+/* 관리자 모바일: 긴 이름·팀 이름이 행 높이를 키우거나 옆으로 넘치지 않게 한다. */
+@media (max-width: 767px) {
+  :global(body.admin-mode) .info { min-width: 0; }
+  :global(body.admin-mode) .name,
+  :global(body.admin-mode) .sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

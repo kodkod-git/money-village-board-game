@@ -63,4 +63,48 @@ describe('AdminRankingView', () => {
     expect(screen.getByRole('button', { name: '‹ 뒤로' })).toBeInTheDocument()
     expect(screen.queryByTestId('edit-cash')).not.toBeInTheDocument()
   })
+
+  it('시상대의 이름을 누르면 그 학생의 정보를 연다', async () => {
+    mockViewport(390)
+    renderView()
+    await screen.findByText('4조')
+    // 이름이 시상대와 목록에 두 번 나오고, 시상대가 먼저다.
+    const podiumName = screen.getAllByText('다라')[0]
+    expect(podiumName.className).toMatch(/name/)
+    expect(podiumName.closest('[class*="podium"]')).not.toBeNull()
+    await userEvent.click(podiumName)
+    expect(screen.getByRole('button', { name: '‹ 뒤로' })).toBeInTheDocument()
+    expect(screen.getAllByText('다라').length).toBeGreaterThan(2)
+  })
+
+  it('모바일에서는 팀 이름으로도 검색된다', async () => {
+    mockViewport(390)
+    renderView()
+    await screen.findByText('4조')
+    await userEvent.type(screen.getByPlaceholderText('이름 또는 팀 검색...'), '4조')
+    await waitFor(() => expect(screen.queryByText('1조')).not.toBeInTheDocument())
+    expect(screen.getByText('4조')).toBeInTheDocument()
+    expect(screen.getByText('사아')).toBeInTheDocument()
+  })
+
+  it('모바일에서 검색 결과가 없으면 안내 문구를 보여 준다', async () => {
+    mockViewport(390)
+    renderView()
+    await screen.findByText('4조')
+    await userEvent.type(screen.getByPlaceholderText('이름 또는 팀 검색...'), '없는이름')
+    expect(await screen.findByText('검색 결과가 없습니다.')).toBeInTheDocument()
+  })
+})
+
+describe('AdminRankingView PC 검색', () => {
+  it('PC에서는 팀 이름으로 검색해도 찾지 못한다', async () => {
+    mockViewport(1280)
+    renderView()
+    await screen.findByRole('table')
+    expect(screen.getByText('4조')).toBeInTheDocument()
+    await userEvent.type(screen.getByPlaceholderText('이름 또는 팀 검색...'), '4조')
+    await waitFor(() => expect(screen.queryByText('4조')).not.toBeInTheDocument())
+    expect(screen.queryByText('사아')).not.toBeInTheDocument()
+    expect(screen.queryByText('검색 결과가 없습니다.')).not.toBeInTheDocument()
+  })
 })

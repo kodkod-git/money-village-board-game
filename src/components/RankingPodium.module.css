@@ -103,3 +103,8 @@
 .first .value {
   color: var(--white);
 }
+
+/* 관리자 모바일: 세 칸이 좁은 화면에 모두 들어오도록 줄어들게 한다. */
+@media (max-width: 767px) {
+  :global(body.admin-mode) .slot { flex-shrink: 1; min-width: 0; }
+}

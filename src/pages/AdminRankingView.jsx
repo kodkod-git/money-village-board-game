@@ -37,10 +37,12 @@ function formatManwon(value) {
   return value != null ? `${Math.round(value / 10000).toLocaleString()}만원` : '-'
 }
 
-function matchesSearch(row, query) {
+function matchesSearch(row, query, includeTeamName = false) {
   if (!query.trim()) return true
   const q = query.trim().toLowerCase()
-  return row.name?.toLowerCase().includes(q) || row.teamCode?.toLowerCase().includes(q)
+  return row.name?.toLowerCase().includes(q)
+    || row.teamCode?.toLowerCase().includes(q)
+    || (includeTeamName && row.teamName?.toLowerCase().includes(q))
 }
 
 const teamLabel = row => row.teamName || row.teamCode
@@ -67,7 +69,8 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
   }, [category, classId])
 
   const valueKey = VALUE_KEYS[category]
-  const filteredRows = useMemo(() => rows.filter(row => matchesSearch(row, search)), [rows, search])
+  // 모바일 줄에는 팀 이름이 보이므로 모바일에서만 팀 이름도 검색 대상에 넣는다.
+  const filteredRows = useMemo(() => rows.filter(row => matchesSearch(row, search, isMobile)), [rows, search, isMobile])
   const podiumRows = PODIUM_ORDER.map(i => rows[i]).filter(Boolean)
   const activeLabel = CATEGORY_TABS.find(t => t.key === category)?.label
 
@@ -150,6 +153,9 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
               onRowClick={setViewingPlayer}
               podium={showPodium ? <RankingPodium rows={rows.slice(0, 3)} valueKey={valueKey} onRowClick={setViewingPlayer} /> : null}
             />
+          )}
+          {!loading && !error && rows.length > 0 && search.trim() && filteredRows.length === 0 && (
+            <p className={styles.message}>검색 결과가 없습니다.</p>
           )}
         </div>
         {playerPopup}

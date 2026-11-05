@@ -361,7 +361,10 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px 16px 0;
+  padding: 12px 16px 12px;
+  /* 관리자 화면은 --sx/--sy를 정의하지 않아 랭킹 컴포넌트가 최대 크기로 그려진다. */
+  --sx: .43;
+  --sy: .5;
 }
 
 @media (max-width: 767px) {
