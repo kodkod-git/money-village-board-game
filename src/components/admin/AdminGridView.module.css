@@ -29,3 +29,9 @@
   font-weight: 700;
   color: var(--admin-blue);
 }
+
+@media (max-width: 767px) {
+  .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
+
+  .createCard { min-height: 96px; }
+}

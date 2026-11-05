@@ -11,6 +11,8 @@ import ConfirmDialog from '../components/admin/ConfirmDialog'
 import ClanTab from '../components/admin/ClanTab'
 import ClanRecapBanner from '../components/admin/ClanRecapBanner'
 import ClanRecapStory from '../components/admin/ClanRecapStory'
+import AdminOverflowMenu from '../components/admin/AdminOverflowMenu'
+import useIsAdminMobile from '../hooks/useIsAdminMobile'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
@@ -35,6 +37,9 @@ function matchesSearch(room, query) {
 export default function AdminClassDashboard({ classId, initialName }) {
   const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
+  const isMobile = useIsAdminMobile()
+  // 모바일은 그리드만 지원한다. activeTab은 그대로 두어 창을 다시 넓히면 보던 탭이 나온다.
+  const visibleTab = isMobile ? 'grid' : activeTab
   // 팀 대결 결과 스토리: 배너를 누를 때 한 번 불러온다(열려 있는 동안 갱신하지 않음).
   const [recap, setRecap] = useState(null)
   const closeRecap = useCallback(() => setRecap(null), [])
@@ -66,7 +71,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
 
   // 팀 상태가 바뀌면(결과 등록 등) rooms가 다시 내려오므로 그때마다 결과도 새로 받는다.
   useEffect(() => {
-    if (activeTab !== 'chart') return
+    if (visibleTab !== 'chart') return
     let cancelled = false
     setResultsError(false)
     fetch(`/api/rankings?classId=${encodeURIComponent(classId)}`)
@@ -74,7 +79,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
       .then(data => { if (!cancelled) setResults(data) })
       .catch(() => { if (!cancelled) setResultsError(true) })
     return () => { cancelled = true }
-  }, [activeTab, classId, rooms])
+  }, [visibleTab, classId, rooms])
 
   useEffect(() => {
     if (!socket || !classId) return
@@ -192,71 +197,97 @@ export default function AdminClassDashboard({ classId, initialName }) {
     loadRooms()
   }
 
+  const titleRow = (
+    <div className={styles.titleRow}>
+      <span className={styles.editIcon} aria-hidden="true">✏️</span>
+      <input
+        className={styles.titleInput}
+        value={name}
+        onChange={e => setName(e.target.value)}
+        onBlur={handleTitleBlur}
+      />
+    </div>
+  )
+  const searchInput = (
+    <input
+      className={styles.searchInput}
+      placeholder="이름 또는 팀 검색..."
+      value={search}
+      onChange={e => setSearch(e.target.value)}
+    />
+  )
+  const bulkRegisterButton = (
+    <button
+      className={styles.bulkRegisterBtn}
+      onClick={() => setConfirmBulkRegister(true)}
+      disabled={isBulkRegistering}
+      type="button"
+    >
+      <img src="/icons/IconRegister.png" alt="" className={styles.btnIcon} />
+      <span>전체 등록</span>
+    </button>
+  )
+
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <div className={styles.titleRow}>
-            <span className={styles.editIcon} aria-hidden="true">✏️</span>
-            <input
-              className={styles.titleInput}
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onBlur={handleTitleBlur}
+      {isMobile ? (
+        <div className={styles.mobileHeader}>
+          <div className={styles.mobileTitleBar}>
+            {titleRow}
+            <AdminOverflowMenu
+              label="수업 메뉴"
+              items={[
+                { key: 'qr', label: 'QR 코드', onSelect: () => setShowQr(true) },
+                { key: 'survey', label: '만족도 조사', onSelect: () => setShowSurveyQr(true) },
+                { key: 'delete-all', label: '전체 삭제', danger: true, disabled: rooms.length === 0, onSelect: () => setConfirmDeleteAll(true) },
+              ]}
             />
           </div>
-          <p className={styles.subtitle}>진행중인 팀과 완료한 팀을 확인하고 수정할 수 있습니다</p>
+          {searchInput}
+          {bulkRegisterButton}
         </div>
-        <div className={styles.headerActions}>
-          {activeTab !== 'clans' && (
-            <input
-              className={styles.searchInput}
-              placeholder="이름 또는 팀 검색..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          )}
-          <div className={styles.viewToggle}>
-            {TABS.map(tab => (
-              <button
-                key={tab.key}
-                type="button"
-                aria-label={tab.label}
-                className={`${styles.viewToggleBtn} ${activeTab === tab.key ? styles.viewToggleBtnActive : ''}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <span
-                  className={styles.viewToggleIcon}
-                  style={{ WebkitMaskImage: `url(${tab.icon})`, maskImage: `url(${tab.icon})` }}
-                  aria-hidden="true"
-                />
-              </button>
-            ))}
+      ) : (
+        <div className={styles.header}>
+          <div>
+            {titleRow}
+            <p className={styles.subtitle}>진행중인 팀과 완료한 팀을 확인하고 수정할 수 있습니다</p>
           </div>
-          <button className={styles.qrBtn} onClick={() => setShowSurveyQr(true)} type="button">만족도 조사</button>
-          <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR 코드</button>
-          <button
-            className={styles.deleteAllBtn}
-            onClick={() => setConfirmDeleteAll(true)}
-            disabled={rooms.length === 0}
-            type="button"
-          >
-            <img src="/icons/IconDelete.png" alt="" className={styles.btnIcon} />
-            <span>전체 삭제</span>
-          </button>
-          <button
-            className={styles.bulkRegisterBtn}
-            onClick={() => setConfirmBulkRegister(true)}
-            disabled={isBulkRegistering}
-            type="button"
-          >
-            <img src="/icons/IconRegister.png" alt="" className={styles.btnIcon} />
-            <span>전체 등록</span>
-          </button>
+          <div className={styles.headerActions}>
+            {activeTab !== 'clans' && searchInput}
+            <div className={styles.viewToggle}>
+              {TABS.map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  aria-label={tab.label}
+                  className={`${styles.viewToggleBtn} ${activeTab === tab.key ? styles.viewToggleBtnActive : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <span
+                    className={styles.viewToggleIcon}
+                    style={{ WebkitMaskImage: `url(${tab.icon})`, maskImage: `url(${tab.icon})` }}
+                    aria-hidden="true"
+                  />
+                </button>
+              ))}
+            </div>
+            <button className={styles.qrBtn} onClick={() => setShowSurveyQr(true)} type="button">만족도 조사</button>
+            <button className={styles.qrBtn} onClick={() => setShowQr(true)} type="button">QR 코드</button>
+            <button
+              className={styles.deleteAllBtn}
+              onClick={() => setConfirmDeleteAll(true)}
+              disabled={rooms.length === 0}
+              type="button"
+            >
+              <img src="/icons/IconDelete.png" alt="" className={styles.btnIcon} />
+              <span>전체 삭제</span>
+            </button>
+            {bulkRegisterButton}
+          </div>
         </div>
-      </div>
+      )}
 
-      {activeTab === 'clans' && rooms.length > 0 && (
+      {visibleTab === 'clans' && rooms.length > 0 && (
         <ClanRecapBanner onOpen={handleOpenRecap} disabled={isLoadingRecap} />
       )}
       {rooms.length > 0 && <AdminStatCards rooms={rooms} />}
@@ -298,7 +329,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
         />
       ) : (
         <>
-          {activeTab === 'grid' && (
+          {visibleTab === 'grid' && (
             <AdminGridView
               rooms={filteredRooms}
               allRooms={rooms}
@@ -307,22 +338,22 @@ export default function AdminClassDashboard({ classId, initialName }) {
               onRoomChanged={loadRooms}
             />
           )}
-          {activeTab === 'table' && (
+          {visibleTab === 'table' && (
             <AdminTableView rooms={filteredRooms} onDeletePlayers={handleDeleteSelectedPlayers} />
           )}
-          {activeTab === 'chart' && resultsError && (
+          {visibleTab === 'chart' && resultsError && (
             <p className={styles.chartMessage}>결과를 불러오는 중 오류가 발생했습니다.</p>
           )}
-          {activeTab === 'chart' && !resultsError && results === null && (
+          {visibleTab === 'chart' && !resultsError && results === null && (
             <p className={styles.chartMessage}>불러오는 중...</p>
           )}
-          {activeTab === 'chart' && !resultsError && results?.length === 0 && (
+          {visibleTab === 'chart' && !resultsError && results?.length === 0 && (
             <AdminEmptyState title="등록된 게임 결과가 없습니다." subtitle="팀 결과를 등록하면 유형 분포를 확인할 수 있습니다." />
           )}
-          {activeTab === 'chart' && !resultsError && results?.length > 0 && (
+          {visibleTab === 'chart' && !resultsError && results?.length > 0 && (
             <TypeDistribution rows={results} scopeLabel="수업" largePoints />
           )}
-          {activeTab === 'clans' && <ClanTab classId={classId} />}
+          {visibleTab === 'clans' && <ClanTab classId={classId} />}
         </>
       )}
 

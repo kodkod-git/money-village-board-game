@@ -206,3 +206,30 @@
   font-weight: 700;
   color: var(--admin-text-2);
 }
+
+.mobileHeader,
+.mobileTitleBar { display: flex; }
+
+.mobileHeader { flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+.mobileTitleBar { align-items: center; gap: 8px; }
+
+@media (max-width: 767px) {
+  .page { padding: 16px 16px 24px; }
+
+  .titleRow { flex: 1; min-width: 0; }
+
+  .titleInput { font-size: 18px; max-width: none; min-height: 44px; }
+
+  .searchInput { width: 100%; height: 44px; font-size: 16px; }
+
+  .bulkRegisterBtn { width: 100%; height: 44px; justify-content: center; font-size: 14px; }
+
+  /* 관전 화면은 화면 전체를 덮는다. */
+  .spectatePopup {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}

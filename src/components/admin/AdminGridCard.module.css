@@ -220,3 +220,7 @@
   color: var(--admin-text);
   white-space: nowrap;
 }
+
+@media (max-width: 767px) {
+  .tab { min-height: 44px; min-width: 44px; }
+}
