@@ -89,6 +89,7 @@ export default function IndividualPage() {
     const params = new URLSearchParams({ name: stored?.name ?? '', character: stored?.character ?? '' })
     if (stored?.affiliation) params.set('affiliation', stored.affiliation)
     if (stored?.classId) params.set('classId', stored.classId)
+    if (stored?.officialPlayerId) params.set('officialPlayerId', stored.officialPlayerId)
     navigate(`/lobby?${params}`)
   }
 

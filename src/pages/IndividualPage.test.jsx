@@ -188,6 +188,22 @@ describe('IndividualPage', () => {
     expect(calledWith).toContain('classId=class-1')
   })
 
+  it('추방 후 로비로 돌아갈 때 저장된 officialPlayerId를 URL에 유지한다', async () => {
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'AB1234', name: '김민준', character: 'Innovator-사자', affiliation: '', classId: 'class-1', officialPlayerId: 'op-7',
+    }))
+    renderPage()
+    await screen.findByText('직업 선택')
+
+    const socket = io()
+    const [, kickedHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'you-were-kicked')
+    act(() => kickedHandler())
+    await userEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    const [calledWith] = mockNavigate.mock.calls.find(([url]) => url.startsWith('/lobby?'))
+    expect(calledWith).toContain('officialPlayerId=op-7')
+  })
+
   it('직업만 선택한 상태로 재입장하면 아직 방문하지 않은 단계는 완료 표시되지 않는다', async () => {
     global.fetch = vi.fn().mockResolvedValue({
       json: () => Promise.resolve({
