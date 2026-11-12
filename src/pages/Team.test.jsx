@@ -103,6 +103,24 @@ describe('Team', () => {
     }, expect.any(Function))
   })
 
+  it('재연결 시 저장된 officialPlayerId를 join-room에 함께 보낸다', () => {
+    renderTeam()
+    const socket = io()
+    const [, connectHandler] = socket.on.mock.calls.findLast(([ev]) => ev === 'connect')
+
+    sessionStorage.setItem('player_profile', JSON.stringify({
+      code: 'ABC123', name: '철수', character: 'Adventurer-강아지', affiliation: '', isHost: true, officialPlayerId: 'op1',
+    }))
+    sessionStorage.setItem('player_uuid', 'p1')
+    socket.emit.mockClear()
+
+    connectHandler()
+
+    expect(socket.emit).toHaveBeenCalledWith('join-room', expect.objectContaining({
+      code: 'ABC123', playerUuid: 'p1', officialPlayerId: 'op1',
+    }), expect.any(Function))
+  })
+
   it('저장된 프로필의 방 코드가 다르면 재연결 시 join-room을 보내지 않는다', () => {
     renderTeam()
     const socket = io()
