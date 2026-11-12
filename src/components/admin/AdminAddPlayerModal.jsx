@@ -7,6 +7,7 @@ import AssetListEditor from '../AssetListEditor'
 import NumberInputModal from '../NumberInputModal'
 import CharacterCard from '../CharacterCard'
 import ConfirmDialog from './ConfirmDialog'
+import useOfficialNameResolve from '../../hooks/useOfficialNameResolve'
 import { CHARACTERS } from '../../constants/characters'
 import { DEFAULT_PRICES } from '../PriceSettingModal'
 import {
@@ -43,7 +44,7 @@ function priceLabelsFor(prices, category) {
   ]))
 }
 
-export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) {
+export default function AdminAddPlayerModal({ code, prices, official = null, onSaved, onClose }) {
   const [step, setStep] = useState(STEP_NAME)
   const [completedUpTo, setCompletedUpTo] = useState(-1)
   const [draft, setDraft] = useState(defaultDraft)
@@ -51,6 +52,8 @@ export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) 
   const [showCashModal, setShowCashModal] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [officialPlayerId, setOfficialPlayerId] = useState(null)
+  const resolver = useOfficialNameResolve(official?.classId)
   const frameRef = useRef(null)
 
   const assetStep = step - ASSET_STEP_OFFSET
@@ -70,6 +73,7 @@ export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) 
         stocks: draft.stocks,
         realEstate: draft.realEstate,
         cash,
+        officialPlayerId: official ? officialPlayerId : undefined,
       }),
     })
     setSaving(false)
@@ -77,12 +81,29 @@ export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) 
     onSaved()
   }
 
-  function handleNext() {
-    if (step === STEP_NAME && !draft.name.trim()) return
+  async function handleNext() {
+    if (step === STEP_NAME) {
+      if (!draft.name.trim()) return
+      if (official) {
+        if (resolver.busy || resolver.confirmLabel) return
+        const id = await resolver.submit(draft.name.trim())
+        if (!id) return
+        setOfficialPlayerId(id)
+      }
+      setStep(STEP_CHARACTER)
+      return
+    }
     if (step === STEP_CHARACTER && !draft.character) return
     if (step === LAST_STEP) { handleFinish(); return }
     if (assetStep >= 0) setCompletedUpTo(prev => Math.max(prev, assetStep))
     setStep(step + 1)
+  }
+
+  async function handleOfficialConfirm() {
+    const id = await resolver.confirm()
+    if (!id) return
+    setOfficialPlayerId(id)
+    setStep(STEP_CHARACTER)
   }
 
   // 뒤로 가기는 한 단계씩 되돌아가고, 첫 단계에서는 입력 취소를 확인한다.
@@ -219,18 +240,26 @@ export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) 
             </div>
             <div className={nameStyles.card}>
               <div className={nameStyles.inputGroup}>
-                <label className={nameStyles.label} htmlFor="admin-add-player-name">이름을 입력하세요</label>
+                <label className={nameStyles.label} htmlFor="admin-add-player-name">{official ? '실명을 입력하세요' : '이름을 입력하세요'}</label>
                 <input
                   id="admin-add-player-name"
                   className={nameStyles.input}
-                  placeholder="예) 홍길동"
+                  placeholder={official ? '예) 홍길동 (실명)' : '예) 홍길동'}
                   value={draft.name}
-                  onChange={e => setDraft(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => {
+                    setOfficialPlayerId(null)
+                    resolver.clearMessages()
+                    setDraft(prev => ({ ...prev, name: e.target.value }))
+                  }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()}
                   maxLength={20}
                 />
+                {resolver.duplicateNotice && (
+                  <p className={nameStyles.notice} role="alert">같은 이름의 참가자가 있어요. 구분할 수 있게 이름을 바꿔 주세요 (예: {draft.name.trim()}B)</p>
+                )}
+                {resolver.error && <p className={nameStyles.notice} role="alert">{resolver.error}</p>}
               </div>
-              <button className={nameStyles.gradBtn} onClick={handleNext} disabled={!draft.name.trim()}>
+              <button className={nameStyles.gradBtn} onClick={handleNext} disabled={!draft.name.trim() || resolver.busy}>
                 다음 →
               </button>
             </div>
@@ -267,6 +296,18 @@ export default function AdminAddPlayerModal({ code, prices, onSaved, onClose }) 
 
         {assetStep >= 0 && renderAssetStep()}
       </div>
+
+      {resolver.confirmLabel && (
+        <ConfirmDialog
+          tone="primary"
+          title="참가자 확인"
+          description={`${resolver.confirmLabel} 님이 맞나요?`}
+          confirmLabel="네, 맞아요"
+          cancelLabel="아니요"
+          onCancel={resolver.reject}
+          onConfirm={handleOfficialConfirm}
+        />
+      )}
 
       {confirmCancel && (
         <ConfirmDialog

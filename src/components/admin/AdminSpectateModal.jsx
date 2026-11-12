@@ -350,6 +350,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
         <AdminAddPlayerModal
           code={room.code}
           prices={room.prices}
+          official={room.isOfficial ? { classId: room.classId } : null}
           onClose={() => setShowAddPlayer(false)}
           onSaved={() => { setShowAddPlayer(false); onRoomChanged?.() }}
         />

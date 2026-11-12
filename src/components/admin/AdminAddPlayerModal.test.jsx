@@ -181,3 +181,53 @@ describe('AdminAddPlayerModal — 참가자 화면과 같은 구성', () => {
     expect(screen.getByText(/지금까지 입력한 내용이 사라집니다/)).toBeInTheDocument()
   })
 })
+
+describe('AdminAddPlayerModal 대회', () => {
+  it('대회 방이면 실명 라벨을 쓰고, 같은 이름이면 확인한 뒤 캐릭터 단계로 간다', async () => {
+    const user = userEvent.setup()
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ exists: true, label: '박병윤 (2026 시즌1)' }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ officialPlayerId: 'op-old' }) })
+
+    renderModal({ official: { classId: 'c1' } })
+    await user.type(screen.getByLabelText('실명을 입력하세요'), '박병윤')
+    await user.click(screen.getByText('다음 →'))
+    expect(await screen.findByText('박병윤 (2026 시즌1) 님이 맞나요?')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '네, 맞아요' }))
+    expect(await screen.findByText('캐릭터 선택')).toBeInTheDocument()
+    expect(global.fetch).toHaveBeenCalledWith('/api/contests/c1/players/resolve', expect.objectContaining({
+      body: JSON.stringify({ realName: '박병윤', confirm: true }),
+    }))
+  })
+
+  it('[아니요]를 누르면 이름 단계에 머물고 이름을 바꾸라고 안내한다', async () => {
+    const user = userEvent.setup()
+    global.fetch = vi.fn().mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ exists: true, label: '박병윤 (2026 시즌1)' }) })
+
+    renderModal({ official: { classId: 'c1' } })
+    await user.type(screen.getByLabelText('실명을 입력하세요'), '박병윤')
+    await user.click(screen.getByText('다음 →'))
+    await user.click(await screen.findByRole('button', { name: '아니요' }))
+    expect(screen.getByText('같은 이름의 참가자가 있어요. 구분할 수 있게 이름을 바꿔 주세요 (예: 박병윤B)')).toBeInTheDocument()
+    expect(screen.queryByText('캐릭터 선택')).not.toBeInTheDocument()
+  })
+
+  it('완료할 때 officialPlayerId를 함께 보낸다', async () => {
+    const user = userEvent.setup()
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ officialPlayerId: 'op1' }) })
+      .mockResolvedValue({ ok: true, json: () => Promise.resolve({ playerUuid: 'new-1' }) })
+
+    renderModal({ official: { classId: 'c1' } })
+    await user.type(screen.getByLabelText('실명을 입력하세요'), '박병윤')
+    await user.click(screen.getByText('다음 →'))
+    await user.click(await screen.findByAltText(CHARACTERS[0]))
+    await user.click(screen.getByText('다음'))
+    for (let i = 0; i < 4; i++) await user.click(screen.getByText('다음'))
+    await user.click(screen.getByText('완료'))
+
+    expect(global.fetch).toHaveBeenLastCalledWith('/api/admin/rooms/AB1234/players', expect.objectContaining({
+      body: expect.stringContaining('"officialPlayerId":"op1"'),
+    }))
+  })
+})
