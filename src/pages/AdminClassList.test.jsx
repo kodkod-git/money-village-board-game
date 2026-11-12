@@ -6,8 +6,9 @@ import { setAdminSession, clearAdminSession } from '../utils/adminAuth'
 import { mockViewport, restoreViewport } from '../test-utils/mockViewport'
 
 const CLASSES = [
-  { id: 'class-1', name: '3학년 2반', createdAt: '2026-07-27T00:00:00.000Z' },
-  { id: 'unassigned', name: '미배정 수업' },
+  { id: 'class-1', name: '3학년 2반', kind: 'class', createdAt: '2026-07-27T00:00:00.000Z' },
+  { id: 'contest-1', name: '2026 시즌1', kind: 'official', createdAt: '2026-11-12T00:00:00.000Z' },
+  { id: 'unassigned', name: '미배정 수업', kind: 'class' },
 ]
 
 beforeEach(() => {
@@ -18,9 +19,9 @@ beforeEach(() => {
 afterEach(() => clearAdminSession())
 
 describe('AdminClassList', () => {
-  it('제목은 수업 목록이다', () => {
+  it('제목은 게임 목록이다', () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
-    expect(screen.getByText('수업 목록')).toBeInTheDocument()
+    expect(screen.getByText('게임 목록')).toBeInTheDocument()
   })
 
   it('마운트 시 /api/admin/classes를 호출해 수업 목록을 보여준다', async () => {
@@ -39,7 +40,7 @@ describe('AdminClassList', () => {
     const onSelectClass = vi.fn()
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={onSelectClass} onLogout={vi.fn()} />)
     await userEvent.click(await screen.findByText('3학년 2반'))
-    expect(onSelectClass).toHaveBeenCalledWith({ id: 'class-1', name: '3학년 2반' })
+    expect(onSelectClass).toHaveBeenCalledWith({ id: 'class-1', name: '3학년 2반', kind: 'class' })
   })
 
   it('수업 생성하기로 새 수업을 만들면 목록을 새로고침한다', async () => {
@@ -73,8 +74,8 @@ describe('AdminClassList', () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
     await screen.findByText('3학년 2반')
     const surveyBtns = screen.getAllByRole('button', { name: '만족도 조사' })
-    expect(surveyBtns).toHaveLength(1) // 미배정 수업에는 QR 버튼과 마찬가지로 없다
-    expect(surveyBtns[0].nextElementSibling).toBe(screen.getByRole('button', { name: 'QR' }))
+    expect(surveyBtns).toHaveLength(2) // 수업과 대회 행에만 있고, 미배정 수업에는 QR 버튼과 마찬가지로 없다
+    expect(surveyBtns[0].nextElementSibling).toBe(screen.getAllByRole('button', { name: 'QR' })[0])
     await userEvent.click(surveyBtns[0])
     expect(screen.getByText('만족도 조사 QR 코드')).toBeInTheDocument()
   })
@@ -82,7 +83,7 @@ describe('AdminClassList', () => {
   it('미배정 수업에는 삭제 버튼을 보여주지 않는다', async () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
     await screen.findByText('미배정 수업')
-    expect(screen.getAllByText('삭제')).toHaveLength(1)
+    expect(screen.getAllByText('삭제')).toHaveLength(2)
   })
 
   it('삭제 버튼 클릭 시 확인 팝업을 보여주고, 확인 시 DELETE 요청 후 목록을 새로고침한다', async () => {
@@ -96,7 +97,7 @@ describe('AdminClassList', () => {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
     })
 
-    await userEvent.click(screen.getByText('삭제'))
+    await userEvent.click(screen.getAllByText('삭제')[0])
     expect(screen.getByText(/되돌릴 수 없습니다/)).toBeInTheDocument()
 
     await userEvent.click(screen.getByText('예'))
@@ -114,7 +115,7 @@ describe('AdminClassList', () => {
     await screen.findByText('3학년 2반')
     global.fetch.mockClear()
 
-    await userEvent.click(screen.getByText('삭제'))
+    await userEvent.click(screen.getAllByText('삭제')[0])
     await userEvent.click(screen.getByText('아니요'))
 
     expect(screen.queryByText(/되돌릴 수 없습니다/)).not.toBeInTheDocument()
@@ -133,6 +134,33 @@ describe('AdminClassList', () => {
 
     await userEvent.click(screen.getByText('확인'))
     expect(screen.queryByText('수업 이름을 입력해주세요')).not.toBeInTheDocument()
+  })
+})
+
+describe('AdminClassList 대회', () => {
+  it('대회에는 공식 뱃지를 붙인다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('2026 시즌1')
+    expect(screen.getAllByText('공식')).toHaveLength(1)
+  })
+
+  it('대회 생성하기는 kind official로 생성한다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await userEvent.type(screen.getByPlaceholderText('새 대회 이름'), '2026 시즌2')
+    await userEvent.click(screen.getByRole('button', { name: '대회 생성하기' }))
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith('/api/admin/classes', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: '2026 시즌2', kind: 'official' }),
+      })),
+    )
+  })
+
+  it('대회를 고르면 kind를 함께 넘긴다', async () => {
+    const onSelectClass = vi.fn()
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={onSelectClass} onLogout={vi.fn()} />)
+    await userEvent.click(await screen.findByText('2026 시즌1'))
+    expect(onSelectClass).toHaveBeenCalledWith({ id: 'contest-1', name: '2026 시즌1', kind: 'official' })
   })
 })
 
