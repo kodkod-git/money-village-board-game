@@ -27,3 +27,17 @@ describe('AlertModal', () => {
     expect(screen.getByText('안내만')).toBeInTheDocument()
   })
 })
+
+describe('AlertModal 취소 버튼', () => {
+  it('onCancel을 주면 취소 버튼을 보여 주고 누르면 호출한다', async () => {
+    const onCancel = vi.fn()
+    render(<AlertModal message="맞나요?" confirmLabel="네, 맞아요" cancelLabel="아니요" onConfirm={vi.fn()} onCancel={onCancel} />)
+    await userEvent.click(screen.getByRole('button', { name: '아니요' }))
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('onCancel이 없으면 버튼은 하나다', () => {
+    render(<AlertModal message="안내" onConfirm={vi.fn()} />)
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+  })
+})
