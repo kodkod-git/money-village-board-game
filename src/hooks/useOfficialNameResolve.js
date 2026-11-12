@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { resolveOfficialPlayer } from '../utils/officialPlayer'
 
 const ERROR_MESSAGE = '참가자 확인 중 오류가 발생했어요. 다시 시도해 주세요.'
@@ -11,8 +11,11 @@ export default function useOfficialNameResolve(classId) {
   const [duplicateNotice, setDuplicateNotice] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const inFlight = useRef(false)
 
   async function run(name, confirm) {
+    if (inFlight.current) return null
+    inFlight.current = true
     setBusy(true)
     setError('')
     try {
@@ -30,6 +33,7 @@ export default function useOfficialNameResolve(classId) {
       setError(ERROR_MESSAGE)
       return null
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
@@ -43,7 +47,7 @@ export default function useOfficialNameResolve(classId) {
       setDuplicateNotice(false)
       return run(name, false)
     },
-    confirm: () => run(pendingName, true),
+    confirm: () => (pendingName ? run(pendingName, true) : Promise.resolve(null)),
     reject: () => {
       setPendingName(null)
       setConfirmLabel(null)

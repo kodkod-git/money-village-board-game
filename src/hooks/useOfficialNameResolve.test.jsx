@@ -50,4 +50,22 @@ describe('useOfficialNameResolve', () => {
     expect(id).toBeNull()
     expect(result.current.error).toBe('참가자 확인 중 오류가 발생했어요. 다시 시도해 주세요.')
   })
+
+  it('같은 틱에 submit을 두 번 불러도 요청은 한 번만 보낸다', async () => {
+    reply({ officialPlayerId: 'op1' })
+    const { result } = renderHook(() => useOfficialNameResolve('c1'))
+    await act(async () => {
+      result.current.submit('박병윤')
+      result.current.submit('박병윤')
+    })
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('확인 대기 이름이 없으면 confirm은 요청 없이 null을 돌려준다', async () => {
+    const { result } = renderHook(() => useOfficialNameResolve('c1'))
+    let id
+    await act(async () => { id = await result.current.confirm() })
+    expect(id).toBeNull()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
 })
