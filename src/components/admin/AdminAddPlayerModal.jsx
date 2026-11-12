@@ -64,7 +64,9 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
     setSaving(true)
     setSaveError('')
     const cash = Math.min(parseInt(cashDisplay, 10) || 0, MAX_CASH)
-    const res = await adminFetch(`/api/admin/rooms/${code}/players`, {
+    let res
+    try {
+      res = await adminFetch(`/api/admin/rooms/${code}/players`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -77,10 +79,16 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
         cash,
         officialPlayerId: official ? officialPlayerId : undefined,
       }),
-    })
-    setSaving(false)
+      })
+    } catch {
+      setSaveError('참가자를 추가하지 못했어요')
+      return
+    } finally {
+      setSaving(false)
+    }
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
+      let data = {}
+      try { data = await res.json() } catch { /* 본문 없음 */ }
       setSaveError(data.error || '참가자를 추가하지 못했어요')
       return
     }
