@@ -370,6 +370,8 @@ export async function getSessionCreatedAtsByClassId(classId) {
   return (data ?? []).map(session => session.created_at)
 }
 
+const RESULT_PAGE_SIZE = 1000
+
 const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, classes!inner(name, kind))'
 
 // 공식 랭킹 계산(server/officialRanking.js)의 입력 형태로 대회 결과를 가져온다.
@@ -381,8 +383,16 @@ export async function getOfficialResultRows({ classId = null } = {}) {
     .eq('game_sessions.classes.kind', 'official')
   if (classId) query = query.eq('game_sessions.class_id', classId)
 
-  const { data, error } = await query
-  if (error) throw error
+  // Supabase는 한 번에 최대 1000행만 돌려준다. 고유한 id로 정렬해 페이지 단위로 모두 읽는다.
+  const data = []
+  for (let from = 0; ; from += RESULT_PAGE_SIZE) {
+    const { data: page, error } = await query
+      .order('id', { ascending: true })
+      .range(from, from + RESULT_PAGE_SIZE - 1)
+    if (error) throw error
+    data.push(...page)
+    if (page.length < RESULT_PAGE_SIZE) break
+  }
 
   // 중첩 필터가 적용되지 않는 환경에서도 대회 결과만 남도록 한 번 더 거른다.
   return data

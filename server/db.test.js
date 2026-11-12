@@ -5,6 +5,7 @@ function makeQueryBuilder(result) {
   const builder = {
     select: vi.fn(() => builder),
     order: vi.fn(() => builder),
+    range: vi.fn(() => builder),
     eq: vi.fn(() => builder),
     is: vi.fn(() => builder),
     single: vi.fn(() => Promise.resolve(result)),
@@ -1015,5 +1016,30 @@ describe('공식전', () => {
       officialPlayerId: 'op1', realName: '박병윤', character: 'fox',
       totalAssets: 1200, createdAt: '2026-11-12T01:00:00.000Z',
     }])
+  })
+
+  it('getOfficialResultRows는 1000행 제한을 넘어 모든 페이지를 range로 가져온다', async () => {
+    const row = (i) => ({
+      session_id: `s${i}`, official_player_id: 'op1', character: 'fox', total_assets: '100', created_at: '2026-11-12T01:00:00.000Z',
+      official_players: { real_name: '박병윤' },
+      game_sessions: { class_id: 'c2', classes: { name: '2026 시즌1', kind: 'official' } },
+    })
+    const pages = [Array.from({ length: 1000 }, (_, i) => row(i)), [row(1000), row(1001)]]
+    let call = 0
+    const builder = makeQueryBuilder({ data: [], error: null })
+    builder.range = vi.fn(() => {
+      const data = pages[call++]
+      return { then: (resolve) => resolve({ data, error: null }) }
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getOfficialResultRows } = await import('./db.js')
+    const rows = await getOfficialResultRows()
+
+    expect(builder.range).toHaveBeenCalledTimes(2)
+    expect(builder.range).toHaveBeenNthCalledWith(1, 0, 999)
+    expect(builder.range).toHaveBeenNthCalledWith(2, 1000, 1999)
+    expect(rows).toHaveLength(1002)
   })
 })
