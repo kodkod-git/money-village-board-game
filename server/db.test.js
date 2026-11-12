@@ -1037,6 +1037,7 @@ describe('공식전', () => {
     const { getOfficialResultRows } = await import('./db.js')
     const rows = await getOfficialResultRows()
 
+    expect(mockFrom).toHaveBeenCalledTimes(2)
     expect(builder.range).toHaveBeenCalledTimes(2)
     expect(builder.range).toHaveBeenNthCalledWith(1, 0, 999)
     expect(builder.range).toHaveBeenNthCalledWith(2, 1000, 1999)

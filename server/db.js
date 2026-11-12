@@ -377,16 +377,20 @@ const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets
 // 공식 랭킹 계산(server/officialRanking.js)의 입력 형태로 대회 결과를 가져온다.
 // classId가 없으면 모든 대회(누적), 있으면 그 대회만 가져온다.
 export async function getOfficialResultRows({ classId = null } = {}) {
-  let query = supabase
-    .from('game_results')
-    .select(OFFICIAL_SELECT)
-    .eq('game_sessions.classes.kind', 'official')
-  if (classId) query = query.eq('game_sessions.class_id', classId)
+  // postgrest 빌더는 호출마다 상태가 바뀌므로 페이지마다 새로 만든다.
+  const buildQuery = () => {
+    let query = supabase
+      .from('game_results')
+      .select(OFFICIAL_SELECT)
+      .eq('game_sessions.classes.kind', 'official')
+    if (classId) query = query.eq('game_sessions.class_id', classId)
+    return query
+  }
 
   // Supabase는 한 번에 최대 1000행만 돌려준다. 고유한 id로 정렬해 페이지 단위로 모두 읽는다.
   const data = []
   for (let from = 0; ; from += RESULT_PAGE_SIZE) {
-    const { data: page, error } = await query
+    const { data: page, error } = await buildQuery()
       .order('id', { ascending: true })
       .range(from, from + RESULT_PAGE_SIZE - 1)
     if (error) throw error
