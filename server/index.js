@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import qrcode from 'qrcode'
 import { createRoom, getRoom, addPlayer, addManualPlayer, removePlayer, markDisconnected, updatePlayerState, updateRoomPricesByCode, updateRoomTitle, kickPlayer, listAllRooms, updatePlayerStateByUuid, computeLiveRoomStatus, deleteRoomByCode, deleteRoomsByClassId, sortRoomsByCreationOrder, listPublicRoomsByClassId, teamNumbersForClass, getRoomBySocketId, removePlayerByUuid, defaultGameState } from './rooms.js'
-import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId } from './db.js'
+import { saveGameResult, getGameResult, getRankings, getAllCompletedTeams, updateGameResult, updateSessionTitle, deleteCompletedTeam, deleteCompletedTeamsByClassId, getSessionIdByTeamCode, getSessionCreatedAtsByClassId, getOfficialResultRows } from './db.js'
 import { saveQuizResult, getQuizResult } from './quiz.js'
 import { saveSynergyResult, getSynergyResult } from './synergy.js'
 import { renderSynergyThumbnail } from './synergyThumbnail.js'
@@ -14,7 +14,9 @@ import { listSurveyResponses, SURVEY_TABLES } from './surveyResponses.js'
 import { parseSurveyEvent, saveSurveyEvent, listSurveyEvents, summarizeSurveyEvents } from './surveyEvents.js'
 import { createAdmin, verifyAdminPassword, seedMasterAdmin } from './admins.js'
 import { signAdminToken, requireAdmin } from './adminAuth.js'
-import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, UNASSIGNED_CLASS } from './classes.js'
+import { createClass, listClassesForAdmin, hasClassAccess, updateClassName, deleteClass, getClassInfo, listOfficialContests, UNASSIGNED_CLASS } from './classes.js'
+import { resolveOfficialPlayer, getOfficialPlayer, normalizeRealName } from './officialPlayers.js'
+import { buildOfficialRankings } from './officialRanking.js'
 import { createClan, renameClan, deleteClan, assignToClan, listClans, pruneMembers, deleteClassClans, isValidClanName } from './clans.js'
 import { buildClanView } from './clanView.js'
 import { buildClanRecap } from './clanRecap.js'
@@ -38,10 +40,71 @@ function broadcastClassRooms(classId) {
   io.to(`class:${classId ?? 'unassigned'}`).emit('class-rooms-updated')
 }
 
-app.post('/api/rooms', (req, res) => {
-  const room = createRoom({ classId: req.body?.classId ?? null })
-  broadcastClassRooms(room.classId)
-  res.json({ code: room.code })
+app.post('/api/rooms', async (req, res) => {
+  const classId = req.body?.classId ?? null
+  try {
+    const { kind } = await getClassInfo(classId)
+    const room = createRoom({ classId, isOfficial: kind === 'official' })
+    broadcastClassRooms(room.classId)
+    res.json({ code: room.code })
+  } catch (err) {
+    console.error('room create error:', err)
+    res.status(500).json({ error: 'Failed to create room' })
+  }
+})
+
+// 입장 화면(NameInput)이 대회인지 판별할 때 쓴다.
+app.get('/api/classes/:classId/kind', async (req, res) => {
+  try {
+    res.json(await getClassInfo(req.params.classId))
+  } catch (err) {
+    console.error('class kind error:', err)
+    res.status(500).json({ error: 'Failed to fetch class kind' })
+  }
+})
+
+// 팀 QR이나 팀 코드로 들어온 경우의 판별. 방이 속한 수업의 종류를 돌려준다.
+app.get('/api/rooms/:code/kind', async (req, res) => {
+  const room = getRoom(req.params.code.toUpperCase())
+  if (!room) return res.status(404).json({ error: 'Room not found' })
+  try {
+    const info = await getClassInfo(room.classId)
+    res.json({ ...info, classId: room.classId })
+  } catch (err) {
+    console.error('room kind error:', err)
+    res.status(500).json({ error: 'Failed to fetch room kind' })
+  }
+})
+
+// 실명 입력 단계: 같은 대회에 같은 실명이 있는지 확인하고 공식 참가자를 찾거나 만든다.
+app.post('/api/contests/:classId/players/resolve', async (req, res) => {
+  const { classId } = req.params
+  const { realName, confirm } = req.body ?? {}
+  const name = normalizeRealName(realName)
+  if (!name) return res.status(400).json({ error: 'realName이 필요합니다' })
+  if (name.length > 20) return res.status(400).json({ error: '이름은 20자 이하로 입력해주세요' })
+  try {
+    const info = await getClassInfo(classId)
+    if (info.kind !== 'official') return res.status(400).json({ error: '대회가 아닙니다' })
+    res.json(await resolveOfficialPlayer({ classId, contestName: info.name, realName: name, confirm: Boolean(confirm) }))
+  } catch (err) {
+    console.error('resolve official player error:', err)
+    res.status(500).json({ error: 'Failed to resolve official player' })
+  }
+})
+
+app.get('/api/official-rankings', async (req, res) => {
+  const classId = req.query.classId || null
+  try {
+    const [contests, rows] = await Promise.all([
+      listOfficialContests(),
+      getOfficialResultRows({ classId }),
+    ])
+    res.json({ contests, ...buildOfficialRankings(rows) })
+  } catch (err) {
+    console.error('official rankings error:', err)
+    res.status(500).json({ error: 'Failed to fetch official rankings' })
+  }
 })
 
 app.get('/api/rooms', async (req, res) => {
@@ -259,10 +322,10 @@ app.get('/api/admin/classes', requireAdmin, async (req, res) => {
 })
 
 app.post('/api/admin/classes', requireAdmin, async (req, res) => {
-  const { name } = req.body
+  const { name, kind } = req.body
   if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
   try {
-    const cls = await createClass(name, req.admin.adminId)
+    const cls = await createClass(name, req.admin.adminId, kind)
     res.json(cls)
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
@@ -468,6 +531,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
       updatedAt: room.updatedAt,
       classId: room.classId,
       title: room.title,
+      isOfficial: room.isOfficial,
       prices: room.prices,
       players: room.players.map(p => ({
         playerUuid: p.playerUuid,
@@ -503,7 +567,8 @@ app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
     // 이름을 직접 정할 때까지는 로비에서 학생 방과 동일하게 방장 이름 기반 표시로 폴백한다).
     const title = resolvedClassId ? '' : null
 
-    const room = createRoom({ classId: resolvedClassId, title })
+    const { kind } = await getClassInfo(resolvedClassId)
+    const room = createRoom({ classId: resolvedClassId, title, isOfficial: kind === 'official' })
     broadcastClassRooms(room.classId)
     res.json({ code: room.code })
   } catch (err) {
@@ -600,7 +665,7 @@ app.delete('/api/admin/rooms/:code/players/:playerUuid', requireAdmin, async (re
 
 app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
   const code = req.params.code.toUpperCase()
-  const { name, character, job, badges, stocks, realEstate, cash } = req.body ?? {}
+  const { name, character, job, badges, stocks, realEstate, cash, officialPlayerId } = req.body ?? {}
   if (!name?.trim() || !character) return res.status(400).json({ error: 'name과 character가 필요합니다' })
 
   const classId = await findRoomClassId(code)
@@ -623,7 +688,14 @@ app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
   }
 
   try {
-    const room = addManualPlayer(code, { name: name.trim(), character, gameState })
+    const target = getRoom(code)
+    if (target?.isOfficial) {
+      const official = await getOfficialPlayer(officialPlayerId)
+      if (!official || official.class_id !== target.classId) {
+        return res.status(400).json({ error: '대회 참가자를 확인할 수 없어요' })
+      }
+    }
+    const room = addManualPlayer(code, { name: name.trim(), character, gameState, officialPlayerId: officialPlayerId ?? null })
     io.to(code).emit('room-updated', { players: room.players })
     broadcastClassRooms(room.classId)
     const player = room.players[room.players.length - 1]
@@ -683,6 +755,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
       createdAt: session.created_at,
       classId: session.class_id ?? null,
       className,
+      classKind: session.classes?.kind ?? 'class',
       stockPrices: session.stock_prices,
       realEstatePrices: session.real_estate_prices,
       players: results.map((r, i) => ({
@@ -700,6 +773,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
         stockValue: r.stock_value != null ? Number(r.stock_value) : null,
         realEstateValue: r.real_estate_value != null ? Number(r.real_estate_value) : null,
         playerUuid: r.player_uuid,
+        officialPlayerId: r.official_player_id ?? null,
         teamCode: session.team_code,
       })),
     })
@@ -716,13 +790,23 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join-room', ({ code, name, character, isHost, playerUuid, affiliation }, callback) => {
+  socket.on('join-room', async ({ code, name, character, isHost, playerUuid, affiliation, officialPlayerId }, callback) => {
+    const upper = code.toUpperCase()
     try {
-      const room = addPlayer(code.toUpperCase(), {
-        socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation,
+      // 대회 방의 새 참가자는 공식 참가자 id가 이 대회 소속이어야 한다.
+      // 같은 playerUuid의 재접속은 이미 검증된 자리라 건너뛴다.
+      const target = getRoom(upper)
+      const isRejoin = target?.players.some(p => p.playerUuid && p.playerUuid === playerUuid)
+      if (target?.isOfficial && !isRejoin && officialPlayerId) {
+        const official = await getOfficialPlayer(officialPlayerId)
+        if (!official || official.class_id !== target.classId) throw new Error('Official player not in contest')
+      }
+
+      const room = addPlayer(upper, {
+        socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation, officialPlayerId: officialPlayerId ?? null,
       })
-      socket.join(code.toUpperCase())
-      io.to(code.toUpperCase()).emit('room-updated', { players: room.players })
+      socket.join(upper)
+      io.to(upper).emit('room-updated', { players: room.players })
       broadcastClassRooms(room.classId)
       callback?.({ ok: true })
     } catch (err) {
