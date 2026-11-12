@@ -47,11 +47,23 @@ function defaultPrices() {
   }
 }
 
-export function createRoom({ classId = null, title = null } = {}) {
+// 대회 방의 새 참가자 검증. 공식 참가자 없이는 들어올 수 없고, 한 사람이 같은 테이블에
+// 두 자리를 차지할 수 없다(결과가 같은 사람 기록으로 두 번 누적되므로).
+function assertOfficialSeat(room, officialPlayerId) {
+  if (!room.isOfficial) return
+  if (!officialPlayerId) throw new Error('Official player required')
+  if (room.players.some(p => p.officialPlayerId === officialPlayerId)) {
+    throw new Error('Official player already in room')
+  }
+}
+
+// isOfficial: 공식전(대회) 방. 방을 만들 때 수업 종류를 한 번 조회해 저장해 두고,
+// 입장 검증 때마다 DB를 다시 보지 않는다.
+export function createRoom({ classId = null, title = null, isOfficial = false } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title }
+  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title, isOfficial: Boolean(isOfficial) }
   rooms.set(code, room)
   return room
 }
@@ -64,7 +76,7 @@ export function listAllRooms() {
   return Array.from(rooms.values())
 }
 
-export function addPlayer(code, { socketId, name, character, isHost, playerUuid, affiliation = '' }) {
+export function addPlayer(code, { socketId, name, character, isHost, playerUuid, affiliation = '', officialPlayerId = null }) {
   if (!socketId) throw new Error('player.socketId is required')
   const room = rooms.get(code)
   if (!room) throw new Error('Room not found')
@@ -87,19 +99,25 @@ export function addPlayer(code, { socketId, name, character, isHost, playerUuid,
   }
 
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
-  room.players.push({ socketId, name, character, isHost, playerUuid, affiliation, connected: true, gameState: defaultGameState() })
+  assertOfficialSeat(room, officialPlayerId)
+  room.players.push({
+    socketId, name, character, isHost, playerUuid, affiliation, connected: true, gameState: defaultGameState(),
+    officialPlayerId: room.isOfficial ? officialPlayerId : null,
+  })
   socketToRoom.set(socketId, code)
   return room
 }
 
-export function addManualPlayer(code, { name, character, gameState }) {
+export function addManualPlayer(code, { name, character, gameState, officialPlayerId = null }) {
   const room = rooms.get(code)
   if (!room) throw new Error('Room not found')
   if (room.players.length >= MAX_PLAYERS) throw new Error('Room is full')
+  assertOfficialSeat(room, officialPlayerId)
 
   const playerUuid = crypto.randomUUID()
   room.players.push({
     socketId: null, name, character, isHost: false, playerUuid, affiliation: '', connected: true, gameState,
+    officialPlayerId: room.isOfficial ? officialPlayerId : null,
   })
   room.updatedAt = new Date()
   return room

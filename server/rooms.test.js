@@ -766,3 +766,61 @@ describe('teamNumbersForClass', () => {
     expect(numbers.size).toBe(1)
   })
 })
+
+describe('대회 방', () => {
+  const gameState = {
+    cash: 0, job: null,
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+    badges: [false, false, false, false, false, false],
+    jobVisited: true, stocksVisited: true, realEstateVisited: true, isCompleted: true,
+  }
+
+  it('isOfficial을 저장한다(기본 false)', () => {
+    expect(createRoom().isOfficial).toBe(false)
+    expect(createRoom({ classId: 'c1', isOfficial: true }).isOfficial).toBe(true)
+  })
+
+  it('대회 방은 officialPlayerId 없이 들어올 수 없다', () => {
+    const { code } = createRoom({ classId: 'c1', isOfficial: true })
+    expect(() => addPlayer(code, { socketId: 's1', name: '박병윤', character: 'fox', playerUuid: 'u1' }))
+      .toThrow('Official player required')
+  })
+
+  it('대회 방에 들어오면 officialPlayerId를 플레이어에 저장한다', () => {
+    const { code } = createRoom({ classId: 'c1', isOfficial: true })
+    addPlayer(code, { socketId: 's1', name: '박병윤', character: 'fox', playerUuid: 'u1', officialPlayerId: 'op1' })
+    expect(getRoom(code).players[0].officialPlayerId).toBe('op1')
+  })
+
+  it('같은 공식 참가자가 다른 기기로 같은 방에 또 들어오면 거절한다', () => {
+    const { code } = createRoom({ classId: 'c1', isOfficial: true })
+    addPlayer(code, { socketId: 's1', name: '박병윤', character: 'fox', playerUuid: 'u1', officialPlayerId: 'op1' })
+    expect(() => addPlayer(code, { socketId: 's2', name: '박병윤', character: 'bear', playerUuid: 'u2', officialPlayerId: 'op1' }))
+      .toThrow('Official player already in room')
+  })
+
+  it('같은 playerUuid의 재접속은 officialPlayerId 없이도 허용한다', () => {
+    const { code } = createRoom({ classId: 'c1', isOfficial: true })
+    addPlayer(code, { socketId: 's1', name: '박병윤', character: 'fox', playerUuid: 'u1', officialPlayerId: 'op1' })
+    addPlayer(code, { socketId: 's9', name: '박병윤', character: 'fox', playerUuid: 'u1' })
+    const players = getRoom(code).players
+    expect(players).toHaveLength(1)
+    expect(players[0]).toMatchObject({ socketId: 's9', officialPlayerId: 'op1' })
+  })
+
+  it('일반 방은 officialPlayerId를 무시하고 null로 둔다', () => {
+    const { code } = createRoom({ classId: 'c1' })
+    addPlayer(code, { socketId: 's1', name: '철수', character: 'fox', playerUuid: 'u1', officialPlayerId: 'op1' })
+    expect(getRoom(code).players[0].officialPlayerId).toBeNull()
+  })
+
+  it('수동 추가도 대회 방이면 officialPlayerId가 필요하고 중복을 막는다', () => {
+    const { code } = createRoom({ classId: 'c1', isOfficial: true })
+    expect(() => addManualPlayer(code, { name: '박병윤', character: 'fox', gameState })).toThrow('Official player required')
+    addManualPlayer(code, { name: '박병윤', character: 'fox', gameState, officialPlayerId: 'op1' })
+    expect(getRoom(code).players[0].officialPlayerId).toBe('op1')
+    expect(() => addManualPlayer(code, { name: '박병윤', character: 'bear', gameState, officialPlayerId: 'op1' }))
+      .toThrow('Official player already in room')
+  })
+})
