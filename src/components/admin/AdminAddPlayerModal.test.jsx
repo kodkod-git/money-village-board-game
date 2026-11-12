@@ -231,3 +231,17 @@ describe('AdminAddPlayerModal 대회', () => {
     }))
   })
 })
+
+describe('AdminAddPlayerModal 추가 실패', () => {
+  it('서버가 거절하면 오류 메시지를 보여준다', async () => {
+    const user = userEvent.setup()
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, json: () => Promise.resolve({ error: '대회 참가자를 확인할 수 없어요' }) })
+
+    renderModal()
+    await goToAssetSteps(user)
+    for (let i = 0; i < 4; i++) await user.click(screen.getByText('다음'))
+    await user.click(screen.getByText('완료'))
+
+    expect(await screen.findByText('대회 참가자를 확인할 수 없어요')).toBeInTheDocument()
+  })
+})

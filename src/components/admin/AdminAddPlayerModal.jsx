@@ -52,6 +52,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
   const [showCashModal, setShowCashModal] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [officialPlayerId, setOfficialPlayerId] = useState(null)
   const resolver = useOfficialNameResolve(official?.classId)
   const frameRef = useRef(null)
@@ -61,6 +62,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
   async function handleFinish() {
     if (saving) return
     setSaving(true)
+    setSaveError('')
     const cash = Math.min(parseInt(cashDisplay, 10) || 0, MAX_CASH)
     const res = await adminFetch(`/api/admin/rooms/${code}/players`, {
       method: 'POST',
@@ -77,7 +79,11 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
       }),
     })
     setSaving(false)
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setSaveError(data.error || '참가자를 추가하지 못했어요')
+      return
+    }
     onSaved()
   }
 
@@ -207,6 +213,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
           </div>
         )}
 
+        {step === LAST_STEP && saveError && <p className={nameStyles.notice} role="alert">{saveError}</p>}
         <div className={assetStyles.bottomBar}>
           <button className={assetStyles.nextBtn} onClick={handleNext} disabled={saving}>
             {step === LAST_STEP ? '완료' : '다음'}

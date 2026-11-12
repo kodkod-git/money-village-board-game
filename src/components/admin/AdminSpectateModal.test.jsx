@@ -455,6 +455,13 @@ describe('직접 등록하기', () => {
     expect(onRoomChanged).toHaveBeenCalled()
     expect(screen.queryByRole('dialog', { name: '팀원 직접 등록' })).not.toBeInTheDocument()
   })
+
+  it('대회 방이면 등록 마법사가 실명 입력으로 열린다', async () => {
+    const officialRoom = { ...makeRoom('AB1234', '김민준'), isOfficial: true, classId: 'c1' }
+    render(<MemoryRouter><AdminSpectateModal rooms={[officialRoom]} initialIndex={0} onPlayerUpdate={vi.fn()} onClose={vi.fn()} /></MemoryRouter>)
+    await userEvent.click(screen.getByText('직접 등록하기'))
+    expect(screen.getByLabelText('실명을 입력하세요')).toBeInTheDocument()
+  })
 })
 
 describe('결과 공유', () => {
