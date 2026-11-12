@@ -34,14 +34,24 @@
   flex-direction: column;
 }
 
-/* 오른쪽 상단 공유 버튼 2개(카카오톡·링크 복사). 아이콘/색은 퀴즈 결과 화면
+/* 오른쪽 상단 액션 줄(공유 아이콘·설문·보고서 버튼, 마지막 줄에 공식 랭킹 버튼). 아이콘/색은 퀴즈 결과 화면
    (QuizResult.module.css의 .iconBtn/.kakaoIconBtn)과 맞췄다. */
 .shareActions {
   position: absolute;
   top: clamp(20px, calc(32px * var(--sy)), 32px);
   right: clamp(16px, calc(24px * var(--sx)), 24px);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: clamp(6px, calc(8px * var(--sx)), 8px);
+  /* 왼쪽 "처음으로" 버튼과 겹치지 않게 넘치면 줄바꿈한다. */
+  max-width: calc(100% - 140px);
+}
+
+.officialRow {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .shareIconBtn {
@@ -78,7 +88,7 @@
   cursor: pointer;
 }
 
-/* 폰 폭에서는 공유 버튼 4개가 왼쪽의 "처음으로" 버튼과 겹치지 않게 줄인다. */
+/* 폰 폭에서는 액션 버튼들이 왼쪽의 "처음으로" 버튼과 겹치지 않게 줄인다. */
 @container (max-width: 480px) {
   .shareActions {
     gap: 4px;

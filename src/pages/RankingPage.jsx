@@ -52,6 +52,7 @@ export default function RankingPage() {
   // 공유 링크로 들어온 사람처럼 이 게임에 내 결과가 없으면 경제적 잠재력 유형 버튼을 숨긴다.
   useEffect(() => {
     if (!isV2) return
+    setIsOfficialSession(false)
     fetch(`/api/results/${sessionId}`)
       .then(r => r.json())
       .then(data => {
@@ -167,9 +168,11 @@ export default function RankingPage() {
             )}
           </>
         )}
-        <button type="button" className={styles.surveyBtn} onClick={() => navigate('/ranking/official')}>
-          공식 랭킹 보러가기
-        </button>
+        <div className={styles.officialRow}>
+          <button type="button" className={styles.surveyBtn} onClick={() => navigate('/ranking/official')}>
+            공식 랭킹 보러가기
+          </button>
+        </div>
       </div>
       <div className={styles.inner}>
         <div className={styles.header}>
