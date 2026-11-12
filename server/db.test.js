@@ -994,7 +994,7 @@ describe('공식전', () => {
         {
           session_id: 's1', official_player_id: 'op1', character: 'fox', total_assets: '1200', created_at: '2026-11-12T01:00:00.000Z',
           official_players: { real_name: '박병윤' },
-          game_sessions: { class_id: 'c2', classes: { name: '2026 시즌1', kind: 'official' } },
+          game_sessions: { class_id: 'c2', title: '1팀', team_code: 'AB12', classes: { name: '2026 시즌1', kind: 'official' } },
         },
         {
           session_id: 's9', official_player_id: null, character: 'bear', total_assets: '10', created_at: '2026-11-12T01:00:00.000Z',
@@ -1013,7 +1013,7 @@ describe('공식전', () => {
     expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'c2')
     expect(rows).toEqual([{
       sessionId: 's1', contestId: 'c2', contestName: '2026 시즌1',
-      officialPlayerId: 'op1', realName: '박병윤', character: 'fox',
+      officialPlayerId: 'op1', realName: '박병윤', character: 'fox', teamName: '1팀',
       totalAssets: 1200, createdAt: '2026-11-12T01:00:00.000Z',
     }])
   })

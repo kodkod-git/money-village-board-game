@@ -47,11 +47,8 @@ export default function OfficialRankingPage() {
   }, [contestId, reloadKey])
 
   const isAllContests = !contestId
-  // 전체 대회 범위에서는 같은 실명이 대회마다 따로 오르므로 대회 이름을 붙여 구분한다.
-  const rows = useMemo(() => (data[tab] ?? []).map(p => ({
-    ...p,
-    name: isAllContests ? `${p.realName} (${p.contestName})` : p.realName,
-  })), [data, tab, isAllContests])
+  // 이름은 실명만 쓴다. 같은 실명이 대회마다 따로 오르는 전체 대회 범위에서는 보조 줄의 대회 이름으로 구분한다.
+  const rows = useMemo(() => (data[tab] ?? []).map(p => ({ ...p, name: p.realName })), [data, tab])
 
   // 내 기록: 결과 화면에서 기억해 둔 공식 참가자 id. 대회별 범위는 그 대회의 id,
   // 전체 대회 범위는 기억한 id 중 순위에 있는 첫 번째를 쓴다.
@@ -64,10 +61,11 @@ export default function OfficialRankingPage() {
 
   const isPoints = tab === 'points'
   const formatValue = isPoints ? row => formatPoints(row.points) : row => formatWon(row.bestAssets)
-  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : isAllContests
-    // 전체 대회 범위는 이름에 이미 대회 이름이 붙어 있으므로 보조 줄에는 게임 수만 보여 준다.
-    ? row => `${row.games}게임`
-    : row => row.contestName
+  // 보조 줄. 총자산 탭: 대회 · 팀 · 팀 내 순위 (최고 자산을 기록한 게임 기준).
+  // 승점 탭: 게임 수와 1위 횟수, 전체 대회 범위에서는 앞에 대회 이름을 붙인다.
+  const getSub = isPoints
+    ? row => [isAllContests && row.contestName, `${row.games}게임`, `1위 ${row.wins}회`].filter(Boolean).join(' · ')
+    : row => [row.contestName, row.bestTeamName, row.bestTableRank && `팀 내 ${row.bestTableRank}위`].filter(Boolean).join(' · ')
   const getRowKey = row => row.officialPlayerId
   const podiumRows = rows.slice(0, 3)
 

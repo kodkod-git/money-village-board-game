@@ -31,6 +31,19 @@ export function tablePoints(results) {
   return awards
 }
 
+// 한 테이블 안의 총자산 순위 → Map<officialPlayerId, rank>. 같은 총자산은 같은 순위(1, 2, 2, 4).
+function tableRanks(results) {
+  const ranks = new Map()
+  const sorted = [...results].sort((a, b) => b.totalAssets - a.totalAssets)
+  let prevRank = 0
+  sorted.forEach((r, i) => {
+    const rank = i > 0 && r.totalAssets === sorted[i - 1].totalAssets ? prevRank : i + 1
+    prevRank = rank
+    if (r.officialPlayerId) ranks.set(r.officialPlayerId, rank)
+  })
+  return ranks
+}
+
 // 앞 사람과 key가 같으면 같은 등수를 준다(1, 1, 3 방식).
 function withRanks(sorted, keyOf) {
   let prevKey = null
@@ -44,7 +57,8 @@ function withRanks(sorted, keyOf) {
   })
 }
 
-// rows: { sessionId, contestId, contestName, officialPlayerId, realName, character, totalAssets, createdAt }
+// rows: { sessionId, contestId, contestName, officialPlayerId, realName, character, teamName, totalAssets, createdAt }
+// bestTeamName·bestTableRank: 최고 자산을 기록한 게임의 팀 이름과 그 팀 안의 순위
 // → { points: Row[], bestAssets: Row[] }
 export function buildOfficialRankings(rows) {
   const bySession = new Map()
@@ -56,6 +70,7 @@ export function buildOfficialRankings(rows) {
   const players = new Map()
   for (const tableRows of bySession.values()) {
     const awards = tablePoints(tableRows)
+    const ranks = tableRanks(tableRows)
     for (const r of tableRows) {
       const award = awards.get(r.officialPlayerId)
       if (!award) continue
@@ -72,6 +87,8 @@ export function buildOfficialRankings(rows) {
           games: 0,
           wins: 0,
           bestAssets: r.totalAssets,
+          bestTeamName: r.teamName ?? '',
+          bestTableRank: ranks.get(r.officialPlayerId),
           lastPlayedAt: r.createdAt,
         }
         players.set(r.officialPlayerId, p)
@@ -79,7 +96,11 @@ export function buildOfficialRankings(rows) {
       p.points += award.points
       p.games += 1
       if (award.isFirst) p.wins += 1
-      if (r.totalAssets > p.bestAssets) p.bestAssets = r.totalAssets
+      if (r.totalAssets > p.bestAssets) {
+        p.bestAssets = r.totalAssets
+        p.bestTeamName = r.teamName ?? ''
+        p.bestTableRank = ranks.get(r.officialPlayerId)
+      }
       if (Date.parse(r.createdAt) > Date.parse(p.lastPlayedAt)) {
         p.character = r.character
         p.lastPlayedAt = r.createdAt

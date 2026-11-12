@@ -100,6 +100,22 @@ describe('buildOfficialRankings', () => {
     ])
   })
 
+  it('최고 자산을 기록한 게임의 팀 이름과 그 팀 안의 순위를 함께 준다', () => {
+    const rows = [
+      row({ sessionId: 's1', officialPlayerId: 'p1', teamName: 'A팀', totalAssets: 500 }),
+      row({ sessionId: 's1', officialPlayerId: 'p2', teamName: 'A팀', totalAssets: 300 }),
+      row({ sessionId: 's2', officialPlayerId: 'p2', teamName: 'B팀', totalAssets: 900 }),
+      row({ sessionId: 's2', officialPlayerId: 'p3', teamName: 'B팀', totalAssets: 1000 }),
+      row({ sessionId: 's2', officialPlayerId: 'p1', teamName: 'B팀', totalAssets: 900 }),
+    ]
+    const { bestAssets } = buildOfficialRankings(rows)
+    const byId = Object.fromEntries(bestAssets.map(p => [p.officialPlayerId, p]))
+    expect(byId.p3).toMatchObject({ bestTeamName: 'B팀', bestTableRank: 1 })
+    // p2의 최고 기록(900)은 B팀에서 p1과 공동 2위다
+    expect(byId.p2).toMatchObject({ bestTeamName: 'B팀', bestTableRank: 2 })
+    expect(byId.p1).toMatchObject({ bestTeamName: 'B팀', bestTableRank: 2 })
+  })
+
   it('캐릭터는 가장 최근 게임의 캐릭터를 쓴다', () => {
     const rows = [
       row({ sessionId: 's2', officialPlayerId: 'p1', character: 'bear', createdAt: '2026-11-12T03:00:00.000Z' }),

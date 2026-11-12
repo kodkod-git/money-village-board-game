@@ -372,7 +372,7 @@ export async function getSessionCreatedAtsByClassId(classId) {
 
 const RESULT_PAGE_SIZE = 1000
 
-const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, classes!inner(name, kind))'
+const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, title, team_code, classes!inner(name, kind))'
 
 // 공식 랭킹 계산(server/officialRanking.js)의 입력 형태로 대회 결과를 가져온다.
 // classId가 없으면 모든 대회(누적), 있으면 그 대회만 가져온다.
@@ -408,6 +408,7 @@ export async function getOfficialResultRows({ classId = null } = {}) {
       officialPlayerId: r.official_player_id,
       realName: r.official_players?.real_name ?? null,
       character: r.character,
+      teamName: r.game_sessions.title || r.game_sessions.team_code || '',
       totalAssets: Number(r.total_assets),
       createdAt: r.created_at,
     }))
