@@ -5,6 +5,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
 import { getPlayerUuid } from '../utils/playerUuid'
+import { rememberOfficialPlayer } from '../utils/officialPlayer'
 import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
 import { SURVEY_URL } from '../constants/survey'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
@@ -43,6 +44,7 @@ export default function RankingPage() {
   const [viewingPlayer, setViewingPlayer] = useState(null)
   const [shareNotice, setShareNotice] = useState('')
   const [hasMyResult, setHasMyResult] = useState(false)
+  const [isOfficialSession, setIsOfficialSession] = useState(false)
 
   const myPlayerUuid = getPlayerUuid()
 
@@ -54,7 +56,12 @@ export default function RankingPage() {
       .then(r => r.json())
       .then(data => {
         setMyClassId(data.classId ?? 'unassigned')
-        setHasMyResult((data.players ?? []).some(p => p.playerUuid === myPlayerUuid))
+        const me = (data.players ?? []).find(p => p.playerUuid === myPlayerUuid)
+        setHasMyResult(Boolean(me))
+        const official = data.classKind === 'official'
+        setIsOfficialSession(official)
+        // 공식 랭킹의 "내 기록" 고정에 쓴다(기기 단위).
+        if (official && me?.officialPlayerId) rememberOfficialPlayer(data.classId, me.officialPlayerId)
       })
       .catch(() => {})
   }, [sessionId, isV2, myPlayerUuid])
@@ -136,29 +143,34 @@ export default function RankingPage() {
   return (
     <div className={styles.page}>
       {isV2 ? <BackButton to="/" label="처음으로" /> : <BackButton />}
-      {isV2 && (
-        <div className={styles.shareActions}>
-          <button
-            type="button"
-            className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
-            onClick={handleKakaoShare}
-            aria-label="카카오톡 공유하기"
-          >
-            <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
-          </button>
-          <button type="button" className={styles.shareIconBtn} onClick={handleCopyLink} aria-label="링크 복사하기">
-            <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
-          </button>
-          <a className={styles.surveyBtn} href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
-            만족도 조사
-          </a>
-          {hasMyResult && (
-            <button type="button" className={styles.surveyBtn} onClick={() => navigate(`/result/${sessionId}/report`)}>
-              경제적 잠재력 유형
+      <div className={styles.shareActions}>
+        {isV2 && (
+          <>
+            <button
+              type="button"
+              className={`${styles.shareIconBtn} ${styles.kakaoIconBtn}`}
+              onClick={handleKakaoShare}
+              aria-label="카카오톡 공유하기"
+            >
+              <img className={styles.shareIconImg} src="/icons/mode_comment.png" alt="" aria-hidden="true" />
             </button>
-          )}
-        </div>
-      )}
+            <button type="button" className={styles.shareIconBtn} onClick={handleCopyLink} aria-label="링크 복사하기">
+              <img className={styles.shareIconImg} src="/icons/link_2.png" alt="" aria-hidden="true" />
+            </button>
+            <a className={styles.surveyBtn} href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
+              만족도 조사
+            </a>
+            {hasMyResult && (
+              <button type="button" className={styles.surveyBtn} onClick={() => navigate(`/result/${sessionId}/report`)}>
+                경제적 잠재력 유형
+              </button>
+            )}
+          </>
+        )}
+        <button type="button" className={styles.surveyBtn} onClick={() => navigate('/ranking/official')}>
+          공식 랭킹 보러가기
+        </button>
+      </div>
       <div className={styles.inner}>
         <div className={styles.header}>
           <h1 className={styles.title}>랭킹</h1>
@@ -184,18 +196,26 @@ export default function RankingPage() {
 
         {isV2 && (
           <div className={styles.tabs}>
-            {SCOPE_TABS.map(tab => (
-              <button
-                key={tab.key}
-                className={`${styles.tab} ${scope === tab.key ? styles.tabActive : ''}`}
-                onClick={() => {
-                  setRows([])
-                  setScope(tab.key)
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {SCOPE_TABS.map(tab => {
+              const isContestTab = tab.key === 'class' && isOfficialSession
+              return (
+                <button
+                  key={tab.key}
+                  className={`${styles.tab} ${scope === tab.key ? styles.tabActive : ''}`}
+                  onClick={() => {
+                    // 대회의 총자산 순위는 불공정하므로 공식 랭킹(순위 포인트)으로 보낸다.
+                    if (isContestTab) {
+                      navigate(`/ranking/official?classId=${encodeURIComponent(myClassId)}`)
+                      return
+                    }
+                    setRows([])
+                    setScope(tab.key)
+                  }}
+                >
+                  {isContestTab ? '대회' : tab.label}
+                </button>
+              )
+            })}
           </div>
         )}
 

@@ -11,6 +11,7 @@ function renderAt(path) {
       <Routes>
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
+        <Route path="/ranking/official" element={<div>공식 랭킹 화면</div>} />
         <Route path="/join-code" element={<div>팀코드 입력 화면</div>} />
         <Route path="/" element={<div>메인 화면</div>} />
       </Routes>
@@ -349,5 +350,51 @@ describe('RankingPage', () => {
     await userEvent.click(await screen.findByText('홍길동'))
     await userEvent.click(screen.getByRole('button', { name: '경제적 잠재력 유형 보고서' }))
     expect(screen.getByText('보고서 /result/session-1/report?player=p3')).toBeInTheDocument()
+  })
+})
+
+describe('공식 랭킹 연결', () => {
+  it('홈 랭킹에 공식 랭킹 보러가기 버튼이 있고 누르면 이동한다', async () => {
+    renderAt('/ranking')
+    await userEvent.click(await screen.findByRole('button', { name: '공식 랭킹 보러가기' }))
+    expect(await screen.findByText('공식 랭킹 화면')).toBeInTheDocument()
+  })
+
+  it('대회 게임 결과 화면에서는 범위 탭이 "대회"이고 누르면 그 대회의 공식 랭킹으로 간다', async () => {
+    const original = global.fetch
+    global.fetch = vi.fn(url => {
+      if (url.startsWith('/api/results/')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({
+          teamCode: 'AB1234', classId: 'contest-1', className: '2026 시즌1', classKind: 'official',
+          players: [{ rank: 1, name: '박병윤', character: 'fox', totalAssets: 1, playerUuid: 'me', officialPlayerId: 'op1' }],
+        }) })
+      }
+      return original(url)
+    })
+    sessionStorage.setItem('player_uuid', 'me')
+
+    renderAt('/result/s1')
+    await userEvent.click(await screen.findByRole('button', { name: '대회' }))
+    expect(await screen.findByText('공식 랭킹 화면')).toBeInTheDocument()
+  })
+
+  it('결과 화면에서 내 officialPlayerId를 대회별로 기억한다', async () => {
+    const original = global.fetch
+    global.fetch = vi.fn(url => {
+      if (url.startsWith('/api/results/')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({
+          teamCode: 'AB1234', classId: 'contest-1', className: '2026 시즌1', classKind: 'official',
+          players: [{ rank: 1, name: '박병윤', character: 'fox', totalAssets: 1, playerUuid: 'me', officialPlayerId: 'op1' }],
+        }) })
+      }
+      return original(url)
+    })
+    sessionStorage.setItem('player_uuid', 'me')
+    localStorage.removeItem('official_player_ids')
+
+    renderAt('/result/s1')
+    await waitFor(() =>
+      expect(JSON.parse(localStorage.getItem('official_player_ids'))).toEqual({ 'contest-1': 'op1' }),
+    )
   })
 })
