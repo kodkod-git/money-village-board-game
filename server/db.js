@@ -72,6 +72,8 @@ export async function saveGameResult(room) {
       total_assets: breakdown.totalAssets,
       stock_value: breakdown.stockValue,
       real_estate_value: breakdown.realEstateValue,
+      // 공식전(대회) 결과를 공식 참가자와 연결한다. 일반 게임은 null.
+      official_player_id: player.officialPlayerId ?? null,
     }
   })
 
@@ -91,7 +93,7 @@ export async function saveGameResult(room) {
 export async function getGameResult(sessionId) {
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
-    .select('*, classes(name)')
+    .select('*, classes(name, kind)')
     .eq('id', sessionId)
     .single()
 
@@ -260,7 +262,7 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'id, player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name))'
+const RANKING_SELECT = 'id, player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name, kind))'
 
 // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
 // 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
@@ -320,11 +322,18 @@ export async function getRankings({ classId = null, category = null } = {}) {
   const { data, error } = await query
   if (error) throw error
 
+  // 전체 범위(일반 랭킹)에서는 공식전(대회) 결과를 뺀다. 공식전은 테이블마다 가격이 달라
+  // 총자산 비교가 불공정하므로 공식 랭킹에서만 순위 포인트로 보여 준다.
+  // 대회를 직접 고른 경우(classId)는 관리자 화면이 수업과 똑같이 보여 줘야 해서 그대로 둔다.
+  const visible = classId
+    ? data
+    : data.filter(r => r.game_sessions?.classes?.kind !== 'official')
+
   // 순자산(현금+주식+부동산, 성공카드 배수 미적용)에 해당하는 DB 컬럼이 없어
   // total_assets 순으로 받은 뒤 JS에서 재정렬한다. 동점은 안정 정렬로 총자산 순.
   const sorted = isNetWorth
-    ? [...data].sort((a, b) => netWorthOf(b) - netWorthOf(a))
-    : data
+    ? [...visible].sort((a, b) => netWorthOf(b) - netWorthOf(a))
+    : visible
 
   return sorted.map(mapRankingRow)
 }
@@ -358,4 +367,33 @@ export async function getSessionCreatedAtsByClassId(classId) {
   const { data, error } = await query
   if (error) throw error
   return (data ?? []).map(session => session.created_at)
+}
+
+const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, classes!inner(name, kind))'
+
+// 공식 랭킹 계산(server/officialRanking.js)의 입력 형태로 대회 결과를 가져온다.
+// classId가 없으면 모든 대회(누적), 있으면 그 대회만 가져온다.
+export async function getOfficialResultRows({ classId = null } = {}) {
+  let query = supabase
+    .from('game_results')
+    .select(OFFICIAL_SELECT)
+    .eq('game_sessions.classes.kind', 'official')
+  if (classId) query = query.eq('game_sessions.class_id', classId)
+
+  const { data, error } = await query
+  if (error) throw error
+
+  // 중첩 필터가 적용되지 않는 환경에서도 대회 결과만 남도록 한 번 더 거른다.
+  return data
+    .filter(r => r.game_sessions?.classes?.kind === 'official')
+    .map(r => ({
+      sessionId: r.session_id,
+      contestId: r.game_sessions.class_id,
+      contestName: r.game_sessions.classes.name,
+      officialPlayerId: r.official_player_id,
+      realName: r.official_players?.real_name ?? null,
+      character: r.character,
+      totalAssets: Number(r.total_assets),
+      createdAt: r.created_at,
+    }))
 }

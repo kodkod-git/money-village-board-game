@@ -649,7 +649,7 @@ describe('getGameResult', () => {
     const { getGameResult } = await import('./db.js')
     const { session } = await getGameResult('session-1')
 
-    expect(mockSelect).toHaveBeenCalledWith('*, classes(name)')
+    expect(mockSelect).toHaveBeenCalledWith('*, classes(name, kind)')
     expect(session.classes.name).toBe('1반')
   })
 })
@@ -908,5 +908,96 @@ describe('getRankings', () => {
     const rows = await getRankings({ classId: 'class-1' })
     expect(rows[0].resultId).toBe('result-1')
     expect(rows[0].teamName).toBe('AB1234')
+  })
+})
+
+describe('공식전', () => {
+  it('saveGameResult는 플레이어의 officialPlayerId를 official_player_id로 저장한다(없으면 null)', async () => {
+    const mockSessionInsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: 'session-1' }, error: null }) }),
+    })
+    const mockResultsInsert = vi.fn().mockResolvedValue({ error: null })
+    mockFrom.mockReset()
+    mockFrom.mockImplementation(table => (table === 'game_sessions' ? { insert: mockSessionInsert } : { insert: mockResultsInsert }))
+
+    const { saveGameResult } = await import('./db.js')
+    const gameState = {
+      job: 'a', cash: 0,
+      stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+      realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
+      badges: [false, false, false, false, false, false],
+    }
+    await saveGameResult({
+      code: 'AB1234', prices: PRICES, classId: 'c1',
+      players: [
+        { playerUuid: 'p1', name: '박병윤', character: 'fox', officialPlayerId: 'op1', gameState },
+        { playerUuid: 'p2', name: '김철수', character: 'bear', gameState },
+      ],
+    })
+
+    expect(mockResultsInsert).toHaveBeenCalledWith([
+      expect.objectContaining({ player_uuid: 'p1', official_player_id: 'op1' }),
+      expect.objectContaining({ player_uuid: 'p2', official_player_id: null }),
+    ])
+  })
+
+  it('getRankings 전체 범위는 대회 결과를 뺀다. 미배정 결과는 남긴다', async () => {
+    const builder = makeQueryBuilder({
+      data: [
+        { id: 'r1', name: '일반', total_assets: 300, game_sessions: { class_id: 'c1', classes: { name: '1반', kind: 'class' } } },
+        { id: 'r2', name: '대회', total_assets: 200, game_sessions: { class_id: 'c2', classes: { name: '시즌1', kind: 'official' } } },
+        { id: 'r3', name: '미배정', total_assets: 100, game_sessions: { class_id: null, classes: null } },
+      ],
+      error: null,
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    const rows = await getRankings({})
+    expect(rows.map(r => r.name)).toEqual(['일반', '미배정'])
+  })
+
+  it('getRankings에 classId를 주면 대회 결과도 그대로 보여 준다(관리자 대회 화면)', async () => {
+    const builder = makeQueryBuilder({
+      data: [{ id: 'r2', name: '대회', total_assets: 200, game_sessions: { class_id: 'c2', classes: { name: '시즌1', kind: 'official' } } }],
+      error: null,
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    const rows = await getRankings({ classId: 'c2' })
+    expect(rows.map(r => r.name)).toEqual(['대회'])
+  })
+
+  it('getOfficialResultRows는 대회 결과만 계산용 형태로 돌려주고 classId로 거른다', async () => {
+    const builder = makeQueryBuilder({
+      data: [
+        {
+          session_id: 's1', official_player_id: 'op1', character: 'fox', total_assets: '1200', created_at: '2026-11-12T01:00:00.000Z',
+          official_players: { real_name: '박병윤' },
+          game_sessions: { class_id: 'c2', classes: { name: '2026 시즌1', kind: 'official' } },
+        },
+        {
+          session_id: 's9', official_player_id: null, character: 'bear', total_assets: '10', created_at: '2026-11-12T01:00:00.000Z',
+          official_players: null,
+          game_sessions: { class_id: 'c1', classes: { name: '1반', kind: 'class' } },
+        },
+      ],
+      error: null,
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getOfficialResultRows } = await import('./db.js')
+    const rows = await getOfficialResultRows({ classId: 'c2' })
+
+    expect(builder.eq).toHaveBeenCalledWith('game_sessions.class_id', 'c2')
+    expect(rows).toEqual([{
+      sessionId: 's1', contestId: 'c2', contestName: '2026 시즌1',
+      officialPlayerId: 'op1', realName: '박병윤', character: 'fox',
+      totalAssets: 1200, createdAt: '2026-11-12T01:00:00.000Z',
+    }])
   })
 })
