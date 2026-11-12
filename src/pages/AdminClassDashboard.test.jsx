@@ -493,4 +493,13 @@ describe('AdminClassDashboard', () => {
     expect(await screen.findByText('팀 대결 결과를 불러오지 못했어요')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
+
+  it('대회면 제목 옆에 공식 뱃지를 보여 준다', async () => {
+    render(
+      <SocketProvider>
+        <AdminClassDashboard classId="contest-1" initialName="2026 시즌1" kind="official" />
+      </SocketProvider>
+    )
+    expect(await screen.findByText('공식')).toBeInTheDocument()
+  })
 })

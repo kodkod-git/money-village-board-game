@@ -167,3 +167,22 @@ describe('AdminGridCard', () => {
     })
   })
 })
+
+describe('AdminGridCard 대회', () => {
+  it('대회의 1인 등록 팀에는 공식 집계 제외 표시를 붙인다', () => {
+    render(<AdminGridCard room={makeRoom({ registered: true, status: 'completed' })} isOfficial onSpectate={vi.fn()} />)
+    expect(screen.getByText('공식 집계 제외(1인)')).toBeInTheDocument()
+  })
+
+  it('일반 수업이거나 2명 이상이면 표시하지 않는다', () => {
+    const { unmount } = render(<AdminGridCard room={makeRoom({ registered: true, status: 'completed' })} onSpectate={vi.fn()} />)
+    expect(screen.queryByText('공식 집계 제외(1인)')).not.toBeInTheDocument()
+    unmount()
+    const two = makeRoom({
+      registered: true, status: 'completed',
+      players: [{ character: 'Adventurer-강아지', name: '김민준' }, { character: 'Adventurer-고양이', name: '이서연' }],
+    })
+    render(<AdminGridCard room={two} isOfficial onSpectate={vi.fn()} />)
+    expect(screen.queryByText('공식 집계 제외(1인)')).not.toBeInTheDocument()
+  })
+})

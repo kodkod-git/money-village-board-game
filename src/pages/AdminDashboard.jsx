@@ -71,6 +71,7 @@ export default function AdminDashboard() {
         <AdminClassDashboard
           classId={selectedClass.id}
           initialName={selectedClass.name}
+          kind={selectedClass.kind ?? 'class'}
         />
       )}
       {section === 'ranking' && selectedClass && (

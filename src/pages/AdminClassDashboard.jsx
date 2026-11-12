@@ -34,7 +34,8 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName }) {
+export default function AdminClassDashboard({ classId, initialName, kind = 'class' }) {
+  const isOfficial = kind === 'official'
   const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
   const isMobile = useIsAdminMobile()
@@ -206,6 +207,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
         onChange={e => setName(e.target.value)}
         onBlur={handleTitleBlur}
       />
+      {isOfficial && <span className={styles.officialBadge}>공식</span>}
     </div>
   )
   const searchInput = (
@@ -331,6 +333,7 @@ export default function AdminClassDashboard({ classId, initialName }) {
         <>
           {visibleTab === 'grid' && (
             <AdminGridView
+              isOfficial={isOfficial}
               rooms={filteredRooms}
               allRooms={rooms}
               onSpectate={room => setSpectateIndex(rooms.findIndex(r => r.code === room.code))}

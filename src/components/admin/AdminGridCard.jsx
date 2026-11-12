@@ -18,7 +18,7 @@ const TABS = [
   { key: 'realEstate', label: '부동산' },
 ]
 
-export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged }) {
+export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged, isOfficial = false }) {
   const [tab, setTab] = useState('lobby')
   const [showPriceModal, setShowPriceModal] = useState(false)
 
@@ -73,6 +73,9 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
       <button className={styles.card} onClick={handleCardClick} type="button">
         {tab === 'lobby' && room.registered && (
           <span className={`${styles.badge} ${styles.badgeRegistered}`}>등록 완료</span>
+        )}
+        {tab === 'lobby' && room.registered && isOfficial && room.players.length === 1 && (
+          <span className={styles.officialExcluded}>공식 집계 제외(1인)</span>
         )}
         {badgeClassKey && (
           <span className={`${styles.badge} ${styles[badgeClassKey]}`}>
