@@ -971,6 +971,22 @@ describe('공식전', () => {
     expect(rows.map(r => r.name)).toEqual(['대회'])
   })
 
+  it('getRankings에 includeOfficial을 주면 전체 범위에서도 대회 결과를 남긴다(게임 분석)', async () => {
+    const builder = makeQueryBuilder({
+      data: [
+        { id: 'r1', name: '일반', total_assets: 300, game_sessions: { class_id: 'c1', classes: { name: '1반', kind: 'class' } } },
+        { id: 'r2', name: '대회', total_assets: 200, game_sessions: { class_id: 'c2', classes: { name: '시즌1', kind: 'official' } } },
+      ],
+      error: null,
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(builder)
+
+    const { getRankings } = await import('./db.js')
+    const rows = await getRankings({ includeOfficial: true })
+    expect(rows.map(r => r.name)).toEqual(['일반', '대회'])
+  })
+
   it('getOfficialResultRows는 대회 결과만 계산용 형태로 돌려주고 classId로 거른다', async () => {
     const builder = makeQueryBuilder({
       data: [

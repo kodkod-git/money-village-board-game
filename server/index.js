@@ -96,10 +96,14 @@ app.post('/api/contests/:classId/players/resolve', async (req, res) => {
 app.get('/api/official-rankings', async (req, res) => {
   const classId = req.query.classId || null
   try {
-    const [contests, rows] = await Promise.all([
+    // 대회가 아닌 classId(미배정·일반 수업·잘못된 값)는 결과를 조회하지 않고 빈 랭킹을 돌려준다.
+    // uuid가 아닌 값을 그대로 조회하면 PostgREST가 22P02로 실패하기 때문이다.
+    const [contests, info] = await Promise.all([
       listOfficialContests(),
-      getOfficialResultRows({ classId }),
+      classId ? getClassInfo(classId) : null,
     ])
+    if (info && info.kind !== 'official') return res.json({ contests, points: [], bestAssets: [] })
+    const rows = await getOfficialResultRows({ classId })
     res.json({ contests, ...buildOfficialRankings(rows) })
   } catch (err) {
     console.error('official rankings error:', err)
@@ -276,7 +280,11 @@ app.get('/api/admin/survey/:test/metrics', requireAdmin, async (req, res) => {
 app.get('/api/rankings', async (req, res) => {
   try {
     const { classId, category } = req.query
-    const rankings = await getRankings({ classId: classId ?? null, category: category ?? null })
+    const rankings = await getRankings({
+      classId: classId ?? null,
+      category: category ?? null,
+      includeOfficial: req.query.includeOfficial === '1',
+    })
     res.json(rankings)
   } catch (err) {
     console.error('rankings error:', err)

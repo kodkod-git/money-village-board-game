@@ -301,7 +301,7 @@ function mapRankingRow(r, i) {
 
 const RANKING_ORDER_COLUMN = { cash: 'cash', stock: 'stock_value', realEstate: 'real_estate_value' }
 
-export async function getRankings({ classId = null, category = null } = {}) {
+export async function getRankings({ classId = null, category = null, includeOfficial = false } = {}) {
   const isNetWorth = category === 'netWorth'
   const column = isNetWorth
     ? 'total_assets'
@@ -325,7 +325,8 @@ export async function getRankings({ classId = null, category = null } = {}) {
   // 전체 범위(일반 랭킹)에서는 공식전(대회) 결과를 뺀다. 공식전은 테이블마다 가격이 달라
   // 총자산 비교가 불공정하므로 공식 랭킹에서만 순위 포인트로 보여 준다.
   // 대회를 직접 고른 경우(classId)는 관리자 화면이 수업과 똑같이 보여 줘야 해서 그대로 둔다.
-  const visible = classId
+  // includeOfficial은 전체 결과를 분석하는 관리자 "게임 분석" 화면용이다.
+  const visible = classId || includeOfficial
     ? data
     : data.filter(r => r.game_sessions?.classes?.kind !== 'official')
 

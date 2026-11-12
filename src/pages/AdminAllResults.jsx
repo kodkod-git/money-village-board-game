@@ -114,7 +114,7 @@ export default function AdminAllResults() {
   const [activeTab, setActiveTab] = useState('chart')
 
   useEffect(() => {
-    fetch('/api/rankings')
+    fetch('/api/rankings?includeOfficial=1')
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(setRows)
       .catch(() => setError(true))

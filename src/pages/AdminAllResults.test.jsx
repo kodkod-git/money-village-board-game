@@ -40,7 +40,7 @@ describe('AdminAllResults', () => {
     render(<AdminAllResults />)
     await screen.findByText('블루')
     await userEvent.click(screen.getByRole('tab', { name: '테이블 뷰' }))
-    expect(fetch).toHaveBeenCalledWith('/api/rankings')
+    expect(fetch).toHaveBeenCalledWith('/api/rankings?includeOfficial=1')
     const names = screen.getAllByRole('row').slice(1).map(tr => tr.querySelector('td').textContent)
     expect(names).toEqual(['오렌지서울중', '그린서울중', '레드서울중', '블루서울중'])
     expect(screen.queryByRole('columnheader', { name: /상태/ })).not.toBeInTheDocument()
