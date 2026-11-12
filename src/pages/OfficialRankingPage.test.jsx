@@ -80,10 +80,10 @@ describe('OfficialRankingPage', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
   })
 
-  it('총자산 탭은 원 단위와 참고용 안내를 보여 준다', async () => {
+  it('총자산 탭은 원 단위로 보여 주고 참고용 안내는 없다', async () => {
     renderAt()
     await screen.findAllByText('박병윤 (2026 시즌1)')
-    expect(screen.getByText('테이블마다 가격이 달라 참고용 기록이에요.')).toBeInTheDocument()
+    expect(screen.queryByText(/참고용 기록/)).not.toBeInTheDocument()
     expect(screen.getAllByText('1,500,000원').length).toBeGreaterThan(0)
   })
 

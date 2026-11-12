@@ -117,8 +117,6 @@ export default function OfficialRankingPage() {
           ))}
         </div>
 
-        {!isPoints && <p className={styles.notice}>테이블마다 가격이 달라 참고용 기록이에요.</p>}
-
         <hr className={rankingStyles.divider} />
 
         {loading && <p className={rankingStyles.message}>불러오는 중...</p>}

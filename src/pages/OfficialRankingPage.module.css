@@ -20,13 +20,6 @@
   font-weight: 700;
 }
 
-.notice {
-  margin-top: clamp(8px, calc(12px * var(--sy)), 12px);
-  font-size: clamp(11px, calc(13px * min(var(--sx), var(--sy))), 13px);
-  color: var(--ink-2);
-  text-align: center;
-}
-
 .errorBox {
   display: flex;
   flex-direction: column;
