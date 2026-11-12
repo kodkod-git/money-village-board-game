@@ -698,7 +698,13 @@ app.post('/api/admin/rooms/:code/players', requireAdmin, async (req, res) => {
   try {
     const target = getRoom(code)
     if (target?.isOfficial) {
-      const official = await getOfficialPlayer(officialPlayerId)
+      let official
+      try {
+        official = await getOfficialPlayer(officialPlayerId)
+      } catch (err) {
+        console.error('manual player official lookup error:', err)
+        return res.status(500).json({ error: 'Failed to verify official player' })
+      }
       if (!official || official.class_id !== target.classId) {
         return res.status(400).json({ error: '대회 참가자를 확인할 수 없어요' })
       }
@@ -798,9 +804,13 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join-room', async ({ code, name, character, isHost, playerUuid, affiliation, officialPlayerId }, callback) => {
-    const upper = code.toUpperCase()
+  socket.on('join-room', async (payload, callback) => {
+    const reply = typeof callback === 'function' ? callback : () => {}
     try {
+      // async 핸들러라 try 밖에서 던지면 처리되지 않은 rejection으로 프로세스가 죽는다.
+      const { code, name, character, isHost, playerUuid, affiliation, officialPlayerId } = payload ?? {}
+      if (typeof code !== 'string' || !code) throw new Error('Room not found')
+      const upper = code.toUpperCase()
       // 대회 방의 새 참가자는 공식 참가자 id가 이 대회 소속이어야 한다.
       // 같은 playerUuid의 재접속은 이미 검증된 자리라 건너뛴다.
       const target = getRoom(upper)
@@ -810,15 +820,18 @@ io.on('connection', (socket) => {
         if (!official || official.class_id !== target.classId) throw new Error('Official player not in contest')
       }
 
+      // 공식 참가자 조회를 기다리는 사이 연결이 끊겼다면 죽은 소켓으로 자리를 만들지 않는다.
+      if (!socket.connected) return
+
       const room = addPlayer(upper, {
         socketId: socket.id, name, character, isHost: !!isHost, playerUuid, affiliation, officialPlayerId: officialPlayerId ?? null,
       })
       socket.join(upper)
       io.to(upper).emit('room-updated', { players: room.players })
       broadcastClassRooms(room.classId)
-      callback?.({ ok: true })
+      reply({ ok: true })
     } catch (err) {
-      callback?.({ ok: false, error: err.message })
+      reply({ ok: false, error: err.message })
     }
   })
 
