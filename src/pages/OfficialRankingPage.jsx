@@ -30,16 +30,21 @@ export default function OfficialRankingPage() {
   const [data, setData] = useState({ contests: [], points: [], bestAssets: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
+    // 범위를 빠르게 바꾸면 이전 요청이 나중에 도착할 수 있으므로, 정리된 요청의 응답은 버린다.
+    let ignore = false
     setLoading(true)
     setError(null)
     const url = contestId ? `/api/official-rankings?classId=${encodeURIComponent(contestId)}` : '/api/official-rankings'
     fetch(url)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
-      .then(json => { setData(json); setLoading(false) })
-      .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-  }, [contestId])
+      .then(json => { if (!ignore) setData(json) })
+      .catch(() => { if (!ignore) setError('랭킹을 불러오지 못했어요') })
+      .finally(() => { if (!ignore) setLoading(false) })
+    return () => { ignore = true }
+  }, [contestId, reloadKey])
 
   const isCumulative = !contestId
   // 누적 범위에서는 같은 실명이 대회마다 따로 오르므로 대회 이름을 붙여 구분한다.
@@ -59,7 +64,10 @@ export default function OfficialRankingPage() {
 
   const isPoints = tab === 'points'
   const formatValue = isPoints ? row => formatPoints(row.points) : row => formatWon(row.bestAssets)
-  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : row => row.contestName
+  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : isCumulative
+    // 누적 범위는 이름에 이미 대회 이름이 붙어 있으므로 보조 줄에는 게임 수만 보여 준다.
+    ? row => `${row.games}게임`
+    : row => row.contestName
   const getRowKey = row => row.officialPlayerId
   const podiumRows = rows.slice(0, 3)
 
@@ -87,6 +95,7 @@ export default function OfficialRankingPage() {
           <button
             type="button"
             className={`${styles.scopeBtn} ${isCumulative ? styles.scopeBtnActive : ''}`}
+            aria-pressed={isCumulative}
             onClick={() => setSearchParams({}, { replace: true })}
           >
             누적
@@ -97,7 +106,7 @@ export default function OfficialRankingPage() {
             value={contestId}
             onChange={handleContestChange}
           >
-            <option value="">대회별 보기</option>
+            <option value="" disabled>대회별 보기</option>
             {data.contests.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
@@ -108,6 +117,7 @@ export default function OfficialRankingPage() {
               key={t.key}
               type="button"
               className={`${rankingStyles.topTab} ${tab === t.key ? rankingStyles.topTabActive : ''}`}
+              aria-pressed={tab === t.key}
               onClick={() => setTab(t.key)}
             >
               {t.label}
@@ -120,7 +130,14 @@ export default function OfficialRankingPage() {
         <hr className={rankingStyles.divider} />
 
         {loading && <p className={rankingStyles.message}>불러오는 중...</p>}
-        {error && <p className={rankingStyles.message}>{error}</p>}
+        {error && (
+          <div className={styles.errorBox}>
+            <p className={rankingStyles.message}>{error}</p>
+            <button type="button" className={styles.retryBtn} onClick={() => setReloadKey(k => k + 1)}>
+              다시 시도
+            </button>
+          </div>
+        )}
         {!loading && !error && rows.length === 0 && (
           <p className={rankingStyles.message}>아직 집계된 공식 게임이 없어요</p>
         )}
