@@ -99,7 +99,7 @@ describe('Team', () => {
     connectHandler()
 
     expect(socket.emit).toHaveBeenCalledWith('join-room', {
-      code: 'ABC123', name: '철수', affiliation: '', character: 'Adventurer-강아지', isHost: true, playerUuid: 'p1',
+      code: 'ABC123', name: '철수', affiliation: '', character: 'Adventurer-강아지', isHost: true, playerUuid: 'p1', officialPlayerId: null,
     }, expect.any(Function))
   })
 

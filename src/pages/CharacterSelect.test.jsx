@@ -49,6 +49,17 @@ describe('CharacterSelect', () => {
     expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('classId=class-1'))
   })
 
+  it('URL에 officialPlayerId가 있으면 다음 화면으로 그대로 전달한다', () => {
+    render(
+      <MemoryRouter initialEntries={['/select?name=박병윤&classId=c1&officialPlayerId=op1']}>
+        <CharacterSelect />
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getAllByRole('button')[1])
+    fireEvent.click(screen.getByText('이 캐릭터로 시작하기'))
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('officialPlayerId=op1'))
+  })
+
   it('캐릭터 선택 완료 시 새 로비 화면으로 이동한다', () => {
     render(
       <MemoryRouter initialEntries={['/select?name=철수&classId=class-1']}>

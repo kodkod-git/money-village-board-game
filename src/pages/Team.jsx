@@ -84,6 +84,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       character: stored.character,
       isHost: stored.isHost ?? false,
       playerUuid,
+      officialPlayerId: stored.officialPlayerId ?? null,
     }, handleJoinResult)
   }, [socket, roomFetched, roomGone, players, code, readOnly])
 
@@ -102,6 +103,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         character: stored.character,
         isHost: stored.isHost ?? false,
         playerUuid,
+        officialPlayerId: stored.officialPlayerId ?? null,
       }, handleJoinResult)
     }
 

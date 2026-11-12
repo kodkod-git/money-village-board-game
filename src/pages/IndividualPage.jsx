@@ -45,6 +45,7 @@ export default function IndividualPage() {
           socket.emit('join-room', {
             code, name: stored.name, affiliation: stored.affiliation,
             character: stored.character, isHost: false, playerUuid,
+            officialPlayerId: stored.officialPlayerId ?? null,
           }, ({ ok }) => {
             if (!ok) { navigate(`/team/${code}`); return }
             fetch(`/api/rooms/${code}`)

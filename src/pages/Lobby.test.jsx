@@ -296,6 +296,26 @@ describe('Lobby (classId 없이 진입 - 코드로만 참여)', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/team/ABC123', { replace: true })
   })
 
+  it('officialPlayerId를 join-room과 player_profile에 담는다', () => {
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))
+    renderLobby('/lobby?name=박병윤&character=c1&code=abc123&officialPlayerId=op1')
+
+    expect(socket.emit).toHaveBeenCalledWith(
+      'join-room',
+      expect.objectContaining({ code: 'ABC123', officialPlayerId: 'op1' }),
+      expect.any(Function)
+    )
+    expect(JSON.parse(sessionStorage.getItem('player_profile'))).toMatchObject({ officialPlayerId: 'op1' })
+  })
+
+  it('대회 입장 거절 사유를 한글로 안내한다', async () => {
+    const socket = io()
+    socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: false, error: 'Official player already in room' }))
+    renderLobby('/lobby?name=박병윤&character=c1&code=abc123&officialPlayerId=op1')
+    expect(await screen.findByText('이미 이 테이블에 참가 중이에요.')).toBeInTheDocument()
+  })
+
   it('코드를 입력하고 팀 참여하기를 누르면 join-room을 emit하고 팀 화면으로 이동한다', () => {
     const socket = io()
     socket.emit.mockImplementation((event, data, cb) => cb?.({ ok: true }))

@@ -16,12 +16,14 @@ export default function CharacterSelect() {
   const affiliation = searchParams.get('affiliation') ?? ''
   const classId = searchParams.get('classId') ?? ''
   const code = searchParams.get('code') ?? ''
+  const officialPlayerId = searchParams.get('officialPlayerId') ?? ''
 
   function handleSubmit() {
     if (!selected) return
     const params = new URLSearchParams({ affiliation, name, character: selected })
     if (code) params.set('code', code)
     if (classId) params.set('classId', classId)
+    if (officialPlayerId) params.set('officialPlayerId', officialPlayerId)
     navigate(`/lobby?${params}`)
   }
 

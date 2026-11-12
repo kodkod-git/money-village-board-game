@@ -15,6 +15,9 @@ import joinStyles from './NameInput.module.css'
 const JOIN_ERROR_MESSAGES = {
   'Room is full': '팀 인원이 가득 찼어요 (최대 4명). 다른 팀을 골라주세요.',
   'Room not found': '팀을 찾을 수 없어요. 코드를 다시 확인해주세요.',
+  'Official player required': '대회 QR로 다시 들어와 주세요.',
+  'Official player not in contest': '대회 QR로 다시 들어와 주세요.',
+  'Official player already in room': '이미 이 테이블에 참가 중이에요.',
 }
 
 function joinErrorMessage(error) {
@@ -34,6 +37,7 @@ export default function Lobby() {
   const affiliation = searchParams.get('affiliation') ?? ''
   const classId = searchParams.get('classId') ?? ''
   const character = searchParams.get('character') ?? ''
+  const officialPlayerId = searchParams.get('officialPlayerId') || null
   const initialCode = searchParams.get('code') ?? ''
   const [codeInput, setCodeInput] = useState(initialCode.toUpperCase())
 
@@ -85,9 +89,9 @@ export default function Lobby() {
     const existingUuid = sessionStorage.getItem('player_uuid')
     const playerUuid = (stored?.code === code && existingUuid) ? existingUuid : resetPlayerUuid()
 
-    socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid }, ({ ok, error }) => {
+    socket.emit('join-room', { code, name, affiliation, character, isHost, playerUuid, officialPlayerId }, ({ ok, error }) => {
       if (ok) {
-        sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost, classId }))
+        sessionStorage.setItem('player_profile', JSON.stringify({ name, affiliation, character, code, isHost, classId, officialPlayerId }))
         // 로비는 참여 과정의 임시 단계다 — 히스토리에 남겨두면 팀 화면에서
         // 뒤로가기 시 로비로 돌아와 자동 재참여되며 루프가 생긴다. replace로
         // 치워서 뒤로가기가 캐릭터 선택 → 이름 입력 → 팀 코드 입력 → 홈으로
