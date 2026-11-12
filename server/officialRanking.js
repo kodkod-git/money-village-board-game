@@ -59,6 +59,7 @@ function withRanks(sorted, keyOf) {
 
 // rows: { sessionId, contestId, contestName, officialPlayerId, realName, character, teamName, totalAssets, createdAt }
 // bestTeamName·bestTableRank: 최고 자산을 기록한 게임의 팀 이름과 그 팀 안의 순위
+// lastTeamName·lastTableRank: 가장 최근 게임의 팀 이름과 그 팀 안의 순위 (승점 탭용)
 // → { points: Row[], bestAssets: Row[] }
 export function buildOfficialRankings(rows) {
   const bySession = new Map()
@@ -90,6 +91,8 @@ export function buildOfficialRankings(rows) {
           bestTeamName: r.teamName ?? '',
           bestTableRank: ranks.get(r.officialPlayerId),
           lastPlayedAt: r.createdAt,
+          lastTeamName: r.teamName ?? '',
+          lastTableRank: ranks.get(r.officialPlayerId),
         }
         players.set(r.officialPlayerId, p)
       }
@@ -104,6 +107,8 @@ export function buildOfficialRankings(rows) {
       if (Date.parse(r.createdAt) > Date.parse(p.lastPlayedAt)) {
         p.character = r.character
         p.lastPlayedAt = r.createdAt
+        p.lastTeamName = r.teamName ?? ''
+        p.lastTableRank = ranks.get(r.officialPlayerId)
       }
     }
   }

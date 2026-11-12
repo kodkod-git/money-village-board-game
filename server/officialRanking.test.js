@@ -116,6 +116,19 @@ describe('buildOfficialRankings', () => {
     expect(byId.p1).toMatchObject({ bestTeamName: 'B팀', bestTableRank: 2 })
   })
 
+  it('가장 최근 게임의 팀 이름과 팀 내 순위를 함께 준다', () => {
+    const rows = [
+      row({ sessionId: 's1', officialPlayerId: 'p1', teamName: 'A팀', totalAssets: 500, createdAt: '2026-11-12T01:00:00.000Z' }),
+      row({ sessionId: 's1', officialPlayerId: 'p2', teamName: 'A팀', totalAssets: 300, createdAt: '2026-11-12T01:00:00.000Z' }),
+      row({ sessionId: 's2', officialPlayerId: 'p1', teamName: 'B팀', totalAssets: 100, createdAt: '2026-11-12T02:00:00.000Z' }),
+      row({ sessionId: 's2', officialPlayerId: 'p2', teamName: 'B팀', totalAssets: 900, createdAt: '2026-11-12T02:00:00.000Z' }),
+    ]
+    const { points } = buildOfficialRankings(rows)
+    const byId = Object.fromEntries(points.map(p => [p.officialPlayerId, p]))
+    expect(byId.p1).toMatchObject({ lastTeamName: 'B팀', lastTableRank: 2 })
+    expect(byId.p2).toMatchObject({ lastTeamName: 'B팀', lastTableRank: 1 })
+  })
+
   it('캐릭터는 가장 최근 게임의 캐릭터를 쓴다', () => {
     const rows = [
       row({ sessionId: 's2', officialPlayerId: 'p1', character: 'bear', createdAt: '2026-11-12T03:00:00.000Z' }),

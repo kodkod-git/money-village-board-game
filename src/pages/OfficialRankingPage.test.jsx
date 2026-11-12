@@ -10,7 +10,7 @@ const CONTESTS = [
 ]
 
 function player(id, realName, contestName, points, bestAssets, rank) {
-  return { officialPlayerId: id, realName, contestId: contestName === '2026 시즌1' ? 'c1' : 'c2', contestName, character: 'fox', points, games: 3, wins: 1, bestAssets, bestTeamName: 'A팀', bestTableRank: 1, rank }
+  return { officialPlayerId: id, realName, contestId: contestName === '2026 시즌1' ? 'c1' : 'c2', contestName, character: 'fox', points, games: 3, wins: 1, bestAssets, bestTeamName: 'A팀', bestTableRank: 1, lastTeamName: 'C팀', lastTableRank: 2, rank }
 }
 
 const ALL = {
@@ -71,12 +71,12 @@ describe('OfficialRankingPage', () => {
     expect(screen.queryByRole('option', { name: '대회별 보기' })).not.toBeInTheDocument()
   })
 
-  it('승점 탭은 이름 아래에 대회 이름과 점수, 게임 수를 보여 준다', async () => {
+  it('승점 탭은 이름 아래에 대회·최근 팀·팀 내 순위를 보여 준다', async () => {
     renderAt()
     await screen.findAllByText('박병윤')
     await userEvent.click(screen.getByRole('button', { name: '승점' }))
     expect(screen.getAllByText('24.5점').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('2026 시즌1 · 3게임 · 1위 1회').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('2026 시즌1 · C팀 · 팀 내 2위').length).toBeGreaterThan(0)
     expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
   })
 

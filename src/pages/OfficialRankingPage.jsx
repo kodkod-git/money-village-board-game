@@ -46,7 +46,6 @@ export default function OfficialRankingPage() {
     return () => { ignore = true }
   }, [contestId, reloadKey])
 
-  const isAllContests = !contestId
   // 이름은 실명만 쓴다. 같은 실명이 대회마다 따로 오르는 전체 대회 범위에서는 보조 줄의 대회 이름으로 구분한다.
   const rows = useMemo(() => (data[tab] ?? []).map(p => ({ ...p, name: p.realName })), [data, tab])
 
@@ -61,11 +60,12 @@ export default function OfficialRankingPage() {
 
   const isPoints = tab === 'points'
   const formatValue = isPoints ? row => formatPoints(row.points) : row => formatWon(row.bestAssets)
-  // 보조 줄. 총자산 탭: 대회 · 팀 · 팀 내 순위 (최고 자산을 기록한 게임 기준).
-  // 승점 탭: 게임 수와 1위 횟수, 전체 대회 범위에서는 앞에 대회 이름을 붙인다.
+  // 보조 줄: 대회 · 팀 · 팀 내 순위. 총자산 탭은 최고 자산을 기록한 게임, 승점 탭은 가장 최근 게임 기준이다.
+  const subLine = (row, teamName, tableRank) =>
+    [row.contestName, teamName, tableRank && `팀 내 ${tableRank}위`].filter(Boolean).join(' · ')
   const getSub = isPoints
-    ? row => [isAllContests && row.contestName, `${row.games}게임`, `1위 ${row.wins}회`].filter(Boolean).join(' · ')
-    : row => [row.contestName, row.bestTeamName, row.bestTableRank && `팀 내 ${row.bestTableRank}위`].filter(Boolean).join(' · ')
+    ? row => subLine(row, row.lastTeamName, row.lastTableRank)
+    : row => subLine(row, row.bestTeamName, row.bestTableRank)
   const getRowKey = row => row.officialPlayerId
   const podiumRows = rows.slice(0, 3)
 
