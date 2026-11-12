@@ -62,3 +62,15 @@ describe('RankingPodium', () => {
     expect(handleClick).toHaveBeenCalledWith(rows[0])
   })
 })
+
+describe('RankingPodium formatValue', () => {
+  it('formatValue로 값 표시를 바꾼다', () => {
+    const rows = [
+      { rank: 1, officialPlayerId: 'a', name: 'A', character: 'fox', points: 30 },
+      { rank: 2, officialPlayerId: 'b', name: 'B', character: 'fox', points: 20 },
+      { rank: 3, officialPlayerId: 'c', name: 'C', character: 'fox', points: 10 },
+    ]
+    render(<RankingPodium rows={rows} valueKey="points" formatValue={row => `${row.points}점`} getRowKey={row => row.officialPlayerId} />)
+    expect(screen.getByText('30점')).toBeInTheDocument()
+  })
+})

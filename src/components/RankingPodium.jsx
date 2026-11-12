@@ -2,11 +2,15 @@ import styles from './RankingPodium.module.css'
 
 const PODIUM_ORDER = [1, 0, 2]
 
-function formatValue(value) {
+function defaultFormatValue(value) {
   return value == null ? '-원' : `${value.toLocaleString()}원`
 }
 
-export default function RankingPodium({ rows, valueKey = 'totalAssets', onRowClick }) {
+export default function RankingPodium({
+  rows, valueKey = 'totalAssets', onRowClick,
+  formatValue = row => defaultFormatValue(row[valueKey]),
+  getRowKey = row => row.playerUuid,
+}) {
   if (rows.length === 0) return null
 
   const podiumRows = PODIUM_ORDER.map(i => rows[i]).filter(Boolean)
@@ -15,7 +19,7 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets', onRowCli
     <div className={styles.podium}>
       {podiumRows.map(row => (
         <div
-          key={row.playerUuid}
+          key={getRowKey(row)}
           className={`${styles.slot} ${
             row.rank === 1 ? styles.first : row.rank === 2 ? styles.second : styles.third
           }`}
@@ -26,7 +30,7 @@ export default function RankingPodium({ rows, valueKey = 'totalAssets', onRowCli
           <span className={styles.name}>{row.name}</span>
           <div className={styles.box}>
             <span className={styles.rank}>{row.rank}위</span>
-            <span className={styles.value}>{formatValue(row[valueKey])}</span>
+            <span className={styles.value}>{formatValue(row)}</span>
           </div>
         </div>
       ))}

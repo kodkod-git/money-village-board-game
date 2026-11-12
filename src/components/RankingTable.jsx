@@ -1,13 +1,29 @@
 import styles from './RankingTable.module.css'
 
-export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, valueKey = 'totalAssets', podium, getSub = row => row.className }) {
-  const pinnedRow = highlightPlayerUuid
-    ? rows.find(r => r.playerUuid === highlightPlayerUuid)
-    : null
+function defaultFormatValue(row, valueKey) {
+  const value = row[valueKey]
+  return value == null ? '-원' : `${value.toLocaleString()}원`
+}
+
+function defaultRowKey(row) {
+  return `${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`
+}
+
+// formatValue/getRowKey/highlightKey+getHighlightId는 공식 랭킹(포인트, officialPlayerId 기준)용.
+// 기본값은 기존 일반 랭킹 동작(원 단위, playerUuid 기준)과 같다.
+export default function RankingTable({
+  rows, highlightPlayerUuid, onRowClick, valueKey = 'totalAssets', podium,
+  getSub = row => row.className,
+  formatValue: formatValueProp,
+  getRowKey = defaultRowKey,
+  highlightKey,
+  getHighlightId = row => row.playerUuid,
+}) {
+  const targetId = highlightKey ?? highlightPlayerUuid
+  const pinnedRow = targetId ? rows.find(r => getHighlightId(r) === targetId) : null
 
   function formatValue(row) {
-    const value = row[valueKey]
-    return value == null ? '-원' : `${value.toLocaleString()}원`
+    return formatValueProp ? formatValueProp(row) : defaultFormatValue(row, valueKey)
   }
 
   return (
@@ -16,7 +32,7 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
         {podium}
         {rows.map(row => (
           <div
-            key={`${row.sessionId ?? ''}-${row.playerUuid ?? `${row.rank}-${row.name}`}`}
+            key={getRowKey(row)}
             className={`${styles.row} ${row.rank <= 3 ? styles.rowTop3 : ''}`}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             style={onRowClick ? { cursor: 'pointer' } : undefined}
@@ -54,13 +70,13 @@ export default function RankingTable({ rows, highlightPlayerUuid, onRowClick, va
               <span className={styles.pinnedName}>{pinnedRow.name}</span>
               <span className={styles.meBadge}>나</span>
             </span>
-            <span className={styles.pinnedAffiliation}>{pinnedRow.className}</span>
+            <span className={styles.pinnedAffiliation}>{getSub(pinnedRow)}</span>
           </div>
           <span className={styles.pinnedAssets}>{formatValue(pinnedRow)}</span>
         </div>
       )}
 
-      {highlightPlayerUuid && !pinnedRow && (
+      {targetId && !pinnedRow && (
         <button
           type="button"
           className={`${styles.pinnedRow} ${styles.pinnedRowEmpty}`}

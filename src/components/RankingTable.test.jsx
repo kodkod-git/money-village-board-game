@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
@@ -114,5 +114,41 @@ describe('RankingTable', () => {
     )
     await userEvent.click(screen.getByTestId('pinned-row-empty'))
     expect(handleClick).toHaveBeenCalledWith({ isPlaceholder: true })
+  })
+})
+
+describe('RankingTable 공식 랭킹용 prop', () => {
+  const rows = [
+    { rank: 1, officialPlayerId: 'op1', name: '박병윤', character: 'fox', points: 24.5, games: 5, wins: 2 },
+    { rank: 2, officialPlayerId: 'op2', name: '김철수', character: 'bear', points: 10, games: 2, wins: 0 },
+  ]
+
+  it('formatValue와 getSub로 값과 둘째 줄을 바꾼다', () => {
+    render(
+      <RankingTable
+        rows={rows}
+        valueKey="points"
+        formatValue={row => `${row.points}점`}
+        getSub={row => `${row.games}게임 · 1위 ${row.wins}회`}
+        getRowKey={row => row.officialPlayerId}
+      />,
+    )
+    expect(screen.getByText('24.5점')).toBeInTheDocument()
+    expect(screen.getByText('5게임 · 1위 2회')).toBeInTheDocument()
+  })
+
+  it('highlightKey와 getHighlightId로 내 행을 고정하고 둘째 줄도 getSub를 따른다', () => {
+    render(
+      <RankingTable
+        rows={rows}
+        highlightKey="op2"
+        getHighlightId={row => row.officialPlayerId}
+        formatValue={row => `${row.points}점`}
+        getSub={row => `${row.games}게임`}
+      />,
+    )
+    const pinned = screen.getByTestId('pinned-row')
+    expect(within(pinned).getByText('김철수')).toBeInTheDocument()
+    expect(within(pinned).getByText('2게임')).toBeInTheDocument()
   })
 })
