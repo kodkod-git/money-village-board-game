@@ -99,3 +99,23 @@
 }
 
 .gradBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.contestBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--blue-10);
+  color: var(--blue-100);
+  font-weight: 900;
+  font-size: clamp(13px, calc(15px * min(var(--sx, 1), var(--sy, 1))), 15px);
+}
+
+.notice {
+  margin-top: 8px;
+  color: var(--red, #e5484d);
+  font-size: clamp(12px, calc(13px * min(var(--sx, 1), var(--sy, 1))), 13px);
+  line-height: 1.5;
+}
