@@ -146,7 +146,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
         <ConfirmDialog
           tone="danger"
           title={deleteTarget.kind === 'official' ? '대회 삭제' : '수업 삭제'}
-          description={<>'{deleteTarget.name}' {deleteTarget.kind === 'official' ? '대회' : '수업'}를 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          description={<>'{deleteTarget.name}' {deleteTarget.kind === 'official' ? '대회를' : '수업을'} 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleConfirmDelete}
         />

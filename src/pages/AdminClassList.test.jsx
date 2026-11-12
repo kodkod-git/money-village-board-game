@@ -156,6 +156,14 @@ describe('AdminClassList 대회', () => {
     )
   })
 
+  it('대회 삭제 버튼은 대회 삭제 확인 창을 띄운다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('2026 시즌1')
+    await userEvent.click(screen.getAllByText('삭제')[1])
+    expect(screen.getByText('대회 삭제')).toBeInTheDocument()
+    expect(screen.getByText(/'2026 시즌1' 대회를 삭제하면/)).toBeInTheDocument()
+  })
+
   it('대회를 고르면 kind를 함께 넘긴다', async () => {
     const onSelectClass = vi.fn()
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={onSelectClass} onLogout={vi.fn()} />)
