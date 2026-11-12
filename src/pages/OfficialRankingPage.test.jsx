@@ -52,18 +52,37 @@ beforeEach(() => {
 })
 
 describe('OfficialRankingPage', () => {
-  it('기본은 누적 범위의 포인트 순위다. 이름 옆에 대회 이름을 붙이고 점수와 게임 수를 보여 준다', async () => {
+  it('기본은 전체 대회의 총자산 탭이다', async () => {
     renderAt()
     expect(await screen.findAllByText('박병윤 (2026 시즌1)')).not.toHaveLength(0)
+    expect(screen.getByRole('combobox', { name: '대회 선택' })).toHaveValue('')
+    expect(screen.getByRole('option', { name: '전체 대회' })).toBeInTheDocument()
+    expect(screen.getAllByText('1,500,000원').length).toBeGreaterThan(0)
+    expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
+  })
+
+  it('탭은 총자산, 승점 순서이고 소제목은 대회 순위 안내다', async () => {
+    renderAt()
+    await screen.findAllByText('박병윤 (2026 시즌1)')
+    const tabs = screen.getAllByRole('button', { name: /^(총자산|승점)$/ })
+    expect(tabs.map(t => t.textContent)).toEqual(['총자산', '승점'])
+    expect(screen.getByText('대회 순위를 확인하세요.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '누적' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: '대회별 보기' })).not.toBeInTheDocument()
+  })
+
+  it('승점 탭은 이름 옆에 대회 이름을 붙이고 점수와 게임 수를 보여 준다', async () => {
+    renderAt()
+    await screen.findAllByText('박병윤 (2026 시즌1)')
+    await userEvent.click(screen.getByRole('button', { name: '승점' }))
     expect(screen.getAllByText('24.5점').length).toBeGreaterThan(0)
     expect(screen.getAllByText('3게임 · 1위 1회').length).toBeGreaterThan(0)
     expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
   })
 
-  it('최고 자산 탭은 원 단위와 참고용 안내를 보여 준다', async () => {
+  it('총자산 탭은 원 단위와 참고용 안내를 보여 준다', async () => {
     renderAt()
     await screen.findAllByText('박병윤 (2026 시즌1)')
-    await userEvent.click(screen.getByRole('button', { name: '최고 자산' }))
     expect(screen.getByText('테이블마다 가격이 달라 참고용 기록이에요.')).toBeInTheDocument()
     expect(screen.getAllByText('1,500,000원').length).toBeGreaterThan(0)
   })
@@ -107,7 +126,7 @@ describe('OfficialRankingPage', () => {
     })
     renderAt('/ranking/official?classId=c1')
     await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings?classId=c1'))
-    await userEvent.click(screen.getByRole('button', { name: '누적' }))
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '대회 선택' }), '')
     expect(await screen.findAllByText('박병윤 (2026 시즌1)')).not.toHaveLength(0)
     await act(async () => { resolveContest() })
     expect(screen.getAllByText('박병윤 (2026 시즌1)').length).toBeGreaterThan(0)
@@ -136,26 +155,18 @@ describe('OfficialRankingPage', () => {
     expect(await screen.findByText('아직 집계된 공식 게임이 없어요')).toBeInTheDocument()
   })
 
-  it('대회별 보기 안내 옵션은 고를 수 없다', async () => {
+  it('전체 대회 범위의 총자산 탭은 보조 줄에 대회 이름 대신 게임 수를 보여 준다', async () => {
     renderAt()
     await screen.findAllByText('박병윤 (2026 시즌1)')
-    expect(screen.getByRole('option', { name: '대회별 보기' })).toBeDisabled()
-  })
-
-  it('누적 범위의 최고 자산 탭은 보조 줄에 대회 이름 대신 게임 수를 보여 준다', async () => {
-    renderAt()
-    await screen.findAllByText('박병윤 (2026 시즌1)')
-    await userEvent.click(screen.getByRole('button', { name: '최고 자산' }))
     expect(screen.getAllByText('3게임').length).toBeGreaterThan(0)
     // 드롭다운 옵션을 빼면 대회 이름만 단독으로 쓰인 보조 줄은 없어야 한다
     expect(screen.queryAllByText('2026 시즌1').filter(el => el.tagName !== 'OPTION')).toHaveLength(0)
   })
 
-  it('누적 버튼과 탭 버튼은 선택 상태를 aria-pressed로 알린다', async () => {
+  it('탭 버튼은 선택 상태를 aria-pressed로 알린다', async () => {
     renderAt()
     await screen.findAllByText('박병윤 (2026 시즌1)')
-    expect(screen.getByRole('button', { name: '누적' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: '포인트 순위' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: '최고 자산' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '총자산' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '승점' })).toHaveAttribute('aria-pressed', 'false')
   })
 })

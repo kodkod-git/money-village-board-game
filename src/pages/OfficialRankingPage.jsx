@@ -9,8 +9,8 @@ import rankingStyles from './RankingPage.module.css'
 import styles from './OfficialRankingPage.module.css'
 
 const TABS = [
-  { key: 'points', label: '포인트 순위' },
-  { key: 'bestAssets', label: '최고 자산' },
+  { key: 'bestAssets', label: '총자산' },
+  { key: 'points', label: '승점' },
 ]
 
 function formatPoints(points) {
@@ -26,7 +26,7 @@ export default function OfficialRankingPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const contestId = searchParams.get('classId') || ''
-  const [tab, setTab] = useState('points')
+  const [tab, setTab] = useState('bestAssets')
   const [data, setData] = useState({ contests: [], points: [], bestAssets: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -46,15 +46,15 @@ export default function OfficialRankingPage() {
     return () => { ignore = true }
   }, [contestId, reloadKey])
 
-  const isCumulative = !contestId
-  // 누적 범위에서는 같은 실명이 대회마다 따로 오르므로 대회 이름을 붙여 구분한다.
+  const isAllContests = !contestId
+  // 전체 대회 범위에서는 같은 실명이 대회마다 따로 오르므로 대회 이름을 붙여 구분한다.
   const rows = useMemo(() => (data[tab] ?? []).map(p => ({
     ...p,
-    name: isCumulative ? `${p.realName} (${p.contestName})` : p.realName,
-  })), [data, tab, isCumulative])
+    name: isAllContests ? `${p.realName} (${p.contestName})` : p.realName,
+  })), [data, tab, isAllContests])
 
   // 내 기록: 결과 화면에서 기억해 둔 공식 참가자 id. 대회별 범위는 그 대회의 id,
-  // 누적 범위는 기억한 id 중 순위에 있는 첫 번째를 쓴다.
+  // 전체 대회 범위는 기억한 id 중 순위에 있는 첫 번째를 쓴다.
   const myId = useMemo(() => {
     const remembered = getRememberedOfficialPlayers()
     if (contestId) return remembered[contestId] ?? null
@@ -64,8 +64,8 @@ export default function OfficialRankingPage() {
 
   const isPoints = tab === 'points'
   const formatValue = isPoints ? row => formatPoints(row.points) : row => formatWon(row.bestAssets)
-  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : isCumulative
-    // 누적 범위는 이름에 이미 대회 이름이 붙어 있으므로 보조 줄에는 게임 수만 보여 준다.
+  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : isAllContests
+    // 전체 대회 범위는 이름에 이미 대회 이름이 붙어 있으므로 보조 줄에는 게임 수만 보여 준다.
     ? row => `${row.games}게임`
     : row => row.contestName
   const getRowKey = row => row.officialPlayerId
@@ -88,25 +88,17 @@ export default function OfficialRankingPage() {
       <div className={rankingStyles.inner}>
         <div className={rankingStyles.header}>
           <h1 className={rankingStyles.title}>공식 랭킹</h1>
-          <p className={rankingStyles.subtitle}>대회 테이블 순위로 받은 포인트를 합산해요</p>
+          <p className={rankingStyles.subtitle}>대회 순위를 확인하세요.</p>
         </div>
 
         <div className={styles.scopeRow}>
-          <button
-            type="button"
-            className={`${styles.scopeBtn} ${isCumulative ? styles.scopeBtnActive : ''}`}
-            aria-pressed={isCumulative}
-            onClick={() => setSearchParams({}, { replace: true })}
-          >
-            누적
-          </button>
           <select
             aria-label="대회 선택"
-            className={`${styles.contestSelect} ${!isCumulative ? styles.contestSelectActive : ''}`}
+            className={styles.contestSelect}
             value={contestId}
             onChange={handleContestChange}
           >
-            <option value="" disabled>대회별 보기</option>
+            <option value="">전체 대회</option>
             {data.contests.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>

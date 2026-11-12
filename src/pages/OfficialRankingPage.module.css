@@ -5,33 +5,17 @@
   flex-shrink: 0;
 }
 
-.scopeBtn,
 .contestSelect {
+  flex: 1;
+  min-width: 0;
   height: clamp(34px, calc(42px * var(--sy)), 42px);
+  padding: 0 12px;
   border-radius: var(--r-pill);
   border: 1px solid var(--blue-10);
   background: var(--white);
   color: var(--ink-2);
   font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
   font-weight: 700;
-}
-
-.scopeBtn {
-  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
-  flex-shrink: 0;
-}
-
-.contestSelect {
-  flex: 1;
-  min-width: 0;
-  padding: 0 12px;
-}
-
-.scopeBtnActive,
-.contestSelectActive {
-  background: var(--blue-100);
-  border-color: var(--blue-100);
-  color: var(--white);
 }
 
 .notice {
