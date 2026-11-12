@@ -48,6 +48,10 @@ export default function useOfficialNameResolve(classId) {
       return run(name, false)
     },
     confirm: () => (pendingName ? run(pendingName, true) : Promise.resolve(null)),
+    clearMessages: () => {
+      setDuplicateNotice(false)
+      setError('')
+    },
     reject: () => {
       setPendingName(null)
       setConfirmLabel(null)

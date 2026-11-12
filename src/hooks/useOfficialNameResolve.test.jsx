@@ -68,4 +68,15 @@ describe('useOfficialNameResolve', () => {
     expect(id).toBeNull()
     expect(global.fetch).not.toHaveBeenCalled()
   })
+
+  it('clearMessages는 중복 안내와 오류 문구를 지운다', async () => {
+    reply({ exists: true, label: '박병윤 (2026 시즌1)' })
+    const { result } = renderHook(() => useOfficialNameResolve('c1'))
+    await act(async () => { await result.current.submit('박병윤') })
+    act(() => result.current.reject())
+    expect(result.current.duplicateNotice).toBe(true)
+    act(() => result.current.clearMessages())
+    expect(result.current.duplicateNotice).toBe(false)
+    expect(result.current.error).toBe('')
+  })
 })

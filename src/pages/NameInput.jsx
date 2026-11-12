@@ -39,7 +39,7 @@ export default function NameInput() {
   }
 
   async function handleNext() {
-    if (!name.trim() || checking || resolver.busy) return
+    if (!name.trim() || checking || resolver.busy || resolver.confirmLabel) return
     if (!isOfficial) { goNext(); return }
     const officialPlayerId = await resolver.submit(name.trim())
     if (officialPlayerId) goNext(officialPlayerId)
@@ -76,15 +76,15 @@ export default function NameInput() {
             className={styles.input}
             placeholder={isOfficial ? '예) 홍길동 (실명)' : '예) 홍길동'}
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => { setName(e.target.value); resolver.clearMessages() }}
             onKeyDown={e => e.key === 'Enter' && handleNext()}
             maxLength={20}
             disabled={checking}
           />
           {resolver.duplicateNotice && (
-            <p className={styles.notice}>같은 이름의 참가자가 있어요. 구분할 수 있게 이름을 바꿔 주세요 (예: {name.trim()}B)</p>
+            <p className={styles.notice} role="alert">같은 이름의 참가자가 있어요. 구분할 수 있게 이름을 바꿔 주세요 (예: {name.trim()}B)</p>
           )}
-          {resolver.error && <p className={styles.notice}>{resolver.error}</p>}
+          {resolver.error && <p className={styles.notice} role="alert">{resolver.error}</p>}
         </div>
         <button className={styles.gradBtn} onClick={handleNext} disabled={!name.trim() || checking || resolver.busy}>
           다음 →
