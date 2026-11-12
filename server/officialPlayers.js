@@ -3,7 +3,7 @@ import { supabase } from './supabase.js'
 const COLUMNS = 'id, class_id, real_name'
 
 export function normalizeRealName(name) {
-  return String(name ?? '').trim()
+  return String(name ?? '').normalize('NFC').replace(/\s+/g, ' ').trim()
 }
 
 export async function findOfficialPlayer(classId, realName) {

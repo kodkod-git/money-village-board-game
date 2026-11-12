@@ -32,6 +32,16 @@ describe('normalizeRealName', () => {
     expect(normalizeRealName('  박병윤 ')).toBe('박병윤')
     expect(normalizeRealName(undefined)).toBe('')
   })
+
+  it('NFD로 들어온 한글을 NFC로 바꾼다', () => {
+    const nfd = '박병윤'.normalize('NFD')
+    expect(nfd).not.toBe('박병윤')
+    expect(normalizeRealName(nfd)).toBe('박병윤'.normalize('NFC'))
+  })
+
+  it('안쪽 공백 연속을 하나로 줄인다', () => {
+    expect(normalizeRealName('박  병윤')).toBe('박 병윤')
+  })
 })
 
 describe('resolveOfficialPlayer', () => {
@@ -53,6 +63,13 @@ describe('resolveOfficialPlayer', () => {
     mockTable({ found: { id: 'old-id', class_id: 'c1', real_name: '박병윤' } })
     const result = await resolveOfficialPlayer({ classId: 'c1', contestName: '2026 시즌1', realName: '박병윤', confirm: true })
     expect(result).toEqual({ officialPlayerId: 'old-id' })
+  })
+
+  it('같은 이름이 없으면 confirm이어도 새로 만든다', async () => {
+    const { insert } = mockTable({ found: null })
+    const result = await resolveOfficialPlayer({ classId: 'c1', contestName: '2026 시즌1', realName: '박병윤', confirm: true })
+    expect(insert).toHaveBeenCalledWith({ class_id: 'c1', real_name: '박병윤' })
+    expect(result).toEqual({ officialPlayerId: 'new-id' })
   })
 
   it('이름이 비어 있으면 에러를 던진다', async () => {
