@@ -1,0 +1,143 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
+import RankingPodium from '../components/RankingPodium'
+import RankingTable from '../components/RankingTable'
+import useBodyClass from '../hooks/useBodyClass'
+import { getRememberedOfficialPlayers } from '../utils/officialPlayer'
+import rankingStyles from './RankingPage.module.css'
+import styles from './OfficialRankingPage.module.css'
+
+const TABS = [
+  { key: 'points', label: '포인트 순위' },
+  { key: 'bestAssets', label: '최고 자산' },
+]
+
+function formatPoints(points) {
+  return `${Number.isInteger(points) ? points : points.toFixed(1)}점`
+}
+
+function formatWon(value) {
+  return `${value.toLocaleString()}원`
+}
+
+export default function OfficialRankingPage() {
+  useBodyClass('onboarding-mode')
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const contestId = searchParams.get('classId') || ''
+  const [tab, setTab] = useState('points')
+  const [data, setData] = useState({ contests: [], points: [], bestAssets: [] })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    const url = contestId ? `/api/official-rankings?classId=${encodeURIComponent(contestId)}` : '/api/official-rankings'
+    fetch(url)
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(json => { setData(json); setLoading(false) })
+      .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
+  }, [contestId])
+
+  const isCumulative = !contestId
+  // 누적 범위에서는 같은 실명이 대회마다 따로 오르므로 대회 이름을 붙여 구분한다.
+  const rows = useMemo(() => (data[tab] ?? []).map(p => ({
+    ...p,
+    name: isCumulative ? `${p.realName} (${p.contestName})` : p.realName,
+  })), [data, tab, isCumulative])
+
+  // 내 기록: 결과 화면에서 기억해 둔 공식 참가자 id. 대회별 범위는 그 대회의 id,
+  // 누적 범위는 기억한 id 중 순위에 있는 첫 번째를 쓴다.
+  const myId = useMemo(() => {
+    const remembered = getRememberedOfficialPlayers()
+    if (contestId) return remembered[contestId] ?? null
+    const ids = new Set(Object.values(remembered))
+    return rows.find(r => ids.has(r.officialPlayerId))?.officialPlayerId ?? null
+  }, [contestId, rows])
+
+  const isPoints = tab === 'points'
+  const formatValue = isPoints ? row => formatPoints(row.points) : row => formatWon(row.bestAssets)
+  const getSub = isPoints ? row => `${row.games}게임 · 1위 ${row.wins}회` : row => row.contestName
+  const getRowKey = row => row.officialPlayerId
+  const podiumRows = rows.slice(0, 3)
+
+  function handleBack() {
+    // 이전 화면(일반 랭킹이나 결과 화면)으로 돌아간다. 공식 랭킹으로 바로 들어와 이전 기록이 없으면 일반 랭킹으로 간다.
+    if (window.history.state?.idx > 0) navigate(-1)
+    else navigate('/ranking')
+  }
+
+  function handleContestChange(e) {
+    const next = e.target.value
+    setSearchParams(next ? { classId: next } : {}, { replace: true })
+  }
+
+  return (
+    <div className={rankingStyles.page}>
+      <BackButton onClick={handleBack} />
+      <div className={rankingStyles.inner}>
+        <div className={rankingStyles.header}>
+          <h1 className={rankingStyles.title}>공식 랭킹</h1>
+          <p className={rankingStyles.subtitle}>대회 테이블 순위로 받은 포인트를 합산해요</p>
+        </div>
+
+        <div className={styles.scopeRow}>
+          <button
+            type="button"
+            className={`${styles.scopeBtn} ${isCumulative ? styles.scopeBtnActive : ''}`}
+            onClick={() => setSearchParams({}, { replace: true })}
+          >
+            누적
+          </button>
+          <select
+            aria-label="대회 선택"
+            className={`${styles.contestSelect} ${!isCumulative ? styles.contestSelectActive : ''}`}
+            value={contestId}
+            onChange={handleContestChange}
+          >
+            <option value="">대회별 보기</option>
+            {data.contests.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+
+        <div className={rankingStyles.topTabs}>
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              type="button"
+              className={`${rankingStyles.topTab} ${tab === t.key ? rankingStyles.topTabActive : ''}`}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {!isPoints && <p className={styles.notice}>테이블마다 가격이 달라 참고용 기록이에요.</p>}
+
+        <hr className={rankingStyles.divider} />
+
+        {loading && <p className={rankingStyles.message}>불러오는 중...</p>}
+        {error && <p className={rankingStyles.message}>{error}</p>}
+        {!loading && !error && rows.length === 0 && (
+          <p className={rankingStyles.message}>아직 집계된 공식 게임이 없어요</p>
+        )}
+        {!loading && !error && rows.length > 0 && (
+          <RankingTable
+            rows={rows}
+            formatValue={formatValue}
+            getSub={getSub}
+            getRowKey={getRowKey}
+            highlightKey={myId ?? undefined}
+            getHighlightId={row => row.officialPlayerId}
+            podium={podiumRows.length === 3
+              ? <RankingPodium rows={podiumRows} formatValue={formatValue} getRowKey={getRowKey} />
+              : null}
+          />
+        )}
+      </div>
+    </div>
+  )
+}

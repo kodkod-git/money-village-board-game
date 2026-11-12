@@ -8,6 +8,7 @@ import Lobby from './pages/Lobby'
 import Team from './pages/Team'
 import IndividualPage from './pages/IndividualPage'
 import RankingPage from './pages/RankingPage'
+import OfficialRankingPage from './pages/OfficialRankingPage'
 import EconomicReport from './pages/EconomicReport'
 import AdminDashboard from './pages/AdminDashboard'
 import QuizIntro from './pages/QuizIntro'
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/team/:code" element={<Team />} />
         <Route path="/team/:code/individual" element={<IndividualPage />} />
         <Route path="/ranking" element={<RankingPage />} />
+        <Route path="/ranking/official" element={<OfficialRankingPage />} />
         <Route path="/result/:sessionId" element={<RankingPage />} />
         <Route path="/result/:sessionId/report" element={<EconomicReport />} />
         <Route path="/result/:sessionId/guide" element={<ParentGuide />} />

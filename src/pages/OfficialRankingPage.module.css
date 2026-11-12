@@ -1,0 +1,42 @@
+.scopeRow {
+  display: flex;
+  gap: clamp(6px, calc(8px * var(--sx)), 8px);
+  margin-bottom: clamp(10px, calc(16px * var(--sy)), 16px);
+  flex-shrink: 0;
+}
+
+.scopeBtn,
+.contestSelect {
+  height: clamp(34px, calc(42px * var(--sy)), 42px);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--blue-10);
+  background: var(--white);
+  color: var(--ink-2);
+  font-size: clamp(12px, calc(14px * min(var(--sx), var(--sy))), 14px);
+  font-weight: 700;
+}
+
+.scopeBtn {
+  padding: 0 clamp(14px, calc(20px * var(--sx)), 20px);
+  flex-shrink: 0;
+}
+
+.contestSelect {
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.scopeBtnActive,
+.contestSelectActive {
+  background: var(--blue-100);
+  border-color: var(--blue-100);
+  color: var(--white);
+}
+
+.notice {
+  margin-top: clamp(8px, calc(12px * var(--sy)), 12px);
+  font-size: clamp(11px, calc(13px * min(var(--sx), var(--sy))), 13px);
+  color: var(--ink-2);
+  text-align: center;
+}
