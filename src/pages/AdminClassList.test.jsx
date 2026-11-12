@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AdminClassList from './AdminClassList'
@@ -138,10 +138,30 @@ describe('AdminClassList', () => {
 })
 
 describe('AdminClassList 대회', () => {
-  it('대회에는 공식 뱃지를 붙인다', async () => {
+  it('수업과 대회를 각자의 목록에 나눠 보여준다', async () => {
     render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
     await screen.findByText('2026 시즌1')
-    expect(screen.getAllByText('공식')).toHaveLength(1)
+    const classList = screen.getByRole('region', { name: '수업 목록' })
+    const contestList = screen.getByRole('region', { name: '대회 목록' })
+    expect(within(classList).getByText('3학년 2반')).toBeInTheDocument()
+    expect(within(classList).getByText('미배정 수업')).toBeInTheDocument()
+    expect(within(classList).queryByText('2026 시즌1')).not.toBeInTheDocument()
+    expect(within(contestList).getByText('2026 시즌1')).toBeInTheDocument()
+    expect(within(contestList).queryByText('3학년 2반')).not.toBeInTheDocument()
+  })
+
+  it('각 목록 칼럼에 자기 생성 폼이 있다', async () => {
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('2026 시즌1')
+    expect(within(screen.getByRole('region', { name: '수업 목록' })).getByPlaceholderText('새 수업 이름')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: '대회 목록' })).getByPlaceholderText('새 대회 이름')).toBeInTheDocument()
+  })
+
+  it('대회가 없으면 대회 목록에 빈 상태 문구를 보여준다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(CLASSES.filter(c => c.kind !== 'official')) })
+    render(<AdminClassList profile={{ username: 'admin', isSuper: true }} onSelectClass={vi.fn()} onLogout={vi.fn()} />)
+    await screen.findByText('3학년 2반')
+    expect(within(screen.getByRole('region', { name: '대회 목록' })).getByText('아직 만든 대회가 없어요')).toBeInTheDocument()
   })
 
   it('대회 생성하기는 kind official로 생성한다', async () => {

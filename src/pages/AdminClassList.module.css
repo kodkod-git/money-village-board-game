@@ -14,15 +14,11 @@
   border-radius: var(--admin-r-sm); height: 36px; padding: 0 14px;
   font-size: 12px; font-weight: 700; color: var(--admin-text-2);
 }
-.createGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; max-width: 1040px; }
-.createColumn { display: flex; flex-direction: column; gap: 6px; }
-.createLabel { font-size: 12px; font-weight: 700; color: var(--admin-text-2); }
+/* 칼럼 하나가 420px보다 좁아지면 수업 목록 아래로 대회 목록이 내려간다 (사이드바가 있는 좁은 창 포함). */
+.columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 24px; align-items: start; max-width: 1200px; }
+.column { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.columnTitle { font-size: 16px; font-weight: 700; color: var(--admin-text); }
 .createForm { display: flex; gap: 8px; }
-.officialBadge {
-  display: inline-block; margin-left: 8px; padding: 2px 8px; vertical-align: middle;
-  border-radius: 999px; background: var(--admin-blue); color: #fff;
-  font-size: 11px; font-weight: 700;
-}
 .createInput {
   flex: 1; height: 40px; padding: 0 14px;
   border: 1px solid var(--admin-border); border-radius: var(--admin-r-sm); font-size: 13px;
@@ -32,8 +28,12 @@
   height: 40px; padding: 0 18px; border: none; border-radius: var(--admin-r-sm);
   background: var(--admin-blue); color: white; font-size: 13px; font-weight: 700;
 }
-.error { color: #e53935; font-size: 12px; margin-bottom: 12px; }
-.list { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+.error { color: #e53935; font-size: 12px; }
+.empty {
+  padding: 24px 16px; text-align: center; font-size: 13px; color: var(--admin-text-3);
+  border: 1px dashed var(--admin-border); border-radius: var(--admin-r-md);
+}
+.list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .item {
   display: flex; align-items: center; gap: 8px;
   border: 1px solid var(--admin-border); border-radius: var(--admin-r-md); padding: 4px;
@@ -65,13 +65,11 @@
   .headerActions { display: none; }
 
   .createForm { flex-direction: column; max-width: none; }
-  .createGrid { grid-template-columns: 1fr; max-width: none; }
+  .columns { grid-template-columns: 1fr; gap: 32px; }
 
   .createInput { flex: none; height: 44px; font-size: 16px; }
 
   .createBtn { height: 44px; font-size: 14px; }
-
-  .list { max-width: none; }
 
   .item { padding: 4px 8px 4px 4px; }
 
