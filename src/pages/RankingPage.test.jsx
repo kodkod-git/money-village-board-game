@@ -21,17 +21,17 @@ function renderAt(path) {
 
 beforeEach(() => {
   global.fetch = vi.fn((url) => {
-    if (url === '/api/rankings?category=stock') {
+    if (url === '/api/rankings?category=stock&boardCount=6') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
         { rank: 1, name: '정우성', className: '3반', teamCode: 'EF9012', character: 'tiger', stockValue: 172000, totalAssets: 300000, playerUuid: 'p1' },
       ]) })
     }
-    if (url === '/api/rankings?category=realEstate') {
+    if (url === '/api/rankings?category=realEstate&boardCount=6') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
         { rank: 1, name: '한소희', className: '4반', teamCode: 'GH3456', character: 'toucan', realEstateValue: 90000, totalAssets: 250000, playerUuid: 'p2' },
       ]) })
     }
-    if (url === '/api/rankings?category=netWorth') {
+    if (url === '/api/rankings?category=netWorth&boardCount=6') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([
         { rank: 1, name: '순자산王', className: '2반', teamCode: 'NW0001', character: 'bear', netWorth: 123000, totalAssets: 90000, playerUuid: 'pnw' },
       ]) })
@@ -199,7 +199,7 @@ describe('RankingPage', () => {
     renderAt('/ranking')
     await userEvent.click(screen.getByText('주식'))
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=stock')
+      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=stock&boardCount=6')
     })
     expect(await screen.findByText('정우성')).toBeInTheDocument()
   })
@@ -208,7 +208,7 @@ describe('RankingPage', () => {
     renderAt('/ranking')
     await userEvent.click(screen.getByText('부동산'))
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=realEstate')
+      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=realEstate&boardCount=6')
     })
     expect(await screen.findByText('한소희')).toBeInTheDocument()
   })
@@ -218,7 +218,7 @@ describe('RankingPage', () => {
     await screen.findByText('김민준')
     await userEvent.click(screen.getByText('순자산'))
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=netWorth')
+      expect(global.fetch).toHaveBeenCalledWith('/api/rankings?category=netWorth&boardCount=6')
     })
     expect(await screen.findByText('순자산王')).toBeInTheDocument()
   })
@@ -396,5 +396,37 @@ describe('공식 랭킹 연결', () => {
     await waitFor(() =>
       expect(JSON.parse(localStorage.getItem('official_player_ids'))).toEqual({ 'contest-1': 'op1' }),
     )
+  })
+})
+
+describe('진행 방식(5판/6판) 랭킹', () => {
+  it('공식 랭킹 버튼은 글자 대신 아이콘만 보여 준다', async () => {
+    renderAt('/ranking')
+    const btn = await screen.findByRole('button', { name: '공식 랭킹 보러가기' })
+    expect(btn).toHaveTextContent('')
+  })
+
+  it('탭 아래 체크박스로 5판을 고르면 5판 순위를 조회하고 부동산 탭을 숨긴다', async () => {
+    renderAt('/ranking')
+    expect(await screen.findByRole('checkbox', { name: '6판' })).toBeChecked()
+    expect(screen.getByText('부동산')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('checkbox', { name: '5판' }))
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/rankings?boardCount=5'))
+    expect(screen.getByRole('checkbox', { name: '5판' })).toBeChecked()
+    expect(screen.queryByText('부동산')).not.toBeInTheDocument()
+  })
+
+  it('5판 게임 결과 화면의 팀 범위에서는 부동산 탭이 없고 체크박스도 보이지 않는다', async () => {
+    const original = global.fetch
+    global.fetch = vi.fn(url => (url.startsWith('/api/results/')
+      ? Promise.resolve({ ok: true, json: () => Promise.resolve({ classId: 'class-5', boardCount: 5, players: [] }) })
+      : original(url)))
+    renderAt('/result/session-5')
+    await waitFor(() => expect(screen.queryByText('부동산')).not.toBeInTheDocument())
+    expect(screen.queryByRole('checkbox', { name: '5판' })).not.toBeInTheDocument()
+    // 전체 범위로 바꾸면 내 게임과 같은 5판 순위부터 보여 준다.
+    await userEvent.click(screen.getByText('전체'))
+    expect(await screen.findByRole('checkbox', { name: '5판' })).toBeChecked()
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/rankings?boardCount=5'))
   })
 })

@@ -69,3 +69,8 @@ ALTER TABLE boardgame.official_players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE boardgame.game_results
   ADD COLUMN IF NOT EXISTS official_player_id uuid
   REFERENCES boardgame.official_players(id) ON DELETE SET NULL;
+
+-- 2026-11-16 게임 진행 방식(5판/6판). 5판은 부동산 없이 진행한다.
+ALTER TABLE boardgame.classes
+  ADD COLUMN IF NOT EXISTS board_count smallint NOT NULL DEFAULT 6
+  CHECK (board_count IN (5, 6));

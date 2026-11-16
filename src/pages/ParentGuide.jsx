@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { GUIDE_CONCEPTS, GUIDE_GRID, GUIDE_GROUPS, GUIDE_ORGANIZATION, GUIDE_STAGE } from '../constants/parentGuide'
 import { buildParentGuide, formatManwon } from '../utils/parentGuide'
+import { hasRealEstate } from '../constants/gameData'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './ParentGuide.module.css'
 
@@ -60,6 +61,9 @@ export default function ParentGuide() {
   if (!data) return <p className={styles.message}>불러오는 중...</p>
 
   const guide = buildParentGuide(me, { stockPrices: data.stockPrices, realEstatePrices: data.realEstatePrices })
+  // 5판 게임은 부동산 없이 진행했으므로 부동산 항목을 보여 주지 않는다.
+  const showRealEstate = hasRealEstate(data.boardCount)
+  const split = showRealEstate ? guide.split : guide.split.filter(s => s.key !== 'estate')
   const group = GUIDE_GROUPS[guide.group]
 
   return (
@@ -113,11 +117,11 @@ export default function ParentGuide() {
             ) : (
               <div><dt>주식</dt><dd>없음</dd></div>
             )}
-            {guide.realEstateValue > 0 ? (
+            {showRealEstate && (guide.realEstateValue > 0 ? (
               <div><dt>부동산 (끝났을 때 가격)</dt><dd>{formatManwon(guide.realEstateValue)}</dd></div>
             ) : (
               <div><dt>부동산</dt><dd>없음</dd></div>
-            )}
+            ))}
             <div><dt>자산 합계</dt><dd>{formatManwon(guide.baseAssets)}</dd></div>
             <div><dt>성공열쇠 {guide.keyCount}개 × {guide.multiplier}</dt><dd>+ {formatManwon(guide.bonus)}</dd></div>
           </dl>
@@ -128,14 +132,14 @@ export default function ParentGuide() {
 
           <h3 className={`${styles.subhead} ${styles.splitHead}`}>자산을 이렇게 나눴어요</h3>
           <div className={styles.splitBar} data-testid="split-bar">
-            {guide.split.filter(s => s.pct > 0).map(s => (
+            {split.filter(s => s.pct > 0).map(s => (
               <span key={s.key} className={`${styles.segment} ${styles[s.key]}`} style={{ width: `${s.pct}%` }}>
                 {segmentLabel(s)}
               </span>
             ))}
           </div>
           <ul className={styles.legend}>
-            {guide.split.map(s => (
+            {split.map(s => (
               <li key={s.key}><span className={`${styles.swatch} ${styles[s.key]}`} />{s.label}</li>
             ))}
           </ul>

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import PlayerAssetReceipt from './PlayerAssetReceipt'
 import styles from './AdminTeamAssetsModal.module.css'
 
-export default function AdminTeamAssetsModal({ room, prices, teamLabel, onClose }) {
+export default function AdminTeamAssetsModal({ room, prices, teamLabel, onClose, hideRealEstate = false }) {
   useEffect(() => {
     function onKey(e) {
       if (e.key === 'Escape') onClose()
@@ -32,7 +32,7 @@ export default function AdminTeamAssetsModal({ room, prices, teamLabel, onClose 
         ) : (
           <div className={styles.strip}>
             {players.map(player => (
-              <PlayerAssetReceipt key={player.playerUuid} player={player} prices={prices} />
+              <PlayerAssetReceipt key={player.playerUuid} player={player} prices={prices} hideRealEstate={hideRealEstate} />
             ))}
           </div>
         )}

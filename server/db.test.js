@@ -443,8 +443,29 @@ describe('getRankings', () => {
       totalAssets: 200000, stockValue: 4000, realEstateValue: 10000,
       netWorth: 24000,
       sessionId: 's1', playerUuid: 'p1', teamCode: 'AB1234', teamName: 'TEAM 1', className: '1반',
+      boardCount: 6,
       stockPrices: PRICES.stocks, realEstatePrices: PRICES.realEstate,
     }])
+  })
+
+  it('boardCount를 주면 그 진행 방식(5판/6판)의 결과만 돌려준다', async () => {
+    const row = (uuid, boardCount) => ({
+      player_uuid: uuid, name: uuid, affiliation: '', character: 'lion', job: 'a', cash: 0,
+      stock_holdings: {}, real_estate_holdings: {}, badges: [], total_assets: 0, stock_value: 0, real_estate_value: 0,
+      session_id: `s-${uuid}`,
+      game_sessions: {
+        team_code: uuid, title: null, stock_prices: PRICES.stocks, real_estate_prices: PRICES.realEstate,
+        class_id: 'c', classes: boardCount ? { name: '반', kind: 'class', board_count: boardCount } : null,
+      },
+    })
+    mockFrom.mockReset()
+    mockFrom.mockReturnValue(makeQueryBuilder({ data: [row('six', 6), row('five', 5), row('legacy', null)], error: null }))
+
+    const { getRankings } = await import('./db.js')
+    expect((await getRankings({ boardCount: 5 })).map(r => r.playerUuid)).toEqual(['five'])
+    // 수업 정보가 없는 예전 결과는 6판으로 본다.
+    expect((await getRankings({ boardCount: 6 })).map(r => r.playerUuid)).toEqual(['six', 'legacy'])
+    expect((await getRankings({})).map(r => r.playerUuid)).toEqual(['six', 'five', 'legacy'])
   })
 
   it('팀 이름이 없으면 teamName이 team_code로 대체된다', async () => {
@@ -650,7 +671,7 @@ describe('getGameResult', () => {
     const { getGameResult } = await import('./db.js')
     const { session } = await getGameResult('session-1')
 
-    expect(mockSelect).toHaveBeenCalledWith('*, classes(name, kind)')
+    expect(mockSelect).toHaveBeenCalledWith('*, classes(name, kind, board_count)')
     expect(session.classes.name).toBe('1반')
   })
 })

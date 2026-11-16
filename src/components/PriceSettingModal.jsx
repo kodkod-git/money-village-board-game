@@ -13,8 +13,9 @@ export const DEFAULT_PRICES = {
   realEstate: { gaon: 10000, dami: 10000, chorong: 10000 },
 }
 
-export default function PriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks' }) {
-  const [category, setCategory] = useState(initialCategory)
+// hideRealEstate: 5판 게임은 부동산이 없으므로 주식 가격만 설정한다.
+export default function PriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks', hideRealEstate = false }) {
+  const [category, setCategory] = useState(hideRealEstate ? 'stocks' : initialCategory)
   const [tempPrices, setTempPrices] = useState(prices)
 
   function handleReset() {
@@ -30,22 +31,24 @@ export default function PriceSettingModal({ prices, onConfirm, onClose, initialC
           <button type="button" className={styles.resetBtn} onClick={handleReset}>초기화</button>
         </div>
 
-        <div className={styles.tabs}>
-          <button
-            type="button"
-            className={`${styles.tab} ${category === 'stocks' ? styles.tabActive : ''}`}
-            onClick={() => setCategory('stocks')}
-          >
-            주식
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${category === 'realEstate' ? styles.tabActive : ''}`}
-            onClick={() => setCategory('realEstate')}
-          >
-            부동산
-          </button>
-        </div>
+        {!hideRealEstate && (
+          <div className={styles.tabs}>
+            <button
+              type="button"
+              className={`${styles.tab} ${category === 'stocks' ? styles.tabActive : ''}`}
+              onClick={() => setCategory('stocks')}
+            >
+              주식
+            </button>
+            <button
+              type="button"
+              className={`${styles.tab} ${category === 'realEstate' ? styles.tabActive : ''}`}
+              onClick={() => setCategory('realEstate')}
+            >
+              부동산
+            </button>
+          </div>
+        )}
 
         <PriceListEditor
           category={category}

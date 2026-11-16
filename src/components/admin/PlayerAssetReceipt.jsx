@@ -7,7 +7,8 @@ import {
 import AdminAssetSummary from './AdminAssetSummary'
 import styles from './PlayerAssetReceipt.module.css'
 
-export default function PlayerAssetReceipt({ player, prices }) {
+// hideRealEstate: 5판 게임은 부동산이 없어 부동산 항목을 숨긴다.
+export default function PlayerAssetReceipt({ player, prices, hideRealEstate = false }) {
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
   const earnedBadges = BADGE_NAMES.filter((_, i) => gameState.badges[i])
@@ -60,17 +61,19 @@ export default function PlayerAssetReceipt({ player, prices }) {
         />
       </div>
 
-      <div className={styles.field}>
-        <span className={styles.fieldLabel}>부동산</span>
-        <AdminAssetSummary
-          labels={REAL_ESTATE_LABELS}
-          images={ESTATE_IMAGES}
-          values={gameState.realEstate}
-          folder="estate"
-          unit="개"
-          testIdPrefix={`receipt-${player.playerUuid}-real-estate`}
-        />
-      </div>
+      {!hideRealEstate && (
+        <div className={styles.field}>
+          <span className={styles.fieldLabel}>부동산</span>
+          <AdminAssetSummary
+            labels={REAL_ESTATE_LABELS}
+            images={ESTATE_IMAGES}
+            values={gameState.realEstate}
+            folder="estate"
+            unit="개"
+            testIdPrefix={`receipt-${player.playerUuid}-real-estate`}
+          />
+        </div>
+      )}
 
       <div className={styles.footer}>
         <span className={styles.footerLabel}>총 자산</span>

@@ -88,3 +88,11 @@ describe('AdminPlayerCard 보고서 버튼', () => {
     expect(onReport).toHaveBeenCalled()
   })
 })
+
+describe('AdminPlayerCard 5판', () => {
+  it('hideRealEstate면 부동산 칸을 숨긴다', () => {
+    render(<AdminPlayerCard player={PLAYER} prices={PRICES} onEdit={vi.fn()} hideRealEstate />)
+    expect(screen.queryByText('부동산')).not.toBeInTheDocument()
+    expect(screen.getByText('주식')).toBeInTheDocument()
+  })
+})

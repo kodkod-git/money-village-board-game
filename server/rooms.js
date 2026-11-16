@@ -59,11 +59,15 @@ function assertOfficialSeat(room, officialPlayerId) {
 
 // isOfficial: 공식전(대회) 방. 방을 만들 때 수업 종류를 한 번 조회해 저장해 두고,
 // 입장 검증 때마다 DB를 다시 보지 않는다.
-export function createRoom({ classId = null, title = null, isOfficial = false } = {}) {
+// boardCount: 게임 진행 방식(6판 기본, 5판은 부동산 없이 진행). 수업에서 물려받는다.
+export function createRoom({ classId = null, title = null, isOfficial = false, boardCount = 6 } = {}) {
   let code
   do { code = generateCode() } while (rooms.has(code))
   const now = new Date()
-  const room = { code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title, isOfficial: Boolean(isOfficial) }
+  const room = {
+    code, createdAt: now, updatedAt: now, players: [], prices: defaultPrices(), classId, title,
+    isOfficial: Boolean(isOfficial), boardCount: boardCount === 5 ? 5 : 6,
+  }
   rooms.set(code, room)
   return room
 }

@@ -1,29 +1,61 @@
 import { useState, useEffect, useCallback } from 'react'
 import { adminFetch } from '../utils/adminAuth'
 import ClassQRModal from '../components/admin/ClassQRModal'
-import SurveyQRModal from '../components/admin/SurveyQRModal'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 import AdminOverflowMenu from '../components/admin/AdminOverflowMenu'
 import useIsAdminMobile from '../hooks/useIsAdminMobile'
+import { toBoardCount } from '../constants/gameData'
 import styles from './AdminClassList.module.css'
 
 function formatDate(isoString) {
   return new Date(isoString).toLocaleDateString('ko-KR')
 }
 
-// 게임 목록은 수업과 대회(공식전)를 좌우 칼럼으로 나눠 각자 생성 폼과 목록을 둔다.
-const COLUMNS = [
-  { kind: 'class', title: '수업 목록', placeholder: '새 수업 이름', createLabel: '수업 생성하기', empty: '아직 만든 수업이 없어요' },
-  { kind: 'official', title: '대회 목록', placeholder: '새 대회 이름', createLabel: '대회 생성하기', empty: '아직 만든 대회가 없어요' },
+// 게임 종류: 일반(수업)과 대회(공식전). 목록에서는 대회만 제목 옆 뱃지로 구분한다.
+const KIND_OPTIONS = [
+  { value: 'class', label: '일반' },
+  { value: 'official', label: '대회' },
 ]
+
+// 게임 진행 방식: 6판(기존)과 5판(부동산 없이 진행).
+const BOARD_OPTIONS = [
+  { value: 6, label: '6판', hint: '현금·주식·부동산' },
+  { value: 5, label: '5판', hint: '부동산 없음' },
+]
+
+function SegmentedControl({ label, name, options, value, onChange }) {
+  return (
+    <div className={styles.field}>
+      <span className={styles.fieldLabel} id={`${name}-label`}>{label}</span>
+      <div className={styles.segmented} role="radiogroup" aria-labelledby={`${name}-label`}>
+        {options.map(option => {
+          const selected = option.value === value
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              className={`${styles.segment} ${selected ? styles.segmentActive : ''}`}
+              onClick={() => onChange(option.value)}
+            >
+              <span>{option.label}</span>
+              {option.hint && <span className={styles.segmentHint}>{option.hint}</span>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 export default function AdminClassList({ profile, onSelectClass, onLogout }) {
   const [classes, setClasses] = useState([])
-  const [newClassName, setNewClassName] = useState('')
-  const [newContestName, setNewContestName] = useState('')
-  const [error, setError] = useState(null) // { kind, message }
+  const [newName, setNewName] = useState('')
+  const [newKind, setNewKind] = useState('class')
+  const [newBoardCount, setNewBoardCount] = useState(6)
+  const [error, setError] = useState(null)
   const [qrClass, setQrClass] = useState(null)
-  const [showSurveyQr, setShowSurveyQr] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showEmptyNameWarning, setShowEmptyNameWarning] = useState(false)
   const isMobile = useIsAdminMobile()
@@ -39,24 +71,24 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
     loadClasses()
   }, [loadClasses])
 
-  async function createEntry(kind, rawName, reset) {
-    if (!rawName.trim()) {
-      setShowEmptyNameWarning(kind)
+  async function handleCreate(e) {
+    e.preventDefault()
+    if (!newName.trim()) {
+      setShowEmptyNameWarning(true)
       return
     }
     setError(null)
-    const body = kind === 'official' ? { name: rawName.trim(), kind } : { name: rawName.trim() }
     const res = await adminFetch('/api/admin/classes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ name: newName.trim(), kind: newKind, boardCount: newBoardCount }),
     })
     const data = await res.json()
     if (!res.ok) {
-      setError({ kind, message: data.error ?? '오류가 발생했습니다' })
+      setError(data.error ?? '오류가 발생했습니다')
       return
     }
-    reset('')
+    setNewName('')
     loadClasses()
   }
 
@@ -77,68 +109,68 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
         </div>
       </div>
 
-      <div className={styles.columns}>
-        {COLUMNS.map(col => {
-          const items = classes.filter(cls => (cls.kind ?? 'class') === col.kind)
-          const value = col.kind === 'official' ? newContestName : newClassName
-          const setValue = col.kind === 'official' ? setNewContestName : setNewClassName
-          return (
-            <section key={col.kind} className={styles.column} aria-labelledby={`list-${col.kind}`}>
-              <h2 id={`list-${col.kind}`} className={styles.columnTitle}>{col.title}</h2>
-              <form className={styles.createForm} onSubmit={e => { e.preventDefault(); createEntry(col.kind, value, setValue) }}>
-                <input
-                  className={styles.createInput}
-                  placeholder={col.placeholder}
-                  value={value}
-                  onChange={e => setValue(e.target.value)}
-                />
-                <button type="submit" className={styles.createBtn}>{col.createLabel}</button>
-              </form>
-              {error?.kind === col.kind && <p className={styles.error}>{error.message}</p>}
+      <div className={styles.content}>
+        <form className={styles.createCard} onSubmit={handleCreate} aria-label="새 게임 만들기">
+          <input
+            className={styles.createInput}
+            placeholder="새 게임 이름"
+            aria-label="새 게임 이름"
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+          />
+          <div className={styles.createOptions}>
+            <SegmentedControl label="게임 종류" name="new-kind" options={KIND_OPTIONS} value={newKind} onChange={setNewKind} />
+            <SegmentedControl label="진행 방식" name="new-board" options={BOARD_OPTIONS} value={newBoardCount} onChange={setNewBoardCount} />
+            <button type="submit" className={styles.createBtn}>생성하기</button>
+          </div>
+          {error && <p className={styles.error}>{error}</p>}
+        </form>
 
-              {items.length === 0 ? (
-                <p className={styles.empty}>{col.empty}</p>
-              ) : (
-                <ul className={styles.list}>
-                  {items.map(cls => (
-                    <li key={cls.id} className={styles.item}>
-                      <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name, kind: cls.kind ?? 'class' })}>
-                        <span className={styles.itemName}>{cls.name}</span>
-                        {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
-                      </button>
-                      {cls.id !== 'unassigned' && (isMobile ? (
-                        <AdminOverflowMenu
-                          label={`${cls.name} 메뉴`}
-                          items={[
-                            { key: 'survey', label: '만족도 조사', onSelect: () => setShowSurveyQr(true) },
-                            { key: 'qr', label: 'QR', onSelect: () => setQrClass(cls) },
-                            { key: 'delete', label: '삭제', danger: true, onSelect: () => setDeleteTarget(cls) },
-                          ]}
-                        />
-                      ) : (
-                        <>
-                          <button type="button" className={styles.qrBtn} onClick={() => setShowSurveyQr(true)}>만족도 조사</button>
-                          <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
-                          <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(cls)}>삭제</button>
-                        </>
-                      ))}
-                    </li>
+        {classes.length === 0 ? (
+          <p className={styles.empty}>아직 만든 게임이 없어요</p>
+        ) : (
+          <ul className={styles.list}>
+            {classes.map(cls => {
+              const kind = cls.kind ?? 'class'
+              const boardCount = toBoardCount(cls.boardCount)
+              return (
+                <li key={cls.id} className={styles.item}>
+                  <button type="button" className={styles.itemBtn} onClick={() => onSelectClass({ id: cls.id, name: cls.name, kind, boardCount })}>
+                    <span className={styles.itemTitleRow}>
+                      <span className={styles.itemName}>{cls.name}</span>
+                      {kind === 'official' && <span className={styles.officialBadge}>대회</span>}
+                      {cls.id !== 'unassigned' && <span className={styles.boardBadge}>{boardCount}판</span>}
+                    </span>
+                    {cls.createdAt && <span className={styles.itemDate}>{formatDate(cls.createdAt)}</span>}
+                  </button>
+                  {cls.id !== 'unassigned' && (isMobile ? (
+                    <AdminOverflowMenu
+                      label={`${cls.name} 메뉴`}
+                      items={[
+                        { key: 'qr', label: 'QR', onSelect: () => setQrClass(cls) },
+                        { key: 'delete', label: '삭제', danger: true, onSelect: () => setDeleteTarget(cls) },
+                      ]}
+                    />
+                  ) : (
+                    <>
+                      <button type="button" className={styles.qrBtn} onClick={() => setQrClass(cls)}>QR</button>
+                      <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(cls)}>삭제</button>
+                    </>
                   ))}
-                </ul>
-              )}
-            </section>
-          )
-        })}
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </div>
 
       {qrClass && <ClassQRModal classId={qrClass.id} name={qrClass.name} onClose={() => setQrClass(null)} />}
-      {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
 
       {deleteTarget && (
         <ConfirmDialog
           tone="danger"
-          title={deleteTarget.kind === 'official' ? '대회 삭제' : '수업 삭제'}
-          description={<>'{deleteTarget.name}' {deleteTarget.kind === 'official' ? '대회를' : '수업을'} 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
+          title={deleteTarget.kind === 'official' ? '대회 삭제' : '게임 삭제'}
+          description={<>'{deleteTarget.name}' {deleteTarget.kind === 'official' ? '대회를' : '게임을'} 삭제하면 관련된 모든 팀 기록도 함께 삭제되며 되돌릴 수 없습니다.<br />삭제하시겠습니까?</>}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleConfirmDelete}
         />
@@ -148,7 +180,7 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
         <ConfirmDialog
           tone="primary"
           title="알림"
-          description={showEmptyNameWarning === 'official' ? '대회 이름을 입력해주세요' : '수업 이름을 입력해주세요'}
+          description="게임 이름을 입력해주세요"
           confirmLabel="확인"
           hideCancel
           onCancel={() => setShowEmptyNameWarning(false)}

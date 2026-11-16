@@ -6,8 +6,9 @@ import {
 import { MAX_ASSET_PRICE } from '../../constants/gameData'
 import styles from './AdminPriceSettingModal.module.css'
 
-export default function AdminPriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks' }) {
-  const [category, setCategory] = useState(initialCategory)
+// hideRealEstate: 5판 게임은 부동산이 없으므로 주식 가격만 설정한다.
+export default function AdminPriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks', hideRealEstate = false }) {
+  const [category, setCategory] = useState(hideRealEstate ? 'stocks' : initialCategory)
   const [tempPrices, setTempPrices] = useState(prices)
   const [editingKey, setEditingKey] = useState(null)
 
@@ -30,22 +31,24 @@ export default function AdminPriceSettingModal({ prices, onConfirm, onClose, ini
             <button type="button" className={styles.resetBtn} onClick={handleReset}>초기화</button>
           </div>
 
-          <div className={styles.tabs}>
-            <button
-              type="button"
-              className={`${styles.tab} ${category === 'stocks' ? styles.tabActive : ''}`}
-              onClick={() => setCategory('stocks')}
-            >
-              주식
-            </button>
-            <button
-              type="button"
-              className={`${styles.tab} ${category === 'realEstate' ? styles.tabActive : ''}`}
-              onClick={() => setCategory('realEstate')}
-            >
-              부동산
-            </button>
-          </div>
+          {!hideRealEstate && (
+            <div className={styles.tabs}>
+              <button
+                type="button"
+                className={`${styles.tab} ${category === 'stocks' ? styles.tabActive : ''}`}
+                onClick={() => setCategory('stocks')}
+              >
+                주식
+              </button>
+              <button
+                type="button"
+                className={`${styles.tab} ${category === 'realEstate' ? styles.tabActive : ''}`}
+                onClick={() => setCategory('realEstate')}
+              >
+                부동산
+              </button>
+            </div>
+          )}
 
           <div className={styles.list}>
             {Object.keys(labels).map(key => (

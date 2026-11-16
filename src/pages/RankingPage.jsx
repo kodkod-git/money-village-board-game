@@ -4,6 +4,8 @@ import BackButton from '../components/BackButton'
 import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import AdminEditModal from '../components/admin/AdminEditModal'
+import BoardCountFilter from '../components/BoardCountFilter'
+import { hasRealEstate, toBoardCount } from '../constants/gameData'
 import { getPlayerUuid } from '../utils/playerUuid'
 import { rememberOfficialPlayer } from '../utils/officialPlayer'
 import { copyGameResultLink, shareGameResultToKakao, LINK_COPIED_NOTICE } from '../utils/shareGameResult'
@@ -45,6 +47,13 @@ export default function RankingPage() {
   const [shareNotice, setShareNotice] = useState('')
   const [hasMyResult, setHasMyResult] = useState(false)
   const [isOfficialSession, setIsOfficialSession] = useState(false)
+  // 게임 진행 방식(6판/5판)별로 순위를 따로 매긴다. 전체 범위에서는 체크박스로 고르고,
+  // 수업·팀 범위는 그 게임의 진행 방식을 따른다.
+  const [boardCount, setBoardCount] = useState(6)
+  const [sessionBoardCount, setSessionBoardCount] = useState(6)
+  const effectiveBoardCount = isV2 && scope !== 'global' ? sessionBoardCount : boardCount
+  const showRealEstate = hasRealEstate(effectiveBoardCount)
+  const categoryTabs = showRealEstate ? CATEGORY_TABS : CATEGORY_TABS.filter(tab => tab.key !== 'realEstate')
 
   const myPlayerUuid = getPlayerUuid()
 
@@ -57,6 +66,10 @@ export default function RankingPage() {
       .then(r => r.json())
       .then(data => {
         setMyClassId(data.classId ?? 'unassigned')
+        const sessionBoard = toBoardCount(data.boardCount)
+        setSessionBoardCount(sessionBoard)
+        // 전체 범위로 바꿔도 처음에는 내 게임과 같은 진행 방식의 순위를 보여 준다.
+        setBoardCount(sessionBoard)
         const me = (data.players ?? []).find(p => p.playerUuid === myPlayerUuid)
         setHasMyResult(Boolean(me))
         const official = data.classKind === 'official'
@@ -66,6 +79,14 @@ export default function RankingPage() {
       })
       .catch(() => {})
   }, [sessionId, isV2, myPlayerUuid])
+
+  // 5판에는 부동산이 없으므로 부동산 탭을 보던 중이면 총자산으로 돌린다.
+  useEffect(() => {
+    if (!showRealEstate && category === 'realEstate') {
+      setRows([])
+      setCategory('totalAssets')
+    }
+  }, [showRealEstate, category])
 
   useEffect(() => {
     setLoading(true)
@@ -90,6 +111,7 @@ export default function RankingPage() {
               netWorth: (p.cash ?? 0) + (p.stockValue ?? 0) + (p.realEstateValue ?? 0),
               stockPrices: data.stockPrices,
               realEstatePrices: data.realEstatePrices,
+              boardCount: toBoardCount(data.boardCount),
             }))
             .sort((a, b) => (b[vk] ?? 0) - (a[vk] ?? 0))
             .map((p, i) => ({ ...p, rank: i + 1 }))
@@ -103,13 +125,14 @@ export default function RankingPage() {
     const params = new URLSearchParams()
     if (isV2 && scope === 'class') params.set('classId', myClassId)
     if (category !== 'totalAssets') params.set('category', category)
+    if (!(isV2 && scope === 'class')) params.set('boardCount', String(boardCount))
     const query = params.toString()
 
     fetch(`/api/rankings${query ? `?${query}` : ''}`)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(data => { setRows(data); setLoading(false) })
       .catch(() => { setError('불러오는 중 오류가 발생했습니다.'); setLoading(false) })
-  }, [category, scope, sessionId, isV2, myClassId])
+  }, [category, scope, sessionId, isV2, myClassId, boardCount])
 
   const valueKey = VALUE_KEYS[category]
   const podiumRows = rows.slice(0, 3)
@@ -168,11 +191,15 @@ export default function RankingPage() {
             )}
           </>
         )}
-        <div className={styles.officialRow}>
-          <button type="button" className={styles.surveyBtn} onClick={() => navigate('/ranking/official')}>
-            공식 랭킹 보러가기
-          </button>
-        </div>
+        <button
+          type="button"
+          className={`${styles.shareIconBtn} ${styles.officialIconBtn}`}
+          onClick={() => navigate('/ranking/official')}
+          aria-label="공식 랭킹 보러가기"
+          title="공식 랭킹 보러가기"
+        >
+          <span className={styles.trophyIcon} aria-hidden="true" />
+        </button>
       </div>
       <div className={styles.inner}>
         <div className={styles.header}>
@@ -181,7 +208,7 @@ export default function RankingPage() {
           {shareNotice && <p role="status" className={styles.subtitle}>{shareNotice}</p>}
         </div>
         <div className={styles.topTabs}>
-          {CATEGORY_TABS.map(tab => (
+          {categoryTabs.map(tab => (
             <button
               key={tab.key}
               className={`${styles.topTab} ${category === tab.key ? styles.topTabActive : ''}`}
@@ -222,6 +249,13 @@ export default function RankingPage() {
           </div>
         )}
 
+        {(!isV2 || scope === 'global') && (
+          <BoardCountFilter
+            value={boardCount}
+            onChange={next => { setRows([]); setBoardCount(next) }}
+          />
+        )}
+
         <hr className={styles.divider} />
 
         {loading && <p className={styles.message}>불러오는 중...</p>}
@@ -252,6 +286,7 @@ export default function RankingPage() {
               player={toAdminPlayer(viewingPlayer)}
               prices={toAdminPrices(viewingPlayer)}
               onClose={() => setViewingPlayer(null)}
+              hideRealEstate={!hasRealEstate(viewingPlayer.boardCount)}
               readOnly
               headerAction={reportPath(viewingPlayer) && (
                 <button

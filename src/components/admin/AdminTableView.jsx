@@ -75,7 +75,9 @@ function compareRows(a, b, key, dir) {
   return dir === 'asc' ? diff : -diff
 }
 
-export default function AdminTableView({ rooms, onDeletePlayers }) {
+// hideRealEstate: 5판 게임은 부동산이 없어 부동산총액 칼럼을 숨긴다.
+export default function AdminTableView({ rooms, onDeletePlayers, hideRealEstate = false }) {
+  const columns = hideRealEstate ? COLUMNS.filter(col => col.key !== 'realEstateValue') : COLUMNS
   const [sort, setSort] = useState({ key: null, dir: 'desc' })
   const [selected, setSelected] = useState(() => new Set())
   const [confirmDeleteSelected, setConfirmDeleteSelected] = useState(false)
@@ -139,7 +141,7 @@ export default function AdminTableView({ rooms, onDeletePlayers }) {
               <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="전체 선택" />
             </th>
             <th className={styles.th}>참가자</th>
-            {COLUMNS.map(col => (
+            {columns.map(col => (
               <th key={col.key} className={styles.th}>
                 <button type="button" className={styles.sortBtn} onClick={() => toggleSort(col.key)}>
                   {col.label}
@@ -174,7 +176,7 @@ export default function AdminTableView({ rooms, onDeletePlayers }) {
                   </div>
                 </td>
                 <td className={styles.td}>{formatWon(row.cash)}</td>
-                <td className={styles.td}>{formatWon(row.realEstateValue)}</td>
+                {!hideRealEstate && <td className={styles.td}>{formatWon(row.realEstateValue)}</td>}
                 <td className={styles.td}>{formatWon(row.stockValue)}</td>
                 <td className={`${styles.td} ${styles.totalAssets}`}>{formatWon(row.totalAssets)}</td>
                 <td className={styles.td}>

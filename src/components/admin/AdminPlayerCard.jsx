@@ -8,7 +8,8 @@ import styles from './AdminPlayerCard.module.css'
 
 // onReport: 넘기면 수정 버튼 왼쪽에 "보고서" 버튼을 보여 준다. 결과 등록 전이라
 // 보고서가 아직 없으면 reportDisabled로 비활성화한다.
-export default function AdminPlayerCard({ player, prices, onEdit, onKick, onReport, reportDisabled = false }) {
+// hideRealEstate: 5판 게임은 부동산이 없어 부동산 보유 칸을 숨긴다.
+export default function AdminPlayerCard({ player, prices, onEdit, onKick, onReport, reportDisabled = false, hideRealEstate = false }) {
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
   const earnedBadges = BADGE_NAMES.filter((_, i) => gameState.badges[i])
@@ -79,21 +80,23 @@ export default function AdminPlayerCard({ player, prices, onEdit, onKick, onRepo
         </div>
       </div>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>부동산</span>
-        <div className={styles.iconRow}>
-          {ownedRealEstate.map(key => (
-            <span key={key} className={styles.iconCount}>
-              <img
-                src={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
-                alt={REAL_ESTATE_LABELS[key]}
-                className={styles.assetIcon}
-              />
-              {gameState.realEstate[key]}
-            </span>
-          ))}
+      {!hideRealEstate && (
+        <div className={styles.section}>
+          <span className={styles.sectionLabel}>부동산</span>
+          <div className={styles.iconRow}>
+            {ownedRealEstate.map(key => (
+              <span key={key} className={styles.iconCount}>
+                <img
+                  src={`/badges/estate/${ESTATE_IMAGES[key]}.png`}
+                  alt={REAL_ESTATE_LABELS[key]}
+                  className={styles.assetIcon}
+                />
+                {gameState.realEstate[key]}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

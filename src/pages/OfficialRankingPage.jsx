@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
+import BoardCountFilter from '../components/BoardCountFilter'
+import { toBoardCount } from '../constants/gameData'
 import useBodyClass from '../hooks/useBodyClass'
 import { getRememberedOfficialPlayers } from '../utils/officialPlayer'
 import rankingStyles from './RankingPage.module.css'
@@ -31,20 +33,32 @@ export default function OfficialRankingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
+  // 진행 방식(6판/5판)별로 순위를 따로 매긴다. 대회를 고르면 그 대회의 진행 방식을 따른다.
+  const [boardCount, setBoardCount] = useState(6)
+  const selectedContest = data.contests.find(c => c.id === contestId)
+  // 대회를 고른 경우엔 진행 방식으로 다시 조회할 필요가 없다.
+  const queryBoardCount = contestId ? null : boardCount
+
+  // 대회가 고정된 링크(결과 화면의 "대회" 탭 등)로 들어오면 체크박스를 그 대회의 진행 방식에 맞춘다.
+  useEffect(() => {
+    if (selectedContest) setBoardCount(toBoardCount(selectedContest.boardCount))
+  }, [selectedContest])
 
   useEffect(() => {
     // 범위를 빠르게 바꾸면 이전 요청이 나중에 도착할 수 있으므로, 정리된 요청의 응답은 버린다.
     let ignore = false
     setLoading(true)
     setError(null)
-    const url = contestId ? `/api/official-rankings?classId=${encodeURIComponent(contestId)}` : '/api/official-rankings'
+    const url = contestId
+      ? `/api/official-rankings?classId=${encodeURIComponent(contestId)}`
+      : `/api/official-rankings?boardCount=${queryBoardCount}`
     fetch(url)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(json => { if (!ignore) setData(json) })
       .catch(() => { if (!ignore) setError('랭킹을 불러오지 못했어요') })
       .finally(() => { if (!ignore) setLoading(false) })
     return () => { ignore = true }
-  }, [contestId, reloadKey])
+  }, [contestId, reloadKey, queryBoardCount])
 
   // 이름은 실명만 쓴다. 같은 실명이 대회마다 따로 오르는 전체 대회 범위에서는 보조 줄의 대회 이름으로 구분한다.
   const rows = useMemo(() => (data[tab] ?? []).map(p => ({ ...p, name: p.realName })), [data, tab])
@@ -80,6 +94,16 @@ export default function OfficialRankingPage() {
     setSearchParams(next ? { classId: next } : {}, { replace: true })
   }
 
+  // 다른 진행 방식을 고르면 지금 고른 대회는 목록에 없으므로 전체 대회로 돌아간다.
+  function handleBoardCountChange(next) {
+    setBoardCount(next)
+    if (selectedContest && toBoardCount(selectedContest.boardCount) !== next) {
+      setSearchParams({}, { replace: true })
+    }
+  }
+
+  const visibleContests = data.contests.filter(c => toBoardCount(c.boardCount) === boardCount)
+
   return (
     <div className={rankingStyles.page}>
       <BackButton onClick={handleBack} />
@@ -97,7 +121,7 @@ export default function OfficialRankingPage() {
             onChange={handleContestChange}
           >
             <option value="">전체 대회</option>
-            {data.contests.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {visibleContests.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
 
@@ -114,6 +138,8 @@ export default function OfficialRankingPage() {
             </button>
           ))}
         </div>
+
+        <BoardCountFilter value={boardCount} onChange={handleBoardCountChange} />
 
         <hr className={rankingStyles.divider} />
 

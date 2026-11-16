@@ -6,7 +6,7 @@ import RankingPodium from '../components/RankingPodium'
 import RankingTable from '../components/RankingTable'
 import useIsAdminMobile from '../hooks/useIsAdminMobile'
 import { toAdminPlayer, toAdminPrices } from '../utils/adminPlayerAdapters'
-import { JOB_LABELS } from '../constants/gameData'
+import { JOB_LABELS, hasRealEstate } from '../constants/gameData'
 import styles from './AdminRankingView.module.css'
 
 const EMPTY_ICON = (
@@ -47,7 +47,10 @@ function matchesSearch(row, query, includeTeamName = false) {
 
 const teamLabel = row => row.teamName || row.teamCode
 
-export default function AdminRankingView({ classId, classDisplayName, onGoToTeamStatus }) {
+export default function AdminRankingView({ classId, classDisplayName, onGoToTeamStatus, boardCount = 6 }) {
+  // 5판 게임은 부동산이 없어 부동산 탭·칼럼을 숨긴다.
+  const showRealEstate = hasRealEstate(boardCount)
+  const categoryTabList = showRealEstate ? CATEGORY_TABS : CATEGORY_TABS.filter(t => t.key !== 'realEstate')
   const [category, setCategory] = useState('totalAssets')
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -90,7 +93,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
   )
   const categoryTabs = (
     <div className={styles.tabs}>
-      {CATEGORY_TABS.map(tab => (
+      {categoryTabList.map(tab => (
         <button
           key={tab.key}
           type="button"
@@ -126,6 +129,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
           player={toAdminPlayer(viewingPlayer)}
           prices={toAdminPrices(viewingPlayer)}
           onClose={() => setViewingPlayer(null)}
+          hideRealEstate={!showRealEstate}
           readOnly
         />
       </div>
@@ -221,7 +225,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
                     <th className={styles.th}>참가자</th>
                     <th className={styles.th}>팀</th>
                     <th className={styles.thRight}>현금</th>
-                    <th className={styles.thRight}>부동산</th>
+                    {showRealEstate && <th className={styles.thRight}>부동산</th>}
                     <th className={styles.thRight}>주식</th>
                     <th className={styles.thRight}>총자산</th>
                   </tr>
@@ -244,7 +248,7 @@ export default function AdminRankingView({ classId, classDisplayName, onGoToTeam
                       </td>
                       <td className={styles.td}>{teamLabel(row)}</td>
                       <td className={styles.tdRight}>{formatWon(row.cash)}</td>
-                      <td className={styles.tdRight}>{formatWon(row.realEstateValue)}</td>
+                      {showRealEstate && <td className={styles.tdRight}>{formatWon(row.realEstateValue)}</td>}
                       <td className={styles.tdRight}>{formatWon(row.stockValue)}</td>
                       <td className={`${styles.tdRight} ${styles.totalAssets}`}>{formatWon(row.totalAssets)}</td>
                     </tr>

@@ -48,3 +48,16 @@ export const ROOM_STATUS_LABELS = {
   abandoned: '방치',
   'completed-but-unregistered': '등록 대기',
 }
+
+// 게임 진행 방식(보드게임 판 수). 6판은 기존 방식, 5판은 부동산 없이 진행한다.
+// 게임(수업/대회)마다 정해지며, 값이 없는 예전 데이터는 6판으로 본다.
+export const BOARD_COUNTS = [6, 5]
+export const DEFAULT_BOARD_COUNT = 6
+
+export function toBoardCount(value) {
+  return Number(value) === 5 ? 5 : DEFAULT_BOARD_COUNT
+}
+
+export function hasRealEstate(boardCount) {
+  return toBoardCount(boardCount) !== 5
+}

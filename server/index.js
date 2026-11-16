@@ -20,6 +20,7 @@ import { buildOfficialRankings } from './officialRanking.js'
 import { createClan, renameClan, deleteClan, assignToClan, listClans, pruneMembers, deleteClassClans, isValidClanName } from './clans.js'
 import { buildClanView } from './clanView.js'
 import { buildClanRecap } from './clanRecap.js'
+import { toBoardCount } from '../src/constants/gameData.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -43,8 +44,8 @@ function broadcastClassRooms(classId) {
 app.post('/api/rooms', async (req, res) => {
   const classId = req.body?.classId ?? null
   try {
-    const { kind } = await getClassInfo(classId)
-    const room = createRoom({ classId, isOfficial: kind === 'official' })
+    const { kind, boardCount } = await getClassInfo(classId)
+    const room = createRoom({ classId, isOfficial: kind === 'official', boardCount })
     broadcastClassRooms(room.classId)
     res.json({ code: room.code })
   } catch (err) {
@@ -98,12 +99,14 @@ app.get('/api/official-rankings', async (req, res) => {
   try {
     // 대회가 아닌 classId(미배정·일반 수업·잘못된 값)는 결과를 조회하지 않고 빈 랭킹을 돌려준다.
     // uuid가 아닌 값을 그대로 조회하면 PostgREST가 22P02로 실패하기 때문이다.
+    // boardCount: 진행 방식(5판/6판)별로 따로 순위를 매긴다. 대회를 고르면 그 대회의 방식을 따른다.
+    const boardCount = req.query.boardCount ? toBoardCount(req.query.boardCount) : null
     const [contests, info] = await Promise.all([
       listOfficialContests(),
       classId ? getClassInfo(classId) : null,
     ])
     if (info && info.kind !== 'official') return res.json({ contests, points: [], bestAssets: [] })
-    const rows = await getOfficialResultRows({ classId })
+    const rows = await getOfficialResultRows({ classId, boardCount: classId ? null : boardCount })
     res.json({ contests, ...buildOfficialRankings(rows) })
   } catch (err) {
     console.error('official rankings error:', err)
@@ -136,7 +139,7 @@ app.get('/api/rooms/:code', async (req, res) => {
     const sessionId = await getSessionIdByTeamCode(code).catch(() => null)
     return res.status(404).json({ error: 'Room not found', sessionId })
   }
-  res.json({ code: room.code, playerCount: room.players.length, players: room.players, prices: room.prices })
+  res.json({ code: room.code, playerCount: room.players.length, players: room.players, prices: room.prices, boardCount: room.boardCount ?? 6 })
 })
 
 app.get('/api/rooms/:code/qr', async (req, res) => {
@@ -279,11 +282,12 @@ app.get('/api/admin/survey/:test/metrics', requireAdmin, async (req, res) => {
 
 app.get('/api/rankings', async (req, res) => {
   try {
-    const { classId, category } = req.query
+    const { classId, category, boardCount } = req.query
     const rankings = await getRankings({
       classId: classId ?? null,
       category: category ?? null,
       includeOfficial: req.query.includeOfficial === '1',
+      boardCount: boardCount ? toBoardCount(boardCount) : null,
     })
     res.json(rankings)
   } catch (err) {
@@ -330,10 +334,10 @@ app.get('/api/admin/classes', requireAdmin, async (req, res) => {
 })
 
 app.post('/api/admin/classes', requireAdmin, async (req, res) => {
-  const { name, kind } = req.body
+  const { name, kind, boardCount } = req.body
   if (!name?.trim()) return res.status(400).json({ error: 'name이 필요합니다' })
   try {
-    const cls = await createClass(name, req.admin.adminId, kind)
+    const cls = await createClass(name, req.admin.adminId, kind, toBoardCount(boardCount))
     res.json(cls)
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: '이미 존재하는 수업입니다' })
@@ -530,6 +534,8 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
     const allowed = await hasClassAccess(req.admin, classId)
     if (!allowed) return res.status(403).json({ error: '해당 수업에 접근 권한이 없습니다' })
 
+    // 진행 방식(5판/6판)은 수업 단위로 정해지므로 등록된 팀에도 수업의 값을 붙인다.
+    const { boardCount } = await getClassInfo(classId)
     const now = new Date()
     const liveRooms = listAllRooms().map(room => ({
       code: room.code,
@@ -555,7 +561,7 @@ app.get('/api/admin/rooms', requireAdmin, async (req, res) => {
 
     const matchesClass = room => (classId === 'unassigned' ? !room.classId : room.classId === classId)
 
-    res.json(sortRoomsByCreationOrder(allRooms.filter(matchesClass)))
+    res.json(sortRoomsByCreationOrder(allRooms.filter(matchesClass)).map(room => ({ ...room, boardCount })))
   } catch (err) {
     console.error('admin rooms error:', err)
     res.status(500).json({ error: 'Failed to fetch rooms' })
@@ -575,8 +581,8 @@ app.post('/api/admin/rooms', requireAdmin, async (req, res) => {
     // 이름을 직접 정할 때까지는 로비에서 학생 방과 동일하게 방장 이름 기반 표시로 폴백한다).
     const title = resolvedClassId ? '' : null
 
-    const { kind } = await getClassInfo(resolvedClassId)
-    const room = createRoom({ classId: resolvedClassId, title, isOfficial: kind === 'official' })
+    const { kind, boardCount } = await getClassInfo(resolvedClassId)
+    const room = createRoom({ classId: resolvedClassId, title, isOfficial: kind === 'official', boardCount })
     broadcastClassRooms(room.classId)
     res.json({ code: room.code })
   } catch (err) {
@@ -770,6 +776,7 @@ app.get('/api/results/:sessionId', async (req, res) => {
       classId: session.class_id ?? null,
       className,
       classKind: session.classes?.kind ?? 'class',
+      boardCount: toBoardCount(session.classes?.board_count),
       stockPrices: session.stock_prices,
       realEstatePrices: session.real_estate_prices,
       players: results.map((r, i) => ({

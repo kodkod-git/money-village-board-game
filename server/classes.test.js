@@ -28,9 +28,9 @@ describe('createClass', () => {
 
     const cls = await createClass('  3학년 2반  ', 'admin-1')
 
-    expect(mockClassInsert).toHaveBeenCalledWith({ name: '3학년 2반', created_by: 'admin-1', kind: 'class' })
+    expect(mockClassInsert).toHaveBeenCalledWith({ name: '3학년 2반', created_by: 'admin-1', kind: 'class', board_count: 6 })
     expect(mockAccessInsert).toHaveBeenCalledWith({ admin_id: 'admin-1', class_id: 'class-1' })
-    expect(cls).toEqual({ id: 'class-1', name: '3학년 2반' })
+    expect(cls).toEqual({ id: 'class-1', name: '3학년 2반', kind: 'class', boardCount: 6 })
   })
 })
 
@@ -47,8 +47,8 @@ describe('listClassesForAdmin', () => {
 
     expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false })
     expect(classes).toEqual([
-      { id: 'class-1', name: '3학년 2반', kind: 'class', createdAt: '2026-07-27T00:00:00.000Z' },
-      { id: 'unassigned', name: UNASSIGNED_CLASS, kind: 'class' },
+      { id: 'class-1', name: '3학년 2반', kind: 'class', boardCount: 6, createdAt: '2026-07-27T00:00:00.000Z' },
+      { id: 'unassigned', name: UNASSIGNED_CLASS, kind: 'class', boardCount: 6 },
     ])
   })
 
@@ -67,8 +67,8 @@ describe('listClassesForAdmin', () => {
 
     expect(mockEq).toHaveBeenCalledWith('admin_id', 'admin-1')
     expect(classes).toEqual([
-      { id: 'class-2', name: '최근 수업', kind: 'class', createdAt: '2026-08-01T00:00:00.000Z' },
-      { id: 'class-1', name: '오래된 수업', kind: 'class', createdAt: '2026-07-01T00:00:00.000Z' },
+      { id: 'class-2', name: '최근 수업', kind: 'class', boardCount: 6, createdAt: '2026-08-01T00:00:00.000Z' },
+      { id: 'class-1', name: '오래된 수업', kind: 'class', boardCount: 6, createdAt: '2026-07-01T00:00:00.000Z' },
     ])
   })
 })
@@ -157,13 +157,21 @@ describe('createClass kind', () => {
   it("kind가 'official'이면 그대로 저장한다", async () => {
     const insert = mockInsert()
     await createClass('2026 시즌1', 'admin-1', 'official')
-    expect(insert).toHaveBeenCalledWith({ name: '2026 시즌1', created_by: 'admin-1', kind: 'official' })
+    expect(insert).toHaveBeenCalledWith({ name: '2026 시즌1', created_by: 'admin-1', kind: 'official', board_count: 6 })
   })
 
   it("알 수 없는 kind는 'class'로 저장한다", async () => {
     const insert = mockInsert()
     await createClass('x', 'admin-1', 'weird')
-    expect(insert).toHaveBeenCalledWith({ name: 'x', created_by: 'admin-1', kind: 'class' })
+    expect(insert).toHaveBeenCalledWith({ name: 'x', created_by: 'admin-1', kind: 'class', board_count: 6 })
+  })
+
+  it('진행 방식 5판을 저장하고, 알 수 없는 값은 6판으로 저장한다', async () => {
+    const insert = mockInsert()
+    await createClass('5판 게임', 'admin-1', 'class', 5)
+    expect(insert).toHaveBeenCalledWith({ name: '5판 게임', created_by: 'admin-1', kind: 'class', board_count: 5 })
+    await createClass('이상한 값', 'admin-1', 'class', 7)
+    expect(insert).toHaveBeenLastCalledWith({ name: '이상한 값', created_by: 'admin-1', kind: 'class', board_count: 6 })
   })
 })
 
@@ -177,21 +185,26 @@ describe('getClassInfo', () => {
 
   it('대회면 kind와 이름을 돌려준다', async () => {
     const eq = mockLookup({ data: { name: '2026 시즌1', kind: 'official' }, error: null })
-    expect(await getClassInfo('class-1')).toEqual({ kind: 'official', name: '2026 시즌1' })
+    expect(await getClassInfo('class-1')).toEqual({ kind: 'official', name: '2026 시즌1', boardCount: 6 })
     expect(eq).toHaveBeenCalledWith('id', 'class-1')
   })
 
+  it('5판 게임이면 boardCount 5를 돌려준다', async () => {
+    mockLookup({ data: { name: '5판 수업', kind: 'class', board_count: 5 }, error: null })
+    expect(await getClassInfo('class-5')).toEqual({ kind: 'class', name: '5판 수업', boardCount: 5 })
+  })
+
   it('미배정이거나 classId가 없으면 DB를 보지 않고 일반 수업으로 본다', async () => {
-    expect(await getClassInfo('unassigned')).toEqual({ kind: 'class', name: null })
-    expect(await getClassInfo(null)).toEqual({ kind: 'class', name: null })
+    expect(await getClassInfo('unassigned')).toEqual({ kind: 'class', name: null, boardCount: 6 })
+    expect(await getClassInfo(null)).toEqual({ kind: 'class', name: null, boardCount: 6 })
     expect(mockFrom).not.toHaveBeenCalled()
   })
 
   it('없는 수업이나 uuid 형식이 아닌 id(22P02)는 일반 수업으로 본다', async () => {
     mockLookup({ data: null, error: null })
-    expect(await getClassInfo('missing')).toEqual({ kind: 'class', name: null })
+    expect(await getClassInfo('missing')).toEqual({ kind: 'class', name: null, boardCount: 6 })
     mockLookup({ data: null, error: { code: '22P02' } })
-    expect(await getClassInfo('not-a-uuid')).toEqual({ kind: 'class', name: null })
+    expect(await getClassInfo('not-a-uuid')).toEqual({ kind: 'class', name: null, boardCount: 6 })
   })
 })
 
@@ -204,7 +217,7 @@ describe('listOfficialContests', () => {
     const eq = vi.fn().mockReturnValue({ order })
     mockFrom.mockReturnValue({ select: vi.fn().mockReturnValue({ eq }) })
 
-    expect(await listOfficialContests()).toEqual([{ id: 'c2', name: '시즌2', createdAt: '2026-11-02T00:00:00.000Z' }])
+    expect(await listOfficialContests()).toEqual([{ id: 'c2', name: '시즌2', boardCount: 6, createdAt: '2026-11-02T00:00:00.000Z' }])
     expect(eq).toHaveBeenCalledWith('kind', 'official')
     expect(order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
