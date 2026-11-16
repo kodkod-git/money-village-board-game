@@ -13,7 +13,8 @@ import StockEditModal from './StockEditModal'
 import styles from './AdminEditModal.module.css'
 import AdminAssetSummary from './AdminAssetSummary'
 
-export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false, headerAction = null }) {
+// hideRealEstate: 5판 게임은 부동산이 없어 부동산 항목과 수정 버튼을 숨긴다.
+export default function AdminEditModal({ player, prices, onSave = () => {}, onClose, readOnly = false, headerAction = null, hideRealEstate = false }) {
   const [editingField, setEditingField] = useState(null)
   const { gameState } = player
   const { totalAssets } = calculateAssetBreakdown(gameState, prices)
@@ -109,24 +110,26 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
             </div>
           </div>
 
-          <div className={styles.card}>
-            <div className={styles.field}>
-              <div className={styles.fieldHeader}>
-                <span className={styles.fieldLabel}>부동산</span>
-                {!readOnly && (
-                  <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
-                )}
+          {!hideRealEstate && (
+            <div className={styles.card}>
+              <div className={styles.field}>
+                <div className={styles.fieldHeader}>
+                  <span className={styles.fieldLabel}>부동산</span>
+                  {!readOnly && (
+                    <button type="button" data-testid="edit-realEstate" className={styles.editBtn} onClick={() => setEditingField('realEstate')}>수정</button>
+                  )}
+                </div>
+                <AdminAssetSummary
+                  labels={REAL_ESTATE_LABELS}
+                  images={ESTATE_IMAGES}
+                  values={gameState.realEstate}
+                  folder="estate"
+                  unit="개"
+                  testIdPrefix="admin-real-estate-holding"
+                />
               </div>
-              <AdminAssetSummary
-                labels={REAL_ESTATE_LABELS}
-                images={ESTATE_IMAGES}
-                values={gameState.realEstate}
-                folder="estate"
-                unit="개"
-                testIdPrefix="admin-real-estate-holding"
-              />
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -156,7 +159,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
           onClose={() => setEditingField(null)}
         />
       )}
-      {editingField === 'realEstate' && (
+      {editingField === 'realEstate' && !hideRealEstate && (
         <RealEstateEditModal
           values={gameState.realEstate}
           prices={prices?.realEstate}

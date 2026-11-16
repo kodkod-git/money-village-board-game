@@ -72,12 +72,14 @@ export default function AdminDashboard() {
           classId={selectedClass.id}
           initialName={selectedClass.name}
           kind={selectedClass.kind ?? 'class'}
+          boardCount={selectedClass.boardCount ?? 6}
         />
       )}
       {section === 'ranking' && selectedClass && (
         <AdminRankingView
           classId={selectedClass.id}
           classDisplayName={selectedClass.name}
+          boardCount={selectedClass.boardCount ?? 6}
           onGoToTeamStatus={() => handleNavigate('team-status')}
         />
       )}

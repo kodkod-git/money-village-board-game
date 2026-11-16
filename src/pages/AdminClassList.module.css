@@ -14,18 +14,37 @@
   border-radius: var(--admin-r-sm); height: 36px; padding: 0 14px;
   font-size: 12px; font-weight: 700; color: var(--admin-text-2);
 }
-/* 칼럼 하나가 420px보다 좁아지면 수업 목록 아래로 대회 목록이 내려간다 (사이드바가 있는 좁은 창 포함). */
-.columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 24px; align-items: start; max-width: 1200px; }
-.column { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.columnTitle { font-size: 16px; font-weight: 700; color: var(--admin-text); }
-.createForm { display: flex; gap: 8px; }
+/* 일반 게임과 대회를 한 칼럼에 함께 보여 준다. */
+.content { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+
+/* 생성 카드: 이름 입력 → 게임 종류·진행 방식 선택 → 생성하기 */
+.createCard {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px; border: 1px solid var(--admin-border); border-radius: var(--admin-r-md);
+  background: var(--admin-surface);
+}
 .createInput {
-  flex: 1; height: 40px; padding: 0 14px;
-  border: 1px solid var(--admin-border); border-radius: var(--admin-r-sm); font-size: 13px;
+  height: 44px; padding: 0 14px;
+  border: 1px solid var(--admin-border); border-radius: var(--admin-r-sm); font-size: 14px;
   background: var(--admin-input-bg); color: var(--admin-text);
 }
+.createOptions { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.fieldLabel { font-size: 12px; font-weight: 700; color: var(--admin-text-2); }
+.segmented {
+  display: inline-flex; padding: 3px; gap: 2px;
+  border-radius: var(--admin-r-sm); background: var(--admin-bg); border: 1px solid var(--admin-border);
+}
+.segment {
+  display: flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 14px; border: none; border-radius: 6px;
+  background: transparent; color: var(--admin-text-2); font-size: 13px; font-weight: 700;
+}
+.segmentActive { background: var(--admin-surface); color: var(--admin-blue); box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12); }
+.segmentHint { font-size: 11px; font-weight: 500; color: var(--admin-text-3); }
 .createBtn {
-  height: 40px; padding: 0 18px; border: none; border-radius: var(--admin-r-sm);
+  margin-left: auto;
+  height: 40px; padding: 0 22px; border: none; border-radius: var(--admin-r-sm);
   background: var(--admin-blue); color: white; font-size: 13px; font-weight: 700;
 }
 .error { color: #e53935; font-size: 12px; }
@@ -44,7 +63,17 @@
   padding: 12px 14px;
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
 }
+.itemTitleRow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .itemName { font-size: 15px; font-weight: 700; color: var(--admin-text); }
+.officialBadge {
+  flex-shrink: 0; padding: 2px 8px; border-radius: 999px;
+  background: var(--admin-blue); color: #fff; font-size: 11px; font-weight: 700;
+}
+.boardBadge {
+  flex-shrink: 0; padding: 1px 7px; border-radius: 999px;
+  border: 1px solid var(--admin-border); background: var(--admin-bg);
+  color: var(--admin-text-2); font-size: 11px; font-weight: 700;
+}
 .itemDate { font-size: 11px; font-weight: 500; color: var(--admin-text-3); }
 .qrBtn {
   background: var(--admin-bg); border: 1px solid var(--admin-border);
@@ -64,12 +93,17 @@
 
   .headerActions { display: none; }
 
-  .createForm { flex-direction: column; max-width: none; }
-  .columns { grid-template-columns: 1fr; gap: 32px; }
+  .createCard { padding: 12px; }
 
-  .createInput { flex: none; height: 44px; font-size: 16px; }
+  .createInput { font-size: 16px; }
 
-  .createBtn { height: 44px; font-size: 14px; }
+  .createOptions { flex-direction: column; align-items: stretch; gap: 12px; }
+
+  .segmented { display: flex; }
+
+  .segment { flex: 1; justify-content: center; }
+
+  .createBtn { margin-left: 0; height: 44px; font-size: 14px; }
 
   .item { padding: 4px 8px 4px 4px; }
 

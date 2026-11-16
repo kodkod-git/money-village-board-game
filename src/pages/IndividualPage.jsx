@@ -5,6 +5,7 @@ import AssetInputSteps, { defaultGameState } from '../components/AssetInputSteps
 import AlertModal from '../components/AlertModal'
 import { DEFAULT_PRICES } from '../components/PriceSettingModal'
 import { useSocketContext } from '../contexts/SocketContext'
+import { hasRealEstate } from '../constants/gameData'
 import useBodyClass from '../hooks/useBodyClass'
 import styles from './IndividualPage.module.css'
 
@@ -16,6 +17,8 @@ export default function IndividualPage() {
 
   const [player, setPlayer] = useState(null)
   const [prices, setPrices] = useState(DEFAULT_PRICES)
+  // 게임 진행 방식(6판/5판). 5판은 부동산 입력 단계를 건너뛴다.
+  const [boardCount, setBoardCount] = useState(6)
   const [gameState, setGameState] = useState(defaultGameState)
   // 서버에서 참가자 정보를 다시 받을 때마다 올려서 입력 단계의 완료 표시·현금을 다시 맞춘다.
   const [syncToken, setSyncToken] = useState(0)
@@ -37,6 +40,7 @@ export default function IndividualPage() {
         .then(r => r.json())
         .then(data => {
           setPrices(data.prices)
+          setBoardCount(data.boardCount ?? 6)
           const me = data.players?.find(p => p.socketId === socket.id)
           if (me) { applyPlayer(me); return }
           const stored = JSON.parse(sessionStorage.getItem('player_profile') || 'null')
@@ -107,6 +111,7 @@ export default function IndividualPage() {
         gameState={gameState}
         prices={prices}
         syncToken={syncToken}
+        hideRealEstate={!hasRealEstate(boardCount)}
         onChange={updateState}
         onComplete={next => { updateState(next); navigate(`/team/${code}`) }}
       />

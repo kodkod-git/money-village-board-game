@@ -8,6 +8,7 @@ import PriceSettingModal, { DEFAULT_PRICES } from '../components/PriceSettingMod
 import AlertModal from '../components/AlertModal'
 import { useSocketContext } from '../contexts/SocketContext'
 import useBodyClass from '../hooks/useBodyClass'
+import { hasRealEstate } from '../constants/gameData'
 import styles from './Team.module.css'
 
 export default function Team({ readOnly = false, mockRoom = null }) {
@@ -21,6 +22,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
   const [roomFetched, setRoomFetched] = useState(readOnly)
   const [showQR, setShowQR] = useState(false)
   const [prices, setPrices] = useState(readOnly ? mockRoom.prices : DEFAULT_PRICES)
+  const [boardCount, setBoardCount] = useState(readOnly ? (mockRoom.boardCount ?? 6) : 6)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   // 방에서 강제로 나가게 된 사유(강퇴 / 방 삭제 / 결과 등록). 안내 모달을 먼저 띄우고
@@ -63,6 +65,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
         }
         if (data.players) setPlayers(data.players)
         if (data.prices) setPrices(data.prices)
+        if (data.boardCount) setBoardCount(data.boardCount)
       }))
       .catch(() => {})
       .finally(() => setRoomFetched(true))
@@ -282,6 +285,7 @@ export default function Team({ readOnly = false, mockRoom = null }) {
       {showPriceModal && (
         <PriceSettingModal
           prices={prices}
+          hideRealEstate={!hasRealEstate(boardCount)}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}
         />

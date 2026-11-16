@@ -3,6 +3,7 @@ import { ROOM_STATUS_LABELS } from '../../constants/gameData'
 import PriceSettingModal, { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES } from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import { teamDisplayName } from '../../utils/teamDisplayName'
+import { hasRealEstate } from '../../constants/gameData'
 import styles from './AdminGridCard.module.css'
 
 const STATUS_BADGE_CLASS = {
@@ -20,6 +21,9 @@ const TABS = [
 
 export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChanged, isOfficial = false }) {
   const [tab, setTab] = useState('lobby')
+  // 5판 게임은 부동산이 없어 부동산 가격 탭을 숨긴다.
+  const showRealEstate = hasRealEstate(room.boardCount)
+  const tabs = showRealEstate ? TABS : TABS.filter(t => t.key !== 'realEstate')
   const [showPriceModal, setShowPriceModal] = useState(false)
 
   const displayName = teamDisplayName(room, index)
@@ -57,7 +61,7 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
           <span className={styles.codeBadge}>{room.code}</span>
         </div>
         <div className={styles.tabs}>
-          {TABS.map(t => (
+          {tabs.map(t => (
             <button
               key={t.key}
               type="button"
@@ -126,6 +130,7 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
         <PriceSettingModal
           prices={room.prices}
           initialCategory={tab === 'realEstate' ? 'realEstate' : 'stocks'}
+          hideRealEstate={!showRealEstate}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}
         />

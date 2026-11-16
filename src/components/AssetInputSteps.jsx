@@ -11,8 +11,18 @@ import {
 } from '../constants/gameData'
 import styles from '../pages/IndividualPage.module.css'
 
-const STEPS = ['직업', '성공열쇠', '주식', '부동산', '현금']
-const VISITED_KEY_BY_STEP = { 0: 'jobVisited', 1: 'badgesVisited', 2: 'stocksVisited', 3: 'realEstateVisited' }
+// 입력 단계. 5판 게임은 부동산 없이 진행하므로 부동산 단계를 건너뛴다.
+const ALL_STEPS = [
+  { key: 'job', label: '직업', visitedKey: 'jobVisited' },
+  { key: 'badges', label: '성공열쇠', visitedKey: 'badgesVisited' },
+  { key: 'stocks', label: '주식', visitedKey: 'stocksVisited' },
+  { key: 'realEstate', label: '부동산', visitedKey: 'realEstateVisited' },
+  { key: 'cash', label: '현금' },
+]
+
+export function assetSteps(hideRealEstate = false) {
+  return hideRealEstate ? ALL_STEPS.filter(s => s.key !== 'realEstate') : ALL_STEPS
+}
 
 function priceLabels(prices, category) {
   return Object.fromEntries(Object.entries(DEFAULT_PRICES[category]).map(([key, defaultPrice]) => [
@@ -30,35 +40,44 @@ export function defaultGameState() {
   }
 }
 
-export function computeCompletedUpTo(gameState) {
+function isStepDone(stepKey, gameState) {
+  if (stepKey === 'job') return gameState.job !== null || gameState.jobVisited
+  if (stepKey === 'cash') return gameState.isCompleted
+  const { visitedKey } = ALL_STEPS.find(s => s.key === stepKey)
+  return Boolean(gameState[visitedKey])
+}
+
+export function computeCompletedUpTo(gameState, hideRealEstate = false) {
   let upTo = -1
-  if (gameState.job !== null || gameState.jobVisited) upTo = 0
-  if (gameState.badgesVisited) upTo = 1
-  if (gameState.stocksVisited) upTo = 2
-  if (gameState.realEstateVisited) upTo = 3
-  if (gameState.isCompleted) upTo = 4
+  assetSteps(hideRealEstate).forEach((s, i) => {
+    if (isStepDone(s.key, gameState)) upTo = i
+  })
   return upTo
 }
 
 // 직업 → 성공열쇠 → 주식 → 부동산 → 현금 입력 단계(IndividualPage).
+// hideRealEstate: 5판 게임이면 부동산 단계를 건너뛴다.
 // syncToken: 부모가 서버에서 상태를 다시 받아올 때마다 올리면 완료 단계·현금 표시를 그 상태에 맞춘다.
-export default function AssetInputSteps({ gameState, onChange, onComplete, prices, syncToken = 0 }) {
+export default function AssetInputSteps({ gameState, onChange, onComplete, prices, syncToken = 0, hideRealEstate = false }) {
+  const steps = assetSteps(hideRealEstate)
+  const lastStep = steps.length - 1
   const [step, setStep] = useState(0)
-  const [completedUpTo, setCompletedUpTo] = useState(() => computeCompletedUpTo(gameState))
+  const stepKey = steps[Math.min(step, lastStep)].key
+  const [completedUpTo, setCompletedUpTo] = useState(() => computeCompletedUpTo(gameState, hideRealEstate))
   const [cashDisplay, setCashDisplay] = useState(() => String(gameState.cash ?? 0))
   const [showCashModal, setShowCashModal] = useState(false)
 
   const latestGameState = useRef(gameState)
   latestGameState.current = gameState
   useEffect(() => {
-    setCompletedUpTo(computeCompletedUpTo(latestGameState.current))
+    setCompletedUpTo(computeCompletedUpTo(latestGameState.current, hideRealEstate))
     setCashDisplay(String(latestGameState.current.cash ?? 0))
-  }, [syncToken])
+  }, [syncToken, hideRealEstate])
 
   function handleNext() {
-    if (step === 4) { handleComplete(); return }
+    if (step >= lastStep) { handleComplete(); return }
 
-    const visitedKey = VISITED_KEY_BY_STEP[step]
+    const visitedKey = steps[step].visitedKey
     if (visitedKey && !gameState[visitedKey]) onChange({ ...gameState, [visitedKey]: true })
 
     setCompletedUpTo(prev => Math.max(prev, step))
@@ -73,14 +92,14 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
   return (
     <>
       <StepBar
-        steps={STEPS}
+        steps={steps.map(s => s.label)}
         currentStep={step}
         completedUpTo={completedUpTo}
         onStepClick={completedUpTo >= 0 ? i => setStep(i) : undefined}
       />
       <hr className={styles.divider} />
 
-      {step === 0 && (
+      {stepKey === 'job' && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>직업 선택</h1>
           <p className={styles.stepSubtitle}>나의 직업을 선택해주세요</p>
@@ -90,7 +109,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
         </div>
       )}
 
-      {step === 1 && (
+      {stepKey === 'badges' && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>성공열쇠</h1>
           <p className={styles.stepSubtitle}>획득한 성공열쇠를 모두 선택해주세요</p>
@@ -108,7 +127,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
         </div>
       )}
 
-      {step === 3 && (
+      {stepKey === 'realEstate' && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>부동산</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
@@ -129,7 +148,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
         </div>
       )}
 
-      {step === 2 && (
+      {stepKey === 'stocks' && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>주식</h1>
           <p className={styles.stepSubtitle}>보유 수량을 선택해주세요</p>
@@ -150,7 +169,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
         </div>
       )}
 
-      {step === 4 && (
+      {stepKey === 'cash' && (
         <div className={`${styles.stepContent} ${styles.stepContentFill}`}>
           <h1 className={styles.stepTitle}>현금</h1>
           <p className={styles.stepSubtitle}>보유 현금을 입력해주세요</p>
@@ -185,7 +204,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
 
       <div className={styles.bottomBar}>
         <button className={styles.nextBtn} onClick={handleNext}>
-          {step === 4 ? '완료' : '다음'}
+          {step >= lastStep ? '완료' : '다음'}
         </button>
       </div>
     </>

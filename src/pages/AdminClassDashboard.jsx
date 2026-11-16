@@ -16,6 +16,7 @@ import useIsAdminMobile from '../hooks/useIsAdminMobile'
 import { adminFetch } from '../utils/adminAuth'
 import { toast } from '../utils/toast'
 import { useSocketContext } from '../contexts/SocketContext'
+import { hasRealEstate } from '../constants/gameData'
 import styles from './AdminDashboard.module.css'
 
 const TABS = [
@@ -34,8 +35,10 @@ function matchesSearch(room, query) {
   return room.players.some(p => p?.name?.toLowerCase().includes(q))
 }
 
-export default function AdminClassDashboard({ classId, initialName, kind = 'class' }) {
+export default function AdminClassDashboard({ classId, initialName, kind = 'class', boardCount = 6 }) {
   const isOfficial = kind === 'official'
+  // 5판 게임은 부동산 없이 진행한다.
+  const hideRealEstate = !hasRealEstate(boardCount)
   const { socket } = useSocketContext()
   const [activeTab, setActiveTab] = useState('grid')
   const isMobile = useIsAdminMobile()
@@ -208,6 +211,7 @@ export default function AdminClassDashboard({ classId, initialName, kind = 'clas
         onBlur={handleTitleBlur}
       />
       {isOfficial && <span className={styles.officialBadge}>공식</span>}
+      {boardCount === 5 && <span className={styles.boardBadge}>5판</span>}
     </div>
   )
   const searchInput = (
@@ -296,7 +300,7 @@ export default function AdminClassDashboard({ classId, initialName, kind = 'clas
 
       {showQr && <ClassQRModal classId={classId} name={name} onClose={() => setShowQr(false)} />}
       {showSurveyQr && <SurveyQRModal onClose={() => setShowSurveyQr(false)} />}
-      {recap && <ClanRecapStory className={name} recap={recap} onClose={closeRecap} />}
+      {recap && <ClanRecapStory className={name} recap={recap} onClose={closeRecap} hideRealEstate={hideRealEstate} />}
 
       {confirmDeleteAll && (
         <ConfirmDialog
@@ -342,7 +346,7 @@ export default function AdminClassDashboard({ classId, initialName, kind = 'clas
             />
           )}
           {visibleTab === 'table' && (
-            <AdminTableView rooms={filteredRooms} onDeletePlayers={handleDeleteSelectedPlayers} />
+            <AdminTableView rooms={filteredRooms} onDeletePlayers={handleDeleteSelectedPlayers} hideRealEstate={hideRealEstate} />
           )}
           {visibleTab === 'chart' && resultsError && (
             <p className={styles.chartMessage}>결과를 불러오는 중 오류가 발생했습니다.</p>

@@ -10,6 +10,7 @@ import useIsAdminMobile from '../../hooks/useIsAdminMobile'
 import { adminFetch } from '../../utils/adminAuth'
 import { copyGameResultLink, shareGameResultToKakao } from '../../utils/shareGameResult'
 import { teamDisplayName } from '../../utils/teamDisplayName'
+import { hasRealEstate } from '../../constants/gameData'
 import styles from './AdminSpectateModal.module.css'
 
 const POLL_INTERVAL_MS = 3000
@@ -31,6 +32,8 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
   const index = rooms.findIndex(r => r.code === currentCode)
   const room = rooms[index]
   const hasDisconnectedPlayer = room.players.some(p => p?.connected === false)
+  // 5판 게임은 부동산 없이 진행하므로 부동산 관련 정보·입력을 모두 숨긴다.
+  const hideRealEstate = !hasRealEstate(room.boardCount)
   const pollTimer = useRef(null)
   const isMobile = useIsAdminMobile()
   const touchStart = useRef(null)
@@ -172,6 +175,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       <AdminEditModal
         player={player}
         prices={room.prices}
+        hideRealEstate={hideRealEstate}
         onSave={(field, value) => handleSave(editingPlayerUuid, field, value)}
         onClose={() => setEditingPlayerUuid(null)}
       />
@@ -244,6 +248,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
               key={player.playerUuid}
               player={player}
               prices={room.prices}
+              hideRealEstate={hideRealEstate}
               onEdit={() => setEditingPlayerUuid(player.playerUuid)}
               onKick={room.registered ? undefined : () => setKickTarget(player.playerUuid)}
               onReport={() => window.open(reportPath(player.playerUuid), '_blank', 'noopener')}
@@ -332,6 +337,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
       {showPriceModal && (
         <AdminPriceSettingModal
           prices={room.prices}
+          hideRealEstate={hideRealEstate}
           onConfirm={handlePriceConfirm}
           onClose={() => setShowPriceModal(false)}
         />
@@ -342,6 +348,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           room={room}
           prices={room.prices}
           teamLabel={displayName}
+          hideRealEstate={hideRealEstate}
           onClose={() => setShowDetail(false)}
         />
       )}
@@ -351,6 +358,7 @@ export default function AdminSpectateModal({ rooms, initialIndex, onPlayerUpdate
           code={room.code}
           prices={room.prices}
           official={room.isOfficial ? { classId: room.classId } : null}
+          hideRealEstate={hideRealEstate}
           onClose={() => setShowAddPlayer(false)}
           onSaved={() => { setShowAddPlayer(false); onRoomChanged?.() }}
         />

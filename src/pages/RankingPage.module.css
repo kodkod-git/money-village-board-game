@@ -48,10 +48,17 @@
   max-width: calc(100% - 140px);
 }
 
-.officialRow {
-  flex-basis: 100%;
-  display: flex;
-  justify-content: flex-end;
+/* 공식 랭킹 보러가기: 글자 대신 트로피 아이콘만 둔다(좁은 화면에서 버튼이 잘리지 않게). */
+.officialIconBtn {
+  border-color: var(--amber);
+}
+
+.trophyIcon {
+  width: clamp(17px, calc(20px * min(var(--sx), var(--sy))), 20px);
+  height: clamp(17px, calc(20px * min(var(--sx), var(--sy))), 20px);
+  background: var(--amber);
+  -webkit-mask: url(/icons/IconTrophy.svg) center / contain no-repeat;
+  mask: url(/icons/IconTrophy.svg) center / contain no-repeat;
 }
 
 .shareIconBtn {

@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js'
 import { UNASSIGNED_CLASS } from './classes.js'
-import { STOCK_LABELS, REAL_ESTATE_LABELS } from '../src/constants/gameData.js'
+import { STOCK_LABELS, REAL_ESTATE_LABELS, toBoardCount } from '../src/constants/gameData.js'
 
 // src/utils/calculateAssets.js는 이 공식의 브라우저 번들용 사본이다(이 파일은 Supabase
 // 서버 클라이언트를 로드하므로 클라이언트에서 직접 import할 수 없다). 아래 공식을 바꾸면
@@ -93,7 +93,7 @@ export async function saveGameResult(room) {
 export async function getGameResult(sessionId) {
   const { data: session, error: sessionError } = await supabase
     .from('game_sessions')
-    .select('*, classes(name, kind)')
+    .select('*, classes(name, kind, board_count)')
     .eq('id', sessionId)
     .single()
 
@@ -262,12 +262,16 @@ export async function updateGameResult(teamCode, playerUuid, partialGameState) {
   }
 }
 
-const RANKING_SELECT = 'id, player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name, kind))'
+const RANKING_SELECT = 'id, player_uuid, name, affiliation, character, job, cash, stock_holdings, real_estate_holdings, badges, total_assets, stock_value, real_estate_value, session_id, created_at, game_sessions!inner(team_code, title, stock_prices, real_estate_prices, class_id, classes(name, kind, board_count))'
 
 // 순자산 = 현금 + 주식평가액 + 부동산평가액 (성공카드 배수 미적용).
 // 구 데이터는 stock_value/real_estate_value가 null일 수 있어 0으로 취급한다.
 function netWorthOf(r) {
   return (Number(r.cash) || 0) + (Number(r.stock_value) || 0) + (Number(r.real_estate_value) || 0)
+}
+
+function boardCountOf(r) {
+  return toBoardCount(r.game_sessions?.classes?.board_count)
 }
 
 function mapRankingRow(r, i) {
@@ -292,6 +296,8 @@ function mapRankingRow(r, i) {
     teamCode: r.game_sessions?.team_code ?? '',
     teamName: r.game_sessions?.title || r.game_sessions?.team_code || '',
     className: r.game_sessions?.classes?.name ?? UNASSIGNED_CLASS,
+    // 게임 진행 방식(6판/5판). 미배정 수업 등 수업 정보가 없으면 6판이다.
+    boardCount: boardCountOf(r),
     stockPrices: r.game_sessions?.stock_prices ?? null,
     realEstatePrices: r.game_sessions?.real_estate_prices ?? null,
     // 결과 등록 시각. 관리자 "게임 분석" 테이블을 최신순으로 보여 줄 때 쓴다.
@@ -301,7 +307,8 @@ function mapRankingRow(r, i) {
 
 const RANKING_ORDER_COLUMN = { cash: 'cash', stock: 'stock_value', realEstate: 'real_estate_value' }
 
-export async function getRankings({ classId = null, category = null, includeOfficial = false } = {}) {
+// boardCount: 게임 진행 방식(5|6)으로 거른다. 진행 방식이 다르면 자산 구성이 달라 순위를 따로 매긴다.
+export async function getRankings({ classId = null, category = null, includeOfficial = false, boardCount = null } = {}) {
   const isNetWorth = category === 'netWorth'
   const column = isNetWorth
     ? 'total_assets'
@@ -326,9 +333,10 @@ export async function getRankings({ classId = null, category = null, includeOffi
   // 총자산 비교가 불공정하므로 공식 랭킹에서만 순위 포인트로 보여 준다.
   // 대회를 직접 고른 경우(classId)는 관리자 화면이 수업과 똑같이 보여 줘야 해서 그대로 둔다.
   // includeOfficial은 전체 결과를 분석하는 관리자 "게임 분석" 화면용이다.
-  const visible = classId || includeOfficial
+  const scoped = classId || includeOfficial
     ? data
     : data.filter(r => r.game_sessions?.classes?.kind !== 'official')
+  const visible = boardCount ? scoped.filter(r => boardCountOf(r) === toBoardCount(boardCount)) : scoped
 
   // 순자산(현금+주식+부동산, 성공카드 배수 미적용)에 해당하는 DB 컬럼이 없어
   // total_assets 순으로 받은 뒤 JS에서 재정렬한다. 동점은 안정 정렬로 총자산 순.
@@ -372,11 +380,12 @@ export async function getSessionCreatedAtsByClassId(classId) {
 
 const RESULT_PAGE_SIZE = 1000
 
-const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, title, team_code, classes!inner(name, kind))'
+const OFFICIAL_SELECT = 'session_id, official_player_id, character, total_assets, created_at, official_players(real_name), game_sessions!inner(class_id, title, team_code, classes!inner(name, kind, board_count))'
 
 // 공식 랭킹 계산(server/officialRanking.js)의 입력 형태로 대회 결과를 가져온다.
 // classId가 없으면 모든 대회(누적), 있으면 그 대회만 가져온다.
-export async function getOfficialResultRows({ classId = null } = {}) {
+// boardCount가 있으면 그 진행 방식(5판/6판)의 대회만 남긴다.
+export async function getOfficialResultRows({ classId = null, boardCount = null } = {}) {
   // postgrest 빌더는 호출마다 상태가 바뀌므로 페이지마다 새로 만든다.
   const buildQuery = () => {
     let query = supabase
@@ -401,6 +410,7 @@ export async function getOfficialResultRows({ classId = null } = {}) {
   // 중첩 필터가 적용되지 않는 환경에서도 대회 결과만 남도록 한 번 더 거른다.
   return data
     .filter(r => r.game_sessions?.classes?.kind === 'official')
+    .filter(r => !boardCount || toBoardCount(r.game_sessions.classes.board_count) === toBoardCount(boardCount))
     .map(r => ({
       sessionId: r.session_id,
       contestId: r.game_sessions.class_id,

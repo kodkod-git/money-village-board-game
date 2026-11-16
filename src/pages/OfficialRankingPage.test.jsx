@@ -43,7 +43,7 @@ function renderAt(path = '/ranking/official') {
 beforeEach(() => {
   localStorage.clear()
   global.fetch = vi.fn(url => {
-    if (url === '/api/official-rankings') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
+    if (url === '/api/official-rankings?boardCount=6') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
     if (url === '/api/official-rankings?classId=c1') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ contests: CONTESTS, points: [], bestAssets: [] }) })
     }
@@ -58,7 +58,7 @@ describe('OfficialRankingPage', () => {
     expect(screen.getByRole('combobox', { name: '대회 선택' })).toHaveValue('')
     expect(screen.getByRole('option', { name: '전체 대회' })).toBeInTheDocument()
     expect(screen.getAllByText('1,500,000원').length).toBeGreaterThan(0)
-    expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
+    expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings?boardCount=6')
   })
 
   it('탭은 총자산, 승점 순서이고 소제목은 대회 순위 안내다', async () => {
@@ -77,7 +77,7 @@ describe('OfficialRankingPage', () => {
     await userEvent.click(screen.getByRole('button', { name: '승점' }))
     expect(screen.getAllByText('24.5점').length).toBeGreaterThan(0)
     expect(screen.getAllByText('2026 시즌1 · C팀 · 팀 내 2위').length).toBeGreaterThan(0)
-    expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings')
+    expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings?boardCount=6')
   })
 
   it('총자산 탭은 원 단위로 보여 주고 참고용 안내는 없다', async () => {
@@ -121,7 +121,7 @@ describe('OfficialRankingPage', () => {
       if (url === '/api/official-rankings?classId=c1') {
         return new Promise(resolve => { resolveContest = () => resolve({ ok: true, json: () => Promise.resolve(STALE) }) })
       }
-      if (url === '/api/official-rankings') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
+      if (url === '/api/official-rankings?boardCount=6') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
       return Promise.reject(new Error(url))
     })
     renderAt('/ranking/official?classId=c1')
@@ -137,7 +137,7 @@ describe('OfficialRankingPage', () => {
     let fail = false
     global.fetch = vi.fn(url => {
       if (fail) return Promise.resolve({ ok: false, json: () => Promise.resolve({}) })
-      if (url === '/api/official-rankings') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
+      if (url === '/api/official-rankings?boardCount=6') return Promise.resolve({ ok: true, json: () => Promise.resolve(ALL) })
       return Promise.reject(new Error(url))
     })
     renderAt()
@@ -167,5 +167,33 @@ describe('OfficialRankingPage', () => {
     await screen.findAllByText('박병윤')
     expect(screen.getByRole('button', { name: '총자산' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '승점' })).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+describe('OfficialRankingPage 진행 방식', () => {
+  it('탭 아래 5판/6판 체크박스로 진행 방식별 순위를 조회하고, 대회 목록도 그 방식만 보여 준다', async () => {
+    const contests = [...CONTESTS.map(c => ({ ...c, boardCount: 6 })), { id: 'c5', name: '5판 대회', boardCount: 5 }]
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ ...ALL, contests }) }))
+    renderAt()
+    await screen.findAllByText('박병윤')
+    const six = screen.getByRole('checkbox', { name: '6판' })
+    const five = screen.getByRole('checkbox', { name: '5판' })
+    expect(six).toBeChecked()
+    expect(five).not.toBeChecked()
+    expect(screen.queryByRole('option', { name: '5판 대회' })).not.toBeInTheDocument()
+
+    await userEvent.click(five)
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/official-rankings?boardCount=5'))
+    expect(screen.getByRole('checkbox', { name: '5판' })).toBeChecked()
+    expect(screen.getByRole('option', { name: '5판 대회' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: '2026 시즌1' })).not.toBeInTheDocument()
+  })
+
+  it('5판 대회로 바로 들어오면 체크박스가 5판으로 맞춰진다', async () => {
+    const contests = [{ id: 'c5', name: '5판 대회', boardCount: 5 }]
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ contests, points: [], bestAssets: [] }) }))
+    renderAt('/ranking/official?classId=c5')
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: '5판' })).toBeChecked())
+    expect(screen.getByRole('combobox', { name: '대회 선택' })).toHaveValue('c5')
   })
 })

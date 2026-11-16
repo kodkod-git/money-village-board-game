@@ -15,7 +15,8 @@ function winnerNames(winners) {
 
 // 인트로 → 게임별 1등 → 전체 1위 → 주식·부동산 가격 비교 → 팀별 총 자산 → 우승 팀.
 // 게임이 하나면 게임별 1등이 전체 1위와 겹치므로 빼고, 가격 차이가 없는 종류의 비교 장도 뺀다.
-function buildSlides(className, recap) {
+// hideRealEstate: 5판 게임은 부동산이 없어 부동산 가격 비교 장을 뺀다.
+function buildSlides(className, recap, hideRealEstate = false) {
   const { teams, games } = recap
   const players = teams.flatMap(team => team.members)
 
@@ -45,7 +46,7 @@ function buildSlides(className, recap) {
   ]
 
   const overallWinners = topTeams(players, 'totalAssets')
-  const priceSlides = ['stock', 'estate']
+  const priceSlides = (hideRealEstate ? ['stock'] : ['stock', 'estate'])
     .map(kind => ({ kind, comparison: buildPriceComparison(games, kind) }))
     .filter(({ comparison }) => comparison)
     .map(({ kind, comparison }) => ({
@@ -77,7 +78,7 @@ function buildSlides(className, recap) {
       ),
     },
     ...(priceSlides.length > 0
-      ? [{ key: 'price-intro', theme: 'total', content: <RecapPriceIntroSlide /> }, ...priceSlides]
+      ? [{ key: 'price-intro', theme: 'total', content: <RecapPriceIntroSlide hideRealEstate={hideRealEstate} /> }, ...priceSlides]
       : []),
     { key: 'versus', theme: 'versus', content: <RecapVersusSlide teams={teams} /> },
     {
@@ -98,14 +99,14 @@ function buildSlides(className, recap) {
 
 // 팀 대결 결과 스토리: 어두운 오버레이 위 세로 카드를 인스타그램 스토리처럼 넘겨 본다.
 // 자동으로 넘어가지 않는다(선생님이 설명하며 넘긴다). 배경을 눌러도 닫히지 않는다.
-export default function ClanRecapStory({ className, recap, onClose }) {
+export default function ClanRecapStory({ className, recap, onClose, hideRealEstate = false }) {
   const [index, setIndex] = useState(0)
   const dialogRef = useRef(null)
   const cardRef = useRef(null)
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
 
-  const slides = buildSlides(className, recap)
+  const slides = buildSlides(className, recap, hideRealEstate)
   const last = slides.length - 1
   const slide = slides[index]
 

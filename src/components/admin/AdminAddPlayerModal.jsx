@@ -6,6 +6,7 @@ import BadgePicker from '../BadgePicker'
 import AssetListEditor from '../AssetListEditor'
 import NumberInputModal from '../NumberInputModal'
 import CharacterCard from '../CharacterCard'
+import { assetSteps } from '../AssetInputSteps'
 import ConfirmDialog from './ConfirmDialog'
 import useOfficialNameResolve from '../../hooks/useOfficialNameResolve'
 import { CHARACTERS } from '../../constants/characters'
@@ -22,12 +23,10 @@ import styles from './AdminAddPlayerModal.module.css'
 
 // 참가자가 실제로 거치는 화면(NameInput → CharacterSelect → IndividualPage)과
 // 똑같이 보이도록 각 화면의 CSS 모듈을 그대로 가져다 쓴다. 자산 입력 단계의
-// StepBar도 참가자 화면과 같은 5단계다.
+// StepBar도 참가자 화면과 같은 단계다(6판 5단계, 5판은 부동산을 뺀 4단계).
 const STEP_NAME = 0
 const STEP_CHARACTER = 1
 const ASSET_STEP_OFFSET = 2
-const ASSET_STEPS = ['직업', '성공열쇠', '주식', '부동산', '현금']
-const LAST_STEP = ASSET_STEP_OFFSET + ASSET_STEPS.length - 1
 
 function defaultDraft() {
   return {
@@ -44,7 +43,9 @@ function priceLabelsFor(prices, category) {
   ]))
 }
 
-export default function AdminAddPlayerModal({ code, prices, official = null, onSaved, onClose }) {
+export default function AdminAddPlayerModal({ code, prices, official = null, onSaved, onClose, hideRealEstate = false }) {
+  const steps = assetSteps(hideRealEstate)
+  const LAST_STEP = ASSET_STEP_OFFSET + steps.length - 1
   const [step, setStep] = useState(STEP_NAME)
   const [completedUpTo, setCompletedUpTo] = useState(-1)
   const [draft, setDraft] = useState(defaultDraft)
@@ -58,6 +59,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
   const frameRef = useRef(null)
 
   const assetStep = step - ASSET_STEP_OFFSET
+  const assetStepKey = assetStep >= 0 ? steps[assetStep]?.key : null
 
   async function handleFinish() {
     if (saving) return
@@ -131,14 +133,14 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
       <div className={`${assetStyles.page} ${assetStyles.pageFill}`}>
         <BackButton onClick={handleBack} />
         <StepBar
-          steps={ASSET_STEPS}
+          steps={steps.map(s => s.label)}
           currentStep={assetStep}
           completedUpTo={completedUpTo}
           onStepClick={completedUpTo >= 0 ? i => setStep(ASSET_STEP_OFFSET + i) : undefined}
         />
         <hr className={assetStyles.divider} />
 
-        {assetStep === 0 && (
+        {assetStepKey === 'job' && (
           <div className={`${assetStyles.stepContent} ${assetStyles.stepContentFill}`}>
             <h1 className={assetStyles.stepTitle}>직업 선택</h1>
             <p className={assetStyles.stepSubtitle}>나의 직업을 선택해주세요</p>
@@ -148,7 +150,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
           </div>
         )}
 
-        {assetStep === 1 && (
+        {assetStepKey === 'badges' && (
           <div className={`${assetStyles.stepContent} ${assetStyles.stepContentFill}`}>
             <h1 className={assetStyles.stepTitle}>성공열쇠</h1>
             <p className={assetStyles.stepSubtitle}>획득한 성공열쇠를 모두 선택해주세요</p>
@@ -166,7 +168,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
           </div>
         )}
 
-        {assetStep === 2 && (
+        {assetStepKey === 'stocks' && (
           <div className={`${assetStyles.stepContent} ${assetStyles.stepContentFill}`}>
             <h1 className={assetStyles.stepTitle}>주식</h1>
             <p className={assetStyles.stepSubtitle}>보유 수량을 선택해주세요</p>
@@ -184,7 +186,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
           </div>
         )}
 
-        {assetStep === 3 && (
+        {assetStepKey === 'realEstate' && (
           <div className={`${assetStyles.stepContent} ${assetStyles.stepContentFill}`}>
             <h1 className={assetStyles.stepTitle}>부동산</h1>
             <p className={assetStyles.stepSubtitle}>보유 수량을 선택해주세요</p>
@@ -202,7 +204,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
           </div>
         )}
 
-        {assetStep === 4 && (
+        {assetStepKey === 'cash' && (
           <div className={`${assetStyles.stepContent} ${assetStyles.stepContentFill}`}>
             <h1 className={assetStyles.stepTitle}>현금</h1>
             <p className={assetStyles.stepSubtitle}>보유 현금을 입력해주세요</p>
