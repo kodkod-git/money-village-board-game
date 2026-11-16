@@ -111,16 +111,18 @@ export default function AdminClassList({ profile, onSelectClass, onLogout }) {
 
       <div className={styles.content}>
         <form className={styles.createCard} onSubmit={handleCreate} aria-label="새 게임 만들기">
-          <input
-            className={styles.createInput}
-            placeholder="새 게임 이름"
-            aria-label="새 게임 이름"
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-          />
           <div className={styles.createOptions}>
             <SegmentedControl label="게임 종류" name="new-kind" options={KIND_OPTIONS} value={newKind} onChange={setNewKind} />
             <SegmentedControl label="진행 방식" name="new-board" options={BOARD_OPTIONS} value={newBoardCount} onChange={setNewBoardCount} />
+          </div>
+          <div className={styles.createRow}>
+            <input
+              className={styles.createInput}
+              placeholder="새 게임 이름"
+              aria-label="새 게임 이름"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+            />
             <button type="submit" className={styles.createBtn}>생성하기</button>
           </div>
           {error && <p className={styles.error}>{error}</p>}
