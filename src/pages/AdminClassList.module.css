@@ -23,7 +23,9 @@
   padding: 16px; border: 1px solid var(--admin-border); border-radius: var(--admin-r-md);
   background: var(--admin-surface);
 }
+.createRow { display: flex; gap: 8px; }
 .createInput {
+  flex: 1; min-width: 0;
   height: 44px; padding: 0 14px;
   border: 1px solid var(--admin-border); border-radius: var(--admin-r-sm); font-size: 14px;
   background: var(--admin-input-bg); color: var(--admin-text);
@@ -43,8 +45,8 @@
 .segmentActive { background: var(--admin-surface); color: var(--admin-blue); box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12); }
 .segmentHint { font-size: 11px; font-weight: 500; color: var(--admin-text-3); }
 .createBtn {
-  margin-left: auto;
-  height: 40px; padding: 0 22px; border: none; border-radius: var(--admin-r-sm);
+  flex-shrink: 0;
+  height: 44px; padding: 0 22px; border: none; border-radius: var(--admin-r-sm);
   background: var(--admin-blue); color: white; font-size: 13px; font-weight: 700;
 }
 .error { color: #e53935; font-size: 12px; }
@@ -55,7 +57,8 @@
 .list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .item {
   display: flex; align-items: center; gap: 8px;
-  border: 1px solid var(--admin-border); border-radius: var(--admin-r-md); padding: 4px;
+  /* 오른쪽 여백(18px)을 제목·생성일 왼쪽 여백(행 4px + 버튼 14px)과 맞춘다 */
+  border: 1px solid var(--admin-border); border-radius: var(--admin-r-md); padding: 4px 18px 4px 4px;
   background: var(--admin-surface);
 }
 .itemBtn {
@@ -103,7 +106,7 @@
 
   .segment { flex: 1; justify-content: center; }
 
-  .createBtn { margin-left: 0; height: 44px; font-size: 14px; }
+  .createBtn { padding: 0 16px; font-size: 14px; }
 
   .item { padding: 4px 8px 4px 4px; }
 
