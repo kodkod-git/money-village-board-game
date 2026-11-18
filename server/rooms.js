@@ -30,7 +30,7 @@ export function defaultGameState() {
   return {
     cash: null,
     job: null,
-    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, beauty: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
     jobVisited: false,
@@ -42,7 +42,7 @@ export function defaultGameState() {
 
 function defaultPrices() {
   return {
-    stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000 },
+    stocks: { semiconductor: 2000, finance: 2000, industrial: 2000, auto: 2000, bio: 2000, content: 2000, beauty: 2000 },
     realEstate: { gaon: 10000, nuri: 10000, dami: 10000, maru: 10000, chorong: 10000, hani: 10000 },
   }
 }

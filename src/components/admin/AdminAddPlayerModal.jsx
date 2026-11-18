@@ -13,7 +13,7 @@ import { CHARACTERS } from '../../constants/characters'
 import { DEFAULT_PRICES } from '../PriceSettingModal'
 import {
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
-  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
+  STOCK_IMAGES, MAX_CASH, stockLabelsFor,
 } from '../../constants/gameData'
 import { adminFetch } from '../../utils/adminAuth'
 import nameStyles from '../../pages/NameInput.module.css'
@@ -32,7 +32,7 @@ function defaultDraft() {
   return {
     name: '', character: null, job: null,
     badges: [false, false, false, false, false, false],
-    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, beauty: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
   }
 }
@@ -175,7 +175,7 @@ export default function AdminAddPlayerModal({ code, prices, official = null, onS
             <div className={assetStyles.fillWrapper}>
               <AssetListEditor
                 fill
-                labels={STOCK_LABELS}
+                labels={stockLabelsFor(hideRealEstate)}
                 images={STOCK_IMAGES}
                 priceLabels={priceLabelsFor(prices, 'stocks')}
                 imageFolder="stock"

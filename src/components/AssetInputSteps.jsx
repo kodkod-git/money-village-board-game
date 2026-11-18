@@ -7,7 +7,7 @@ import NumberInputModal from './NumberInputModal'
 import { DEFAULT_PRICES } from './PriceSettingModal'
 import {
   REAL_ESTATE_LABELS, ESTATE_IMAGES,
-  STOCK_LABELS, STOCK_IMAGES, MAX_CASH,
+  STOCK_IMAGES, MAX_CASH, stockLabelsFor,
 } from '../constants/gameData'
 import styles from '../pages/IndividualPage.module.css'
 
@@ -33,7 +33,7 @@ function priceLabels(prices, category) {
 export function defaultGameState() {
   return {
     cash: 0, job: null,
-    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+    stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, beauty: 0 },
     realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
     badges: [false, false, false, false, false, false],
     jobVisited: false, badgesVisited: false, stocksVisited: false, realEstateVisited: false, isCompleted: false,
@@ -155,7 +155,7 @@ export default function AssetInputSteps({ gameState, onChange, onComplete, price
           <div className={styles.fillWrapper}>
             <AssetListEditor
               fill
-              labels={STOCK_LABELS}
+              labels={stockLabelsFor(hideRealEstate)}
               images={STOCK_IMAGES}
               priceLabels={priceLabels(prices, 'stocks')}
               imageFolder="stock"

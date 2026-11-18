@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { ROOM_STATUS_LABELS } from '../../constants/gameData'
-import PriceSettingModal, { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES } from '../PriceSettingModal'
+import PriceSettingModal, { STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES, DEFAULT_PRICES } from '../PriceSettingModal'
 import { adminFetch } from '../../utils/adminAuth'
 import { teamDisplayName } from '../../utils/teamDisplayName'
-import { hasRealEstate } from '../../constants/gameData'
+import { hasRealEstate, stockLabelsFor } from '../../constants/gameData'
 import styles from './AdminGridCard.module.css'
 
 const STATUS_BADGE_CLASS = {
@@ -29,7 +29,9 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
   const displayName = teamDisplayName(room, index)
   const slots = Array.from({ length: 4 }, (_, i) => room.players[i] ?? null)
   const badgeClassKey = !room.registered ? STATUS_BADGE_CLASS[room.status] : undefined
-  const priceLabels = tab === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
+  // 5판 게임은 뷰티 주식이 추가된다.
+  const priceLabels = tab === 'stocks' ? stockLabelsFor(!showRealEstate) : REAL_ESTATE_LABELS
+  const priceDefaults = tab === 'stocks' ? DEFAULT_PRICES.stocks : DEFAULT_PRICES.realEstate
   const priceImages = tab === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
   const priceFolder = tab === 'stocks' ? 'stock' : 'estate'
   const priceValues = tab === 'stocks' ? room.prices?.stocks : room.prices?.realEstate
@@ -119,7 +121,7 @@ export default function AdminGridCard({ room, index = 0, onSpectate, onRoomChang
               <div key={key} className={styles.priceRow}>
                 <img src={`/badges/${priceFolder}/${priceImages[key]}.png`} alt="" className={styles.priceIcon} />
                 <span className={styles.priceLabel}>{priceLabels[key]}</span>
-                <span className={styles.priceValue}>{(priceValues?.[key] ?? 0).toLocaleString()}원</span>
+                <span className={styles.priceValue}>{(priceValues?.[key] ?? priceDefaults[key] ?? 0).toLocaleString()}원</span>
               </div>
             ))}
           </div>

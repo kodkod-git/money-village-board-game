@@ -76,6 +76,16 @@ describe('buildPriceComparison', () => {
     ])
   })
 
+  it('5판 게임이면 뷰티 차트를 더해 4개를 그리고, 뷰티가 가장 비싸면 1위로 본다', () => {
+    const result = buildPriceComparison([
+      game(1, { ...A, beauty: 9000 }),
+      game(2, B),
+    ], 'stock', { fiveBoard: true })
+    expect(result.charts.map(c => c.label)).toEqual(['바이오', '반도체', '금융', '뷰티'])
+    expect(result.charts[3].image).toBe('/badges/stock/뷰티.png')
+    expect(result.title).toBe('주식의 경우 게임 1에서는 뷰티가 가장 비쌌는데, 게임 2에서는 반도체가 가장 비쌌네요!')
+  })
+
   it('부동산도 같은 구성으로 만든다', () => {
     const result = buildPriceComparison([
       game(1, null, { gaon: 90000, chorong: 10000, dami: 10000 }),

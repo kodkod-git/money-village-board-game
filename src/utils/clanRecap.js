@@ -1,5 +1,5 @@
 // 팀 대결 결과 스토리(ClanRecapStory)의 순위 계산과 문구.
-import { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, ESTATE_IMAGES } from '../constants/gameData'
+import { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, ESTATE_IMAGES, FIVE_BOARD_ONLY_STOCKS } from '../constants/gameData'
 import { DEFAULT_PRICES } from '../components/PriceSettingModal'
 
 export function topTeams(teams, valueKey) {
@@ -26,7 +26,7 @@ const PRICE_KINDS = {
   stock: {
     label: '주식',
     pricesKey: 'stockPrices',
-    order: ['bio', 'semiconductor', 'finance'],
+    order: ['bio', 'semiconductor', 'finance', 'beauty'],
     labels: STOCK_LABELS,
     imageOf: key => `/badges/stock/${STOCK_IMAGES[key]}.png`,
     basePrices: DEFAULT_PRICES.stocks,
@@ -68,8 +68,10 @@ function priceTitle(kindLabel, tops) {
 
 // 게임끼리 같은 종목의 가격을 비교할 자료. 가격 기록이 있는 게임이 둘 미만이거나
 // 모든 게임의 가격이 같으면 비교할 거리가 없어 null을 돌려준다.
-export function buildPriceComparison(allGames, kind) {
-  const { label, pricesKey, order, labels, imageOf, basePrices } = PRICE_KINDS[kind]
+// fiveBoard: 5판 게임이면 5판 전용 주식(뷰티)도 비교한다. 6판은 그 종목을 뺀다.
+export function buildPriceComparison(allGames, kind, { fiveBoard = false } = {}) {
+  const { label, pricesKey, order: allKeys, labels, imageOf, basePrices } = PRICE_KINDS[kind]
+  const order = fiveBoard ? allKeys : allKeys.filter(key => !FIVE_BOARD_ONLY_STOCKS.includes(key))
   // 가격 기록이 없는 옛 결과는 0원으로 오해되지 않게 빼고 그린다.
   const games = allGames
     .map((game, colorIndex) => ({ game, colorIndex }))

@@ -95,7 +95,7 @@ describe('AdminAddPlayerModal', () => {
           character: CHARACTERS[0],
           job: null,
           badges: [false, false, false, false, false, false],
-          stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0 },
+          stocks: { semiconductor: 0, finance: 0, industrial: 0, auto: 0, bio: 0, content: 0, beauty: 0 },
           realEstate: { gaon: 0, nuri: 0, dami: 0, maru: 0, chorong: 0, hani: 0 },
           cash: 0,
         }),

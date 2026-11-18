@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import NumberInputModal from '../NumberInputModal'
 import {
-  STOCK_LABELS, REAL_ESTATE_LABELS, DEFAULT_PRICES, STOCK_IMAGES, REAL_ESTATE_IMAGES,
+  REAL_ESTATE_LABELS, DEFAULT_PRICES, STOCK_IMAGES, REAL_ESTATE_IMAGES,
 } from '../PriceSettingModal'
-import { MAX_ASSET_PRICE } from '../../constants/gameData'
+import { MAX_ASSET_PRICE, stockLabelsFor } from '../../constants/gameData'
 import styles from './AdminPriceSettingModal.module.css'
 
-// hideRealEstate: 5판 게임은 부동산이 없으므로 주식 가격만 설정한다.
+// hideRealEstate: 5판 게임은 부동산이 없으므로 주식 가격만 설정하고, 5판 전용 주식(뷰티)도 보여준다.
 export default function AdminPriceSettingModal({ prices, onConfirm, onClose, initialCategory = 'stocks', hideRealEstate = false }) {
   const [category, setCategory] = useState(hideRealEstate ? 'stocks' : initialCategory)
   const [tempPrices, setTempPrices] = useState(prices)
@@ -16,7 +16,7 @@ export default function AdminPriceSettingModal({ prices, onConfirm, onClose, ini
     setTempPrices(prev => ({ ...prev, [category]: DEFAULT_PRICES[category] }))
   }
 
-  const labels = category === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
+  const labels = category === 'stocks' ? stockLabelsFor(hideRealEstate) : REAL_ESTATE_LABELS
   const images = category === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
   const folder = category === 'stocks' ? 'stock' : 'estate'
   const editingLabel = editingKey ? labels[editingKey] : null
@@ -59,7 +59,7 @@ export default function AdminPriceSettingModal({ prices, onConfirm, onClose, ini
                   <span className={styles.rowUnit}>단위: 원</span>
                 </div>
                 <button type="button" className={styles.pricePill} onClick={() => setEditingKey(key)}>
-                  {tempPrices[category][key].toLocaleString()} 원 ›
+                  {(tempPrices[category][key] ?? DEFAULT_PRICES[category][key]).toLocaleString()} 원 ›
                 </button>
               </div>
             ))}
