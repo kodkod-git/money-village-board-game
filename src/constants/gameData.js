@@ -30,11 +30,22 @@ export const ESTATE_PRICES = {
   gaon: '2만원', dami: '7만원', chorong: '10만원',
 }
 
+// 모든 주식 종목. 자산 계산은 이 전체 목록으로 한다(6판 게임은 뷰티를 보유할 수 없어
+// 항상 0주이므로 결과가 같다). 화면에 보여줄 종목은 stockLabelsFor로 고른다.
 export const STOCK_LABELS = {
-  semiconductor: '반도체', finance: '금융', bio: '바이오',
+  semiconductor: '반도체', finance: '금융', bio: '바이오', beauty: '뷰티',
 }
 export const STOCK_IMAGES = {
-  semiconductor: '반도체IT', finance: '금융산업', bio: '바이오헬스케어',
+  semiconductor: '반도체IT', finance: '금융산업', bio: '바이오헬스케어', beauty: '뷰티',
+}
+// 5판 게임에서만 거래하는 종목.
+export const FIVE_BOARD_ONLY_STOCKS = ['beauty']
+
+// 게임 진행 방식에 맞는 주식 종목 { 키: 이름 }. fiveBoard가 참이면 뷰티를 포함한 4종목,
+// 아니면(6판) 기존 3종목이다. 컴포넌트에서는 5판 여부인 hideRealEstate를 그대로 넘긴다.
+export function stockLabelsFor(fiveBoard) {
+  if (fiveBoard) return STOCK_LABELS
+  return Object.fromEntries(Object.entries(STOCK_LABELS).filter(([key]) => !FIVE_BOARD_ONLY_STOCKS.includes(key)))
 }
 
 export const MAX_CASH = 1000000000

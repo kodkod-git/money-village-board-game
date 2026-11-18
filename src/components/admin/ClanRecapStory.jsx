@@ -47,7 +47,7 @@ function buildSlides(className, recap, hideRealEstate = false) {
 
   const overallWinners = topTeams(players, 'totalAssets')
   const priceSlides = (hideRealEstate ? ['stock'] : ['stock', 'estate'])
-    .map(kind => ({ kind, comparison: buildPriceComparison(games, kind) }))
+    .map(kind => ({ kind, comparison: buildPriceComparison(games, kind, { fiveBoard: hideRealEstate }) }))
     .filter(({ comparison }) => comparison)
     .map(({ kind, comparison }) => ({
       key: `price-${kind}`,

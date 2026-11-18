@@ -2,17 +2,19 @@ import { useState } from 'react'
 import NumberInputModal from './NumberInputModal'
 import {
   MAX_ASSET_PRICE,
-  STOCK_LABELS, STOCK_IMAGES,
+  STOCK_IMAGES, stockLabelsFor,
   REAL_ESTATE_LABELS, ESTATE_IMAGES as REAL_ESTATE_IMAGES,
 } from '../constants/gameData'
+import { DEFAULT_PRICES } from './PriceSettingModal'
 import styles from './PriceSettingModal.module.css'
 
 // 한 종류(주식 또는 부동산)의 가격 목록과 계산기. 관리자 가격 설정 모달(PriceSettingModal)에서 쓴다.
 // prices: 그 종류의 { 종목키: 가격 } / onChange: 바뀐 { 종목키: 가격 } 전체를 받는다.
-export default function PriceListEditor({ category, prices, onChange }) {
+// fiveBoard: 5판 게임이면 5판 전용 주식(뷰티)도 보여준다.
+export default function PriceListEditor({ category, prices, onChange, fiveBoard = false }) {
   const [editingKey, setEditingKey] = useState(null)
 
-  const labels = category === 'stocks' ? STOCK_LABELS : REAL_ESTATE_LABELS
+  const labels = category === 'stocks' ? stockLabelsFor(fiveBoard) : REAL_ESTATE_LABELS
   const images = category === 'stocks' ? STOCK_IMAGES : REAL_ESTATE_IMAGES
   const folder = category === 'stocks' ? 'stock' : 'estate'
 
@@ -27,7 +29,7 @@ export default function PriceListEditor({ category, prices, onChange }) {
               <span className={styles.rowUnit}>단위: 원</span>
             </div>
             <button type="button" className={styles.pricePill} onClick={() => setEditingKey(key)}>
-              <span className={styles.priceValue}>{prices[key].toLocaleString()}</span>{' '}
+              <span className={styles.priceValue}>{(prices[key] ?? DEFAULT_PRICES[category][key]).toLocaleString()}</span>{' '}
               <span className={styles.priceUnitLabel}>원 ›</span>
             </button>
           </div>

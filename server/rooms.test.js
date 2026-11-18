@@ -335,7 +335,7 @@ describe('createRoom prices', () => {
     const room = createRoom()
     expect(room.prices.stocks).toEqual({
       semiconductor: 2000, finance: 2000, industrial: 2000,
-      auto: 2000, bio: 2000, content: 2000,
+      auto: 2000, bio: 2000, content: 2000, beauty: 2000,
     })
     expect(room.prices.realEstate).toEqual({
       gaon: 10000, nuri: 10000, dami: 10000,

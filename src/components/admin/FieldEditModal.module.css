@@ -142,6 +142,11 @@
   width: 100%;
 }
 
+/* 종목이 4개(5판 주식)면 3+1로 어긋나지 않게 2×2로 놓는다. 좁은 화면의 1열 규칙이 뒤에서 덮어쓴다. */
+.assetGridFour {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .assetTile {
   background: var(--admin-surface);
   border: 2px solid var(--admin-blue-faint);

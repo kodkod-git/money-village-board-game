@@ -9,7 +9,7 @@ import styles from './PriceSettingModal.module.css'
 export { STOCK_LABELS, STOCK_IMAGES, REAL_ESTATE_LABELS, REAL_ESTATE_IMAGES }
 
 export const DEFAULT_PRICES = {
-  stocks: { semiconductor: 2000, finance: 2000, bio: 2000 },
+  stocks: { semiconductor: 2000, finance: 2000, bio: 2000, beauty: 2000 },
   realEstate: { gaon: 10000, dami: 10000, chorong: 10000 },
 }
 
@@ -53,6 +53,7 @@ export default function PriceSettingModal({ prices, onConfirm, onClose, initialC
         <PriceListEditor
           category={category}
           prices={tempPrices[category]}
+          fiveBoard={hideRealEstate}
           onChange={next => setTempPrices(prev => ({ ...prev, [category]: next }))}
         />
 

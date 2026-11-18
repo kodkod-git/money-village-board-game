@@ -3,7 +3,7 @@ import {
   JOB_LABELS, JOB_ICONS, JOB_IMAGES, BADGE_NAMES, BADGE_LABELS,
   REAL_ESTATE_LABELS, ESTATE_IMAGES, ESTATE_PRICES,
   STOCK_LABELS, STOCK_IMAGES, ROOM_STATUS_LABELS,
-  MAX_ASSET_PRICE, MAX_ASSET_QUANTITY,
+  MAX_ASSET_PRICE, MAX_ASSET_QUANTITY, stockLabelsFor,
 } from './gameData'
 
 describe('gameData constants', () => {
@@ -26,10 +26,15 @@ describe('gameData constants', () => {
     expect(Object.keys(ESTATE_PRICES)).toEqual(keys)
   })
 
-  it('주식은 3개이며 라벨/이미지 키가 일치한다', () => {
+  it('주식은 뷰티를 포함해 4개이며 라벨/이미지 키가 일치한다', () => {
     const keys = Object.keys(STOCK_LABELS)
-    expect(keys).toHaveLength(3)
+    expect(keys).toHaveLength(4)
     expect(Object.keys(STOCK_IMAGES)).toEqual(keys)
+  })
+
+  it('6판은 기존 3종목, 5판은 뷰티를 더한 4종목을 쓴다', () => {
+    expect(Object.values(stockLabelsFor(false))).toEqual(['반도체', '금융', '바이오'])
+    expect(Object.values(stockLabelsFor(true))).toEqual(['반도체', '금융', '바이오', '뷰티'])
   })
 
   it('방 상태 라벨은 live/stale/abandoned/completed-but-unregistered 키를 갖는다', () => {

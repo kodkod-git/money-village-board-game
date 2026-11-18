@@ -171,6 +171,7 @@ export default function AdminEditModal({ player, prices, onSave = () => {}, onCl
         <StockEditModal
           values={gameState.stocks}
           prices={prices?.stocks}
+          fiveBoard={hideRealEstate}
           onChange={val => onSave('stocks', val)}
           onClose={() => setEditingField(null)}
         />

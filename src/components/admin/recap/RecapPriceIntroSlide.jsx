@@ -1,12 +1,15 @@
 import { STOCK_IMAGES, ESTATE_IMAGES } from '../../../constants/gameData'
 import styles from './RecapPriceIntroSlide.module.css'
 
-const STOCK_ICONS = ['bio', 'semiconductor', 'finance'].map(key => `/badges/stock/${STOCK_IMAGES[key]}.png`)
+const stockIcon = key => `/badges/stock/${STOCK_IMAGES[key]}.png`
+const STOCK_ICONS = ['bio', 'semiconductor', 'finance'].map(stockIcon)
+// 5판 게임은 뷰티 주식이 추가된다.
+const FIVE_BOARD_STOCK_ICONS = [...STOCK_ICONS, stockIcon('beauty')]
 const ESTATE_ICONS = ['gaon', 'chorong', 'dami'].map(key => `/badges/estate/${ESTATE_IMAGES[key]}.png`)
 
-// hideRealEstate: 5판 게임은 부동산이 없어 주식 가격만 이야기한다.
+// hideRealEstate: 5판 게임은 부동산이 없어 주식 가격만 이야기한다(뷰티 포함 4종목).
 export default function RecapPriceIntroSlide({ hideRealEstate = false }) {
-  const icons = hideRealEstate ? STOCK_ICONS : [...STOCK_ICONS, ...ESTATE_ICONS]
+  const icons = hideRealEstate ? FIVE_BOARD_STOCK_ICONS : [...STOCK_ICONS, ...ESTATE_ICONS]
   return (
     <div className={styles.slide}>
       <h2 className={styles.title}>흥미로운 결과도 있어요!</h2>

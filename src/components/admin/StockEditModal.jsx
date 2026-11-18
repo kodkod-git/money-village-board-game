@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { STOCK_LABELS, STOCK_IMAGES, MAX_ASSET_QUANTITY } from '../../constants/gameData'
+import { STOCK_IMAGES, MAX_ASSET_QUANTITY, stockLabelsFor } from '../../constants/gameData'
 import { DEFAULT_PRICES } from '../PriceSettingModal'
 import AssetQtyStepper from './AssetQtyStepper'
 import styles from './FieldEditModal.module.css'
 
-export default function StockEditModal({ values, prices, onChange, onClose }) {
+// fiveBoard: 5판 게임이면 5판 전용 주식(뷰티)도 수정할 수 있다.
+export default function StockEditModal({ values, prices, onChange, onClose, fiveBoard = false }) {
+  const labels = stockLabelsFor(fiveBoard)
   const [draft, setDraft] = useState(values)
 
   function setQty(key, raw) {
@@ -29,25 +31,25 @@ export default function StockEditModal({ values, prices, onChange, onClose }) {
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
         </div>
         <div className={styles.body}>
-          <div className={styles.assetGrid}>
-            {Object.keys(STOCK_LABELS).map(key => (
+          <div className={`${styles.assetGrid} ${Object.keys(labels).length === 4 ? styles.assetGridFour : ''}`}>
+            {Object.keys(labels).map(key => (
               <div key={key} className={styles.assetTile}>
                 <div className={styles.assetTileHead}>
                   <img
                     src={`/badges/stock/${STOCK_IMAGES[key]}.png`}
-                    alt={STOCK_LABELS[key]}
+                    alt={labels[key]}
                     className={styles.assetTileIcon}
                   />
                   <div className={styles.assetTileInfo}>
-                    <span className={styles.assetTileName}>{STOCK_LABELS[key]}</span>
+                    <span className={styles.assetTileName}>{labels[key]}</span>
                     <span className={styles.assetTilePrice}>{(prices?.[key] ?? DEFAULT_PRICES.stocks[key]).toLocaleString('ko-KR')}원</span>
                   </div>
                 </div>
                 <AssetQtyStepper
-                  value={draft[key]}
+                  value={draft[key] ?? 0}
                   onChange={raw => setQty(key, raw)}
                   max={MAX_ASSET_QUANTITY}
-                  label={STOCK_LABELS[key]}
+                  label={labels[key]}
                 />
               </div>
             ))}
