@@ -28,6 +28,7 @@ export default function SheetGrid({
   const focusCell = (row, col) => refs.current.get(`${row}:${col}`)?.focus()
 
   function handleCellKey(e, row, col, student, q) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return
     if (MOVES[e.key]) {
       e.preventDefault()
       const [dr, dc] = MOVES[e.key]
@@ -98,6 +99,8 @@ export default function SheetGrid({
                     <textarea
                       aria-label={`${label} 메모 입력`}
                       className={styles.memoBox}
+                      autoFocus
+                      onKeyDown={e => { if (e.key === 'Escape') setMemoOpen(null) }}
                       value={s.memo}
                       onChange={e => onSetMemo(s.key, e.target.value)}
                     />
@@ -139,6 +142,7 @@ export default function SheetGrid({
                           aria-label={`${studentLabel(s, col)} ${q.code}`}
                           className={className}
                           title={title}
+                          tabIndex={row === 0 ? 0 : -1}
                           onClick={() => onCycle(s.key, q.code)}
                           onKeyDown={e => handleCellKey(e, row, col, s, q)}
                         >{display(value)}</button>
@@ -154,25 +158,31 @@ export default function SheetGrid({
         <tfoot>
           <tr>
             <th colSpan={4} className={styles.sticky}>시민권</th>
-            {results.map((r, i) => <td key={students[i].key} className={styles.summary}>{r.citizenType ?? '–'}</td>)}
+            {students.map((s, i) => <td key={s.key} className={styles.summary}>{results[i]?.citizenType ?? '–'}</td>)}
             {!readOnly && <td />}
           </tr>
           <tr>
             <th colSpan={4} className={styles.sticky}>여권</th>
-            {results.map((r, i) => (
-              <td key={students[i].key} className={styles.summary}>
-                {r.passportType ?? <span className={styles.followUp}>보충 필요</span>}
-              </td>
-            ))}
+            {students.map((s, i) => {
+              const r = results[i]
+              return (
+                <td key={s.key} className={styles.summary}>
+                  {!r ? '–' : r.passportType ?? <span className={styles.followUp}>보충 필요</span>}
+                </td>
+              )
+            })}
             {!readOnly && <td />}
           </tr>
           <tr>
             <th colSpan={4} className={styles.sticky}>미응답</th>
-            {results.map((r, i) => (
-              <td key={students[i].key} className={styles.summary} title={r.missingCodes.join(', ')}>
-                {r.missingCodes.length}
-              </td>
-            ))}
+            {students.map((s, i) => {
+              const r = results[i]
+              return (
+                <td key={s.key} className={styles.summary} title={r?.missingCodes.join(', ')}>
+                  {r ? r.missingCodes.length : ''}
+                </td>
+              )
+            })}
             {!readOnly && <td />}
           </tr>
         </tfoot>

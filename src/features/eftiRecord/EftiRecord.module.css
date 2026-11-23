@@ -23,7 +23,7 @@
 .grid { border-collapse: separate; border-spacing: 0; font-size: 13px; color: var(--admin-text); }
 .grid th, .grid td { border-bottom: 1px solid var(--admin-border); border-right: 1px solid var(--admin-border); padding: 4px 6px; background: var(--admin-surface); }
 .grid thead th { position: sticky; top: 0; z-index: 2; background: var(--admin-icon-bg); vertical-align: top; }
-.grid tfoot th, .grid tfoot td { position: sticky; bottom: 0; z-index: 2; background: var(--admin-blue-soft); font-weight: 600; }
+.grid tfoot th, .grid tfoot td { position: sticky; bottom: 0; z-index: 2; background: var(--admin-blue-soft); font-weight: 600; height: 28px; line-height: 18px; }
 .grid tfoot tr:nth-child(1) th, .grid tfoot tr:nth-child(1) td { bottom: 56px; }
 .grid tfoot tr:nth-child(2) th, .grid tfoot tr:nth-child(2) td { bottom: 28px; }
 .sticky { position: sticky; z-index: 1; }

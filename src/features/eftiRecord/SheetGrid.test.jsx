@@ -101,4 +101,19 @@ describe('SheetGrid', () => {
     expect(screen.getByText('3')).toHaveAttribute('title', '1 또는 2만')
     expect(screen.queryByRole('button', { name: '+ 학생' })).not.toBeInTheDocument()
   })
+
+  it('답 칸은 첫 행만 Tab 정지점이다', () => {
+    render(<Harness />)
+    expect(cell('학생 1 01')).toHaveAttribute('tabindex', '0')
+    expect(cell('학생 1 02')).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('메모 버튼으로 메모 칸을 열면 포커스되고 Escape 로 닫힌다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(cell('학생 1 메모'))
+    expect(screen.getByLabelText('학생 1 메모 입력')).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByLabelText('학생 1 메모 입력')).not.toBeInTheDocument()
+  })
 })

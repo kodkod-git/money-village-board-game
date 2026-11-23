@@ -20,7 +20,7 @@ async function request(path, options) {
 }
 
 const headerQuery = h => new URLSearchParams({
-  teacher_name: h.teacherName, class_name: h.className, class_time: h.classTime, completed_on: h.completedOn,
+  teacher_name: h.teacherName ?? '', class_name: h.className ?? '', class_time: h.classTime ?? '', completed_on: h.completedOn ?? '',
 }).toString()
 
 export const fetchQuestions = () => request('/questions')
@@ -62,5 +62,5 @@ export async function downloadTemplate() {
   document.body.appendChild(a)
   a.click()
   a.remove()
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 0)
 }
