@@ -1,5 +1,5 @@
 -- EFTI 성향기록지 DB 검증 스크립트
--- 2026-11-19-add-efti-record-schema.sql 적용 후 SQL Editor(또는 psql)에서 실행한다.
+-- 2026-11-19-add-efti-record-schema.sql 과 2026-11-23-efti-record-webapp.sql 적용 후 SQL Editor(또는 psql)에서 실행한다.
 -- 트랜잭션 안에서 샘플을 넣고 확인한 뒤 ROLLBACK 하므로 실제 데이터는 남지 않는다.
 -- 기대값과 다르면 RAISE EXCEPTION 으로 멈춘다. 끝까지 가면 'ALL PASSED' 를 알린다.
 
@@ -111,6 +111,59 @@ BEGIN
     VALUES ('검증반', '토 10:00', '검증선생', 'all1', '2026-11-19');
     RAISE EXCEPTION '중복 행이 들어감 (UNIQUE 누락)';
   EXCEPTION WHEN unique_violation THEN NULL;
+  END;
+
+  -- 8. memo 컬럼과 뷰 출력
+  UPDATE efti_record.records SET memo = '보충 예정' WHERE nickname = 'miss2' AND class_name = '검증반';
+  SELECT * INTO v FROM efti_record.record_results WHERE nickname = 'miss2' AND class_name = '검증반';
+  IF v.memo IS DISTINCT FROM '보충 예정' THEN RAISE EXCEPTION 'record_results.memo: 보충 예정 기대, % 나옴', v.memo; END IF;
+
+  -- 9. save_sheet: 새 기록지 저장 → 헤더 변경 + 삭제 + 업데이트
+  PERFORM efti_record.save_sheet(
+    NULL,
+    '{"class_name":"저장반","class_time":"일 10:00","teacher_name":"검증선생","completed_on":"2026-11-23"}',
+    '[{"nickname":" 가 ","answers":{"q01":1}},{"nickname":"나","memo":"결석","answers":{"q01":2}}]',
+    NULL);
+  SELECT count(*) INTO n FROM efti_record.records WHERE class_name = '저장반' AND class_time = '일 10:00';
+  IF n <> 2 THEN RAISE EXCEPTION 'save_sheet 새 기록지: 2행 기대, %행', n; END IF;
+
+  PERFORM efti_record.save_sheet(
+    '{"class_name":"저장반","class_time":"일 10:00","teacher_name":"검증선생","completed_on":"2026-11-23"}',
+    '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+    jsonb_build_array(jsonb_build_object(
+      'id', (SELECT id FROM efti_record.records WHERE class_name = '저장반' AND nickname = '가'),
+      'nickname', '가나',
+      'answers', jsonb_build_object('q01', 2, 'q02', 1))),
+    ARRAY[(SELECT id FROM efti_record.records WHERE class_name = '저장반' AND nickname = '나')]);
+  SELECT count(*) INTO n FROM efti_record.records WHERE class_name = '저장반';
+  IF n <> 1 THEN RAISE EXCEPTION 'save_sheet 삭제: 1행 기대, %행', n; END IF;
+  SELECT * INTO v FROM efti_record.records WHERE class_name = '저장반';
+  IF (v.class_time, v.completed_on, v.nickname, v.q01, v.q02, v.memo)
+     IS DISTINCT FROM ('일 11:00'::text, '2026-11-30'::date, '가나'::text, 2::smallint, 1::smallint, NULL::text) THEN
+    RAISE EXCEPTION 'save_sheet 헤더 변경·업데이트 결과 불일치';
+  END IF;
+
+  -- 10. 이미 있는 기록지 헤더로 바꾸면 unique_violation
+  BEGIN
+    PERFORM efti_record.save_sheet(
+      '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+      '{"class_name":"검증반","class_time":"토 10:00","teacher_name":"검증선생","completed_on":"2026-11-19"}',
+      '[]', NULL);
+    RAISE EXCEPTION '이미 있는 기록지 헤더로 바뀜 (충돌 검사 누락)';
+  EXCEPTION WHEN unique_violation THEN NULL;
+  END;
+
+  -- 11. 다른 기록지 학생 id 로 업데이트하면 no_data_found
+  BEGIN
+    PERFORM efti_record.save_sheet(
+      NULL,
+      '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+      jsonb_build_array(jsonb_build_object(
+        'id', (SELECT id FROM efti_record.records WHERE nickname = 'all1' AND class_name = '검증반'),
+        'nickname', 'x', 'answers', '{}'::jsonb)),
+      NULL);
+    RAISE EXCEPTION '다른 기록지 학생이 업데이트됨';
+  EXCEPTION WHEN no_data_found THEN NULL;
   END;
 
   RAISE NOTICE 'EFTI record verify: ALL PASSED';
