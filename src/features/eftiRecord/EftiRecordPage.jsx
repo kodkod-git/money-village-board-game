@@ -25,6 +25,9 @@ export default function EftiRecordPage({ profile, onDirtyChange }) {
       .catch(() => setError('문항을 불러오지 못했어요. Exposed schemas 설정을 확인해 주세요'))
   }, [])
 
+  // 화면이 사라지면(예: 창이 좁아져 PC 전용 안내로 바뀜) 저장 안 한 변경 표시도 함께 지운다.
+  useEffect(() => () => onDirtyChange?.(false), [onDirtyChange])
+
   const handleDirty = useCallback(value => {
     setDirty(value)
     onDirtyChange?.(value)

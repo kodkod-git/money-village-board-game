@@ -179,7 +179,7 @@ BEGIN
   SELECT count(*), string_agg(nickname, ',' ORDER BY nickname) INTO n, cols
     FROM efti_record.records WHERE class_name = '저장반';
   IF n <> 2 OR cols IS DISTINCT FROM '가나,다' THEN
-    RAISE EXCEPTION 'save_sheet 이름 맞바꿈: 2행(가나,다) 기대, %행(%)', n, cols;
+    RAISE EXCEPTION 'save_sheet 이름 변경 후 옛 이름 추가:2행(가나,다) 기대, %행(%)', n, cols;
   END IF;
 
   -- 13. 원래 기록지가 없으면 no_data_found

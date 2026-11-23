@@ -145,7 +145,7 @@ BEGIN
     INTO cols, vals, sets
     FROM questions;
 
-  -- 1차: id 있는 학생(수정), 2차: id 없는 학생(추가). 이름을 맞바꾸거나 옮기고 새로 추가해도 UNIQUE 에 걸리지 않게 한다.
+  -- 1차: id 있는 학생(수정), 2차: id 없는 학생(추가). 기존 학생 이름을 바꾸고 옛 이름으로 새 학생을 추가해도 UNIQUE 에 걸리지 않게 한다. (기존 두 학생의 이름 맞바꿈은 UNIQUE 가 즉시 검사되어 23505 로 실패한다.)
   FOR pass IN 1..2 LOOP
     FOR s IN SELECT value FROM jsonb_array_elements(COALESCE(p_students, '[]'::jsonb))
               WHERE (value ->> 'id' IS NOT NULL) = (pass = 1) LOOP
