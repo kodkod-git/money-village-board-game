@@ -104,4 +104,15 @@ describe('SheetEditor', () => {
     await user.upload(screen.getByLabelText('업로드 파일'), new File(['x'], 'sheet.xlsx'))
     expect(await screen.findByRole('dialog', { name: '업로드 미리보기' })).toBeInTheDocument()
   })
+
+  it('저장 중에는 입력이 잠긴다', async () => {
+    const user = userEvent.setup()
+    api.saveSheet.mockReturnValue(new Promise(() => {}))
+    render(<SheetEditor questions={QUESTIONS} profile={PROFILE} />)
+    await fillHeader(user)
+    await user.type(screen.getByLabelText('학생 1 이름'), '민준')
+    await user.click(screen.getByRole('button', { name: '민준 01' }))
+    await user.click(screen.getByRole('button', { name: '저장' }))
+    expect(screen.getByRole('button', { name: '민준 01' })).toBeDisabled()
+  })
 })

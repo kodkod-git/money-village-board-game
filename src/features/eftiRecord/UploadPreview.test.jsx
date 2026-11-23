@@ -60,4 +60,13 @@ describe('UploadPreview', () => {
     await user.click(screen.getByRole('button', { name: '저장' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('이미 있어요')
   })
+
+  it('Escape 로 닫고 취소 버튼에 포커스가 있다', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(<UploadPreview questions={QUESTIONS} preview={PREVIEW} onCancel={onCancel} onSaved={vi.fn()} />)
+    expect(screen.getByRole('button', { name: '취소' })).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(onCancel).toHaveBeenCalled()
+  })
 })

@@ -38,6 +38,8 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
   const [confirm, setConfirm] = useState(null)
   const [preview, setPreview] = useState(null)
   const [focusKey, setFocusKey] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const requestRef = useRef(0)
   const fileRef = useRef(null)
 
   const refreshSheets = useCallback(() => {
@@ -60,11 +62,11 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
 
   const edit = action => { setServerErrors([]); setStatus(null); dispatch(action) }
 
-  function resetTo(next, focusNickname = null) {
+  const resetTo = useCallback((next, focusNickname = null) => {
     dispatch({ type: 'reset', state: next })
     setServerErrors([])
     setFocusKey(next.students.find(s => s.nickname === focusNickname)?.key ?? null)
-  }
+  }, [])
 
   function guard(action) {
     if (!state.dirty) return action()
@@ -77,14 +79,17 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
   }
 
   const openSheet = useCallback(async (header, nickname = null) => {
+    const request = ++requestRef.current
     try {
       const sheet = await api.fetchSheet(header)
+      if (request !== requestRef.current) return
       resetTo(loadedSheetState(sheet.header, sheet.students), nickname)
       setStatus(null)
     } catch (err) {
+      if (request !== requestRef.current) return
       setStatus({ tone: 'error', text: err?.errors?.[0]?.message ?? '기록지를 열지 못했어요' })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [resetTo])
 
   useEffect(() => {
     if (target) openSheet(target.header, target.nickname ?? null)
@@ -141,10 +146,13 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+    setUploading(true)
     try {
       setPreview(await api.uploadFile(file))
     } catch (err) {
       setStatus({ tone: 'error', text: err?.errors?.[0]?.message ?? '파일을 읽지 못했어요' })
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -170,6 +178,7 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
 
   return (
     <>
+      <fieldset disabled={saving} className={styles.fieldset}>
       <div className={styles.toolbar}>
         <button type="button" className={styles.button} onClick={() => guard(() => resetTo(initialSheetState(questions, profile.username)))}>
           새 기록지
@@ -205,7 +214,7 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
         <button type="button" className={styles.button} onClick={() => api.downloadTemplate().catch(() => setStatus({ tone: 'error', text: '템플릿을 받지 못했어요' }))}>
           엑셀 템플릿 받기
         </button>
-        <button type="button" className={styles.button} onClick={() => guard(() => fileRef.current?.click())}>
+        <button type="button" className={styles.button} disabled={uploading} onClick={() => guard(() => fileRef.current?.click())}>
           파일 업로드
         </button>
         <input
@@ -253,6 +262,7 @@ export default function SheetEditor({ questions, profile, target = null, onDirty
         onRemove={removeStudent}
         onAdd={() => edit({ type: 'addStudent', questions })}
       />
+      </fieldset>
 
       {preview && (
         <UploadPreview questions={questions} preview={preview} onCancel={() => setPreview(null)} onSaved={handleUploaded} />

@@ -70,3 +70,5 @@
 .resultsTable tbody tr:hover td { background: var(--admin-blue-soft); }
 .rowFollowUp td { background: #fff7f7; }
 .empty { padding: 32px; text-align: center; color: var(--admin-text-3); }
+
+.fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: contents; }
