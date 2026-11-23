@@ -32,7 +32,8 @@ shared/eftiRecord/                 프레임워크와 무관한 순수 JS (프�
   scoring.js       computeResult(answers, questions)
                    → { citizenType, passportType, citizenCounts, passportCounts, missingCodes }
   validation.js    validateSheet(sheet, questions) → 오류 목록
-  sheetFormat.js   기록지 표 ↔ records 행 변환, 업로드 문항 행 일치 검사
+  sheetFormat.js   기록지 표 ↔ records 행 변환, 정규화, 바뀐 문항 수
+  grid.js          업로드 표(2차원 배열) → 기록지 파싱, 문항 행 일치 검사, 셀 주소 붙이기, CSV 파서
 server/eftiRecord/
   client.js        efti_record 스키마용 supabase 클라이언트 (server/supabaseSurvey.js 패턴)
   repo.js          기록지 조회·저장(save_sheet RPC)·삭제, 결과 조회. DB 접근은 여기만
@@ -76,7 +77,8 @@ src/features/eftiRecord/
 2. `record_results` 뷰를 `CREATE OR REPLACE VIEW` 로 다시 만들고 출력 **맨 끝**에 `memo` 를 추가한다 (기존 컬럼 순서 유지, `security_invoker = true` 유지).
 3. 함수 `efti_record.save_sheet(p_original jsonb, p_header jsonb, p_students jsonb, p_delete_ids uuid[]) RETURNS SETOF uuid`
    - `LANGUAGE plpgsql`, 한 트랜잭션으로 실행한다.
-   - `p_original` (헤더 4개 키, NULL 이면 새 기록지)이 있고 `p_header` 와 다르면, 원래 헤더의 모든 행을 `UPDATE` 로 새 헤더로 바꾼다.
+   - `p_original` (헤더 4개 키, NULL 이면 새 기록지 또는 업로드)이 있고 `p_header` 와 다르면, 새 헤더에 이미 행이 있을 때 `unique_violation` 으로 거부하고, 없으면 원래 헤더의 모든 행을 `UPDATE` 로 새 헤더로 바꾼다.
+   - `p_original` 이 NULL 인데 같은 헤더 기록지가 이미 있으면 그 기록지에 학생을 더한다 (업로드 병합과 같은 동작).
    - `p_delete_ids` 행을 삭제한다. 단, 새 헤더 기록지에 속한 행만 삭제한다.
    - `p_students` 각 항목: `id` 가 있으면 그 행(새 헤더 기록지에 속해야 함)을 `UPDATE`, 없으면 `INSERT`. 문항 컬럼은 `questions.column_name` 으로 찾는다 (코드 하드코딩 없음). `answers` 에 없는 코드는 NULL.
    - 저장된 행 id를 반환한다.
