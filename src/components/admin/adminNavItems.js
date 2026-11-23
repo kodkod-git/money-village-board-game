@@ -7,5 +7,7 @@ export const NAV_ITEMS = [
   { key: 'responses', label: '테스트 분석', icon: '/icons/assignment.png', superOnly: true, mobile: false },
   // 모든 수업의 참가자 결과를 보여 주므로 마찬가지로 마스터 관리자 전용이다.
   { key: 'all-results', label: '게임 분석', icon: '/icons/IconGame.svg', superOnly: true, mobile: false },
+  // 학생 성향기록지(입력 표가 넓어) PC 전용. 일반 관리자는 자기 기록만 본다.
+  { key: 'efti-record', label: 'EFTI 성향기록', icon: '/icons/IconTable.png', mobile: false },
   { key: 'settings', label: '설정', icon: '/icons/IconSettings.png' },
 ]
