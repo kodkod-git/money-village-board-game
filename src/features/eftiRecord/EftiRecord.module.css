@@ -1,0 +1,72 @@
+/* EFTI 성향기록 화면 전체 스타일. 색은 index.css 의 --admin-* 변수를 쓴다. */
+.page { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.title { margin: 0; font-size: 22px; font-weight: 700; color: var(--admin-text); }
+.tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--admin-border); }
+.tab { padding: 10px 16px; border: none; background: none; font-size: 15px; color: var(--admin-text-2); cursor: pointer; border-bottom: 2px solid transparent; }
+.tabActive { color: var(--admin-blue); border-bottom-color: var(--admin-blue); font-weight: 600; }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 12px; padding: 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--admin-text-2); }
+.field input, .field select { height: 36px; padding: 0 10px; border: 1px solid var(--admin-border); border-radius: 8px; background: var(--admin-input-bg); font-size: 14px; color: var(--admin-text); }
+.field input[readonly] { color: var(--admin-text-3); }
+.spacer { flex: 1; }
+.button { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--admin-border); background: var(--admin-surface); font-size: 14px; cursor: pointer; color: var(--admin-text); }
+.button:disabled { opacity: 0.45; cursor: not-allowed; }
+.primary { background: var(--admin-blue); border-color: var(--admin-blue); color: #fff; }
+.danger { color: #d64545; }
+.status { margin: 0; font-size: 14px; }
+.statusOk { color: var(--admin-blue); }
+.statusError { color: #d64545; }
+.hiddenInput { display: none; }
+
+.gridWrap { overflow: auto; max-height: calc(100vh - 300px); border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
+.grid { border-collapse: separate; border-spacing: 0; font-size: 13px; color: var(--admin-text); }
+.grid th, .grid td { border-bottom: 1px solid var(--admin-border); border-right: 1px solid var(--admin-border); padding: 4px 6px; background: var(--admin-surface); }
+.grid thead th { position: sticky; top: 0; z-index: 2; background: var(--admin-icon-bg); vertical-align: top; }
+.grid tfoot th, .grid tfoot td { position: sticky; bottom: 0; z-index: 2; background: var(--admin-blue-soft); font-weight: 600; }
+.grid tfoot tr:nth-child(1) th, .grid tfoot tr:nth-child(1) td { bottom: 56px; }
+.grid tfoot tr:nth-child(2) th, .grid tfoot tr:nth-child(2) td { bottom: 28px; }
+.sticky { position: sticky; z-index: 1; }
+.grid thead .sticky, .grid tfoot .sticky { z-index: 3; }
+.colCode { left: 0; width: 52px; min-width: 52px; text-align: center; }
+.colQuestion { left: 52px; width: 200px; min-width: 200px; }
+.colOption1 { left: 252px; width: 160px; min-width: 160px; color: var(--admin-text-2); }
+.colOption2 { left: 412px; width: 160px; min-width: 160px; color: var(--admin-text-2); }
+.grid tfoot th.sticky { left: 0; text-align: right; }
+.stageRow td { background: var(--admin-purple-tint); color: var(--admin-purple); font-weight: 700; text-align: left; padding-left: 12px; }
+
+.studentHead { min-width: 92px; width: 92px; }
+.nameInput { width: 100%; box-sizing: border-box; height: 28px; border: 1px solid var(--admin-border); border-radius: 6px; padding: 0 6px; font-size: 13px; }
+.studentName { display: block; font-weight: 600; }
+.studentTools { display: flex; justify-content: center; gap: 4px; margin-top: 4px; }
+.studentTools button { border: none; background: none; cursor: pointer; color: var(--admin-text-3); font-size: 14px; }
+.memoOn { color: var(--admin-orange) !important; }
+.memoBox { width: 100%; box-sizing: border-box; min-height: 56px; margin-top: 4px; font-size: 12px; }
+.memoText { display: inline-block; margin-top: 2px; font-size: 11px; color: var(--admin-orange); }
+.badge { display: inline-block; margin-bottom: 4px; padding: 1px 6px; border-radius: 999px; background: var(--admin-blue-soft); color: var(--admin-blue); font-size: 11px; font-weight: 600; }
+.addCol { min-width: 80px; }
+.addCol button { border: 1px dashed var(--admin-blue-line); background: none; color: var(--admin-blue); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+
+.answerCell { text-align: center; padding: 2px !important; }
+.answer { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 26px; border: 1px solid transparent; border-radius: 6px; background: none; font-size: 15px; cursor: pointer; color: var(--admin-text); }
+.answer:focus { outline: 2px solid var(--admin-blue); outline-offset: -2px; }
+.missing { background: var(--admin-yellow-tint); }
+.invalid { border-color: #d64545 !important; background: #fdecec; }
+.summary { text-align: center; }
+.followUp { display: inline-block; padding: 1px 6px; border-radius: 999px; background: #fdecec; color: #d64545; font-size: 11px; font-weight: 600; }
+
+.overlay { position: fixed; inset: 0; z-index: 50; background: rgba(15, 20, 40, 0.45); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.modal { background: var(--admin-surface); border-radius: 16px; padding: 20px; width: min(1200px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.modal h2 { margin: 0; font-size: 18px; }
+.modalActions { display: flex; justify-content: flex-end; gap: 8px; }
+.errorList { margin: 0; padding: 10px 10px 10px 28px; max-height: 120px; overflow: auto; background: #fdecec; color: #d64545; border-radius: 8px; font-size: 13px; }
+
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 14px; height: 36px; }
+.resultsTable { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--admin-surface); }
+.resultsTable th, .resultsTable td { padding: 8px 10px; border-bottom: 1px solid var(--admin-border); text-align: left; white-space: nowrap; }
+.resultsTable th { background: var(--admin-icon-bg); color: var(--admin-text-2); font-weight: 600; }
+.resultsTable tbody tr { cursor: pointer; }
+.resultsTable tbody tr:hover td { background: var(--admin-blue-soft); }
+.rowFollowUp td { background: #fff7f7; }
+.empty { padding: 32px; text-align: center; color: var(--admin-text-3); }
