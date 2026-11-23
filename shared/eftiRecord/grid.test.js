@@ -88,9 +88,30 @@ describe('parseGrid', () => {
   })
 })
 
+describe('grid 보강', () => {
+  it('CSV 로 저장되어 앞자리 0 이 빠진 문자열 코드(1~9)도 01~09 로 맞춘다', () => {
+    const codes = QUESTIONS.map(q => q.code)
+    for (let i = 0; i < 9; i++) codes[i] = String(i + 1)
+    expect(parseGrid(makeGrid({ codes }), QUESTIONS).errors).toEqual([])
+  })
+
+  it('엑셀 시간 셀(1899-12-30 Date)은 HH:MM 으로 읽는다', () => {
+    const grid = makeGrid({ header: { classTime: new Date(Date.UTC(1899, 11, 30, 10, 0)) } })
+    expect(parseGrid(grid, QUESTIONS).header.classTime).toBe('10:00')
+  })
+
+  it('잘못된 Date 는 던지지 않고 빈 문자열', () => {
+    expect(normalizeDateText(new Date(NaN))).toBe('')
+    const grid = makeGrid({ header: { completedOn: new Date(NaN), className: new Date(NaN) } })
+    const { header } = parseGrid(grid, QUESTIONS)
+    expect(header.completedOn).toBe('')
+    expect(header.className).toBe('')
+  })
+})
+
 describe('parseCsv', () => {
   it('BOM, 따옴표, 쉼표, CRLF 를 처리하고 빈 칸은 null', () => {
-    expect(parseCsv('﻿a,"b,c","say ""hi"""\r\n,1\r\n')).toEqual([
+    expect(parseCsv('\uFEFFa,"b,c","say ""hi"""\r\n,1\r\n')).toEqual([
       ['a', 'b,c', 'say "hi"'],
       [null, '1'],
     ])

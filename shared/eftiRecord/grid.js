@@ -24,21 +24,28 @@ export function columnLetter(n) {
 const cellRef = (col, row) => `${columnLetter(col)}${row}`
 const at = (grid, row, col) => grid[row - 1]?.[col - 1] ?? null
 
+// 엑셀 시간 전용 셀은 1899-12-30(또는 31) 날짜의 Date 로 들어온다 → HH:MM. 잘못된 Date 는 빈 문자열.
+function dateText(d) {
+  if (Number.isNaN(d.getTime())) return ''
+  const iso = d.toISOString()
+  return /^1899-12-3[01]/.test(iso) ? iso.slice(11, 16) : iso.slice(0, 10)
+}
+
 function text(v) {
   if (v === null || v === undefined) return ''
-  if (v instanceof Date) return v.toISOString().slice(0, 10)
+  if (v instanceof Date) return dateText(v)
   return String(v).trim()
 }
 
 // 엑셀 날짜 셀은 UTC 자정 Date 로 들어온다.
 export function normalizeDateText(v) {
-  if (v instanceof Date) return v.toISOString().slice(0, 10)
+  if (v instanceof Date) return dateText(v)
   const t = text(v)
   const m = t.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})\.?$/)
   return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` : t
 }
 
-const normalizeCode = v => (typeof v === 'number' ? String(v).padStart(2, '0') : text(v))
+const normalizeCode = v => { const t = text(v); return /^\d$/.test(t) ? t.padStart(2, '0') : t }
 
 function toAnswer(v) {
   const t = text(v)
@@ -101,7 +108,7 @@ export function attachCellRefs(errors, parsed) {
 
 // RFC 4180 범위: 쉼표 구분, 큰따옴표 감싸기·이스케이프, CRLF/LF. 빈 칸은 null.
 export function parseCsv(content) {
-  const src = content.replace(/^﻿/, '')
+  const src = content.replace(/^\uFEFF/, '')
   const rows = []
   let row = []
   let field = ''
