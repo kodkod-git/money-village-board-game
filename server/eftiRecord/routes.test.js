@@ -138,6 +138,15 @@ describe('PUT /sheet', () => {
   })
 })
 
+describe('잘못된 입력 형식 DB 오류', () => {
+  it('22007 은 400 INVALID_INPUT', async () => {
+    const repo = fakeRepo({ getSheet: vi.fn(async () => { throw { code: '22007' } }) })
+    const r = await call({ repo, admin: MASTER, path: `/sheet${LEE_QUERY}` })
+    expect(r.status).toBe(400)
+    expect(r.json.errors[0].code).toBe('INVALID_INPUT')
+  })
+})
+
 describe('POST /upload', () => {
   const parsed = (header, students) => ({
     header, students, errors: [], studentColumns: students.map((_, i) => 6 + i),

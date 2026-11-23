@@ -18,6 +18,7 @@ function sendError(res, err) {
   if (err?.code === 'EF409') return res.status(409).json({ errors: [makeError('SHEET_EXISTS')] })
   if (err?.code === '23505') return res.status(409).json({ errors: [makeError('NICKNAME_EXISTS')] })
   if (err?.code === 'P0002') return res.status(409).json({ errors: [makeError('STALE_SHEET')] })
+  if (['22P02', '22007', '22008'].includes(err?.code)) return res.status(400).json({ errors: [makeError('INVALID_INPUT')] })
   if (err?.type === 'entity.too.large') return res.status(413).json({ errors: [makeError('FILE_TOO_LARGE')] })
   console.error('efti-record error:', err)
   return res.status(500).json({ error: '요청을 처리하지 못했어요' })

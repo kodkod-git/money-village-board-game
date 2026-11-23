@@ -102,9 +102,9 @@ describe('repo', () => {
       missing_codes: ['33-2'],
     }], error: null })
     mockFrom.mockReturnValue(b)
-    const rows = await listResults({ teacherName: 'kim', className: '햇살반', q: '민_', needsFollowUp: true })
+    const rows = await listResults({ teacherName: 'kim', className: '햇살반', q: '민_*', needsFollowUp: true })
     expect(b.eq).toHaveBeenCalledWith('class_name', '햇살반')
-    expect(b.ilike).toHaveBeenCalledWith('nickname', '%민\\_%')
+    expect(b.ilike).toHaveBeenCalledWith('nickname', '%민\\_\\*%')
     expect(b.is).toHaveBeenCalledWith('passport_type', null)
     expect(rows[0]).toEqual({
       recordId: 'r1', header: HEADER, nickname: '민준', memo: '결석', citizenType: 'PASC', passportType: null,

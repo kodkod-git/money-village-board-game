@@ -151,9 +151,10 @@ BEGIN
               WHERE (value ->> 'id' IS NOT NULL) = (pass = 1) LOOP
       saved := NULL;
       IF pass = 2 THEN
+        -- created_at 을 clock_timestamp() 로 직접 넣는다: 한 호출 안에서는 now() 가 모두 같아 입력 순서가 사라진다.
         EXECUTE format(
-          'INSERT INTO records (class_name, class_time, teacher_name, completed_on, nickname, memo, %s)
-           VALUES ($2, $3, $4, $5, NULLIF(btrim($1 ->> ''nickname''), ''''), NULLIF(btrim($1 ->> ''memo''), ''''), %s)
+          'INSERT INTO records (class_name, class_time, teacher_name, completed_on, nickname, memo, created_at, %s)
+           VALUES ($2, $3, $4, $5, NULLIF(btrim($1 ->> ''nickname''), ''''), NULLIF(btrim($1 ->> ''memo''), ''''), clock_timestamp(), %s)
            RETURNING id', cols, vals)
           INTO saved USING s, h_class, h_time, h_teacher, h_date;
       ELSE

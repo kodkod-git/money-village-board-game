@@ -18,7 +18,7 @@ function whereHeader(query, header) {
   return Object.entries(headerToRow(header)).reduce((q, [k, v]) => q.eq(k, v), query)
 }
 
-const escapeLike = s => s.replace(/[\\%_]/g, c => `\\${c}`)
+const escapeLike = s => s.replace(/[\\%_*]/g, c => `\\${c}`)
 
 export async function listQuestions() {
   const { data, error } = await db.from('questions').select('*').order('sort_order')
