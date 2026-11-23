@@ -21,6 +21,9 @@ import { createClan, renameClan, deleteClan, assignToClan, listClans, pruneMembe
 import { buildClanView } from './clanView.js'
 import { buildClanRecap } from './clanRecap.js'
 import { toBoardCount } from '../src/constants/gameData.js'
+import { createEftiRecordRouter } from './eftiRecord/routes.js'
+import * as eftiRecordRepo from './eftiRecord/repo.js'
+import * as eftiRecordXlsx from './eftiRecord/xlsx.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -295,6 +298,9 @@ app.get('/api/rankings', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch rankings' })
   }
 })
+
+// EFTI 성향기록지 입력·조회 (docs/superpowers/specs/2026-11-23-efti-record-page-design.md)
+app.use('/api/admin/efti-record', createEftiRecordRouter({ repo: eftiRecordRepo, xlsx: eftiRecordXlsx, requireAdmin }))
 
 app.post('/api/admin/signup', async (req, res) => {
   const { username, password } = req.body
