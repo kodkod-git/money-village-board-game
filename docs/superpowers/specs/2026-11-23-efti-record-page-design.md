@@ -118,7 +118,7 @@ DB 제약(CHECK, UNIQUE, NOT NULL)은 그대로 둔다. 서버 검증을 통과�
   - 업로드 파일의 선생님 칸: 비어 있으면 내 username, 내 username이면 통과, 다른 값이면 오류.
 - 마스터
   - 모든 기록지 조회·수정·삭제. 남의 기록지를 수정할 때 `teacher_name` 은 원래 값을 유지한다 (`original.teacherName` 과 다르게 바꿀 수 없음).
-  - 새 기록지는 자기 username. 업로드에서는 파일의 선생님 칸 값을 쓸 수 있다 (비면 자기 username).
+  - 새 기록지(`original` 이 null 인 저장)는 요청의 선생님 값을 쓰고, 비면 자기 username. 입력 화면은 자기 username을 보내고, 업로드 저장은 파일의 선생님 칸 값을 보낸다.
   - 결과 탭에 선생님 필터가 보인다.
 
 ### 검증 (`shared/eftiRecord/validation.js`, 화면·서버 공용)
@@ -134,7 +134,7 @@ DB 제약(CHECK, UNIQUE, NOT NULL)은 그대로 둔다. 서버 검증을 통과�
 | `TEACHER_MISMATCH` | (업로드, 일반 관리자) 선생님 칸이 내 username이 아님 |
 | `NO_STUDENTS` | 저장할 학생이 0명 |
 
-서버 오류 응답: 400 `{ errors }` (검증), 403 (권한), 404 (기록지 없음), 409 `{ errors: [{ code: 'SHEET_EXISTS', message: '같은 반·날짜 기록지가 이미 있어요' }] }` (UNIQUE 위반 `23505`), 500 `{ error: '저장 중 오류가 발생했어요' }` (상세는 서버 로그만).
+서버 오류 응답: 400 `{ errors }` (검증), 403 (권한), 404 (기록지 없음), 409 `SHEET_EXISTS` (`save_sheet` 의 헤더 충돌 `EF409`) / `NICKNAME_EXISTS` (같은 기록지 학생 이름 UNIQUE 위반 `23505`) / `STALE_SHEET` (`P0002`: 원래 기록지나 학생이 없어짐), 400 `INVALID_INPUT` (`22P02`·`22007`·`22008`), 413 `FILE_TOO_LARGE`, 500 `{ error: '요청을 처리하지 못했어요' }` (상세는 서버 로그만).
 
 ## 화면
 
@@ -207,7 +207,7 @@ A4 수업 날짜   B4 (날짜 서식)
 | `shared/eftiRecord/validation.test.js` | 검증 코드별 케이스 |
 | `shared/eftiRecord/sheetFormat.test.js` | 표 ↔ records 행 변환, 문항 행 일치 검사 |
 | `server/eftiRecord/xlsx.test.js` | 템플릿 생성 → 다시 파싱하면 빈 기록지, 값을 채운 xlsx·csv 파싱, 셀 주소가 들어간 오류 |
-| `server/eftiRecord/routes.test.js` | repo 모킹. 일반/마스터 권한, 남의 기록지 403, teacherName 덮어쓰기, 업로드 new/overwrite 판정, 23505 → 409 |
+| `server/eftiRecord/routes.test.js` | repo 모킹. 일반/마스터 권한, 남의 기록지 403, teacherName 덮어쓰기, 업로드 new/overwrite 판정, EF409·23505·P0002 → 409 |
 | `src/features/eftiRecord/SheetEditor.test.jsx` | 3단 토글, 키보드(1/2 후 아래로 이동, Backspace, 방향키), 요약 행 실시간 갱신, 열 추가·삭제, 저장 버튼 활성 조건 |
 | `src/features/eftiRecord/UploadPreview.test.jsx` | 배지, 오류 시 저장 비활성 |
 | `src/features/eftiRecord/ResultsTable.test.jsx` | 필터, 보충 필요 강조, 행 클릭 이동 |
