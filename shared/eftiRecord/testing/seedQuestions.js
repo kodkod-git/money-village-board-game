@@ -1,9 +1,12 @@
 // 테스트 전용. 문항 목록의 단일 출처인 마이그레이션 시드 SQL을 그대로 읽어 픽스처로 쓴다.
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { resolve, dirname } from 'node:path'
 
-const SEED_PATH = fileURLToPath(
-  new URL('../../../supabase/migrations/2026-11-19-add-efti-record-schema.sql', import.meta.url)
+// jsdom 환경에서는 전역 URL 이 file: 기준 경로를 풀지 못하므로 경로 모듈로 계산한다.
+const SEED_PATH = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../../supabase/migrations/2026-11-19-add-efti-record-schema.sql'
 )
 
 // ( 1, '01',   'q01',   1, 'T', '질문', '①', '②', 'F', 'P')
