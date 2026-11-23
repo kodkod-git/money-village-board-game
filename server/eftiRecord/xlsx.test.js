@@ -76,6 +76,11 @@ describe('parseUpload (CSV)', () => {
       .rejects.toMatchObject({ code: 'ENCODING' })
   })
 
+  it('옛 .xls·암호화 xlsx(CFB)는 UNSUPPORTED_EXCEL', async () => {
+    await expect(parseUpload(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1]), QUESTIONS))
+      .rejects.toMatchObject({ code: 'UNSUPPORTED_EXCEL' })
+  })
+
   it('xlsx 시그니처인데 깨진 파일은 UNREADABLE_FILE', async () => {
     const err = await parseUpload(Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x00]), QUESTIONS).catch(e => e)
     expect(err).toBeInstanceOf(UploadFormatError)

@@ -79,13 +79,16 @@ SELECT
 FROM efti_record.records r
 JOIN counts c ON c.record_id = r.id;
 
--- 기록지 한 장 저장. 한 트랜잭션: 헤더 변경 → 삭제 → 학생 업서트.
+-- 기록지 한 장 저장. 한 트랜잭션: 헤더 변경 → 삭제 → 학생 수정(id 있는 것) → 학생 추가(id 없는 것).
 --   p_original : 원래 헤더 {class_name, class_time, teacher_name, completed_on}. NULL 이면 새 기록지(또는 업로드 병합)
 --   p_header   : 저장할 헤더
 --   p_students : [{id?, nickname, memo?, answers: {q01: 1|2|null, ...}}]  (answers 키는 questions.column_name)
+--                answers 는 문항 전체를 담아야 한다. 빠진 키는 NULL 로 저장된다.
 --   p_delete_ids: 지울 학생 id (저장할 헤더의 기록지에 속한 행만 지운다)
--- 헤더를 바꿨는데 새 헤더에 이미 행이 있으면 unique_violation.
--- id 가 있는데 그 기록지에 없는 학생이면 no_data_found (P0002).
+-- 오류:
+--   EF409 (기록지 헤더 충돌)       : 헤더를 바꿨는데 새 헤더에 이미 행이 있음
+--   23505 unique_violation         : 같은 기록지 안 학생 이름 중복
+--   P0002 no_data_found            : 원래 기록지가 없거나, id 가 있는데 그 기록지에 없는 학생
 CREATE OR REPLACE FUNCTION efti_record.save_sheet(
   p_original   jsonb,
   p_header     jsonb,
@@ -109,6 +112,8 @@ DECLARE
   sets text;
   s jsonb;
   saved uuid;
+  renamed int;
+  pass int;
 BEGIN
   IF p_original IS NOT NULL
      AND (o_class, o_time, o_teacher, o_date) IS DISTINCT FROM (h_class, h_time, h_teacher, h_date) THEN
@@ -116,11 +121,15 @@ BEGIN
       SELECT 1 FROM records
        WHERE class_name = h_class AND class_time = h_time AND teacher_name = h_teacher AND completed_on = h_date
     ) THEN
-      RAISE EXCEPTION '이미 같은 반·수업시간·날짜 기록지가 있습니다' USING ERRCODE = 'unique_violation';
+      RAISE EXCEPTION '이미 같은 반·수업시간·날짜 기록지가 있습니다' USING ERRCODE = 'EF409';
     END IF;
     UPDATE records
        SET class_name = h_class, class_time = h_time, teacher_name = h_teacher, completed_on = h_date
      WHERE class_name = o_class AND class_time = o_time AND teacher_name = o_teacher AND completed_on = o_date;
+    GET DIAGNOSTICS renamed = ROW_COUNT;
+    IF renamed = 0 THEN
+      RAISE EXCEPTION '원래 기록지가 더 이상 없습니다' USING ERRCODE = 'no_data_found';
+    END IF;
   END IF;
 
   IF p_delete_ids IS NOT NULL THEN
@@ -136,27 +145,31 @@ BEGIN
     INTO cols, vals, sets
     FROM questions;
 
-  FOR s IN SELECT value FROM jsonb_array_elements(COALESCE(p_students, '[]'::jsonb)) LOOP
-    saved := NULL;
-    IF s ->> 'id' IS NULL THEN
-      EXECUTE format(
-        'INSERT INTO records (class_name, class_time, teacher_name, completed_on, nickname, memo, %s)
-         VALUES ($2, $3, $4, $5, btrim($1 ->> ''nickname''), NULLIF(btrim($1 ->> ''memo''), ''''), %s)
-         RETURNING id', cols, vals)
-        INTO saved USING s, h_class, h_time, h_teacher, h_date;
-    ELSE
-      EXECUTE format(
-        'UPDATE records
-            SET nickname = btrim($1 ->> ''nickname''), memo = NULLIF(btrim($1 ->> ''memo''), ''''), %s
-          WHERE id = ($1 ->> ''id'')::uuid
-            AND class_name = $2 AND class_time = $3 AND teacher_name = $4 AND completed_on = $5
-         RETURNING id', sets)
-        INTO saved USING s, h_class, h_time, h_teacher, h_date;
-      IF saved IS NULL THEN
-        RAISE EXCEPTION '기록지에 없는 학생입니다: %', s ->> 'id' USING ERRCODE = 'no_data_found';
+  -- 1차: id 있는 학생(수정), 2차: id 없는 학생(추가). 이름을 맞바꾸거나 옮기고 새로 추가해도 UNIQUE 에 걸리지 않게 한다.
+  FOR pass IN 1..2 LOOP
+    FOR s IN SELECT value FROM jsonb_array_elements(COALESCE(p_students, '[]'::jsonb))
+              WHERE (value ->> 'id' IS NOT NULL) = (pass = 1) LOOP
+      saved := NULL;
+      IF pass = 2 THEN
+        EXECUTE format(
+          'INSERT INTO records (class_name, class_time, teacher_name, completed_on, nickname, memo, %s)
+           VALUES ($2, $3, $4, $5, NULLIF(btrim($1 ->> ''nickname''), ''''), NULLIF(btrim($1 ->> ''memo''), ''''), %s)
+           RETURNING id', cols, vals)
+          INTO saved USING s, h_class, h_time, h_teacher, h_date;
+      ELSE
+        EXECUTE format(
+          'UPDATE records
+              SET nickname = NULLIF(btrim($1 ->> ''nickname''), ''''), memo = NULLIF(btrim($1 ->> ''memo''), ''''), %s
+            WHERE id = ($1 ->> ''id'')::uuid
+              AND class_name = $2 AND class_time = $3 AND teacher_name = $4 AND completed_on = $5
+           RETURNING id', sets)
+          INTO saved USING s, h_class, h_time, h_teacher, h_date;
+        IF saved IS NULL THEN
+          RAISE EXCEPTION '기록지에 없는 학생입니다: %', s ->> 'id' USING ERRCODE = 'no_data_found';
+        END IF;
       END IF;
-    END IF;
-    RETURN NEXT saved;
+      RETURN NEXT saved;
+    END LOOP;
   END LOOP;
 END
 $$;

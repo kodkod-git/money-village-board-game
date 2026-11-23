@@ -143,14 +143,14 @@ BEGIN
     RAISE EXCEPTION 'save_sheet 헤더 변경·업데이트 결과 불일치';
   END IF;
 
-  -- 10. 이미 있는 기록지 헤더로 바꾸면 unique_violation
+  -- 10. 이미 있는 기록지 헤더로 바꾸면 EF409 (헤더 충돌)
   BEGIN
     PERFORM efti_record.save_sheet(
       '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
       '{"class_name":"검증반","class_time":"토 10:00","teacher_name":"검증선생","completed_on":"2026-11-19"}',
       '[]', NULL);
     RAISE EXCEPTION '이미 있는 기록지 헤더로 바뀜 (충돌 검사 누락)';
-  EXCEPTION WHEN unique_violation THEN NULL;
+  EXCEPTION WHEN SQLSTATE 'EF409' THEN NULL;
   END;
 
   -- 11. 다른 기록지 학생 id 로 업데이트하면 no_data_found
@@ -163,6 +163,32 @@ BEGIN
         'nickname', 'x', 'answers', '{}'::jsonb)),
       NULL);
     RAISE EXCEPTION '다른 기록지 학생이 업데이트됨';
+  EXCEPTION WHEN no_data_found THEN NULL;
+  END;
+
+  -- 12. 기존 학생 이름을 바꾸고(id) 그 옛 이름으로 새 학생을 추가해도 UNIQUE 에 걸리지 않는다 (수정 → 추가 순서)
+  PERFORM efti_record.save_sheet(
+    '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+    '{"class_name":"저장반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+    jsonb_build_array(
+      jsonb_build_object('nickname', '가나', 'answers', '{}'::jsonb),
+      jsonb_build_object(
+        'id', (SELECT id FROM efti_record.records WHERE class_name = '저장반' AND nickname = '가나'),
+        'nickname', '다', 'answers', '{}'::jsonb)),
+    NULL);
+  SELECT count(*), string_agg(nickname, ',' ORDER BY nickname) INTO n, cols
+    FROM efti_record.records WHERE class_name = '저장반';
+  IF n <> 2 OR cols IS DISTINCT FROM '가나,다' THEN
+    RAISE EXCEPTION 'save_sheet 이름 맞바꿈: 2행(가나,다) 기대, %행(%)', n, cols;
+  END IF;
+
+  -- 13. 원래 기록지가 없으면 no_data_found
+  BEGIN
+    PERFORM efti_record.save_sheet(
+      '{"class_name":"없는반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+      '{"class_name":"다른반","class_time":"일 11:00","teacher_name":"검증선생","completed_on":"2026-11-30"}',
+      '[]', NULL);
+    RAISE EXCEPTION '없는 기록지의 헤더가 바뀜';
   EXCEPTION WHEN no_data_found THEN NULL;
   END;
 

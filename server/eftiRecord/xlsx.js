@@ -28,7 +28,7 @@ export async function buildTemplate(questions, { teacherName = '' } = {}) {
   const lastCol = LAYOUT.firstStudentCol + LAYOUT.templateStudentCount - 1
 
   for (const [field, ref] of Object.entries(LAYOUT.headerCells)) {
-    const label = ws.getCell(Number(ref.slice(1)), 1)
+    const label = ws.getCell(ws.getCell(ref).row, 1)
     label.value = LAYOUT.headerLabels[field]
     label.font = { bold: true }
   }
@@ -100,7 +100,15 @@ export function detectFormat(buffer) {
     : 'csv'
 }
 
+// 옛 .xls 와 암호화된 xlsx 는 CFB(D0 CF 11 E0) 컨테이너다.
+function isCompoundFile(buffer) {
+  return buffer.length >= 4 && buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0
+}
+
 async function readUploadGrid(buffer) {
+  if (isCompoundFile(buffer)) {
+    throw new UploadFormatError('UNSUPPORTED_EXCEL', '엑셀 통합 문서(.xlsx)로 저장해 주세요')
+  }
   if (detectFormat(buffer) === 'xlsx') {
     const wb = new ExcelJS.Workbook()
     try {
@@ -108,7 +116,7 @@ async function readUploadGrid(buffer) {
     } catch {
       throw new UploadFormatError('UNREADABLE_FILE', '엑셀 파일을 읽을 수 없어요')
     }
-    const ws = wb.worksheets[0]
+    const ws = wb.getWorksheet('기록지') ?? wb.worksheets[0]
     if (!ws) throw new UploadFormatError('NO_SHEET', '시트를 찾을 수 없어요')
     return worksheetToGrid(ws)
   }

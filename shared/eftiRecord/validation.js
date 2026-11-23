@@ -12,7 +12,8 @@ export const ERROR_MESSAGES = {
   TEACHER_MISMATCH: '선생님 ID가 로그인한 계정과 달라요',
   EMPTY_FILE: '파일이 비어 있어요',
   FILE_TOO_LARGE: '파일이 너무 커요 (25MB 이하)',
-  SHEET_EXISTS: '같은 반·수업시간·날짜의 기록지나 같은 이름의 학생이 이미 있어요',
+  SHEET_EXISTS: '같은 반·수업시간·날짜 기록지가 이미 있어요',
+  NICKNAME_EXISTS: '같은 기록지에 같은 이름의 학생이 이미 있어요',
   STALE_SHEET: '기록지가 그사이 바뀌었어요. 기록지를 다시 열어 주세요',
 }
 
