@@ -60,7 +60,7 @@ describe('parseUpload (CSV)', () => {
       '코드,단계,질문,①,②,민준', '메모,,,,,',
       ...QUESTIONS.map((q, i) => `${q.code},${q.stage}단계,"${q.question}",x,y,${i === 0 ? firstAnswer : ''}`),
     ]
-    return '﻿' +lines.join('\r\n')
+    return '\uFEFF' + lines.join('\r\n')
   }
 
   it('같은 배치의 UTF-8 CSV 를 읽는다', async () => {
