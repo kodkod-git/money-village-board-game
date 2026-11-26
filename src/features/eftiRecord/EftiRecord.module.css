@@ -48,7 +48,10 @@
 .addCol button { border: 1px dashed var(--admin-blue-line); background: none; color: var(--admin-blue); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
 
 .answerCell { text-align: center; padding: 2px !important; }
-.answer { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 26px; border: 1px solid transparent; border-radius: 6px; background: none; font-size: 15px; cursor: pointer; color: var(--admin-text); }
+.answer { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 30px; border: 1px solid transparent; border-radius: 6px; background: none; font-size: 15px; cursor: pointer; color: var(--admin-text); }
+.mark1, .mark2 { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 15px; font-weight: 800; line-height: 1; }
+.mark1 { background: var(--admin-blue); }
+.mark2 { background: #d9480f; } /* --admin-orange 는 흰 글자와 대비가 낮아 더 진한 주황을 쓴다 */
 .answer:focus { outline: 2px solid var(--admin-blue); outline-offset: -2px; }
 .missing { background: var(--admin-yellow-tint); }
 .invalid { border-color: #d64545 !important; background: #fdecec; }

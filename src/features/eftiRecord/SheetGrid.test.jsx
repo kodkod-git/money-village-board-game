@@ -42,9 +42,9 @@ describe('SheetGrid', () => {
     const user = userEvent.setup()
     render(<Harness />)
     await user.click(cell('학생 1 01'))
-    expect(cell('학생 1 01')).toHaveTextContent('①')
+    expect(cell('학생 1 01')).toHaveTextContent(/^1$/)
     await user.click(cell('학생 1 01'))
-    expect(cell('학생 1 01')).toHaveTextContent('②')
+    expect(cell('학생 1 01')).toHaveTextContent(/^2$/)
     await user.click(cell('학생 1 01'))
     expect(cell('학생 1 01')).toHaveTextContent(/^$/)
   })
@@ -54,10 +54,10 @@ describe('SheetGrid', () => {
     render(<Harness />)
     act(() => cell('학생 1 01').focus())
     await user.keyboard('1')
-    expect(cell('학생 1 01')).toHaveTextContent('①')
+    expect(cell('학생 1 01')).toHaveTextContent(/^1$/)
     expect(cell('학생 1 02')).toHaveFocus()
     await user.keyboard('2')
-    expect(cell('학생 1 02')).toHaveTextContent('②')
+    expect(cell('학생 1 02')).toHaveTextContent(/^2$/)
     await user.keyboard('{ArrowUp}{ArrowUp}{Backspace}')
     expect(cell('학생 1 01')).toHaveTextContent(/^$/)
   })
@@ -115,5 +115,25 @@ describe('SheetGrid', () => {
     expect(screen.getByLabelText('학생 1 메모 입력')).toHaveFocus()
     await user.keyboard('{Escape}')
     expect(screen.queryByLabelText('학생 1 메모 입력')).not.toBeInTheDocument()
+  })
+})
+
+describe('SheetGrid 표시', () => {
+  it('①은 파란, ②는 주황 원형 배지로 크게 보인다', () => {
+    const questions = loadSeedQuestions()
+    const answers = Object.fromEntries(questions.map(q => [q.code, null]))
+    answers['01'] = 1
+    answers['02'] = 2
+    render(
+      <SheetGrid
+        questions={questions}
+        students={[{ key: 'a', nickname: '민준', memo: '', answers }]}
+        results={[]}
+        onCycle={() => {}} onSetAnswer={() => {}} onSetName={() => {}}
+        onSetMemo={() => {}} onRemove={() => {}} onAdd={() => {}}
+      />,
+    )
+    expect(screen.getByRole('button', { name: '민준 01' }).querySelector('[data-mark="1"]')).toHaveTextContent('1')
+    expect(screen.getByRole('button', { name: '민준 02' }).querySelector('[data-mark="2"]')).toHaveTextContent('2')
   })
 })

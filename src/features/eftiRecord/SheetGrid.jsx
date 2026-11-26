@@ -2,11 +2,14 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import styles from './EftiRecord.module.css'
 
-const MARK = { 1: '①', 2: '②' }
 const MOVES = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }
 
 const studentLabel = (s, i) => String(s.nickname ?? '').trim() || `학생 ${i + 1}`
-const display = v => MARK[v] ?? (v === null || v === undefined ? '' : String(v))
+// 학생 답(1/2)은 멀리서도 구분되도록 색이 다른 큰 원형 배지로 그린다. 그 밖의 값(업로드 오류 등)은 글자 그대로.
+function display(v) {
+  if (v === 1 || v === 2) return <span className={styles[`mark${v}`]} data-mark={v}>{v}</span>
+  return v === null || v === undefined ? '' : String(v)
+}
 
 export default function SheetGrid({
   questions, students, results, errors = [], readOnly = false, badges = {}, focusKey = null,
